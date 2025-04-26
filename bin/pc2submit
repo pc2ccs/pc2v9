@@ -14,16 +14,21 @@
 
 import argparse
 import base64
-import dateutil.parser
+import datetime
 import json
 import logging
 import os
 import requests
 import requests.utils
+from requests.auth import HTTPBasicAuth
 import stat
 import sys
 import time
+import re
 import urllib3
+from urllib.parse import urlparse
+import netrc
+import getpass
 from typing import NoReturn
 try:
     import magic
@@ -32,6 +37,15 @@ except ModuleNotFoundError:
     magic = None
 
 APP_NAME = 'PC2'
+
+# Set this environment variable to 'yes' if you want to allow the user to enter credentials and add them to .netrc
+ENV_SUBMITCREDENTIALS = 'SUBMITCREDENTIALS'
+# Set this environment to variable 'yes' to omit help messages for some options that control the URL
+ENV_SUBMITOMITEXTRAHELP = 'SUBMITOMITEXTRAHELP'
+# Environment variable that holds the base URL to use if not specified on command line
+ENV_SUBMITBASEURL = 'SUBMITBASEURL'
+# Environment variable that holds the contest id to use if it can not be determined and is not specified
+ENV_SUBMITCONTEST = 'SUBMITCONTEST'
 
 # Set the default base URL to submit to (optional). It can be overridden
 # by the SUBMITBASEURL environment variable or the -u/--url argument.
@@ -52,6 +66,9 @@ warn_mtime_minutes = 5
 # End of configurable settings
 num_warnings = 0
 
+# maybe supply team_id
+team_id = ''
+
 headers = {'user-agent': f'pc2-clics-submit-client ({requests.utils.default_user_agent()})'}
 
 
@@ -68,12 +85,12 @@ def warn_user(msg: str):
     if args.quiet:
         logging.debug(f'user warning #{num_warnings}: {msg}')
     else:
-        print(f'WARNING: {msg}!')
+        print(f'Warning: {msg}!')
 
 
 def usage(msg: str) -> NoReturn:
-    logging.error(f'error: {msg}')
-    print(f"Type '{sys.argv[0]} --help' to get help.")
+    logging.error(f'Error: {msg}')
+    print(f"Type '{os.path.basename(sys.argv[0])} --help' to get help.")
     exit(1)
 
 
@@ -89,7 +106,6 @@ def print_if_json(text: str):
         print(json.dumps(data, indent=2))
     except json.decoder.JSONDecodeError:
         pass
-
 
 def read_contests() -> list:
     '''Read all contests from the API.
@@ -197,6 +213,94 @@ def read_problems() -> list:
 
     return problems
 
+# Courtesy of Google AI
+def append_to_netrc(machine, login, password, netrc_path="~/.netrc"):
+    """Appends a machine entry to the .netrc file.
+
+    Args:
+        machine (str): The machine name.
+        login (str): The login username.
+        password (str): The login password.
+        netrc_path (str, optional): The path to the .netrc file. Defaults to "~/.netrc".
+    """
+    ret = False
+    logging.info(f"Adding entry: 'machine {machine} login {login} password *******' to {netrc_path}")
+    expanded_path = os.path.expanduser(netrc_path)
+    entry = f"machine {machine} login {login} password {password}\n"
+
+    try:
+        bExists = os.path.isfile(expanded_path)
+        with open(expanded_path, "a") as f:
+            f.write(entry)
+        # Linux requires the file to be R/O by the user
+        if not bExists :
+            os.chmod(expanded_path, 0o600)
+        ret = True
+        print("\nCredentials have been updated in {netrc_path}.\n")
+    except IOError as e:
+        print(f"Error appending to {expanded_path}: {e}")
+    return ret
+
+# Prompt user for credentials, and update .netrc
+def prompt_for_creds(netrc_path, host) :
+    ret = False
+    print(f"\nYour credentials for {host} could not be found in {netrc_path}.")
+    if 'USER' in os.environ :
+        user = os.environ['USER']
+    else :
+        user = 'team'
+    while True :
+        uname = input(f"\nPlease enter your user name credential (ENTER={user}): ")  or user
+        if uname == '' :
+            print("You must enter a user name.")
+            continue
+        user = uname
+        passwd = getpass.getpass(f"Please enter the password for {uname}: ")
+        cpassword = getpass.getpass(f"Please re-enter the password for {uname}: ")
+        if passwd != cpassword :
+            print("The passwords do not match.  Try again.")
+            continue
+        if not test_api_endpoint("contests", user, passwd) :
+            if not confirm(f"\nThose credentials did not work. Do you want to try again") :
+                break
+            continue
+        if confirm(f"\nAre you sure the information for '{uname}' is correct") :
+            ret = append_to_netrc(host, uname, passwd, netrc_path)
+            break
+    return ret
+    
+# Validate credentials in .netrc only if ADDSUBMITCREDENTIALS is in environment otherwise
+# see if user has credentials in his .netrc for the url machine 
+# If there are credentials for the host in the baseurl, then the
+# credentials are wrong (return False)
+# If there aren't any credentials in the .netrc, then prompt the user to enter them
+# and we save them in the .netrc
+def check_netrc() :
+    if not ENV_SUBMITCREDENTIALS in os.environ or os.environ[ENV_SUBMITCREDENTIALS] != 'yes' :
+        logging.info(f"Not checking .netrc since {ENV_SUBMITCREDENTIALS} is not set to 'yes' in the environment")
+        return False
+    
+    bAdd = False
+    try :
+        urlCrack = urlparse(baseurl)
+        if urlCrack.netloc != None :
+            # Strip off any port that may be on the network host
+            netHost = urlCrack.netloc.split(':')[0]
+            netrc_path = os.path.join(os.path.expanduser("~"), ".netrc")
+            try :
+                netrc_info = netrc.netrc(netrc_path)
+                nrc_user, nrc_acct, nrc_pass = netrc_info.authenticators(netHost)
+                print(f"\nIt appears as though your credentials for '{netHost}' are incorrect.\n")
+            except Exception as exc :
+                # No .netrc file or can't open?
+                bAdd = True
+            if bAdd :
+                return prompt_for_creds(netrc_path, netHost)
+        else :
+            return False
+    except Exception as exc :
+        pass
+    return False
 
 def do_api_request(name: str):
     '''Perform an API call to the given endpoint and return its data.
@@ -216,22 +320,55 @@ def do_api_request(name: str):
 
     url = f'{baseurl}{api_component}{api_version}{name}'
 
-    logging.info(f'Connecting to {url}')
+    # We do a loop in case we manually enter credentials we can retry.
+    while True :
+        logging.info(f'Connecting to {url}')
 
-    try:
-        response = requests.get(url, headers=headers, verify=False)
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(e)
+        try:
+            response = requests.get(url, headers=headers, verify=False)
+        except requests.exceptions.RequestException as e:
+            raise RuntimeError(e)
 
-    logging.debug(f"API call '{name}' returned:\n{response.text}")
-    if response.status_code >= 300:
-        print_if_json(response.text)
-        if response.status_code == 401:
-            raise RuntimeError(f'Authentication failed, please check your {APP_NAME} credentials')
-        else:
-            raise RuntimeError(f'API request {name} failed (code {response.status_code}).')
-
+        logging.debug(f"API call '{name}' returned:\n{response.text}")
+        if response.status_code >= 300:
+            print_if_json(response.text)
+            if response.status_code == 401:
+                if check_netrc() :
+                    continue
+                raise RuntimeError(f'Authentication failed, please check your {APP_NAME} credentials in your ~/.netrc file')
+            else:
+                raise RuntimeError(f'API request {name} failed (code {response.status_code}).')
+        break
+    
     return json.loads(response.text)
+
+def test_api_endpoint(name: str, user: str, password: str) :
+    '''Perform an API call to the given endpoint to see if it works.
+    No errors rae printed if it doesn't.
+
+    Parameters:
+        name (str): the endpoint to call
+
+    Returns:
+        True if it worked, False if not
+    '''
+    ret = False
+    
+    if baseurl:
+        url = f'{baseurl}{api_component}{api_version}{name}'
+
+        logging.info(f'Connecting to {url}')
+
+        try:
+            response = requests.get(url, headers=headers, verify=False, auth=HTTPBasicAuth(user, password))
+            ret = True
+        except Exception as e:
+            pass
+
+        logging.debug(f"Test API call '{name}' returned: {ret} - Status: {response.status_code}")
+        if response.status_code >= 300 :
+            ret = False    
+    return ret
 
 
 def kotlin_base_entry_point(filebase: str) -> str:
@@ -284,7 +421,7 @@ def get_epilog():
             sorted_exts = ', '.join(sorted(language['extensions']))
             language_part += f"\n    {language['name']:<{max_length}} - {sorted_exts}"
 
-    submit_client = sys.argv[0]
+    submit_client = os.path.basename(sys.argv[0])
     epilog_parts = [
         "Explanation of submission options:",
         contests_part_one,
@@ -295,7 +432,7 @@ extension. For example, 'B.java' indicates the problem 'B'.''',
         language_part,
         '''The default for LANGUAGE is the extension of FILENAME. For example,
 'B.java' indicates a Java submission.''',
-        "Set URL to the base address of the webinterface without the 'team/' suffix.\n" +
+        "Set URL to the base address of the webinterface without the 'contests/' suffix.\n" +
         (f"The (pre)configured URL is '{baseurl}'\n" if baseurl else '') +
         "Credentials are read from ~/.netrc (see netrc(4) for details).",
         f'''Examples:
@@ -318,7 +455,6 @@ Submit multiple files (the problem and language are taken from the first):
 
     return "\n\n".join(part for part in epilog_parts if part)
 
-
 def do_api_submit():
     '''Submit to the API with the given data.'''
 
@@ -328,6 +464,9 @@ def do_api_submit():
     }
     if entry_point:
         jsonSub['entry_point'] = entry_point
+        
+    if team_id :
+        jsonSub['team_id'] = team_id
 
     jsonSub['files'] = []
     for filename in filenames :
@@ -338,19 +477,25 @@ def do_api_submit():
     logging.debug(f"API Post info: jsonSub: {jsonSub}")
 
     url = f"{baseurl}{api_component}{api_version}contests/{my_contest['id']}/submissions"
-    logging.info(f'connecting to {url}')
+    
+    # Loop here in case we have to retry after adding credentials
+    while True :
+        logging.info(f'connecting to {url}')
 
-    response = requests.post(url, json=jsonSub, headers=headers, verify=False)
+        response = requests.post(url, json=jsonSub, headers=headers, verify=False)
 
-    # The connection worked, but we may have received an HTTP error
-    logging.debug(f"API submitting call returned:\n{response.text}")
-    if response.status_code >= 300:
-        print_if_json(response.text)
-        if response.status_code == 401:
-            raise RuntimeError('Authentication failed, please check your {APP_NAME} credentials in ~/.netrc.')
-        else:
-            raise RuntimeError(f'Submission failed (code {response.status_code} - {response.text})')
-
+        # The connection worked, but we may have received an HTTP error
+        logging.debug(f"API submitting call returned:\n{response.text}")
+        if response.status_code >= 300:
+            print_if_json(response.text)
+            if response.status_code == 401:
+                if check_netrc() :
+                    continue
+                raise RuntimeError('Authentication failed, please check your {APP_NAME} credentials in ~/.netrc.')
+            else:
+                raise RuntimeError(f'Submission failed (code {response.status_code} - {response.text})')
+        break
+    
     # We got a successful HTTP response. It worked.
     # But check that we indeed received a submission ID.
 
@@ -364,7 +509,13 @@ def do_api_submit():
             or not isinstance(submission['id'], str)):
         error('CLICS API returned unexpected JSON data.')
 
-    time = dateutil.parser.isoparse(submission['time']).strftime('%H:%M:%S')
+    subTime = submission['time']
+    # Check for just an hour offset, datetime wants a full time offset
+    if re.search(r"[-+]\d\d$", subTime) :
+        subTime = subTime + ":00"
+    elif re.search(r"[Zz]$", subTime) :
+        subTime = subTime[:-1] + "+00:00"
+    time = datetime.datetime.fromisoformat(subTime).strftime('%H:%M:%S')
     sid = submission['id']
     print(f"Submission received: id = s{sid}, time = {time}")
 
@@ -397,19 +548,29 @@ parser = argparse.ArgumentParser(
         add_help=False)
 parser.add_argument('--version', action='version', version=version_text, help='output version information and exit')
 parser.add_argument('-h', '--help', help='display this help and exit', action='store_true')
-parser.add_argument('-c', '--contest', help='''submit for contest with ID or short name CONTEST.
-    Defaults to the value of the
-    environment variable 'SUBMITCONTEST'.
-    Mandatory when more than one contest is active.''')
 parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM', default='')
 parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE', default='')
 parser.add_argument('-e', '--entry_point', help='set an explicit entry_point, e.g. the java main class')
 parser.add_argument('-v', '--verbose', help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')  # NOQA
 parser.add_argument('-q', '--quiet', help='suppress warning/info messages', action='store_true')
 parser.add_argument('-y', '--assume-yes', help='suppress user input and assume yes', action='store_true')
-parser.add_argument('-a', '--api_component', help='include an api component in URL', default=api_component)
-parser.add_argument('-u', '--url', help='''submit to server with base address URL
-    (should not be necessary for normal use)''')
+if not ENV_SUBMITOMITEXTRAHELP in os.environ or os.environ[ENV_SUBMITOMITEXTRAHELP] != 'yes' :
+    parser.add_argument('-c', '--contest', help='''submit for contest with ID or short name CONTEST.
+        Defaults to the value of the
+        environment variable 'SUBMITCONTEST'.
+        Mandatory when more than one contest is active.''')
+    parser.add_argument('-a', '--api_component', help='include an api component in URL', default=api_component)
+    parser.add_argument('-u', '--url', help='''submit to server with base address URL
+        Defaults to the value of the
+        environment variable 'SUBMITBASEURL'
+        (should not be necessary for normal use)''')
+    parser.add_argument('-t', '--team_id', help='submit on behalf of supplied team_id', default=team_id)
+else :
+    parser.add_argument('-c', '--contest', help=argparse.SUPPRESS)
+    parser.add_argument('-a', '--api_component', help=argparse.SUPPRESS, default=api_component)
+    parser.add_argument('-u', '--url', help=argparse.SUPPRESS)
+    parser.add_argument('-t', '--team_id', help=argparse.SUPPRESS, default=team_id)
+    
 parser.add_argument('filename', nargs='*', help='filename(s) to submit')
 
 args = parser.parse_args()
@@ -427,36 +588,36 @@ entry_point = args.entry_point
 
 if args.url:
     baseurl = args.url
-elif 'SUBMITBASEURL' in os.environ:
-    baseurl = os.environ['SUBMITBASEURL']
+elif ENV_SUBMITBASEURL in os.environ:
+    baseurl = os.environ[ENV_SUBMITBASEURL]
 # Make sure that baseurl terminates with a '/' for later concatenation.
 if baseurl and baseurl[-1:] != '/':
     baseurl += '/'
 
 if args.contest:
     contest_id = args.contest
-elif 'SUBMITCONTEST' in os.environ:
-    contest_id = os.environ['SUBMITCONTEST']
+elif ENV_SUBMITCONTEST in os.environ:
+    contest_id = os.environ[ENV_SUBMITCONTEST]
 else:
     contest_id = ''
 
 contests = read_contests() if baseurl else None
 if not contests and not args.help:
-    logging.warning('Could not obtain active contests.')
+    logging.warning('\nCould not obtain active contests.')
+    exit(1)
 
 my_contest: dict = {}
 my_language: dict = {}
 my_problem: dict = {}
+team_id = args.team_id
 
 if not contest_id:
-    if not contests:
-        if not args.help:
-            warn_user('No active contests found (and no contest specified)')
-    elif len(contests) == 1:
-        my_contest = contests[0]
-    else:
-        shortnames = ', '.join([c['name'] for c in contests])
-        warn_user(f"Multiple active contests found, please specify one of {shortnames}")
+    if contests:
+        if len(contests) == 1:
+            my_contest = contests[0]
+        else:
+            shortnames = ', '.join([c['name'] for c in contests])
+            warn_user(f"Multiple active contests found, please specify one of {shortnames} using the --contest option")
 elif contests:
     contest_id = contest_id.lower()
     for contest in contests:
@@ -496,7 +657,7 @@ if not problems:
     logging.warning('Could not obtain problem data.')
 
 if len(args.filename) == 0:
-    usage('No file(s) specified.')
+    usage('It looks like you did not supply your source file(s) on the command line.\n')
 
 # Process all source files
 filenames = []
@@ -552,7 +713,7 @@ if '.' in filebase:
 language_id = language_id.lower()
 for language in languages:
     for extension in language['extensions']:
-        if extension.lower() == language_id:
+        if extension == language_id:
             my_language = language
             break
     if my_language:
