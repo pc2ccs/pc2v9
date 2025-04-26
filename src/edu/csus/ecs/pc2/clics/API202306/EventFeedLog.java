@@ -42,7 +42,7 @@ public class EventFeedLog {
      */
     public EventFeedLog(IInternalContest contest) throws FileNotFoundException, UnsupportedEncodingException {
 
-        filename = getEventFeedLogName(contest.getContestIdentifier());
+        filename = getEventFeedLogName(contest);
         setLogFileName(filename);
 
         // First read log
@@ -62,8 +62,8 @@ public class EventFeedLog {
         }
     }
 
-    private String getEventFeedLogName(String id) {
-        return logsDirectory + File.separator + "Eventfeed_2023_06_" + id + ".log";
+    private String getEventFeedLogName(IInternalContest contest) {
+        return logsDirectory + File.separator + "Eventfeed_2023_06_" + contest.getContestIdentifier() + "_" + contest.getClientId().getName() + ".log";
     }
 
     public String[] getLogLines() {

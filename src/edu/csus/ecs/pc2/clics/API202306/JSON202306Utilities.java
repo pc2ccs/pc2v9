@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.text.SimpleDateFormat;
@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
  * @author John Buck, updated for CLICS 2023-06
  */
 public class JSON202306Utilities extends JSONUtilities {
-    public static final String TEAM_MEMBERS_KEY = "team-members";
+    public static final String TEAM_MEMBERS_KEY = "persons";
 
     public static final String CLARIFICATIONS_KEY = "clarifications";
 
