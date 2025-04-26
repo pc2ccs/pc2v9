@@ -52,7 +52,7 @@
 
 		<!-- copy user doc to staging /doc folder -->
 		<mkdir dir="${staging.dist.dir}/doc" />
-		<copy file="${doc.dir}/WTI User Manual.pdf" todir="${staging.dist.dir}/doc" />
+		<copy file="${doc.dir}/PC2TeamGuide.pdf" todir="${staging.dist.dir}/doc" />
 
 		<!-- the following files were copied as part of the old EWTeam project (from which this packageWTI.xml file was cloned);
 		    the equivalents of these for the WTI project still need to be added. 
