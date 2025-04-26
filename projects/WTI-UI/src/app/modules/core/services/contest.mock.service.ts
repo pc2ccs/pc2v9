@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { ContestLanguage } from '../models/contest-language';
 import { ContestProblem } from '../models/contest-problem';
 import { Clarification } from '../models/clarification';
+import { ContestClock } from '../models/contest-clock';
 import { DEBUG_MODE } from 'src/constants';
 
 @Injectable()
@@ -86,6 +87,24 @@ export class ContestMockService extends IContestService {
     return of<boolean>(true);
   }
   
+  getContestClock(): Observable<ContestClock> {
+    return of<ContestClock>(
+		//return a contest that is running, last 5 hours, has been running one hour, and started on December 18, 2024
+		{running:'true', contestLengthSecs:'18000', elapsedSecs:'3600', wallClockStartTime:'1734593847'});
+  }
+
+  updateLocalContestClockFromServer () {
+	//nothing to do -- this is a mock service
+  }		
+
+  getElapsedSecs(): number {
+	return 3600; //mock: 1 hour has elapsed
+  }
+
+  getRemainingSecs(): number {
+	return 18000 - 3600 ;  //mock: 5 hour contest with one hour elapsed
+  }
+
   getStandings(): Observable<String> {
   
 	//TODO: this method needs to return a legitimate (mock) team standing array!

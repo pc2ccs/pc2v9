@@ -1,10 +1,13 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
 
+import java.util.Calendar;
+
 /**
  * This interface describes the PC<sup>2</sup> API view of Contest Time information.
  * It provides methods for accessing various time-related aspects of the contest, including
- * how much time has elapsed, how much time remains, and how long the contest is scheduled to last.
+ * how much time has elapsed, how much time remains, how long the contest is scheduled to last,
+ * and (once the contest has been started) the date/time at which it was started.
  * <P>
  * Note that under the current implementation, an {@link IContestClock} object is static once it
  * is obtained; to get a current copy of the contest time information a new {@link IContestClock} object
@@ -62,6 +65,19 @@ public interface IContestClock {
      * @return true if the contest clock is currently running; false otherwise.
      */
     boolean isContestClockRunning ();
+    
+    /**
+     * Returns a {@link Calendar} containing the date/time that the contest actually started, 
+     * or null if the contest has not ever been started.
+     * Note that the returned value is independent of (has nothing to do with) the "Scheduled Start Time";
+     * the latter is only relevant before the contest actually starts.  
+     * Note also that once the contest is started, the value returned by this method never changes;
+     * specifically, it is not affected by any subsequent "pause" (a.k.a. "stop contest") operations,
+     * nor by any "start contest" operations following a pause; the returned value always indicates
+     * when the contest was FIRST started.
+     * @return a {@link Calendar} object indicating the date/time that the contest actually started.
+     */
+    public Calendar getContestStartTime();
 
     /**
      * Check whether this ContestClock object is the same as some other ContestClock.
