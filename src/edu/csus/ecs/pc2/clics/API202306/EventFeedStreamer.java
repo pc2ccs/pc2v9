@@ -152,9 +152,11 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         }
 
         public void setTerminateClient() {
-            // if terminateClient is false, this means he caller is asking us
-            // to stop because they're done.  (eg. removeClient() being called)
-            // If there's data pending, we want to wait a big for it to drain.
+            // if terminateClient is false, this means the caller is asking us
+            // to stop because they're done.  (eg. removeStream() being called)
+            // If there's data pending, we want to wait a bit for it to drain.
+            // if terminateClient is already true before this is called, it means
+            // an error has occurred, and there's no point waiting for it to drain.
             if(terminateClient == false && outputQueue.isEmpty() == false) {
                 // wait for the thread to pick it up
                 try {
@@ -944,13 +946,15 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()) {
             StreamAndFilter streamAndFilter = entry.getValue();
 
-            // Check if there was a problem with this client, if so, we are no longer
-            // interested in providing it with data
-            if (streamAndFilter.wantTerminateClient()) {
-                removeStream(streamAndFilter.getStream());
-            } else {
-                if (streamAndFilter.getFilter().matchesFilter(string)) {
-                    streamAndFilter.put(string);
+            if(streamAndFilter != null) {
+                // Check if there was a problem with this client, if so, we are no longer
+                // interested in providing it with data
+                if (streamAndFilter.wantTerminateClient()) {
+                    removeStream(streamAndFilter.getStream());
+                } else {
+                    if (streamAndFilter.getFilter().matchesFilter(string)) {
+                        streamAndFilter.put(string);
+                    }
                 }
             }
         }
@@ -997,11 +1001,13 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                     OutputStream stream = streams.next();
                     StreamAndFilter streamAndFilter = streamsMap.get(stream);
 
-                    // If client had a write issue, we are no longer interested in it.
-                    if(streamAndFilter.wantTerminateClient()) {
-                        removeStream(streamAndFilter.getStream());
-                    } else {
-                        streamAndFilter.put(NL);;
+                    if(streamAndFilter != null) {
+                        // If client had a write issue, we are no longer interested in it.
+                        if(streamAndFilter.wantTerminateClient()) {
+                            removeStream(streamAndFilter.getStream());
+                        } else {
+                            streamAndFilter.put(NL);;
+                        }
                     }
                 }
 
