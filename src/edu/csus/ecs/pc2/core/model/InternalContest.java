@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
@@ -2672,14 +2673,17 @@ public class InternalContest implements IInternalContest {
         } else {
             updateProfile(profile);
         }
-
         setContestIdentifier(profile.getContestId());
-
     }
 
     @Override
     public void setContestIdentifier(String contestId) {
-        contestIdentifier = contestId;
+        if (!StringUtilities.isEmpty(contestId)) {
+            contestIdentifier = contestId;
+            if (profile != null && !StringUtilities.stringSame(contestId, profile.getContestId())) {
+                profile.setContestId(contestId);
+            }
+        }
     }
 
     @Override

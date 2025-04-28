@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -1615,12 +1616,19 @@ public class PacketHandler {
             contest.updateRun(run, getServerClientId());
         }
 
-        // Send to team
         Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);
-        controller.sendToClient(confirmPacket);
+        boolean isThisServer = isServer();
+
+        // Send to remote client (on another server) or a local team
+        // Note that if this was proxy submit by say, a feeder on this server, the response
+        // will get sent below in sendToJudgesAndOthers().  We don't want
+        // to send the same packet to the same client twice.
+        if(!isThisServer || fromId.getClientType() == ClientType.Type.TEAM) {
+            controller.sendToClient(confirmPacket);
+        }
 
         // Send to clients and servers
-        if (isServer()) {
+        if (isThisServer) {
             controller.sendToJudgesAndOthers(confirmPacket, false);
             Packet dupSubmissionPacket = PacketFactory.createRunSubmissionConfirmation(contest.getClientId(), fromId, run, runFiles);
             controller.sendToServers(dupSubmissionPacket);
@@ -1634,7 +1642,7 @@ public class PacketHandler {
 
         Clarification submittedClarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         Clarification clarification = contest.acceptClarification(submittedClarification);
-           
+
         // Send to judge rather than team
         Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(contest.getClientId(), fromId, clarification);
         controller.sendToClient(confirmPacket);
@@ -1651,7 +1659,7 @@ public class PacketHandler {
             else {
                 controller.sendToGroupsandIndividualTeams(confirmPacket,clarification.getAllDestinationsGroup(),clarification.getAllDestinationsTeam());
             }
-            
+
         }
     }
 
@@ -3297,7 +3305,19 @@ public class PacketHandler {
     private void answerClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
-        ClientId whoAnsweredIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        ClientId whoAnsweredIt;
+
+        // Get who answered the clar from the clarification answer - NOT the client who sent the packet.
+        // What's interesting about this is, the clarification answer is already part of the "clarification".  In fact
+        // another COPY of the answer will be added to the clarification by the contest object.  This should probably
+        // be investigated.  Maybe, the answer should be removed from the clarification at this point since it will be
+        // re-added. JB
+        ClarificationAnswer [] clarAns = clarification.getClarificationAnswers();
+        if(clarAns != null && clarAns.length > 0) {
+            whoAnsweredIt = clarAns[clarAns.length-1].getAnswerClient();
+        } else {
+            whoAnsweredIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        }
 
         if (isServer()) {
 

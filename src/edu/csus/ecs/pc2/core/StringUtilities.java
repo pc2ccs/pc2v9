@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
@@ -13,14 +13,15 @@ import java.util.List;
 
 public final class StringUtilities implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -4197938292232525730L;
     /**
      * A constant containing three dots.
      */
     private static final String ELLIPSIS = "...";
+    /**
+     * A constant storing the maximum length of a CLICS id
+     */
+    private static final int MAX_CLICS_ID_LENGTH = 36;
 
     private StringUtilities() {
         super();
@@ -504,5 +505,107 @@ public final class StringUtilities implements Serializable {
                 return lastNumericCompare;
         else
             return aLength - bLength;
+    }
+
+    /**
+     * Helper function to check if character belongs to CLICS compliant character set
+     * @param ch
+     * @param checkHyphen
+     * @param checkDot
+     */
+    private static boolean isCharInCLICSCompliantSet(char ch, boolean checkHyphen, boolean checkDot) {
+        return Character.isLetterOrDigit(ch) || ch == '_' || (checkHyphen && ch == '-') || (checkDot && ch == '.');
+    }
+
+    /**
+     * Check if id is CLICS compliant i.e.
+     * length atmost 36,
+     * consisting only of characters [`a`-`z`, `A`-`Z`, `0`-`9`, `_`, `-`, `.`],
+     * Not starting with `-` or `.` and
+     * Not ending with `.`
+     * @param shortContestName
+     */
+    public static boolean isStringCLICSCompliant(String shortContestName) {
+        if (isEmpty(shortContestName)) {
+            return false;
+        }
+
+        int shortContestNameLength = shortContestName.length();
+        if (shortContestNameLength > MAX_CLICS_ID_LENGTH) {
+            return false;
+        }
+
+        char firstChar = shortContestName.charAt(0);
+        char lastChar = shortContestName.charAt(shortContestNameLength - 1);
+        if (!isCharInCLICSCompliantSet(firstChar, false, false)) {
+            return false;
+        }
+
+        if (!isCharInCLICSCompliantSet(lastChar, true, false)) {
+            return false;
+        }
+
+        for (int i = 1; i < shortContestNameLength - 1; i++) {
+            char ch = shortContestName.charAt(i);
+            if (!isCharInCLICSCompliantSet(ch, true, true)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Make a string CLICS compliant by
+     * truncating length to 36 if more,
+     * replacing invalid characters with `_`
+     * @param shortContestName
+     */
+    public static String makeStringCLICSCompliant(String shortContestName) {
+        if (isEmpty(shortContestName) || isStringCLICSCompliant(shortContestName)) {
+            return shortContestName;
+        }
+
+        if (shortContestName.length() > MAX_CLICS_ID_LENGTH) {
+            shortContestName = shortContestName.substring(0, MAX_CLICS_ID_LENGTH);
+        }
+
+        int shortContestNameLength = shortContestName.length();
+        char firstChar = shortContestName.charAt(0);
+        char lastChar = shortContestName.charAt(shortContestNameLength - 1);
+        if (!isCharInCLICSCompliantSet(firstChar, false, false)) {
+            shortContestName = '_' + shortContestName.substring(1);
+        }
+
+        if (!isCharInCLICSCompliantSet(lastChar, true, false)) {
+            shortContestName = shortContestName.substring(0, shortContestNameLength - 1) + '_';
+        }
+
+        for (int i = 1; i < shortContestNameLength - 1; i++) {
+            char ch = shortContestName.charAt(i);
+            if (!isCharInCLICSCompliantSet(ch, true, true)) {
+                shortContestName = shortContestName.substring(0, i) + '_' + shortContestName.substring(i + 1);
+            }
+        }
+        return shortContestName;
+    }
+
+    /*
+     * Remove all occurrences of a char in a string
+     * Note: will not work for "supplementary characters" (some Chinese Characters).
+     *
+     *  @param s the string to operate on
+     *  @param c all occurrences of this character will be removed from
+     *  @returns s without any character c's
+     */
+    public static String removeAllOccurrences(String s, char c) {
+        StringBuilder sWork = new StringBuilder(s);
+        int i, nLen = sWork.length();
+
+        for(i = nLen-1; i >= 0; i--) {
+            if(sWork.charAt(i) == c) {
+                sWork.deleteCharAt(i);
+            }
+        }
+        return(sWork.toString());
     }
 }

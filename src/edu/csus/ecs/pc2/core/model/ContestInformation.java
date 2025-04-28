@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -173,6 +173,9 @@ public class ContestInformation implements Serializable{
 
     private boolean autoStopContest = false ;
 
+    // RELTIME ((h)*h:mm:ss(.uuu)) of when contest countdown was paused (Before start)
+    private String contestCountdownPauseTime = null;
+
     /**
      * Scoreboard freeze time.
      */
@@ -232,6 +235,33 @@ public class ContestInformation implements Serializable{
      */
     public void setScheduledStartTime(GregorianCalendar newScheduledStartTime) {
         scheduledStartTime = newScheduledStartTime;
+        // if setting start time, pause time must be null
+        if(scheduledStartTime != null) {
+            contestCountdownPauseTime = null;
+        }
+    }
+
+    /**
+     * Gets the time before start when the countdown was paused.
+     *
+     * @return "HH:MM:SS" (RELTIME) of when contest was paused, null if not paused
+     */
+    public String getContestCountdownPauseTime() {
+        return contestCountdownPauseTime;
+    }
+
+    /**
+     * Sets the relative time before contest start when the contest countdown was paused.
+     * This also clears (nulls) the scheduledStartTime since you can't have both a start time
+     * and a pause time.  When the countdown is resumed, the scheduled start time will be reset.
+     *
+     * @param relPauseTime (HH:MM:SS)
+     */
+    public void setContestCountdownPauseTime(String relPauseTime) {
+        if(relPauseTime != null) {
+            scheduledStartTime = null;
+        }
+        contestCountdownPauseTime = relPauseTime;
     }
 
     public String getContestTitle() {
@@ -384,6 +414,10 @@ public class ContestInformation implements Serializable{
                         contestInformation.getScheduledStartTime().getTime())) {
                     return false;
                 }
+            }
+            if ((contestCountdownPauseTime == null && contestInformation.getContestCountdownPauseTime() != null) ||
+                (contestCountdownPauseTime != null && !contestCountdownPauseTime.equals(contestInformation.getContestCountdownPauseTime()))) {
+                return false;
             }
 
             //both scheduledStartTime and contestInformation.getScheduledStartTime() must be null (hence, "same")

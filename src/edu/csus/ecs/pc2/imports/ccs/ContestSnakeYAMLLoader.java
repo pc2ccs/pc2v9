@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -548,13 +548,35 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         loadDataFileContents = fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
 
         String shortContestName = fetchValue(content, CLICS_CONTEST_ID);
-        // only if CLICS id is not present do we try the older short-name
-        if(shortContestName == null) {
+
+        // Check if id is CLICS compliant
+        if (!StringUtilities.isEmpty(shortContestName)) {
+            if (!StringUtilities.isStringCLICSCompliant(shortContestName)) {
+                throw new YamlLoadException(
+                    "ID is not CLICS compliant.\n" +
+                    "Must be:\n" +
+                    "1) Atmost 36 characters in length,\n" +
+                    "2) Consisting only of characters [`a`-`z`, `A`-`Z`, `0`-`9`, `_`, `-`, `.`],\n" +
+                    "3) Do not start with `-` or `.`, and\n" +
+                    "4) Not end with `.`"
+                );
+            }
+        } else {
+            // only if CLICS id is not present do we try older key `short-name`
             shortContestName = fetchValue(content, SHORT_NAME_KEY);
+            shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
+        }
+
+        // only if both CLICS id and `short-name` is not present do we try the key `name`
+        if (StringUtilities.isEmpty(shortContestName)) {
+            shortContestName = fetchValue(content, CLICS_CONTEST_NAME);
+            shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
         }
         // only set short name if string is present AND not empty
         if (!StringUtilities.isEmpty(shortContestName)) {
-            setShortContestName(contest, shortContestName);
+            setShortContestNameAndIdentifier(contest, shortContestName);
+        } else if (StaticLog.getLog() != null) {
+            StaticLog.warning("None of CLICS id, name and short-name is present. Contest Identifier will be set as Default-{:random_number}.");
         }
 
         if (null != fetchValue(content, AUTO_STOP_CLOCK_AT_END_KEY)) {
@@ -885,7 +907,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
-
     /**
      * Generate and write OS password file.
      * @param passfilename
@@ -1043,17 +1064,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
         ContestInformation contestInformation = contest.getContestInformation();
-        // adapted from core.util.JSONTool
+        // adapted from core.util.IJSONTool
         // seems the yaml is converting the 1:00:00 into 3600
         if (scoreboardFreezeTime.length() > 2) {
-            if (!scoreboardFreezeTime.contains(":")) {
-                try {
-                    long seconds = Long.parseLong(scoreboardFreezeTime);
-                    scoreboardFreezeTime = ContestTime.formatTime(seconds);
-                } catch (NumberFormatException e) {
-                    syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds "+ e.getMessage());
-                }
+            long seconds = parseTimeIntoSeconds(scoreboardFreezeTime, -1);
+            if(seconds == -1) {
+                syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds or HH:MM:SS");
             }
+            scoreboardFreezeTime = ContestTime.formatTime(seconds);
         }
         contestInformation.setFreezeTime(scoreboardFreezeTime);
         contest.updateContestInformation(contestInformation);
@@ -1072,9 +1090,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     /**
      * Parses input string and returns number of seconds.
      *
-     * form can be integer or HH:MM:SS
-     *
-     * @param defaultLongValue
+     * form can be integer or HH:MM:SS or just the number of seconds if no ':'
+     * we convert it as a double since some contest times are specifed as
+     * eg. 5:00:00.000 and the YAML parser turns this into a double.
      *
      * @param timeString
      * @param defaultLongValue
@@ -1091,11 +1109,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             long secs = stringToLongSecs(timeString);
             return secs;
         } else {
-            // is a integer or long
-
+            // is a double
             try {
-                long l = Long.parseLong(timeString);
-                return l;
+                double dTime = Double.parseDouble(timeString);
+                // Not interested in fractional seconds for time.
+                return (long)dTime;
             } catch (Exception e) {
                 return defaultLongValue;
             }
@@ -1103,11 +1121,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
-    private void setShortContestName(IInternalContest contest, String shortContestName) {
+    private void setShortContestNameAndIdentifier(IInternalContest contest, String shortContestName) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setContestShortName(shortContestName);
         contest.updateContestInformation(contestInformation);
-
+        contest.setContestIdentifier(shortContestName);
     }
 
     /**

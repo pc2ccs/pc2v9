@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.team;
 
 import java.io.File;
@@ -196,18 +196,27 @@ public class QuickSubmitter implements UIPlugin {
     }
 
     /**
-     * Determine type of judge's submission based on the folder after "submissions/"
+     * Determine type of judge's submission based on the folder after "/submissions/"
+     * eg. accepted, wrong_answer, time_limit_exceeded, etc.
      *
      * @param filePath File to check
      * @return String which is the type
      */
     private String guessSubmissionType(String filePath) {
 
-        int iSub = filePath.lastIndexOf(File.separator);
+        // get "/submissions/" - we will search for this and the first component after it is the type
+        String submissionsBase = File.separator + IContestLoader.SUBMISSIONS_DIRNAME + File.separator;
+        int iSub = filePath.indexOf(submissionsBase);
         String retType;
 
         if(iSub != -1) {
-            retType = filePath.substring(iSub+1);
+            iSub += submissionsBase.length();
+            retType = filePath.substring(iSub);
+            iSub = retType.indexOf(File.separator);
+            // get rid of any trailing components, eg:  accepted/s1345 (submissions may be in subfolders)
+            if(iSub > 0) {
+                retType = retType.substring(0, iSub);
+            }
         } else {
             retType = DEFAULT_SUBMISSION_TYPE;
         }

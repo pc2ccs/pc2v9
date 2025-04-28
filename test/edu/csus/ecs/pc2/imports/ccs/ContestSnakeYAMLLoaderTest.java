@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -387,7 +387,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         ContestInformation info = contest.getContestInformation();
 
         // short-name: ICPC WF 2011
-        assertEquals("ICPC WF 2011", info.getContestShortName());
+        assertEquals("ICPC_WF_2011", info.getContestShortName());
 
         // start-time: 2011-02-04 01:23Z
         assertEquals("Fri Feb 04 01:23:00 2011", formatDate(info.getScheduledStartDate()));
@@ -492,7 +492,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         ContestInformation info = contest.getContestInformation();
 
         // short-name: ICPC WF 2011
-        assertEquals("ICPC WF 2011", info.getContestShortName());
+        assertEquals("ICPC_WF_2011", info.getContestShortName());
 
         // start-time: 2011-02-04 01:23Z
         assertEquals("Fri Feb 04 01:23:00 2011", formatDate(info.getScheduledStartDate()));

@@ -1,6 +1,7 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
+import edu.csus.ecs.pc2.clics.API202003.JSONTool;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -8,7 +9,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 
 /**
  * Unit test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class JSONToolTest extends AbstractTestCase {
@@ -26,6 +27,8 @@ public class JSONToolTest extends AbstractTestCase {
 
         Judgement judgementJE = new Judgement("JE", "JE");
         contest.addJudgement(judgementJE);
+        // JB 12/24 - Not sure what this is supposed to be doing.  The return value is never checked for correctness and
+        // no exceptions can be thrown from convertToJSON(Judgement).  So... ??
         JSONTool json_tool = new JSONTool(contest, controller);
         json_tool.convertToJSON(judgementJE);
     }

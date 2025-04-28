@@ -8,11 +8,18 @@ import { TeamsLoginResponse } from '../models/teams-login-response';
 import { Submission } from '../models/submission';
 import { Run } from '../models/run';
 import { NewClarification } from '../models/new-clarification';
+import { DEBUG_MODE } from 'src/constants';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
+})
 export class TeamsService extends ITeamsService {
+	
   constructor(private _httpClient: HttpClient) {
     super();
+    if (DEBUG_MODE) {
+    	console.log ("Executing TeamsService constructor") ;
+    }
   }
 
   login(loginCredentials: LoginCredentials): Observable<TeamsLoginResponse> {

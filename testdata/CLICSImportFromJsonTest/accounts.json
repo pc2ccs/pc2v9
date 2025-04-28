@@ -1,0 +1,795 @@
+[
+    {
+        "id": "team1",
+        "name": "team1",
+        "password": "mardi-animal-grief-pasta",
+        "type": "team",
+        "username": "team1",
+        "team_id": "1"
+    },
+    {
+        "id": "team2",
+        "name": "team2",
+        "password": "pope-expert-skies-marlin",
+        "type": "team",
+        "username": "team2",
+        "team_id": "2"
+    },
+    {
+        "id": "team3",
+        "name": "team3",
+        "password": "clamp-snugly-chef-mouth",
+        "type": "team",
+        "username": "team3",
+        "team_id": "3"
+    },
+    {
+        "id": "team4",
+        "name": "team4",
+        "password": "crown-blend-venus-swab",
+        "type": "team",
+        "username": "team4",
+        "team_id": "4"
+    },
+    {
+        "id": "team5",
+        "name": "team5",
+        "password": "elite-entire-rust-wharf",
+        "type": "team",
+        "username": "team5",
+        "team_id": "5"
+    },
+    {
+        "id": "team6",
+        "name": "team6",
+        "password": "doing-onset-reboot-clause",
+        "type": "team",
+        "username": "team6",
+        "team_id": "6"
+    },
+    {
+        "id": "team7",
+        "name": "team7",
+        "password": "shadow-send-pretty-refuse",
+        "type": "team",
+        "username": "team7",
+        "team_id": "7"
+    },
+    {
+        "id": "team8",
+        "name": "team8",
+        "password": "twine-define-mosaic-squash",
+        "type": "team",
+        "username": "team8",
+        "team_id": "8"
+    },
+    {
+        "id": "team9",
+        "name": "team9",
+        "password": "throng-sublet-gills-afloat",
+        "type": "team",
+        "username": "team9",
+        "team_id": "9"
+    },
+    {
+        "id": "team10",
+        "name": "team10",
+        "password": "stock-popper-mossy-drown",
+        "type": "team",
+        "username": "team10",
+        "team_id": "10"
+    },
+    {
+        "id": "team11",
+        "name": "team11",
+        "password": "blend-demote-creole-crafty",
+        "type": "team",
+        "username": "team11",
+        "team_id": "11"
+    },
+    {
+        "id": "team12",
+        "name": "team12",
+        "password": "filter-bright-clasp-hyphen",
+        "type": "team",
+        "username": "team12",
+        "team_id": "12"
+    },
+    {
+        "id": "team13",
+        "name": "team13",
+        "password": "boned-plow-primal-eaten",
+        "type": "team",
+        "username": "team13",
+        "team_id": "13"
+    },
+    {
+        "id": "team14",
+        "name": "team14",
+        "password": "tall-garage-chunk-maybe",
+        "type": "team",
+        "username": "team14",
+        "team_id": "14"
+    },
+    {
+        "id": "team15",
+        "name": "team15",
+        "password": "dilute-starch-recant-smock",
+        "type": "team",
+        "username": "team15",
+        "team_id": "15"
+    },
+    {
+        "id": "team16",
+        "name": "team16",
+        "password": "fender-retail-dinghy-bauble",
+        "type": "team",
+        "username": "team16",
+        "team_id": "16"
+    },
+    {
+        "id": "team17",
+        "name": "team17",
+        "password": "chewy-parlor-penny-spinal",
+        "type": "team",
+        "username": "team17",
+        "team_id": "17"
+    },
+    {
+        "id": "team18",
+        "name": "team18",
+        "password": "sixth-rack-radish-anime",
+        "type": "team",
+        "username": "team18",
+        "team_id": "18"
+    },
+    {
+        "id": "team19",
+        "name": "team19",
+        "password": "shrimp-deck-celtic-helper",
+        "type": "team",
+        "username": "team19",
+        "team_id": "19"
+    },
+    {
+        "id": "team20",
+        "name": "team20",
+        "password": "april-silent-thud-sift",
+        "type": "team",
+        "username": "team20",
+        "team_id": "20"
+    },
+    {
+        "id": "team21",
+        "name": "team21",
+        "password": "scion-ebook-gong-tiger",
+        "type": "team",
+        "username": "team21",
+        "team_id": "21"
+    },
+    {
+        "id": "team22",
+        "name": "team22",
+        "password": "outing-robust-skier-trend",
+        "type": "team",
+        "username": "team22",
+        "team_id": "22"
+    },
+    {
+        "id": "team23",
+        "name": "team23",
+        "password": "crust-idiom-dock-pesky",
+        "type": "team",
+        "username": "team23",
+        "team_id": "23"
+    },
+    {
+        "id": "team24",
+        "name": "team24",
+        "password": "gnat-boil-gory-prune",
+        "type": "team",
+        "username": "team24",
+        "team_id": "24"
+    },
+    {
+        "id": "team25",
+        "name": "team25",
+        "password": "glass-navy-late-crowd",
+        "type": "team",
+        "username": "team25",
+        "team_id": "25"
+    },
+    {
+        "id": "team26",
+        "name": "team26",
+        "password": "calm-driven-wince-rural",
+        "type": "team",
+        "username": "team26",
+        "team_id": "26"
+    },
+    {
+        "id": "team27",
+        "name": "team27",
+        "password": "april-theme-spoils-chill",
+        "type": "team",
+        "username": "team27",
+        "team_id": "27"
+    },
+    {
+        "id": "team28",
+        "name": "team28",
+        "password": "train-scribe-unpaid-gluten",
+        "type": "team",
+        "username": "team28",
+        "team_id": "28"
+    },
+    {
+        "id": "team29",
+        "name": "team29",
+        "password": "left-uphold-human-crept",
+        "type": "team",
+        "username": "team29",
+        "team_id": "29"
+    },
+    {
+        "id": "team30",
+        "name": "team30",
+        "password": "anyway-scabby-drift-skinny",
+        "type": "team",
+        "username": "team30",
+        "team_id": "30"
+    },
+    {
+        "id": "team31",
+        "name": "team31",
+        "password": "ferret-grader-stark-puppy",
+        "type": "team",
+        "username": "team31",
+        "team_id": "31"
+    },
+    {
+        "id": "team32",
+        "name": "team32",
+        "password": "lilly-erupt-knelt-evade",
+        "type": "team",
+        "username": "team32",
+        "team_id": "32"
+    },
+    {
+        "id": "team33",
+        "name": "team33",
+        "password": "eldest-frown-suitor-dove",
+        "type": "team",
+        "username": "team33",
+        "team_id": "33"
+    },
+    {
+        "id": "team34",
+        "name": "team34",
+        "password": "hazard-sulk-canal-disarm",
+        "type": "team",
+        "username": "team34",
+        "team_id": "34"
+    },
+    {
+        "id": "team35",
+        "name": "team35",
+        "password": "ritzy-velcro-helmet-five",
+        "type": "team",
+        "username": "team35",
+        "team_id": "35"
+    },
+    {
+        "id": "team36",
+        "name": "team36",
+        "password": "vowel-grimy-award-cure",
+        "type": "team",
+        "username": "team36",
+        "team_id": "36"
+    },
+    {
+        "id": "team37",
+        "name": "team37",
+        "password": "aspire-clever-sprite-dish",
+        "type": "team",
+        "username": "team37",
+        "team_id": "37"
+    },
+    {
+        "id": "team38",
+        "name": "team38",
+        "password": "museum-latch-tutu-vendor",
+        "type": "team",
+        "username": "team38",
+        "team_id": "38"
+    },
+    {
+        "id": "team39",
+        "name": "team39",
+        "password": "erupt-helmet-tray-raving",
+        "type": "team",
+        "username": "team39",
+        "team_id": "39"
+    },
+    {
+        "id": "team40",
+        "name": "team40",
+        "password": "danger-snap-winner-blurt",
+        "type": "team",
+        "username": "team40",
+        "team_id": "40"
+    },
+    {
+        "id": "team41",
+        "name": "team41",
+        "password": "drove-amuck-july-smudge",
+        "type": "team",
+        "username": "team41",
+        "team_id": "41"
+    },
+    {
+        "id": "team42",
+        "name": "team42",
+        "password": "sway-lively-prance-stifle",
+        "type": "team",
+        "username": "team42",
+        "team_id": "42"
+    },
+    {
+        "id": "team43",
+        "name": "team43",
+        "password": "entomb-fender-skiing-dusk",
+        "type": "team",
+        "username": "team43",
+        "team_id": "43"
+    },
+    {
+        "id": "team44",
+        "name": "team44",
+        "password": "safely-ablaze-sprite-sector",
+        "type": "team",
+        "username": "team44",
+        "team_id": "44"
+    },
+    {
+        "id": "team45",
+        "name": "team45",
+        "password": "survey-rising-broom-neon",
+        "type": "team",
+        "username": "team45",
+        "team_id": "45"
+    },
+    {
+        "id": "team46",
+        "name": "team46",
+        "password": "whiny-jersey-ultra-width",
+        "type": "team",
+        "username": "team46",
+        "team_id": "46"
+    },
+    {
+        "id": "team47",
+        "name": "team47",
+        "password": "crave-garlic-spouse-ambush",
+        "type": "team",
+        "username": "team47",
+        "team_id": "47"
+    },
+    {
+        "id": "team48",
+        "name": "team48",
+        "password": "mascot-stage-voyage-fade",
+        "type": "team",
+        "username": "team48",
+        "team_id": "48"
+    },
+    {
+        "id": "team49",
+        "name": "team49",
+        "password": "waggle-kindle-little-rascal",
+        "type": "team",
+        "username": "team49",
+        "team_id": "49"
+    },
+    {
+        "id": "team50",
+        "name": "team50",
+        "password": "jingle-giddy-level-spew",
+        "type": "team",
+        "username": "team50",
+        "team_id": "50"
+    },
+    {
+        "id": "team51",
+        "name": "team51",
+        "password": "poem-rope-yarn-shorty",
+        "type": "team",
+        "username": "team51",
+        "team_id": "51"
+    },
+    {
+        "id": "team52",
+        "name": "team52",
+        "password": "viper-ablaze-roping-awry",
+        "type": "team",
+        "username": "team52",
+        "team_id": "52"
+    },
+    {
+        "id": "team53",
+        "name": "team53",
+        "password": "banter-grader-hatred-chrome",
+        "type": "team",
+        "username": "team53",
+        "team_id": "53"
+    },
+    {
+        "id": "team54",
+        "name": "team54",
+        "password": "rebuff-hurt-denial-grip",
+        "type": "team",
+        "username": "team54",
+        "team_id": "54"
+    },
+    {
+        "id": "team55",
+        "name": "team55",
+        "password": "rewind-epic-zone-bubbly",
+        "type": "team",
+        "username": "team55",
+        "team_id": "55"
+    },
+    {
+        "id": "team56",
+        "name": "team56",
+        "password": "hertz-coral-system-foil",
+        "type": "team",
+        "username": "team56",
+        "team_id": "56"
+    },
+    {
+        "id": "team57",
+        "name": "team57",
+        "password": "basil-prelaw-diaper-dupe",
+        "type": "team",
+        "username": "team57",
+        "team_id": "57"
+    },
+    {
+        "id": "team58",
+        "name": "team58",
+        "password": "rewind-smooth-feline-clammy",
+        "type": "team",
+        "username": "team58",
+        "team_id": "58"
+    },
+    {
+        "id": "team59",
+        "name": "team59",
+        "password": "spry-shut-denial-garlic",
+        "type": "team",
+        "username": "team59",
+        "team_id": "59"
+    },
+    {
+        "id": "team60",
+        "name": "team60",
+        "password": "abacus-amulet-dimple-lunar",
+        "type": "team",
+        "username": "team60",
+        "team_id": "60"
+    },
+    {
+        "id": "team61",
+        "name": "team61",
+        "password": "cover-cement-empty-afar",
+        "type": "team",
+        "username": "team61",
+        "team_id": "61"
+    },
+    {
+        "id": "team62",
+        "name": "team62",
+        "password": "purify-occupy-rinse-velvet",
+        "type": "team",
+        "username": "team62",
+        "team_id": "62"
+    },
+    {
+        "id": "team63",
+        "name": "team63",
+        "password": "ebony-chemo-daybed-booth",
+        "type": "team",
+        "username": "team63",
+        "team_id": "63"
+    },
+    {
+        "id": "team64",
+        "name": "team64",
+        "password": "hybrid-nearby-survey-plural",
+        "type": "team",
+        "username": "team64",
+        "team_id": "64"
+    },
+    {
+        "id": "team65",
+        "name": "team65",
+        "password": "rising-skype-smudge-curing",
+        "type": "team",
+        "username": "team65",
+        "team_id": "65"
+    },
+    {
+        "id": "team66",
+        "name": "team66",
+        "password": "hacked-wing-tacky-hurler",
+        "type": "team",
+        "username": "team66",
+        "team_id": "66"
+    },
+    {
+        "id": "team67",
+        "name": "team67",
+        "password": "dotted-quit-status-ladder",
+        "type": "team",
+        "username": "team67",
+        "team_id": "67"
+    },
+    {
+        "id": "team68",
+        "name": "team68",
+        "password": "stamp-keep-talon-rumble",
+        "type": "team",
+        "username": "team68",
+        "team_id": "68"
+    },
+    {
+        "id": "team69",
+        "name": "team69",
+        "password": "danger-volley-negate-ajar",
+        "type": "team",
+        "username": "team69",
+        "team_id": "69"
+    },
+    {
+        "id": "team70",
+        "name": "team70",
+        "password": "pueblo-sank-quack-stove",
+        "type": "team",
+        "username": "team70",
+        "team_id": "70"
+    },
+    {
+        "id": "team71",
+        "name": "team71",
+        "password": "grout-clock-trash-fence",
+        "type": "team",
+        "username": "team71",
+        "team_id": "71"
+    },
+    {
+        "id": "team72",
+        "name": "team72",
+        "password": "rash-blazer-ripple-pulse",
+        "type": "team",
+        "username": "team72",
+        "team_id": "72"
+    },
+    {
+        "id": "team73",
+        "name": "team73",
+        "password": "sworn-supply-grape-hush",
+        "type": "team",
+        "username": "team73",
+        "team_id": "73"
+    },
+    {
+        "id": "team74",
+        "name": "team74",
+        "password": "jockey-cane-poise-crazy",
+        "type": "team",
+        "username": "team74",
+        "team_id": "74"
+    },
+    {
+        "id": "team75",
+        "name": "team75",
+        "password": "glare-squirt-neuter-conch",
+        "type": "team",
+        "username": "team75",
+        "team_id": "75"
+    },
+    {
+        "id": "team76",
+        "name": "team76",
+        "password": "resize-spur-chomp-dose",
+        "type": "team",
+        "username": "team76",
+        "team_id": "76"
+    },
+    {
+        "id": "team77",
+        "name": "team77",
+        "password": "fading-stark-kite-haven",
+        "type": "team",
+        "username": "team77",
+        "team_id": "77"
+    },
+    {
+        "id": "team78",
+        "name": "team78",
+        "password": "ferris-strode-humped-traps",
+        "type": "team",
+        "username": "team78",
+        "team_id": "78"
+    },
+    {
+        "id": "team79",
+        "name": "team79",
+        "password": "tripod-violin-decode-crazed",
+        "type": "team",
+        "username": "team79",
+        "team_id": "79"
+    },
+    {
+        "id": "team80",
+        "name": "team80",
+        "password": "facing-cloud-rally-recite",
+        "type": "team",
+        "username": "team80",
+        "team_id": "80"
+    },
+    {
+        "id": "team81",
+        "name": "team81",
+        "password": "june-stoke-cure-colony",
+        "type": "team",
+        "username": "team81",
+        "team_id": "81"
+    },
+    {
+        "id": "team82",
+        "name": "team82",
+        "password": "dismay-lark-flinch-idiocy",
+        "type": "team",
+        "username": "team82",
+        "team_id": "82"
+    },
+    {
+        "id": "team83",
+        "name": "team83",
+        "password": "stilt-utter-swear-snarl",
+        "type": "team",
+        "username": "team83",
+        "team_id": "83"
+    },
+    {
+        "id": "team84",
+        "name": "team84",
+        "password": "sheet-swoop-appear-settle",
+        "type": "team",
+        "username": "team84",
+        "team_id": "84"
+    },
+    {
+        "id": "team85",
+        "name": "team85",
+        "password": "prior-skid-portly-circle",
+        "type": "team",
+        "username": "team85",
+        "team_id": "85"
+    },
+    {
+        "id": "team86",
+        "name": "team86",
+        "password": "unrest-settle-darn-wind",
+        "type": "team",
+        "username": "team86",
+        "team_id": "86"
+    },
+    {
+        "id": "team87",
+        "name": "team87",
+        "password": "unread-sadly-banked-purity",
+        "type": "team",
+        "username": "team87",
+        "team_id": "87"
+    },
+    {
+        "id": "team88",
+        "name": "team88",
+        "password": "truce-cable-dangle-public",
+        "type": "team",
+        "username": "team88",
+        "team_id": "88"
+    },
+    {
+        "id": "team89",
+        "name": "team89",
+        "password": "enrage-humid-waving-ravine",
+        "type": "team",
+        "username": "team89",
+        "team_id": "89"
+    },
+    {
+        "id": "team90",
+        "name": "team90",
+        "password": "roamer-duffel-bonded-girdle",
+        "type": "team",
+        "username": "team90",
+        "team_id": "90"
+    },
+    {
+        "id": "team91",
+        "name": "team91",
+        "password": "unlit-twice-slaw-agenda",
+        "type": "team",
+        "username": "team91",
+        "team_id": "91"
+    },
+    {
+        "id": "team92",
+        "name": "team92",
+        "password": "drank-sheet-engine-afoot",
+        "type": "team",
+        "username": "team92",
+        "team_id": "92"
+    },
+    {
+        "id": "team93",
+        "name": "team93",
+        "password": "hatred-couch-hatbox-petite",
+        "type": "team",
+        "username": "team93",
+        "team_id": "93"
+    },
+    {
+        "id": "team94",
+        "name": "team94",
+        "password": "motto-flame-saggy-rented",
+        "type": "team",
+        "username": "team94",
+        "team_id": "94"
+    },
+    {
+        "id": "team95",
+        "name": "team95",
+        "password": "fever-living-parlor-neon",
+        "type": "team",
+        "username": "team95",
+        "team_id": "95"
+    },
+    {
+        "id": "team96",
+        "name": "team96",
+        "password": "sandal-kindle-tiara-chug",
+        "type": "team",
+        "username": "team96",
+        "team_id": "96"
+    },
+    {
+        "id": "team97",
+        "name": "team97",
+        "password": "flick-step-legged-street",
+        "type": "team",
+        "username": "team97",
+        "team_id": "97"
+    },
+    {
+        "id": "team98",
+        "name": "team98",
+        "password": "quill-unpaid-margin-coke",
+        "type": "team",
+        "username": "team98",
+        "team_id": "98"
+    },
+    {
+        "id": "team99",
+        "name": "team99",
+        "password": "manly-boggle-body-vessel",
+        "type": "team",
+        "username": "team99",
+        "team_id": "99"
+    }
+]
+

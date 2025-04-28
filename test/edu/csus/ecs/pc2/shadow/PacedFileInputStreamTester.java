@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.File;
@@ -7,30 +8,30 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class PacedFileInputStreamTester extends AbstractTestCase {
 
-    
+
     /**
      * Test paced stream.
-     * 
+     *
      * @throws Exception
      */
     public void testZeroSecondPaced() throws Exception {
         // TODO SOMEDAY uncomment and fix test
-        
+
 //        String datadir = getDataDirectory();
-        
-        
-        
+
+
+
 ////        ensureDirectory(datadir);
 ////        startExplorer(datadir);
-//        
+//
 //        String filename = datadir + File.separator + "csus-f2019.eventfeed.json";
 ////        editFile(filename);
-//        
+//
 //        File infile = new File(filename);
 //
 //        int secondsPause = 0;
@@ -50,7 +51,7 @@ public class PacedFileInputStreamTester extends AbstractTestCase {
 //        long elapsedtime = new Date().getTime() - startTime;
 //
 //        assertEquals("Expecting number of pauses in stream ", 1264, pc);
-//        
+//
 //        if (isDebugMode()){
 //            System.out.println("File: " + filename + " size " + infile.length());
 //            System.out.println("bytes = " + cnt + " pauses count " + pc);
@@ -58,9 +59,9 @@ public class PacedFileInputStreamTester extends AbstractTestCase {
 //        }
 
     }
-    
+
     public void testOneSecondPaced() throws Exception {
-        
+
         if (isFastJUnitTesting()) {
             return;
         }
@@ -78,10 +79,10 @@ public class PacedFileInputStreamTester extends AbstractTestCase {
         int cnt = 0;
         @SuppressWarnings("unused")
         int inint;
-        while (0 != (inint = stream.read())) {
+        while (-1 != (inint = stream.read())) {
             cnt++;
         }
-        
+
         int pc = stream.getPauseCount();
         stream.close();
 

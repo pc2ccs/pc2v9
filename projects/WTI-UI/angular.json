@@ -29,7 +29,9 @@
             "styles": [
               "src/styles/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "sourceMap": true,
+            "optimization": false
           },
           "configurations": {
             "production": {

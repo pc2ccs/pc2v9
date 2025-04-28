@@ -10,15 +10,19 @@
         <div class='not-container'>
             <div>
                 <h4>Clarifications</h4>
-                <label><input type='radio' [(ngModel)]='clarsNotificationsEnabled' name='popupsEnabledClar' [value]='true'> Enable Pop-ups</label>
+                <label><input type='radio' [(ngModel)]='clarsNotificationsEnabled' name='clarPopupsEnabled' 
+                			[value]='true' (change)="onRadioButtonChange($event)"> Enable Pop-ups</label>
                 <br />
-                <label><input type='radio' [(ngModel)]='clarsNotificationsEnabled' name='popupsEnabledClar' [value]='false'> Disable Pop-ups</label>
+                <label><input type='radio' [(ngModel)]='clarsNotificationsEnabled' name='clarPopupsDisabled' 
+                			[value]='false' (change)="onRadioButtonChange($event)"> Disable Pop-ups</label>
             </div>
             <div>
                 <h4>Runs</h4>
-                <label><input type='radio' [(ngModel)]='runsNotificationsEnabled' name='popupsEnabledRun' [value]='true'> Enable Pop-ups</label>
+                <label><input type='radio' [(ngModel)]='runsNotificationsEnabled' name='runPopupsEnabled' 
+                			[value]='true' (change)="onRadioButtonChange($event)"> Enable Pop-ups</label>
                 <br />
-                <label><input type='radio' [(ngModel)]='runsNotificationsEnabled' name='popupsEnabledRun' [value]='false'> Disable Pop-ups</label>
+                <label><input type='radio' [(ngModel)]='runsNotificationsEnabled' name='runPopupsDisabled' 
+                			[value]='false' (change)="onRadioButtonChange($event)"> Disable Pop-ups</label>
             </div>
         </div>
 

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -597,9 +597,9 @@ public class ContestInformationPane extends JPanePlugin {
             judgeSettingsPane = new JPanel();
 
             judgeSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
-            judgeSettingsPane.setMaximumSize(new Dimension(900, 425));
-            judgeSettingsPane.setMinimumSize(new Dimension(900, 425));
-            judgeSettingsPane.setPreferredSize(new Dimension(900,375));
+            judgeSettingsPane.setMaximumSize(new Dimension(900, 525));
+            judgeSettingsPane.setMinimumSize(new Dimension(900, 525));
+            judgeSettingsPane.setPreferredSize(new Dimension(900,525));
 
             if (showPaneOutlines) {
 
@@ -611,7 +611,8 @@ public class ContestInformationPane extends JPanePlugin {
                 judgeSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
             }
 
-            judgeSettingsPane.setLayout(new FlowLayout((FlowLayout.LEFT)));
+//            judgeSettingsPane.setLayout(new FlowLayout((FlowLayout.LEFT)));
+            judgeSettingsPane.setLayout(new BoxLayout(judgeSettingsPane, BoxLayout.Y_AXIS));
 
             //the contents of the pane:
 
@@ -806,6 +807,8 @@ public class ContestInformationPane extends JPanePlugin {
     private JPanel getScoringPropertiesPane() {
         if (scoringPropertiesPane == null) {
             scoringPropertiesPane = new ScoringPropertiesPane(getUpdateButton(),getCancelButton());
+            scoringPropertiesPane.setMaximumSize(new Dimension(700, 200));
+            scoringPropertiesPane.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             scoringPropertiesPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Scoring Properties",
                     javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
@@ -838,7 +841,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (judgesDefaultAnswerPane == null) {
 
             judgesDefaultAnswerPane = new JPanel();
-            judgesDefaultAnswerPane.setMaximumSize(new Dimension(500, 200));
+            judgesDefaultAnswerPane.setMaximumSize(new Dimension(700, 200));
             judgesDefaultAnswerPane.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             judgesDefaultAnswerPane.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -848,7 +851,6 @@ public class ContestInformationPane extends JPanePlugin {
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
 
             //the contents of the pane:
-
             judgesDefaultAnswerPane.add(getJudgesDefaultAnswerTextField(), null);
 
         }
@@ -859,7 +861,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (judgesExecutePane == null) {
 
             judgesExecutePane = new JPanel();
-            judgesExecutePane.setMaximumSize(new Dimension(500, 200));
+            judgesExecutePane.setMaximumSize(new Dimension(700, 200));
             judgesExecutePane.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             judgesExecutePane.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -1480,10 +1482,10 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JTextField getJudgesDefaultAnswerTextField() {
         if (judgesDefaultAnswerTextField == null) {
-            judgesDefaultAnswerTextField = new JTextField(50);
+            judgesDefaultAnswerTextField = new JTextField();
             judgesDefaultAnswerTextField.setText("");
-//            judgesDefaultAnswerTextField.setSize(new Dimension(280, 29));
-//            judgesDefaultAnswerTextField.setLocation(new Point(208, 214));
+            // Columns are in 'm' widths, which are quite wide.
+            judgesDefaultAnswerTextField.setColumns(60);
             judgesDefaultAnswerTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
@@ -1501,7 +1503,9 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JTextField getJudgesExecuteFolderTextField() {
         if (judgesExecuteFolderTextField == null) {
-            judgesExecuteFolderTextField = new JTextField(50);
+            judgesExecuteFolderTextField = new JTextField();
+            // Column width is that of an 'm', so, 56 'm's.
+            judgesExecuteFolderTextField.setColumns(56);
             judgesExecuteFolderTextField.setText("");
             judgesExecuteFolderTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 @Override
