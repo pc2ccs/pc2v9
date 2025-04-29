@@ -41,10 +41,8 @@ export class ContestService extends IContestService {
 	super();
 	console.log('Executing ContestService constructor...');
 	console.log('...initial environment is:');
-	Object.entries(environment).forEach(([key,value]) => {
-		console.log (`  Key:  ${key},  Value:  ${value}`) ;
-	});
-
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
 
 	this.standingsAreCurrent = false;
     

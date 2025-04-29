@@ -4,6 +4,7 @@ import { LoginCredentials } from '../models/login-credentials';
 import { Router } from '@angular/router';
 import { ITeamsService } from '../abstract-services/i-teams.service';
 import { TeamsLoginResponse } from '../models/teams-login-response';
+import { environment } from 'src/environments/environment';
 import { saveCurrentToken, saveCurrentUserName, clearSessionStorage } from 'src/app/app.component';
 import { DEBUG_MODE } from 'src/constants';
 
@@ -28,12 +29,19 @@ export class AuthService {
               private _router: Router) { 
 	  if (DEBUG_MODE) {
 		  console.log ("Executing AuthService constructor...");
+		console.log("...environment is:");
+		  let environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
 	  }
   }
 
   completeLogin(tokenValue: string, username: string) {
 	if (DEBUG_MODE) {
 		console.log ("Executing AuthService.completeLogin()...");
+		console.log("...environment is:");
+		  let environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
+
 	}
 	
     this._token = tokenValue;
@@ -47,7 +55,11 @@ export class AuthService {
 
   login(loginCredentials: LoginCredentials): Observable<TeamsLoginResponse> {
 	if (DEBUG_MODE) {
-		console.log ("Executing AuthService.login() -- invoking TeamsService.login()") ;
+		console.log ("Executing AuthService.login()...") ;
+		console.log("...environment is:");
+		  let environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
+		console.log("...invoking TeamsService.login()")
 	}
     return this._teamsService.login(loginCredentials);
   }

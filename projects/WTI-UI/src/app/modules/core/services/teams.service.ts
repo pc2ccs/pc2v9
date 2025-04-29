@@ -18,12 +18,26 @@ export class TeamsService extends ITeamsService {
   constructor(private _httpClient: HttpClient) {
     super();
     if (DEBUG_MODE) {
-    	console.log ("Executing TeamsService constructor") ;
+    	console.log ("Executing TeamsService constructor...") ;
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log('...Environment Object (Deep Copy):', environmentCopy);
     }
   }
 
   login(loginCredentials: LoginCredentials): Observable<TeamsLoginResponse> {
-    return this._httpClient.post<TeamsLoginResponse>(`${environment.baseUrl}/teams/login`, loginCredentials);
+	console.log ("Executing TeamsService.login()...") ;
+	console.log("...environment is:");
+		  let environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
+
+	console.log(`Invoking HttpClient.post() with URL ${environment.baseUrl}/teams/login`);
+	let resp = this._httpClient.post<TeamsLoginResponse>(`${environment.baseUrl}/teams/login`, loginCredentials);
+	console.log("Response from HttClient:");
+	console.log(resp);
+	console.log("Environment following HTTPClient response is:");
+		  environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
+	return resp;
   }
 
   logout(): Observable<any> {

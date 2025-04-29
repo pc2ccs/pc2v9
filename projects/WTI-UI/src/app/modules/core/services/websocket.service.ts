@@ -26,9 +26,8 @@ export class WebsocketService extends IWebsocketService {
     if (DEBUG_MODE) {
     	console.log('Executing WebsocketService constructor...');
     	console.log('...initial environment is:');
-		Object.entries(environment).forEach(([key,value]) => {
-			console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		});
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
 
     }
   }
@@ -37,9 +36,8 @@ export class WebsocketService extends IWebsocketService {
     if (DEBUG_MODE) {
     	console.log('Constructing websocket...');
     	console.log('...current environment is:');
-		Object.entries(environment).forEach(([key,value]) => {
-			console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		});
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
     }
     this.socket = new WebSocket(`${environment.websocketUrl}/${this._authService.token}`);
     this.socket.addEventListener('message', this.handleIncomingMessage);

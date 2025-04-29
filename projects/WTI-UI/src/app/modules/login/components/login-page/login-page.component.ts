@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 import { ContestClock } from 'src/app/modules/core/models/contest-clock';
+import { environment } from 'src/environments/environment';
 import { DEBUG_MODE } from 'src/constants';
 
 /*
@@ -49,12 +50,18 @@ export class LoginPageComponent implements OnInit, OnDestroy {
               private _router: Router,
               private _contestService: IContestService,
 			  private _appTitleService: AppTitleService) { 
-	  console.log("Executing LoginPageComponent constructor");
+	  console.log("Executing LoginPageComponent constructor...");
+      console.log ("...environment:") ;
+	  const environmentCopy = JSON.parse(JSON.stringify(environment));
+	  console.log(environmentCopy);
   }
 
   ngOnInit(): void {
 	
-	  console.log ("Executing LoginPageComponent.ngOnInit()");
+	  console.log ("Executing LoginPageComponent.ngOnInit()...");
+          console.log ("...environment:") ;
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
 	  
 	this._appTitleService.setTitleWithTeamId("Login");
 
@@ -71,7 +78,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-	  console.log ("Entering LoginPageComponent.onSubmit()");
+	  console.log ("Entering LoginPageComponent.onSubmit()...");
+          console.log ("...environment:") ;
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
+
     this.loginStarted = true;
     const loginCreds = new LoginCredentials();
     loginCreds.teamName = this.formGroup.get('username').value;
@@ -80,10 +91,23 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((result: TeamsLoginResponse) => {
 
-    	  console.log("LoginPageComponent.onSubmit(): received callback from authService.login()");
+    	  console.log("LoginPageComponent.onSubmit(): received callback from authService.login()...");
+          console.log ("...environment:") ;
+		  let environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
+
     	  console.log ("LoginPageComponent.onSubmit(): invoking authService.completeLogin()");
         this._authService.completeLogin(result.teamId, result.teamName);
-		  console.log ("LoginPageComponent.onSubmit(): invoking websocketService.startWebsocket()");
+			console.log("LoginPageComponent.onSubmit(): returned from authService.completeLogin()...");
+          console.log ("...environment:") ;
+		  environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
+
+		  console.log ("LoginPageComponent.onSubmit(): invoking websocketService.startWebsocket()...");
+          console.log ("...environment:") ;
+		  environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
+
         this._websocketService.startWebsocket();
 		  console.log ("LoginPageComponent.onSubmit(): invoking contestService.getIsContestRunning()");
         this._contestService.getIsContestRunning()

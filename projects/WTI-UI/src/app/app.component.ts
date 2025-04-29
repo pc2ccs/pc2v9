@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import * as Constants from 'src/constants';
@@ -55,7 +55,7 @@ path list to transfer to the "/runs" page.
   styleUrls: ['./app.component.scss']
 })
 
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   configLoaded = false;
 
   constructor(private _httpClient: HttpClient, 
@@ -66,11 +66,8 @@ export class AppComponent implements OnInit {
               private _uiHelperService: UiHelperService) { 
 	  if (DEBUG_MODE) {
 		  console.log("Executing AppComponent constructor...");
-		  console.log("Initial environment is:");
-		  console.log(environment);
-		  Object.entries(environment).forEach(([key,value]) => {
-			  console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		  });
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log('Initial Environment Object (Deep Copy):', environmentCopy);
 	  }
   	//this.router.events.subscribe(console.log); //shows router tracing on console
   }
@@ -89,9 +86,8 @@ export class AppComponent implements OnInit {
 	    	}
 	    }
 	    console.log ("Environment:");
-		Object.entries(environment).forEach(([key,value]) => {
-			console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		});
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
     }
 
     //check if we're loading for the first time
@@ -107,29 +103,30 @@ export class AppComponent implements OnInit {
         this.loadEnvironment();
         if (DEBUG_MODE) {
         	console.log ("...environment after return from loadEnvironment():") ;
-  		    Object.entries(environment).forEach(([key,value]) => {
-			  console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		    });
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
         }
         
 	} else {
 	    //there is a current page stored; we must be reloading from (e.g.) an F5 refresh
 	    if (DEBUG_MODE) {
 	    	console.log ('Restarting Single-Page-Application after refresh navigation...');
+        	console.log ("...environment:") ;
+		  	const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  	console.log(environmentCopy);
 	    }
 	    
-        //restore former environment
+/*        //restore former environment
         if (DEBUG_MODE) {
-        	console.log ("...invoking loadEnvironment()...") ;
+        	console.log ("...invoking restoreEnvironment()...") ;
         }
-        this.loadEnvironment();
+        restoreEnvironment();
         if (DEBUG_MODE) {
-        	console.log ("...environment after return from loadEnvironment():") ;
-  		    Object.entries(environment).forEach(([key,value]) => {
-			  console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		    });
+        	console.log ("...environment after return from restoreEnvironment():") ;
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
         }
-
+*/
 		//The following was initially done by the login-page component's onSubmit() method during login;
 		// this F5 "restore state" code needs to accomplish the equivalent:
 		//this._authService.login(loginCreds)
@@ -230,6 +227,14 @@ export class AppComponent implements OnInit {
 	
   }
 
+  ngOnDestroy() {
+	if (DEBUG_MODE) {
+		console.log ("In method ngOnDestroy()...");
+		console.log ("... invoking saveCurrentEnvironment()");
+	}
+	saveCurrentEnvironment();
+  }
+
   // Load appconfig.json from assets directory, overwrite environment.ts with these values
   loadEnvironment(): void {
 	if (DEBUG_MODE) {
@@ -246,9 +251,8 @@ export class AppComponent implements OnInit {
 	        this.configLoaded = true;
 	    });	
 		console.log("...updated environment:");
-		Object.entries(environment).forEach(([key,value]) => {
-			console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		});
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
 
   }//end function loadEnvironment()
 
@@ -317,3 +321,21 @@ export class AppComponent implements OnInit {
   export function clearSessionStorage() {
       sessionStorage.clear();
   }
+
+  //save the current environment in sessionStorage so a subsequent F5 (refresh) can restore it
+  export function saveCurrentEnvironment() {
+    sessionStorage.setItem(Constants.BASE_URL_KEY, environment.baseUrl) ;
+	sessionStorage.setItem(Constants.WEBSOCKET_URL_KEY, environment.websocketUrl);
+  }
+  
+  //load the most recently saved environment values
+  export function restoreEnvironment() {
+	console.log ("In method restoreEnvironment()");
+    const baseUrl = sessionStorage.getItem(Constants.BASE_URL_KEY);
+	const websocketUrl = sessionStorage.getItem(Constants.WEBSOCKET_URL_KEY);
+	console.log ("restoring baseUrl: ", baseUrl)
+	console.log ("restoring websocketUrl: ", websocketUrl);
+	environment.baseUrl = baseUrl;
+	environment.websocketUrl = websocketUrl;
+  }
+

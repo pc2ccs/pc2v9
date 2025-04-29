@@ -61,3 +61,13 @@ export const CONNECTION_TOKEN_KEY = 'token';
  * The key under which the user name for the current websocket connection is stored in sessionStorage.
  */
 export const CONNECTION_USERNAME_KEY = 'username';
+
+/**
+ * The key under which the base URL for the server is stored in sessionStorage.
+ */
+export const BASE_URL_KEY = 'baseURL';
+
+/**
+ * The key under which the base URL for the server is stored in sessionStorage.
+ */
+export const WEBSOCKET_URL_KEY = 'webocketURL';
