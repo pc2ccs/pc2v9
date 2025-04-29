@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from 'src/app/modules/core/auth/auth.service';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
+import { environment } from 'src/environments/environment';
 import { DEBUG_MODE } from 'src/constants'
 
 /**
@@ -38,7 +39,10 @@ export class AppHeaderComponent {
   
   constructor(private _authService: AuthService, private _contestService: IContestService) {
 	  if (DEBUG_MODE ) {
-		console.log ("Executing AppHeaderComponent constructor")
+		console.log ("Executing AppHeaderComponent constructor...")
+        console.log ("...environment:") ;
+		const environmentCopy = JSON.parse(JSON.stringify(environment));
+		console.log(environmentCopy);
 	  }
   }
 

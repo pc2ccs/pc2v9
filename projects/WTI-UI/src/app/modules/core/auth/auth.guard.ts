@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { AuthService } from './auth.service';
+import { environment } from 'src/environments/environment';
 import { DEBUG_MODE } from 'src/constants';
 
 @Injectable({
@@ -10,6 +11,9 @@ export class AuthGuard implements CanActivate {
   constructor(private _authService: AuthService, private _router: Router) {
 	  if (DEBUG_MODE) {
 		  console.log ("Executing AuthGuard constructor...") ;
+          console.log ("...environment:") ;
+		  const environmentCopy = JSON.parse(JSON.stringify(environment));
+		  console.log(environmentCopy);
 	  }
   }
 
