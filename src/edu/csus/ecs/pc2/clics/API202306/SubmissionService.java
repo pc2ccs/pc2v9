@@ -665,10 +665,10 @@ public class SubmissionService implements Feature {
                 }
                 // No run entered, this is really really bad
                 log.log(Level.WARNING, "No Run added after submitting CLICS API run for team " + team_id + " by " + user);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("unable to add submission").build();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to add submission").build();
             } catch (Exception e) {
                 log.log(Level.WARNING, "Exception submitting CLICS API run for team " + team_id + " by " + user, e);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("unable to submit run" + e.toString()).build();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to submit run: " + e.getLocalizedMessage()).build();
             }
         }
 
