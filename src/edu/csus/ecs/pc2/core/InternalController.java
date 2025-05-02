@@ -605,9 +605,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles,
                                 long overrideSubmissionTimeMS, long overrideRunId, boolean overrideStopOnFailure) throws Exception {
 
-        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Run run = new Run(contest.getClientId(), language, problem);
-        RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);
 
         //determine whether to apply the "current throttling strategy" to this submission 
         // (i.e., whether to accept the run for submission to the PC2 Server)
@@ -630,6 +628,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         Packet packet ;
         if (accept) {
+            ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+            RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);            
             packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
             sendToLocalServer(packet);
         } else {
