@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, Inject, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FileSubmission } from 'src/app/modules/core/models/file-submission';
 import { Submission } from 'src/app/modules/core/models/submission';
 import { takeUntil } from 'rxjs/operators';

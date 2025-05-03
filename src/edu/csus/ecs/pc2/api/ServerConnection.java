@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
 
 import java.io.File;
@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -600,7 +601,13 @@ public class ServerConnection {
         try {
             controller.submitJudgeRun(submittedProblem, submittedLanguage, serializedMainFile, serializedAdditionalFiles, 
                                         overrideSubmissionTimeMS, overrideRunId);
-        } catch (Exception e) {
+        } 
+        catch (SubmissionRejectedException e) {
+            //the submission was rejected, presumably because of the submitJudgeRun() method's ThrottleStrategy;
+            //forward the exception to the caller
+            throw e ;
+        }
+        catch (Exception e) {
             throw new Exception("Unable to submit run " + e);
         }
     }
