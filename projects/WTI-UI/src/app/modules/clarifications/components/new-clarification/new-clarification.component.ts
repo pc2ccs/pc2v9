@@ -39,15 +39,19 @@ export class NewClarificationComponent implements OnInit, OnDestroy {
 
     this._teamService.postClarification(newClarification)
       .pipe(takeUntil(this._unsubscribe))
-      .subscribe(_ => {
-        this.newClarificationForm.reset();
-        this.close();
-        this._contestService.clarificationsUpdated.next();
-        this._uiHelper.alertOk('Clarification has been submitted successfully!');
-      }, (error: any) => {
-        console.error('error submitting new clarification');
-        console.error(error);
-      });
+      .subscribe({
+		next: value  => {
+	      this.newClarificationForm.reset();
+	      this.close();
+	      this._contestService.clarificationsUpdated.next();
+	      this._uiHelper.alertOk('Clarification has been submitted successfully! ');
+	    },
+	    error: (error: any) => {
+	      this._uiHelper.alertError(`Error submitting clarification! ${error}`);
+	    },
+	    complete: () => {
+	    // Called when the observable completes
+  }});
   }
 
   close(): void {

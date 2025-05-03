@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { NewClarificationAlertComponent } from '../../clarifications/components/new-clarification-alert/new-clarification-alert.component';
+import { NewClarificationAnnouncementAlertComponent } from '../../clarifications/components/new-announcement-clarification-alert/new-announcement-alert.component';
 import { NewRunAlertComponent } from '../../runs/components/new-run-alert/new-run-alert.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DEBUG_MODE } from 'src/constants';
@@ -22,6 +23,14 @@ export class UiHelperService {
   incomingClarification(id: string): void {
     if (this.enableClarificationNotifications) {
       this._dialogService.open(NewClarificationAlertComponent, {
+        data: { id }
+      });
+    }
+  }
+  
+  incomingAnnouncement(id: string): void {
+    if (this.enableClarificationNotifications) {
+      this._dialogService.open(NewClarificationAnnouncementAlertComponent, {
         data: { id }
       });
     }

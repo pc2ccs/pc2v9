@@ -34,11 +34,24 @@ export abstract class IWebsocketService {
         this._teamsService.runsUpdated.next();
         break;
       }
+      case 'refresh_runs_list': {
+        this._teamsService.runsUpdated.next();
+        break;
+      }
       case 'clarification': {
     	  if (DEBUG_MODE) {
     		  console.log ("Got '", message.type, "' websocket message in IWebsocketService.incomingMessage()");
     	  }
         this._uiHelperService.incomingClarification(message.id);
+        this._contestService.clarificationsUpdated.next();
+        break;
+      }
+      case 'refresh_clarification_list': {
+        this._contestService.clarificationsUpdated.next();
+        break;
+      }
+      case 'announcement': {
+        this._uiHelperService.incomingAnnouncement(message.id);
         this._contestService.clarificationsUpdated.next();
         break;
       }
