@@ -46,24 +46,21 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
      * Rejects the specified run if the submitting team has already submitted the maximum allowed number of runs in the past minute. 
      */
     public boolean accept(Run run) {
-        int numSoFar = getNumberOfRunsSubmittedInTheLastMinute(contest, run);
-        if (numSoFar < maxPerMinute) 
-          return true;
-        else 
-          return false ;
+        return numSubmittedInTheLastMinuteExceedsMaximum(contest, run);
     }
 
     /**
-     * Queries the specified contest to find the runs already submitted by the submitter of the specified run,
-     * then determines how many of those previously-submitted runs occurred in the last minute.
+     * Queries the specified contest to obtain the complete list of runs, then determines whether 
+     * the count of runs previously submitted in the last minute by the new-run submitter
+     * exceeds the maximum allowed.
      * 
      * @param contest the contest containing runs submitted by teams.
      * @param newRun the (new) {@link Run} submitted by a team about which a strategy decision (i.e. whether or not
      *                  to forward the run to the PC2 Server) is to be made.  
      * 
-     * @return the number of runs which the team has already submitted in the last minute.
+     * @return true if the number of runs which the team has submitted in the last minute exceeds the maximum; false if not.
      */
-    private int getNumberOfRunsSubmittedInTheLastMinute(IInternalContest contest, Run newRun) {
+    private boolean numSubmittedInTheLastMinuteExceedsMaximum(IInternalContest contest, Run newRun) {
         
         //get the clientId for the new Run
         ClientId newSubmitter = newRun.getSubmitter();
@@ -76,7 +73,8 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
         Run[] allRuns = contest.getRuns();
         
         //count the number of runs previously submitted in the last minute by the same client
-        int numSubmittedInLastMinute = 0;
+        int countSoFar = 0;
+        boolean limitReached = false;
         
         //check each contest run 
         for (Run curRun : allRuns ) {
@@ -91,12 +89,18 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
                 if (runSubmisionTimeSecs >= contestElapsedSecs-60) {
                     
                     //the run was submitted in the last minute; count it
-                    numSubmittedInLastMinute++ ;
+                    countSoFar++ ;
+                    
+                    //if the submitter has already exceeded the limit, no need to check any more runs
+                    if (countSoFar > maxPerMinute) {
+                        limitReached = true;
+                        break;
+                    }
                 }
             }
         }
         
-        return numSubmittedInLastMinute ;
+        return limitReached ;
     }
 
 }
