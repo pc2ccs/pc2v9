@@ -46,7 +46,7 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
      * Rejects the specified run if the submitting team has already submitted the maximum allowed number of runs in the past minute. 
      */
     public boolean accept(Run run) {
-        return numSubmittedInTheLastMinuteExceedsMaximum(contest, run);
+        return !numSubmittedInTheLastMinuteExceedsMaximum(contest, run);
     }
 
     /**
