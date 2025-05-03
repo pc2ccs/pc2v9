@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.exception.ServerProcessException;
+import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -76,6 +77,9 @@ import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
+//import edu.csus.ecs.pc2.core.strategies.AcceptAllStrategy;
+import edu.csus.ecs.pc2.core.strategies.MaxSubmissionsPerMinuteStrategy;
+//import edu.csus.ecs.pc2.core.strategies.RejectAllStrategy;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.core.transport.IBtoA;
 import edu.csus.ecs.pc2.core.transport.ITransportManager;
@@ -601,12 +605,36 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles,
                                 long overrideSubmissionTimeMS, long overrideRunId, boolean overrideStopOnFailure) throws Exception {
 
-        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Run run = new Run(contest.getClientId(), language, problem);
-        RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);
 
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
-        sendToLocalServer(packet);
+        //determine whether to apply the "current throttling strategy" to this submission 
+        // (i.e., whether to accept the run for submission to the PC2 Server)
+        boolean accept = true;
+        Account submitterAccount = contest.getAccount(contest.getClientId());
+        
+        if (submitterAccount.isTeam()) {
+            //Determine the throttling strategy to be applied to team submissions.
+            //The following shows several alternative strategy selections, with only one being enabled.
+            //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
+            // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
+            // GUI (such as the PC2 Admin)
+//            IThrottleStrategy strategy = new AcceptAllStrategy();
+//            IThrottleStrategy strategy = new RejectAllStrategy();
+            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,6);
+//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest); //uses DEFAULT_MAX_SUBMISSIONS_PER_MINUTE; same as prev line
+            accept = strategy.accept(run);
+        }
+        
+        Packet packet ;
+        if (accept) {
+            ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+            RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);            
+            packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
+            sendToLocalServer(packet);
+        } else {
+            throw new SubmissionRejectedException("Submission threshhold exceeded");
+        }
     }
 
     @Override
