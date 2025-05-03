@@ -242,13 +242,13 @@ public class CLICSAwardUtilities {
         int lastRankSilver = 8;
         int lastRankBronze = 12;
 
+        // TODO: If no finalizeData, we should do what ResultsFile.GenDefaultFinalizeData() does,
+        // in fact, that should be a Utility method someplace that creats a "default" FinalizeData.
         FinalizeData finalizeData = contest.getFinalizeData();
         if (finalizeData != null) {
-            if (finalizeData.isCertified()) {
-                lastRankGolds = finalizeData.getGoldRank();
-                lastRankSilver = finalizeData.getSilverRank();
-                lastRankBronze = finalizeData.getBronzeRank();
-            }
+            lastRankGolds = finalizeData.getGoldRank();
+            lastRankSilver = finalizeData.getSilverRank();
+            lastRankBronze = finalizeData.getBronzeRank();
         }
 
 
