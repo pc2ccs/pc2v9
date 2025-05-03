@@ -620,9 +620,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // GUI (such as the PC2 Admin)
 //            IThrottleStrategy strategy = new AcceptAllStrategy();
 //            IThrottleStrategy strategy = new RejectAllStrategy();
-            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,4);
+            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,6);
 //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
-            
+//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest); //uses DEFAULT_MAX_SUBMISSIONS_PER_MINUTE; same as prev line
             accept = strategy.accept(run);
         }
         
