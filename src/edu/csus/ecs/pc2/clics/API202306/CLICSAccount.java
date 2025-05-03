@@ -78,7 +78,7 @@ public class CLICSAccount {
             type = "admin";
         } else if(cid.getClientType() == Type.TEAM) {
             type = "team";
-            team_id = username;
+            team_id = Integer.valueOf(cid.getClientNumber()).toString();
         } else if(cid.getClientType() == Type.JUDGE) {
             type = "judge";
         } else {
