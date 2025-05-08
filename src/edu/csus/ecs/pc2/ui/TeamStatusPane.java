@@ -11,11 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -42,8 +44,12 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Dimension;
 
 /**
  * Team Status Pane.
@@ -56,7 +62,7 @@ import java.awt.event.MouseEvent;
  * 
  * @author pc2@ecs.csus.edu
  * @author Doug Lane -- added Status Counts (posthumous credit)
- * @author John Clevenger -- merged Doug's code, made minor changes
+ * @author John Clevenger -- ported Doug's code, made minor changes
  */
 
 public class TeamStatusPane extends JPanePlugin {
@@ -135,6 +141,7 @@ public class TeamStatusPane extends JPanePlugin {
      * 
      */
     private boolean showSimpleStatusCounts = true;
+    private JPanel statusCountTypePanel;
     
     /**
      * This method initializes
@@ -151,7 +158,7 @@ public class TeamStatusPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(583, 193));
+        this.setSize(new Dimension(770, 249));
         this.add(getTeamStatusPane(), java.awt.BorderLayout.CENTER);
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -624,6 +631,7 @@ public class TeamStatusPane extends JPanePlugin {
             buttonPane.add(getReloadButton(), null);
             buttonPane.add(getSiteComboBox(), null);
             buttonPane.add(getShowTeamsCheckBox(), null);
+            buttonPane.add(getStatusCountTypePanel());
         }
         return buttonPane;
     }
@@ -787,5 +795,49 @@ public class TeamStatusPane extends JPanePlugin {
             });
         }
         return showTeamsCheckBox;
+    }
+    
+    /**
+     * Initializes a panel containing a button group which can be used to select the type of "status counts"
+     * displayed in the Status Panel header.  If "By State" is selected, the counts for each header status
+     * are the counts of teams currently in that state (in other words, the number of teams currently rendered
+     * in that state's color).  If "Cummulative" is selected, the header counts reflect how many teams have
+     * reached, or move past, that state (for example, if a team logs in and submits a run, that team will be
+     * counted in both the "Has Logged In" count and the "Has Submitted Runs" count -- whereas with the "By State"
+     * selection the team would ONLY appear in the "Has Submitted Runs" count).
+     * 
+     * @return a Panel containing a button group for selecting the type of status count.
+     */
+    private JPanel getStatusCountTypePanel() {
+        if (statusCountTypePanel == null) {
+        	statusCountTypePanel = new JPanel();
+        	statusCountTypePanel.add(new JLabel("Show status counts: "));
+        	
+        	JRadioButton byStateButton = new JRadioButton("By State");
+        	byStateButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    showSimpleStatusCounts = true;
+                    repopulateGrid(true);
+                }
+        	});
+        	statusCountTypePanel.add(byStateButton);
+        	
+        	JRadioButton cummulativeButton = new JRadioButton("Cummulative");
+        	cummulativeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    showSimpleStatusCounts = false;
+                    repopulateGrid(true);
+                }
+            });
+        	statusCountTypePanel.add(cummulativeButton);
+        	
+        	ButtonGroup statusButtonGroup = new ButtonGroup();
+        	statusButtonGroup.add(byStateButton);
+        	statusButtonGroup.add(cummulativeButton);
+        	byStateButton.setSelected(true);
+        }
+        return statusCountTypePanel;
     }
 }
