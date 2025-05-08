@@ -4,7 +4,11 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,13 +16,18 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.TeamStatus;
@@ -49,6 +58,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.awt.Dimension;
 
 /**
@@ -62,7 +72,7 @@ import java.awt.Dimension;
  * 
  * @author pc2@ecs.csus.edu
  * @author Doug Lane -- added Status Counts (posthumous credit)
- * @author John Clevenger -- ported Doug's code, made minor changes
+ * @author John Clevenger -- ported Doug's code, added buttons to select between count modes.
  */
 
 public class TeamStatusPane extends JPanePlugin {
@@ -142,6 +152,8 @@ public class TeamStatusPane extends JPanePlugin {
      */
     private boolean showSimpleStatusCounts = true;
     private JPanel statusCountTypePanel;
+
+    private JLabel statusCountWhatsThisButton;
     
     /**
      * This method initializes
@@ -811,6 +823,7 @@ public class TeamStatusPane extends JPanePlugin {
     private JPanel getStatusCountTypePanel() {
         if (statusCountTypePanel == null) {
         	statusCountTypePanel = new JPanel();
+        	statusCountTypePanel.setBorder(new LineBorder(Color.black, 1));
         	statusCountTypePanel.add(new JLabel("Show status counts: "));
         	
         	JRadioButton byStateButton = new JRadioButton("By State");
@@ -837,7 +850,61 @@ public class TeamStatusPane extends JPanePlugin {
         	statusButtonGroup.add(byStateButton);
         	statusButtonGroup.add(cummulativeButton);
         	byStateButton.setSelected(true);
+        	
+        	statusCountTypePanel.add(getStatusCountWhatsThisButton());
         }
         return statusCountTypePanel;
     }
+    
+    /**
+     * This method initializes customizeHonorsSolvedCountWhatsThisButton
+     *
+     * @return javax.swing.JLabel
+     */
+    private JLabel getStatusCountWhatsThisButton() {
+
+        if (statusCountWhatsThisButton == null) {
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                statusCountWhatsThisButton = new JLabel("<What's This?>");
+                statusCountWhatsThisButton.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                statusCountWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
+
+            statusCountWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+            statusCountWhatsThisButton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, statusCountWhatsThisMessage, "About Status Count values", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            statusCountWhatsThisButton.setBounds(new Rectangle(620, 242, 20, 20));
+        }
+        return statusCountWhatsThisButton;
+    }
+
+    private String statusCountWhatsThisMessage = //
+            "\nThe count values (in parentheses) in the STATUS header can be configured in two modes." //
+            + "\nIf 'By State' is selected, each count represents the total number of teams in precisely that state." //
+            + "\nIf 'Cummulative' is selected, each count represents the total number of teams who are OR WERE AT SOME POINT in that state." //
+            + "\n\nFor example, if two teams login in, and then one of those teams submits a run," //
+            + "\n'By State' will show one team in the 'Has Logged In' state and one team in the 'Submitted Run(s)' state," //
+            + "\nwhereas 'Cummulative' will show that TWO teams have logged in (and one is currently in the 'Submitted Run(s)' state)." //
+            + " \n\n";
+    
+    private Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
+    }
+
+
 }
