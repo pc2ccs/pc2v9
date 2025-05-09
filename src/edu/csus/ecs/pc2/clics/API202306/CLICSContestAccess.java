@@ -33,6 +33,8 @@ public class CLICSContestAccess {
     public static final String API_CAPABILITY_PROXY_CLAR = "proxy_clar";
     public static final String API_CAPABILITY_ADMIN_SUBMIT = "admin_submit";
     public static final String API_CAPABILITY_ADMIN_CLAR = "admin_clar";
+    // Draft CLICS Spec 2025-XX addition
+    public static final String API_CAPABILITY_COMMENTARY_SUBMIT = "post_comment";
     // tentative - not official, but mentioned in the spec
     public static final String API_CAPABILITY_AWARDS_UPDATE = "awards_update";
 
@@ -87,6 +89,9 @@ public class CLICSContestAccess {
         }
         if(AwardService.isAwardsUpdateAllowed(sc)) {
             cap.add(API_CAPABILITY_AWARDS_UPDATE);
+        }
+        if(CommentaryService.isSubmitCommentaryAllowed(sc)) {
+            cap.add(API_CAPABILITY_COMMENTARY_SUBMIT);
         }
         capabilities = cap.toArray(new String[0]);
 
