@@ -629,7 +629,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet packet ;
         if (accept) {
             ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-            RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);            
+            RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);
             packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
             sendToLocalServer(packet);
         } else {
@@ -5018,7 +5018,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // GUI (such as the PC2 Admin)
 //            IThrottleStrategy strategy = new AcceptAllStrategy();
 //            IThrottleStrategy strategy = new RejectAllStrategy();
-            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest, 4);
+            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest, 6);
 //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
 
             accept = strategy.accept(run);
