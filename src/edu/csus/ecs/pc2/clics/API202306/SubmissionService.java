@@ -86,6 +86,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 public class SubmissionService implements Feature {
     // How long to wait for the submission to be entered into the system before returning error
     private long WAIT_SUBMISSION_TIMEOUT_SECS = 20;
+    private static final int MAX_RUNFILE_RETRIES = 3;
 
     private IInternalContest model;
 
@@ -309,10 +310,11 @@ public class SubmissionService implements Feature {
                             + submissionId + " from local model", e2);
                 }
 
-                //if runFiles is still null we failed to get the runfiles from the local model
-                if (runFiles == null) {
+                // We try to fetch the runfiles a few times
+                for(int nTry = 1; runFiles == null && nTry <= MAX_RUNFILE_RETRIES; nTry++) {
+                    // we failed to get the runfiles from the local model
                     // try getting the submission from the server
-                    controller.getLog().log(Log.INFO, "No runfiles for submission " + submission.getNumber() + " found locally; requesting Submission from server");
+                    controller.getLog().log(Log.INFO, "No runfiles for submission " + submission.getNumber() + " found locally; requesting Submission from server - Try " + nTry);
 
                     try {
                         controller.fetchRun(submission);  //note: requires having "Fetch_Run" permission for the Feeder account...
@@ -332,57 +334,54 @@ public class SubmissionService implements Feature {
                         }
                         waitedMS += 100;
                     }
-                } else {
-                    // if we have the runFiles already, bypass fetching the run and waiting on the server
-                    serverReplied = true;
-                }
-                if (serverReplied) {
-
-                    controller.getLog().log(Log.INFO, "Got a reply from the server...");
+                    if (serverReplied) {
+                        controller.getLog().log(Log.INFO, "Got a reply from the server...");
+                    }
+                    // see if the runfiles showed up
                     try {
                         runFiles = model.getRunFiles(submission);
                     } catch (ClassNotFoundException | IOException | FileSecurityException e1) {
                         controller.getLog().throwing("SubmissionService", "getSubmissionFiles", e1);
                     }
-                    if (runFiles != null) {
-                        controller.getLog().log(Log.INFO, "Returning runFiles: " + runFiles.toString());
+                }
+                if (runFiles != null) {
+                    controller.getLog().log(Log.INFO, "Returning runFiles: " + runFiles.toString());
 
-                        SerializedFile mainFile = runFiles.getMainFile();
-                        SerializedFile[] otherFiles = runFiles.getOtherFiles();
-                        java.nio.file.Path tmpDir = null;
-                        try {
-                            tmpDir = Files.createTempDirectory("subService");
-                            // dump mainFile and otherFiles to tmpDir
-                            HashMap<Integer, String> filesToWrite = new HashMap<Integer, String>();
-                            if (mainFile != null) {
-                                filesToWrite.put(Integer.valueOf(0), mainFile.getName());
-                                mainFile.buffer2file(mainFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + mainFile.getName());
-                            }
-                            if (otherFiles != null) {
-                                for (int j = 0; j < otherFiles.length; j++) {
-                                    SerializedFile serializedFile = otherFiles[j];
-                                    filesToWrite.put(Integer.valueOf(j + 1), serializedFile.getName());
-                                    serializedFile.buffer2file(serializedFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + serializedFile.getName());
-                                }
-                            }
-                            String zipFileName = tmpDir.toAbsolutePath().toString() + File.pathSeparator + "files.zip";
-                            createZip(submission, tmpDir, filesToWrite, zipFileName);
-                            // set file (and path) to be download
-                            File file = new File(zipFileName);
-                            ResponseBuilder responseBuilder = Response.ok(file);
-                            responseBuilder.header("Content-Disposition", "attachment; filename=\"files.zip\"");
-                            return responseBuilder.build();
-                        } catch (IOException e) {
-                            controller.getLog().throwing("SubmissionService", "getSubmissionFiles", e);
-                        } finally {
-                            if (tmpDir != null) {
-                                deleteDir(tmpDir);
+                    SerializedFile mainFile = runFiles.getMainFile();
+                    SerializedFile[] otherFiles = runFiles.getOtherFiles();
+                    java.nio.file.Path tmpDir = null;
+                    try {
+                        tmpDir = Files.createTempDirectory("subService");
+                        // dump mainFile and otherFiles to tmpDir
+                        HashMap<Integer, String> filesToWrite = new HashMap<Integer, String>();
+                        if (mainFile != null) {
+                            filesToWrite.put(Integer.valueOf(0), mainFile.getName());
+                            mainFile.buffer2file(mainFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + mainFile.getName());
+                        }
+                        if (otherFiles != null) {
+                            for (int j = 0; j < otherFiles.length; j++) {
+                                SerializedFile serializedFile = otherFiles[j];
+                                filesToWrite.put(Integer.valueOf(j + 1), serializedFile.getName());
+                                serializedFile.buffer2file(serializedFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + serializedFile.getName());
                             }
                         }
-                    } else {
-                        controller.getLog().log(Log.INFO, "Returned runFiles was null; returning 'NOT_FOUND'");
-                        return Response.status(Status.NOT_FOUND).build();
+                        String zipFileName = tmpDir.toAbsolutePath().toString() + File.pathSeparator + "files.zip";
+                        createZip(submission, tmpDir, filesToWrite, zipFileName);
+                        // set file (and path) to be download
+                        File file = new File(zipFileName);
+                        ResponseBuilder responseBuilder = Response.ok(file);
+                        responseBuilder.header("Content-Disposition", "attachment; filename=\"files.zip\"");
+                        return responseBuilder.build();
+                    } catch (IOException e) {
+                        controller.getLog().throwing("SubmissionService", "getSubmissionFiles", e);
+                    } finally {
+                        if (tmpDir != null) {
+                            deleteDir(tmpDir);
+                        }
                     }
+                } else {
+                    controller.getLog().log(Log.INFO, "Returned runFiles was null; returning 'NOT_FOUND'");
+                    return Response.status(Status.NOT_FOUND).build();
                 }
             }
         }
