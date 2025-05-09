@@ -50,6 +50,7 @@ public class RemoteRunSubmitter {
      * @param auxFiles - other submittted files
      * @param overrideTimeMS - override submission time in MS
      * @param overrideRunId - override run id
+     * @throws Exception if run can't be submitted, eg. throttling
      */
     public void submitRun(String clientIdString, String problemID, String languageID, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) throws Exception {
         submitRun(clientIdString, problemID, languageID, null, mainFile, auxFiles, overrideTimeMS, overrideRunId);
@@ -66,7 +67,7 @@ public class RemoteRunSubmitter {
      * @param auxFiles - other submittted files
      * @param overrideTimeMS - override submission time in MS
      * @param overrideRunId - override run id
-     * @throws Exception
+     * @throws Exception if run can't be submitted, eg. throttling
      */
     public void submitRun(String clientIdString, String problemID, String languageID, String entry_point, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) throws Exception {
 
