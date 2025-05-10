@@ -491,7 +491,7 @@ public class ContestController extends MainController {
 										
 					//retrieve the relevant fields from the PC2 contest clock
 					boolean isRunning = contestClock.isContestClockRunning();
-					long contestLengthInSecs = contestClock.getContestLengthSecs();
+					long contestLengthSecs = contestClock.getContestLengthSecs();
 					long elapsedSecs = contestClock.getElapsedSecs();
 					long wallClockStartTime ;
 					//"contest start time" is a Calendar object and might be null if the contest has never been started
@@ -503,7 +503,7 @@ public class ContestController extends MainController {
 					}
 					
 					//construct a ContestClock containing the PC2 Server clock values
-					returnableContestClock = new ContestClockModel(isRunning,contestLengthInSecs, elapsedSecs, wallClockStartTime);
+					returnableContestClock = new ContestClockModel(isRunning,contestLengthSecs, elapsedSecs, wallClockStartTime);
 										
 				}
 				catch(NotLoggedInException e) {
