@@ -64,5 +64,6 @@
 	<classpathentry kind="lib" path="vendor/lib/bcprov-ext-jdk18on-176.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/bcpkix-jdk18on-176.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/bcutil-jdk18on-176.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jackson-dataformat-yaml-2.5.4.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>

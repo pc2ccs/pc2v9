@@ -13,6 +13,6 @@ else
   PC2XOPS=""
 fi
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx2048M -jar WebTeamInterface-1.1.jar
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx2048M -jar WebTeamInterface-1.2.jar
 
 # eof pc2wti 

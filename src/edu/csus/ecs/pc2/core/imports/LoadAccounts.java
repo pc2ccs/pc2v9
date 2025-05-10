@@ -105,6 +105,7 @@ public class LoadAccounts {
         account.setInstitutionCode(new String(accountClean.getInstitutionCode()));
         account.setInstitutionName(new String(accountClean.getInstitutionName()));
         account.setInstitutionShortName(new String(accountClean.getInstitutionShortName()));
+        account.setCountryCode(new String(accountClean.getCountryCode()));
 
         // Copy groups to new account
         HashSet<ElementId> groupsClean = accountClean.getGroupIds();

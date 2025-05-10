@@ -7,13 +7,14 @@ import java.io.PrintWriter;
 import java.util.GregorianCalendar;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.clics.API202306.EventFeedJSON;
+import edu.csus.ecs.pc2.clics.API202306.JSONTool;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 
 /**
  * Event Feed JSON report.
@@ -49,7 +50,9 @@ public class EventFeedJSONReport implements IReport {
     @Override
     public void writeReport(PrintWriter printWriter) throws IllegalContestState {
 
-        EventFeedJSON efEventFeedJSON = new EventFeedJSON(contest);
+        // TODO: Should specify which API version the report is for.  In fact, this class should
+        // be duplicated for each API version.  ATM we use 2023-06
+        EventFeedJSON efEventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
 
         if(filter != null) {
             efEventFeedJSON.setFilter(filter);

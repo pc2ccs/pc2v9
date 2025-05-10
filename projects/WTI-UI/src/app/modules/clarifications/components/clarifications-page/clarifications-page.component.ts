@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Subject, delay  } from 'rxjs';
 import { Clarification } from '../../../core/models/clarification';
 import { MatDialog } from '@angular/material/dialog';
 import { NewClarificationComponent } from '../new-clarification/new-clarification.component';
@@ -39,7 +39,8 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
     this.loadClars();
 
     this._contestService.clarificationsUpdated
-      .pipe(takeUntil(this._unsubscribe))
+      .pipe(
+	takeUntil(this._unsubscribe))
       .subscribe(_ => {
         this.loadClars();
       });
@@ -55,11 +56,13 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
       data: {},
       disableClose: true
     });
+
   }
 
   private filterClarifications() {
     const filterParams = this.filterForm.value;
     let filtered = this.clarifications;
+
     if (filterParams.recipient === 'all') { filtered = filtered.filter(x => (x.recipient === 'All' || x.recipient === "No Answer Yet")); }
     if (filterParams.recipient === 'some') { filtered = filtered.filter(x => (x.recipient === 'Some' || x.recipient === "No Answer Yet")); }
     if (filterParams.recipient === 'team') { filtered = filtered.filter(x => (x.recipient === 'My Team' || x.recipient === "No Answer Yet")); }

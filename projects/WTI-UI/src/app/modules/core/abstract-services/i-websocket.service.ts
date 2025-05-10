@@ -34,6 +34,10 @@ export abstract class IWebsocketService {
         this._teamsService.runsUpdated.next();
         break;
       }
+      case 'refresh_runs_list': {
+        this._teamsService.runsUpdated.next();
+        break;
+      }
       case 'clarification': {
     	  if (DEBUG_MODE) {
     		  console.log ("Got '", message.type, "' websocket message in IWebsocketService.incomingMessage()");
@@ -42,20 +46,38 @@ export abstract class IWebsocketService {
         this._contestService.clarificationsUpdated.next();
         break;
       }
+      case 'refresh_clarification_list': {
+        this._contestService.clarificationsUpdated.next();
+        break;
+      }
+      case 'announcement': {
+        this._uiHelperService.incomingAnnouncement(message.id);
+        this._contestService.clarificationsUpdated.next();
+        break;
+      }
       case 'contest_clock': {
+    	  /* This case is invoked when the WTI Server gets a "Contest_Clock" message from the PC2 Server
+    	   * (via the PC2 API "ConfigurationItemUpdated()" listener in the WTI class "ConfigurationService").
+    	   * Such a message from the PC2 Server causes the WTI Server to send a "contest_clock" message through
+    	   * the websocket to this client. 
+    	   */
     	  if (DEBUG_MODE) {
-    		  console.log ("Got '", message.type, "' websocket message in IWebsocketService.incomingMessage()");
+    		  console.log ("IWebsocketService.incomingMessage(): got websocket message '", message.type);
+              console.log ("IWebsocketService.incomingMessage(): invoking ContestService.getIsContestRunning() and");
+              console.log ("  subscribing to callback from HTTP GET");
     	  }
         this._contestService.getIsContestRunning()
           .subscribe((val: any) => {
         	  if (DEBUG_MODE) {
         		  console.log ("IWebsocketService.incomingMessage(): callback from ContestService.getIsContestRunning() returned '", val, "'");
-        		  console.log ("Setting ContestService.isContestRunning to '", val, "'") ;
-        		  console.log ("  and invoking ContestService.contestClock.next()") ;
+        		  console.log ("Setting ContestService.isContestRunning to '", val, "',") ;
+        		  console.log ("  invoking ContestService.contestClockEvent.next()") ;
+                  console.log ("  and invoking ContestService.updateLocalContestClockFromServer()");
         	  }
 
             this._contestService.isContestRunning = val;
-            this._contestService.contestClock.next();
+            this._contestService.contestClockEvent.next();
+			this._contestService.updateLocalContestClockFromServer();
           });
         break;
       }

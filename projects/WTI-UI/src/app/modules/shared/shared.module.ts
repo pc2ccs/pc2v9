@@ -8,13 +8,23 @@ import { AppFooterComponent } from './components/app-footer/app-footer.component
 import { RouterModule } from '@angular/router';
 import { JudgementSelectorComponent } from './components/judgement-selector/judgement-selector.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatSelectModule} from '@angular/material/select';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AboutWtiComponent } from './components/about-wti/about-wti.component';
+import { BrowserModule } from '@angular/platform-browser';
+import { DisplayTimePipe } from 'src/app/modules/core/services/displayTimePipe.service';
+import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
+import { ContestService } from 'src/app/modules/core/services/contest.service';
+import { ContestServiceFactory } from '../core/core.module';
+import { HttpClient } from '@angular/common/http';
 
 @NgModule({
+  providers: [
+    { provide: IContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
+    { provide: ContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
+  ],
   declarations: [
     AppHeaderComponent,
     AppFooterComponent,
@@ -32,6 +42,8 @@ import { AboutWtiComponent } from './components/about-wti/about-wti.component';
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
+    BrowserModule,
+    DisplayTimePipe
   ],
   exports: [
     AppHeaderComponent,
@@ -43,7 +55,7 @@ import { AboutWtiComponent } from './components/about-wti/about-wti.component';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatSnackBarModule,
+    MatSnackBarModule
   ]
 })
 export class SharedModule { }

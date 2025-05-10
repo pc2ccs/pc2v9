@@ -25,6 +25,7 @@ import org.json.XML;
 import communication.WTIWebsocket;
 import config.ServerInit;
 import edu.csus.ecs.pc2.api.IClarification;
+import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IJudgement;

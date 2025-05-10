@@ -11,29 +11,41 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.ws.rs.core.SecurityContext;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.util.CommaSeparatedValueParser;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
-import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
+import edu.csus.ecs.pc2.services.eventFeed.WebServerPropertyUtils;
+import edu.csus.ecs.pc2.services.web.IEventFeedStreamer;
 
 /**
  * This class provides a GUI for configuring the embedded Jetty webserver. It allows specifying the port on which Jetty will listen and the REST service endpoints to which Jetty will respond. (Note
  * that REST endpoints are handled using Jersey, the JAX-RS implementation.)
- * 
+ *
  * By default the Jetty webserver is configured to listen on port 50080.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -46,6 +58,12 @@ public class WebServerPane extends JPanePlugin {
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = WebServer.DEFAULT_WEB_SERVER_PORT_NUMBER;
 
     private static final String NL = System.getProperty("line.separator");
+
+    private static final String CLICS_VERSIONS_KEY = "clics.apiVersionsSupported";
+
+    private static final String [] DEF_CLICS_API_VERSIONS = { "2023-06", "2020-03" };
+
+    private static final String CREATE_EF_METHOD = "createEventFeedJSON";
 
     private JPanel buttonPanel = null;
 
@@ -71,10 +89,11 @@ public class WebServerPane extends JPanePlugin {
 
     private JButton viewJSONButton;
     private JCheckBox chckbxClicsContestApi;
+    private JComboBox<String> combobxClicsAPIVersion;
 
     /**
      * Constructs a new WebServerPane.
-     * 
+     *
      */
     public WebServerPane() {
         super();
@@ -83,7 +102,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes the WebServerPane.
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -101,7 +120,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
@@ -119,7 +138,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes startButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getStartButton() {
@@ -129,6 +148,7 @@ public class WebServerPane extends JPanePlugin {
             startButton.setMnemonic(KeyEvent.VK_S);
             startButton.setToolTipText("Start Web Server");
             startButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     startWebServer();
                 }
@@ -140,7 +160,7 @@ public class WebServerPane extends JPanePlugin {
     /**
      * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. TODO: need to provide support for
      * dynamically reconfiguring the registered services.
-     * 
+     *
      */
     private void startWebServer() {
 
@@ -156,10 +176,14 @@ public class WebServerPane extends JPanePlugin {
 
         Properties properties = new Properties();
 
-        properties.put(WebServer.PORT_NUMBER_KEY, portTextField.getText());
-        properties.put(WebServer.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, Boolean.toString(getChckbxClicsContestApi().isSelected()));
-        properties.put(WebServer.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxStarttime().isSelected()));
-        properties.put(WebServer.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxFetchRuns().isSelected()));
+        properties.put(WebServerPropertyUtils.PORT_NUMBER_KEY, portTextField.getText());
+        properties.put(WebServerPropertyUtils.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, Boolean.toString(getChckbxClicsContestApi().isSelected()));
+        properties.put(WebServerPropertyUtils.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxStarttime().isSelected()));
+        properties.put(WebServerPropertyUtils.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxFetchRuns().isSelected()));
+        String apiVer = getComboBxClicsAPIVersion().getSelectedItem().toString();
+        //convert human readable api version, eg 2023-06 to 202306 since this is how we look up the package and class.
+        apiVer = StringUtilities.removeAllOccurrences(apiVer, '-');
+        properties.put(WebServerPropertyUtils.CLICS_API_VERSION,  apiVer);
 
         getWebServer().startWebServer(getContest(), getController(), properties);
 
@@ -172,7 +196,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes stopButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getStopButton() {
@@ -182,6 +206,7 @@ public class WebServerPane extends JPanePlugin {
             stopButton.setMnemonic(KeyEvent.VK_T);
             stopButton.setToolTipText("Stop Web Server");
             stopButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     stopWebServer();
                 }
@@ -202,7 +227,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes centerPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPanel() {
@@ -252,6 +277,14 @@ public class WebServerPane extends JPanePlugin {
             gbc_chckbxClicsContestApi.gridx = 1;
             gbc_chckbxClicsContestApi.gridy = 2;
             centerPanel.add(getChckbxClicsContestApi(), gbc_chckbxClicsContestApi);
+
+            GridBagConstraints gbc_combobxClicsContestApiVersion = new GridBagConstraints();
+            gbc_combobxClicsContestApiVersion.fill = GridBagConstraints.HORIZONTAL;
+            gbc_combobxClicsContestApiVersion.insets = new Insets(0, 0, 5, 5);
+            gbc_combobxClicsContestApiVersion.gridx = 2;
+            gbc_combobxClicsContestApiVersion.gridy = 2;
+            centerPanel.add(getComboBxClicsAPIVersion(), gbc_combobxClicsContestApiVersion);
+
             GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
             gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
             gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 5);
@@ -275,7 +308,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes portTextField to contain the default web server port number.
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getPortTextField() {
@@ -350,6 +383,7 @@ public class WebServerPane extends JPanePlugin {
             viewJSONButton = new JButton("View Event Feed");
             viewJSONButton.setToolTipText("Show the data which will be output on the Event Feed API when the Webserver is started");
             viewJSONButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     viewJSONEventFeed();
                 }
@@ -366,14 +400,29 @@ public class WebServerPane extends JPanePlugin {
 
             String buildNumber = new VersionInfo().getBuildNumber();
 
-            MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
-            String title = "Event Feed JSON (at " + dateString + ", build " + buildNumber + ")";
-            String json = EventFeedStreamer.createEventFeedJSON(getContest(), getController(), null, null);
-            String[] lines = json.split(NL);
-            multipleFileViewer.addTextintoPane(title, lines);
-            multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");
-            FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
-            multipleFileViewer.setVisible(true);
+            String apiChoice = getComboBxClicsAPIVersion().getSelectedItem().toString();
+            String apiVer = StringUtilities.removeAllOccurrences(apiChoice, '-');
+            String apiPackage = WebServer.DEFAULT_CLICS_API_PACKAGE_PREFIX + "." + "API" + apiVer;
+
+            // eg, edu.csus.ecs.pc2.clics.API202306.EventFeedSstreamer
+            String apiClass = apiPackage + ".EventFeedStreamer";
+
+//            IEventFeedStreamer apiStreamer = getAPIClass(apiClass);
+            Method createEF = getAPIcreateEventFeedJSON(apiClass);
+
+            if(createEF != null) {
+                MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+                String title = "CLICS " + apiChoice + " Event Feed JSON (at " + dateString + ", build " + buildNumber + ")";
+                Object args[] = { getContest(), getController(), null, null };
+                String json = (String)createEF.invoke(null, args);
+                String[] lines = json.split(NL);
+                multipleFileViewer.addTextintoPane(title, lines);
+                multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");
+                FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+                multipleFileViewer.setVisible(true);
+            } else {
+                getLog().log(Level.WARNING, "Unable to get API " + apiClass + " method " + CREATE_EF_METHOD);
+            }
         } catch (Exception e) {
             e.printStackTrace(System.err);
             getLog().log(Level.WARNING, "Unable to view EF JSON", e);
@@ -387,5 +436,81 @@ public class WebServerPane extends JPanePlugin {
             chckbxClicsContestApi.setSelected(true);
         }
         return chckbxClicsContestApi;
+    }
+
+    private JComboBox<String> getComboBxClicsAPIVersion() {
+        if(combobxClicsAPIVersion == null) {
+            String [] choices;
+            // try to get supported API versions from INI file
+            try {
+                choices = CommaSeparatedValueParser.parseLine(IniFile.getValue(CLICS_VERSIONS_KEY));
+            } catch (Exception e) {
+                // use somewhat known defaults
+                choices = DEF_CLICS_API_VERSIONS;
+            }
+
+            combobxClicsAPIVersion = new JComboBox<String>(choices);
+            combobxClicsAPIVersion.setEditable(true);
+        }
+        return(combobxClicsAPIVersion);
+    }
+
+    private Method getAPIcreateEventFeedJSON(String className) {
+        Method createEventFeedJSON = null;
+        try {
+            createEventFeedJSON = loadAPIMethod(className, CREATE_EF_METHOD);
+        } catch (Exception e) {
+            getController().getLog().log(Log.WARNING, "Unable to load CLICS API class = " + className + " method " + CREATE_EF_METHOD, e);
+        }
+
+        return createEventFeedJSON;
+    }
+
+    /**
+     * Find and create an instance of ICLICSResourceConfig from className.
+     * <P>
+     * Code snippet.
+     * <pre>
+     * String className = "edu.csus.ecs.pc2.clics.API202306.EventFeedStreamer";
+     * IEventFeedStreamer iRes = loadAPIClass(className);
+     * </pre>
+     *
+     * @param className
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+
+    private IEventFeedStreamer loadAPIClass(String className) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+
+        Class<?> newClass = Class.forName(className);
+        // Arguments for constructor
+        Class [] cArgs = new Class[4];
+        cArgs[0] = IInternalContest.class;
+        cArgs[1] = IInternalController.class;
+        cArgs[2] = HttpServletRequest.class;
+        cArgs[3] = SecurityContext.class;
+
+        Object object = newClass.getDeclaredConstructor(cArgs).newInstance(getContest(), getController(), null, null);
+        if (object instanceof IEventFeedStreamer) {
+            return (IEventFeedStreamer) object;
+        }
+        object = null;
+        throw new SecurityException(className + " loaded, but not an instanceof IEventFeedStreamer");
+    }
+
+    private Method loadAPIMethod(String className, String method) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+
+        Class<?> newClass = Class.forName(className);
+        // Arguments for constructor
+        Class [] cArgs = new Class[4];
+        cArgs[0] = IInternalContest.class;
+        cArgs[1] = IInternalController.class;
+        cArgs[2] = HttpServletRequest.class;
+        cArgs[3] = SecurityContext.class;
+
+        return(newClass.getDeclaredMethod(method, cArgs));
     }
 }

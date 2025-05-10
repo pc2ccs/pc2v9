@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -382,9 +382,10 @@ public class MockController implements IInternalController {
     public void sendToTeams(Packet packet) {
 
     }
-    
+
+    @Override
     public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
-        
+
     }
 
     @Override
@@ -498,14 +499,27 @@ public class MockController implements IInternalController {
 
     }
 
+    @Override
     public ElementId submitClarification(Problem problem, String question) {
         return null;
     }
 
-    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
-        
+    @Override
+    public ElementId submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        return null;
     }
 
+    @Override
+    public ElementId submitClarification(ClientId clientId, Problem problem, String question) {
+        return null;
+    }
+
+    @Override
+    public ElementId submitAnnouncement(ClientId clientId, Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        return null;
+    }
+
+    @Override
     public void submitClarificationAnswer(Clarification clarification) {
 
     }

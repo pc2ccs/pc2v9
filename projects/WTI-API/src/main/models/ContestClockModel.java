@@ -32,6 +32,7 @@ public class ContestClockModel {
 
 	public long getContestLengthInSecs() {
 		return contestLengthInSecs;
+
 	}
 
 	public long getElapsedSecs() {
@@ -42,4 +43,3 @@ public class ContestClockModel {
 		return wallClockStartTime;
 	}
 }
-

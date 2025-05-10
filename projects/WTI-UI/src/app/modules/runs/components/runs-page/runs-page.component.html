@@ -6,6 +6,7 @@
         </div>
         <form class='filters' [formGroup]='filterForm'>
             <h3 class='center'>Filters</h3>
+            <!-- Omit "Run Type" filtering until "Test Run" support is implemented..
             <div>
                 <h5 class='filter-label'>Run Type</h5>
                 <div>
@@ -27,6 +28,7 @@
                     </label>
                 </div>
             </div>
+            -->
             <div>
                 <app-language-selector formControlName='language'></app-language-selector>
             </div>
@@ -44,7 +46,10 @@
     <div class='table-container'>
         <table>
             <tr>
+            	<!-- Omit Run Type until Test Run capability is implemented -- see Issue #1031
                 <th>Run Type</th>
+                -->
+                <th>Run ID</th>
                 <th>Language</th>
                 <th>Problem</th>
                 <th>Judgement</th>
@@ -52,7 +57,10 @@
                 <th></th>
             </tr>
             <tr *ngFor='let run of filteredRuns' [class.pending]='!run.judgement || run.isPreliminary'>
+            	<!-- Omit Run Type until Test Run capability is implemented -- see Issue #1031
                 <td>{{ run.isTestRun ? 'Test' : 'Judged' }}</td>
+                -->
+                <td>{{ run.id }}</td>
                 <td>{{ run.language }}</td>
                 <td>{{ run.problem }}</td>
                 <td>

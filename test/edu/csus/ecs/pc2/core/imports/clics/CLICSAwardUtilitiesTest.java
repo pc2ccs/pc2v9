@@ -436,7 +436,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
         assertTeamCount(awards, CLICSAwardUtilities.ID_GOLD_MEDAL, 4);
         assertTeamCount(awards, CLICSAwardUtilities.ID_SILVER_MEDAL, 4);
-        assertTeamCount(awards, CLICSAwardUtilities.ID_BRONZE_MEDAL, 11);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_BRONZE_MEDAL, 13);
 
         assertEquals("Awards expected ", 7, awards.size());
     }
@@ -451,8 +451,8 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
     protected FinalizeData createFinalizeData(int numberGolds, int numberSilvers, int numberBronzes) {
         FinalizeData data = new FinalizeData();
         data.setGoldRank(numberGolds);
-        data.setSilverRank(numberSilvers);
-        data.setBronzeRank(numberBronzes);
+        data.setSilverRank(numberSilvers+numberGolds);
+        data.setBronzeRank(numberBronzes+numberSilvers+numberGolds);
         data.setComment("Finalized by Director of Operations, no, really!");
         return data;
     }
@@ -532,7 +532,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
 
         List<CLICSAward> list = new ArrayList<CLICSAward>();
-        CLICSAwardUtilities.addMedals(contest, list);
+        CLICSAwardUtilities.addMedals(contest, list, false);
 
         assertEquals("Awards expected ", 9, awards.size());
 

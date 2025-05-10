@@ -374,9 +374,10 @@ public class NullController implements IInternalController {
     public void sendToTeams(Packet packet) {
 
     }
-    
+
+    @Override
     public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
-        
+
     }
 
     @Override
@@ -484,17 +485,28 @@ public class NullController implements IInternalController {
 
     }
 
+    @Override
     public ElementId submitClarification(Problem problem, String question) {
         return null;
     }
-    
-    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
-        
+
+    @Override
+    public ElementId submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        return null;
+    }
+
+    @Override
+    public ElementId submitClarification(ClientId clientId, Problem problem, String question) {
+        return null;
+    }
+
+    @Override
+    public ElementId submitAnnouncement(ClientId clientId, Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        return null;
     }
 
     @Override
     public void submitClarificationAnswer(Clarification clarification) {
-
     }
 
     @Override

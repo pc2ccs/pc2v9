@@ -22,11 +22,15 @@ import edu.csus.ecs.pc2.core.scoring.ProblemSummaryInfo;
 import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
 import edu.csus.ecs.pc2.core.scoring.SummaryRow;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
+
+/*
+ * This class appears to be unused - JB 12/2024
+ */
 
 /**
  * Standings information in CLI 2016 JSON format.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: StandingsJSON.java 341 2013-06-21 10:53:25Z laned $
  */
@@ -35,12 +39,11 @@ public class ContestAPIStandingsJSON {
 
     private IInternalContest model;
     private IInternalController controller;
-    private JSONTool jsonTool;
-    
+
     /**
      * Returns a JSON string describing the current contest standings in the format defined by the 2016 CLI JSON Scoreboard.
      * The format follows this JSON example, from the CLI Wiki JSON Scoreboard page:
-     * 
+     *
      * <pre>
      *  [ {
      *     "rank":1,"team_id":42,"score":{"num_solved":3,"total_time":340},
@@ -55,7 +58,7 @@ public class ContestAPIStandingsJSON {
      *    ...
      *  ]
      * </pre>
-     * 
+     *
      * @param contest - the current contest
      * @param honorScoreboardFreeze - whether to honor the scoreboardFreezeTime (& unfrozen state).
      * @param controller - the current contest controller
@@ -67,7 +70,6 @@ public class ContestAPIStandingsJSON {
 
         model = contest;
         controller = inController;
-        jsonTool = new JSONTool(model, controller);
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
@@ -87,7 +89,7 @@ public class ContestAPIStandingsJSON {
             if (contest.getContestInformation().isUnfrozen()) {
                 honorScoreboardFreeze = false;
             }
-            
+
             Run[] runs = ScoreboardUtilities.getRunsForUserDivision(contest.getClientId(), contest);
             StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null, properties, honorScoreboardFreeze, runs);
 
@@ -104,7 +106,7 @@ public class ContestAPIStandingsJSON {
         Account account = model.getAccount(clientId);
         int teamNum = account.getClientId().getClientNumber();
         ObjectNode element = mapper.createObjectNode();
-        
+
         element.put("rank", sr.getRankNumber());
         element.put("team_id", new Integer(teamNum).toString());
 
@@ -115,10 +117,10 @@ public class ContestAPIStandingsJSON {
         scoreElement.put("num_solved",  numSolved);
         scoreElement.put("total_time", totalTime);
         element.set("score", scoreElement);
-        
+
         ArrayNode problemsArray = mapper.createArrayNode();
         SummaryRow row = sr.getSummaryRow();
-        
+
         //for each problem
         for (int i = 0; i < model.getProblems().length; i++) {
             ObjectNode problemsNode = mapper.createObjectNode();
@@ -127,13 +129,13 @@ public class ContestAPIStandingsJSON {
 
             if (summaryInfo != null) {
 
-                problemsNode.put("problem_id", jsonTool.getProblemId(model.getProblem(summaryInfo.getProblemId())));
+                problemsNode.put("problem_id", IJSONTool.getProblemId(model.getProblem(summaryInfo.getProblemId())));
 
                 //get data on submitted runs
                 int numSubmitted = summaryInfo.getNumberSubmitted();
                 int numPending = summaryInfo.getPendingRunCount();
                 int numJudged = summaryInfo.getJudgedRunCount();
-                
+
                 //verify data makes sense
                 if ((numPending+numJudged) != numSubmitted) {
                     System.err.println ("StandingsJSON2016: mismatch: numPendingRuns+numJudgedRuns!=numSubmittedRuns ("
@@ -144,13 +146,13 @@ public class ContestAPIStandingsJSON {
 
                 // add the number of judging-completed runs to the buffer
                 problemsNode.put("num_judged", numJudged);
-                
+
                 //add the number of pending runs to the buffer
                 problemsNode.put("num_pending",numPending);
-                
+
                 //add the field indicating whether the problem has been solved
                 problemsNode.put("solved", summaryInfo.isSolved());
-                
+
                 //if the problem was solved, add the fields showing solution time and whether the solution was the first-to-solve
                 if (summaryInfo.isSolved()) {
                     long solutionTime = summaryInfo.getSolutionTime();

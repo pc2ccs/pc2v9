@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, Inject, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FileSubmission } from 'src/app/modules/core/models/file-submission';
 import { Submission } from 'src/app/modules/core/models/submission';
 import { takeUntil } from 'rxjs/operators';
@@ -132,18 +133,22 @@ export class NewRunComponent implements OnInit, OnDestroy {
 		//submit the run
 	    this._teamService.submitRun(model)
 	      .pipe(takeUntil(this._unsubscribe))
-	      .subscribe(_ => {
-	        this.clearNewSubmission();
+	      .subscribe({
+		next: value  => {
+	      	this.clearNewSubmission();
 	        this.close();
 	        this._uiHelper.alertOk('Run has been submitted successfully!');
 	        this._teamService.runsUpdated.next();
-	      }, (error: any) => {
-	        this._uiHelper.alertError('Error submitting problem! Check console for details');
+	    },
+	    error: (error: any) => {
+	      this._uiHelper.alertError('Error submitting problem! Check console for details');
 	        console.error(error);
-	      });
+	    },
+	    complete: () => {
+	    // Called when the observable completes
+	    }});
+  		}
 	}
-  }
-
   async buildFileSubmission(file: File) {
     const fileSubmission = new FileSubmission();
     const fileContents = await this.fileReader(file);

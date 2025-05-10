@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -1287,10 +1287,17 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                     } else {
                         infoStr += verstr;
                     }
-                    if(provider != null && !provider.isEmpty()) {
-                        infoStr += " by " + provider;
-                    } else {
+                    if(provider == null || provider.isEmpty()) {
+                        // Try provider object (eg 2023-06 and greater)
+                        Map<String, Object> providerMap = (Map<String, Object>)map.get("provider");
+                        if(providerMap != null) {
+                            provider = (String)providerMap.get("name");
+                        }
+                    }
+                    if(provider == null || provider.isEmpty()) {
                         infoStr += " (unknown provider)";
+                    } else {
+                        infoStr += " by " + provider;
                     }
                 } else {
                     // getRemoteAPIVersionURLString will always return non-null here for those wondering, or remoteAPI would be null!

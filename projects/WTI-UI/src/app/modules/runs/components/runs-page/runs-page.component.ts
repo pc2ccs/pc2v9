@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { ITeamsService } from 'src/app/modules/core/abstract-services/i-teams.service';
-import { takeUntil, filter } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Run } from 'src/app/modules/core/models/run';
 import { MatDialog } from '@angular/material/dialog';
@@ -40,7 +40,8 @@ export class RunsPageComponent implements OnInit, OnDestroy {
 
     // when runs are updated, trigger a reload
     this._teamService.runsUpdated
-      .pipe(takeUntil(this._unsubscribe))
+      .pipe(
+	takeUntil(this._unsubscribe))
       .subscribe(_ => {
         this.loadRuns();
       });

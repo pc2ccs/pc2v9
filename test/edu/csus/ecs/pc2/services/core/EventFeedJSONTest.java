@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.core;
 
 import java.io.File;
@@ -16,6 +16,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.clics.API202306.EventFeedFilter;
+import edu.csus.ecs.pc2.clics.API202306.EventFeedJSON;
+import edu.csus.ecs.pc2.clics.API202306.JSON202306Utilities;
+import edu.csus.ecs.pc2.clics.API202306.JSONTool;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -34,19 +38,18 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.core.util.JSONTool;
-import edu.csus.ecs.pc2.services.web.EventFeedFilter;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * Unit Test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Unit test data.
-     * 
+     *
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
     class UnitTestData {
@@ -55,9 +58,10 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         private SampleContest sampleContest = new SampleContest();
 
+
         /**
          * Construct contest with accounts, runs, clars, etc.
-         * 
+         *
          * @throws Exception
          */
         public UnitTestData() throws Exception {
@@ -74,11 +78,10 @@ public class EventFeedJSONTest extends AbstractTestCase {
                     "11,2,B,35,No,No,1", // zero -- not solved
                     "12,2,B,40,No,No,1", // zero -- not solved
             };
-
-            // Assign half eams random team member names
+            // Assign half teams random team member names
             addTeamMembers(getContest(), getTeamAccounts(getContest()).length / 2, 5);
 
-            assertEquals("Expectig team member names", 5, getFirstAccount(getContest(), Type.TEAM).getMemberNames().length);
+            assertEquals("Expecting team member names", 5, getFirstAccount(getContest(), Type.TEAM).getMemberNames().length);
 
             assertEquals("team count", 120, getContest().getAccounts(Type.TEAM).size());
 
@@ -103,7 +106,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         /**
          * Get contest populated with test data.
-         * 
+         *
          * @return
          */
         public IInternalContest getContest() {
@@ -115,7 +118,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
     public void simpleTest() throws Exception {
 
         IInternalContest contest = new SampleContest().createStandardContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
+        eventFeedJSON.setUseCollections(false);
 
         String json = eventFeedJSON.createJSON(contest, null, null);
 
@@ -125,12 +129,13 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test every name and value that event feed JSON can output.
-     * 
+     *
      */
     public void testCompleteEventFeed() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
+        eventFeedJSON.setUseCollections(false);
 
         String json = eventFeedJSON.createJSON(data.getContest(), null, null);
 
@@ -158,7 +163,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
                 EventFeedJSON.RUN_KEY + ":    0", //
                 EventFeedJSON.SUBMISSION_KEY + ": 12", //
 
-                EventFeedJSON.TEAM_MEMBERS_KEY + ":  300", //
+                // Not implemented in 2023-06 since fields are missing
+                // EventFeedJSON.TEAM_MEMBERS_KEY + ":  300", //
 
                 // EventFeedJSON.ORGANIZATION_KEY + ": 12",
                 // EventFeedJSON.AWARD_KEY + ": 1", //
@@ -172,7 +178,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
         }
 
         assertMatchCount(12, "\"judgement_type_id\"", json);
-        assertMatchCount(422, "\"icpc_id\"", json);
+        // JB Note: Was 422 but we dont have the 300 persons
+        assertMatchCount(122, "\"icpc_id\"", json);
 
     }
 
@@ -181,6 +188,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
         UnitTestData data = new UnitTestData();
         IInternalContest contest = data.getContest();
 
+        JSONTool jsonTool = new JSONTool(contest, null);
+
         Run[] runs = contest.getRuns();
         assertEquals("Run count", 12, runs.length);
 
@@ -188,16 +197,17 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         Run run = runs[runs.length - 1];
 
-        SubmissionJSON submissionJSON = new SubmissionJSON();
+        String submissionJSON = jsonTool.convertToJSON(run, null, null).toString();
 
         // String json = eventFeedJSON.getJSONEvent(eventFeedJSON.SUBMISSION_KEY, 22, EventFeedOperation.CREATE, submissionJSON.createJSON(contest, run));
-        String json = wrapBrackets(submissionJSON.createJSON(contest, run));
+        // String json = wrapBrackets(submissionJSON);
+        String json = submissionJSON;
 
         // System.out.println("debug submission json = "+json);
         // debug submission json = {"id":"12","language_id":"1","problem_id":"quadrangles","team_id":"2","time":"2017-10-09T08:45:43.744-07","contest_time":"00:40:00.000"}
 
         assertEqualJSON(json, "id", "12");
-        assertEqualJSON(json, "language_id", "1");
+        assertEqualJSON(json, "language_id", "java");
         assertEqualJSON(json, "problem_id", "quadrangles");
         assertJSONStringValue(json, "team_id", "2");
     }
@@ -212,7 +222,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Add team member names to account.
-     * 
+     *
      * @param contest
      * @param count
      *            number of accounts to add team names to.
@@ -235,7 +245,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
                     names.add(name);
                 }
 
-                String[] newNames = (String[]) names.toArray(new String[names.size()]);
+                String[] newNames = names.toArray(new String[names.size()]);
                 account.setMemberNames(newNames);
             }
             contest.updateAccount(account);
@@ -265,7 +275,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Expect count of elementName in JSON.
-     * 
+     *
      * @param exepectedCount
      * @param eleementName
      * @param json
@@ -278,7 +288,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Return count of events in json.
-     * 
+     *
      * @param eleementName
      *            element to match
      * @param json
@@ -295,7 +305,6 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(json);
-
         int count = 0;
         while (matcher.find()) {
             count++;
@@ -306,7 +315,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Generate a clarification for every team accounts.
-     * 
+     *
      * @param contest
      * @param problem
      * @param judgeId
@@ -365,7 +374,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         // SOMEDAY move getAllAccounts into AccountsUtility class
 
         Vector<Account> accountVector = contest.getAccounts(type);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
@@ -373,13 +382,14 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test single teams JSON line.
-     * 
+     *
      * @throws Exception
      */
     public void testTeamJSON() throws Exception {
 
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
+        eventFeedJSON.setUseCollections(false);
 
         Account[] account = getAccounts(contest, Type.TEAM);
 
@@ -402,13 +412,14 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * TEst single teams JSON line.
-     * 
+     *
      * @throws Exception
      */
     public void testGroupJSON() throws Exception {
 
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
+        eventFeedJSON.setUseCollections(false);
 
         Group[] groups = contest.getGroups();
         Arrays.sort(groups, new GroupComparator());
@@ -430,7 +441,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Wrap with brackets
-     * 
+     *
      * @param teamJSON
      * @return
      */
@@ -440,15 +451,14 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test single clarification JSON line.
-     * 
+     *
      * @throws Exception
      */
     public void testClarificationJSON() throws Exception {
 
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
-        JSONTool jsonTool = new JSONTool(contest, null);
-
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
+        eventFeedJSON.setUseCollections(false);
 
         Clarification[] clarifications = contest.getClarifications();
         Arrays.sort(clarifications, new ClarificationComparator());
@@ -470,9 +480,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertEqualJSON(json, "text", "Why #2? from team5");
         assertEqualJSON(json, "reply_to_id", "null");
-        assertEqualJSON(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
+        assertEqualJSON(json, "problem_id", IJSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
 
-        assertJSONStringValue(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
+        assertJSONStringValue(json, "problem_id", IJSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
         assertJSONStringValue(json, "id", clarification.getElementId().toString());
         assertJSONStringValue(json, "from_team_id", "5");
         assertJSONNullValue(json, "to_team_id");
@@ -485,9 +495,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Tests whether value for field is a string and value matches exptectedFieldValue.
-     * 
+     *
      * Surround field and value with double quotes, make into JSON.
-     * 
+     *
      * @param matchCount
      *            number of expected match for field and value
      * @param fieldname
@@ -502,7 +512,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     public void testContestJSON() throws Exception {
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
+        eventFeedJSON.setUseCollections(false);
+
         String json = eventFeedJSON.getContestJSONFields(contest);
 
         // System.out.println("debug cont json = "+json);
@@ -522,7 +534,8 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     public void testProblemJSON() throws Exception {
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
+        eventFeedJSON.setUseCollections(false);
 
         Problem problem = contest.getProblems()[0];
         String json = eventFeedJSON.getProblemJSON(contest, problem, 3);
@@ -539,38 +552,41 @@ public class EventFeedJSONTest extends AbstractTestCase {
         assertEqualJSON(json, "ordinal", "3");
     }
 
-    public void testTeamMemberJSON() throws Exception {
-        IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
-
-        Account account = getAccounts(contest, Type.TEAM)[8];
-        String[] names = account.getMemberNames();
-        assertNotNull(names);
-        assertNotNull(names[0]);
-
-        String json = eventFeedJSON.getTeamMemberJSON(contest, account, names[0]);
-        json = wrapBrackets(json);
-
-        // System.out.println("debug team name "+json);
-
-        // debug team name {"id": null, "team_id":"9", "icpc_id": null, "first_name": null, "last_name": null, "sex": null, "role": null}
-
-        // assertEqualJSON(json, "id", "3");
-        // assertJSONStringValue(json, "id", "3");
-
-        assertEqualJSON(json, "team_id", "9");
-        assertJSONStringValue(json, "team_id", "9");
-
-        // assertJSONStringValue(json, "icpc_id", "9");
-        // assertJSONStringValue(json, "first_name", "9");
-        // assertJSONStringValue(json, "last_name", "9");
-        // assertJSONStringValue(json, "sex", "9");
-
-    }
+// JB - Not used at the moment since 2023-06 needs more fields than PC2 supports
+//    public void testTeamMemberJSON() throws Exception {
+//        IInternalContest contest = new UnitTestData().getContest();
+//        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
+//        eventFeedJSON.setUseCollections(false);
+//
+//        Account account = getAccounts(contest, Type.TEAM)[8];
+//        String[] names = account.getMemberNames();
+//        assertNotNull(names);
+//        assertNotNull(names[0]);
+//
+//        String json = eventFeedJSON.getTeamMemberJSON(contest, account, names[0]);
+//        json = wrapBrackets(json);
+//
+//        // System.out.println("debug team name "+json);
+//
+//        // debug team name {"id": null, "team_id":"9", "icpc_id": null, "first_name": null, "last_name": null, "sex": null, "role": null}
+//
+//        // assertEqualJSON(json, "id", "3");
+//        // assertJSONStringValue(json, "id", "3");
+//
+//        assertEqualJSON(json, "team_id", "9");
+//        assertJSONStringValue(json, "team_id", "9");
+//
+//        // assertJSONStringValue(json, "icpc_id", "9");
+//        // assertJSONStringValue(json, "first_name", "9");
+//        // assertJSONStringValue(json, "last_name", "9");
+//        // assertJSONStringValue(json, "sex", "9");
+//
+//    }
 
     public void testLanguageJSON() throws Exception {
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
+        eventFeedJSON.setUseCollections(false);
 
         Language language = contest.getLanguages()[5];
         int langNumber = JSONUtilities.getLanguageIndex(contest, language.getElementId());
@@ -578,21 +594,20 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getLanguageJSON(contest, language);
 
 //        System.out.println("debug lang json = "+json);
-        
+
 //        editFile(writeFile(new File("/tmp/stuf." + System.currentTimeMillis() + ".json"), json));
 
         // {"id":3, "name":"Java"}
-        JSONTool jsonTool= new JSONTool(contest, null);
-        assertEqualJSON(json, "id", jsonTool.getLanguageId(language));
-        assertJSONStringValue(json, "id", jsonTool.getLanguageId(language));
+        assertEqualJSON(json, "id", IJSONTool.getLanguageId(language));
+        assertJSONStringValue(json, "id", IJSONTool.getLanguageId(language));
         assertEqualJSON(json, "name", "APL");
     }
 
     /**
      * Assert that JSON field has value.
-     * 
+     *
      * Parses JSON, compares expected valu eot actual value.
-     * 
+     *
      * @param json
      * @param fieldName
      *            - field name
@@ -638,9 +653,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Assert that JSON field has a value/is preent
-     * 
+     *
      * Parses JSON, compares expected valu eot actual value.
-     * 
+     *
      * @param json
      * @param fieldName
      *            - field name
@@ -707,9 +722,13 @@ public class EventFeedJSONTest extends AbstractTestCase {
     public void testStartAtContestEvent() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        IJSONTool jsonTool = new JSONTool(data.getContest(), null);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(jsonTool);
+        eventFeedJSON.setUseCollections(false);
 
-        String jsonBefore = new EventFeedJSON(data.getContest()).createJSON(data.getContest(),null,null);
+        EventFeedJSON eventFeedJSONBefore = new EventFeedJSON(jsonTool);
+        eventFeedJSONBefore.setUseCollections(false);
+        String jsonBefore = eventFeedJSONBefore.createJSON(data.getContest(),null,null);
 
         EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(0), null);
         eventFeedJSON.setEventIdSequence(0);
@@ -731,28 +750,32 @@ public class EventFeedJSONTest extends AbstractTestCase {
     public void testStartAtEvent40() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
+        eventFeedJSON.setUseCollections(false);
 
         EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(39), null);
         String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
 
-        // System.out.println("debug after event 40 json = "+json);
+        //System.out.println("debug after event 40 json = "+json);
 
         assertNotNull(json);
 
-        assertMatchCount(530, "\"type\"", json);
+        // JB Note: was 530 but we don't have 300 persons anymore, but we do have 133 accounts that
+        // are now part of the ef.  530 - 300 = 230 + 134 (1 admin, 120 teams, 12 judges, 1 score) = 364
+        assertMatchCount(364, "\"token\"", json);
 
     }
 
     /**
      * Test bad event type names, ensure method throws an exception.
-     * 
+     *
      * @throws Exception
      */
     public void testInvalidEventTypes() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
+        eventFeedJSON.setUseCollections(false);
 
         String[] badTypeNameLists = {
                 //
@@ -778,13 +801,14 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test valid event types.
-     * 
+     *
      * @throws Exception
      */
     public void testValidEventTypes() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
+        eventFeedJSON.setUseCollections(false);
 
         String elist = EventFeedJSON.CONTEST_KEY + "," + EventFeedJSON.TEAM_KEY;
 
@@ -799,28 +823,29 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test valid event types.
-     * 
+     *
      * @throws Exception
      */
     public void testLotsOfValidTypes() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
+        eventFeedJSON.setUseCollections(false);
 
-        String elist = JSONUtilities.AWARD_KEY + "," + //
-                JSONUtilities.CLARIFICATIONS_KEY + "," + //
-                JSONUtilities.CONTEST_KEY + "," + //
-                JSONUtilities.GROUPS_KEY + "," + //
-                JSONUtilities.JUDGEMENT_KEY + "," + //
-                JSONUtilities.JUDGEMENT_TYPE_KEY + "," + //
-                JSONUtilities.LANGUAGE_KEY + "," + //
-                JSONUtilities.ORGANIZATION_KEY + "," + //
-                JSONUtilities.TEAM_MEMBERS_KEY + "," + //
-                JSONUtilities.PROBLEM_KEY + "," + //
-                JSONUtilities.RUN_KEY + "," + //
-                JSONUtilities.SUBMISSION_KEY + "," + //
-                JSONUtilities.TEAM_KEY + "," + //
-                JSONUtilities.TEAM_MEMBERS_KEY;
+        String elist = JSON202306Utilities.AWARD_KEY + "," + //
+                JSON202306Utilities.CLARIFICATIONS_KEY + "," + //
+                JSON202306Utilities.CONTEST_KEY + "," + //
+                JSON202306Utilities.GROUPS_KEY + "," + //
+                JSON202306Utilities.JUDGEMENT_KEY + "," + //
+                JSON202306Utilities.JUDGEMENT_TYPE_KEY + "," + //
+                JSON202306Utilities.LANGUAGE_KEY + "," + //
+                JSON202306Utilities.ORGANIZATION_KEY + "," + //
+                JSON202306Utilities.TEAM_MEMBERS_KEY + "," + //
+                JSON202306Utilities.PROBLEM_KEY + "," + //
+                JSON202306Utilities.RUN_KEY + "," + //
+                JSON202306Utilities.SUBMISSION_KEY + "," + //
+                JSON202306Utilities.TEAM_KEY + "," + //
+                JSON202306Utilities.TEAM_MEMBERS_KEY;
 
         // TODO RMeventFeedJSON.setEventTypeList(elist);
 
@@ -828,18 +853,20 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
         assertNotNull(json);
 
-        assertCountEvent(1, JSONUtilities.CONTEST_KEY, json);
-        assertCountEvent(100, JSONUtilities.CLARIFICATIONS_KEY, json);
-        assertCountEvent(300, JSONUtilities.TEAM_MEMBERS_KEY, json);
-        assertCountEvent(120, JSONUtilities.TEAM_KEY, json);
-        assertCountEvent(6, JSONUtilities.LANGUAGE_KEY, json);
-        assertCountEvent(12, JSONUtilities.JUDGEMENT_KEY, json);
-        assertCountEvent(9, JSONUtilities.JUDGEMENT_TYPE_KEY, json);
+        assertCountEvent(1, JSON202306Utilities.CONTEST_KEY, json);
+        assertCountEvent(100, JSON202306Utilities.CLARIFICATIONS_KEY, json);
+        // Team Members are not implemented in the 2023-06 feed due to missing fields.
+        // assertCountEvent(300, JSON202306Utilities.TEAM_MEMBERS_KEY, json);
+        assertCountEvent(120, JSON202306Utilities.TEAM_KEY, json);
+        assertCountEvent(6, JSON202306Utilities.LANGUAGE_KEY, json);
+        assertCountEvent(12, JSON202306Utilities.JUDGEMENT_KEY, json);
+        assertCountEvent(9, JSON202306Utilities.JUDGEMENT_TYPE_KEY, json);
     }
 
     public void testEventTypeNotFound() throws Exception {
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
+        eventFeedJSON.setUseCollections(false);
 
         String elist = EventFeedJSON.AWARD_KEY + "," + //
                 EventFeedJSON.CLARIFICATIONS_KEY;

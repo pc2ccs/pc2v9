@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.export;
 
 import java.io.File;
@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Test for YAML export.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class ExportYAMLTest extends AbstractTestCase {
@@ -37,26 +37,26 @@ public class ExportYAMLTest extends AbstractTestCase {
     public void testOne() throws Exception {
 
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
-        
+
         String dataDirectory = getDataDirectory();
         ensureDirectory(dataDirectory);
-        
+
         String testDirectory = getOutputDataDirectory("testOne");
         ensureDirectory(testDirectory);
 //        startExplorer(testDirectory);
 //        startExplorer(dataDirectory);
-        
+
 //        addShortNames(contest);
 
         Problem[] problems = contest.getProblems();
-        
+
         if (debugMode){
             for (Problem problem : contest.getProblems()) {
                 System.out.println(problem.getDisplayName() + " " +problem.getShortName());
             }
         }
-        
-        
+
+
         sampleContest.addDataFiles(contest, testDirectory, problems[0], "sumit.dat", "sumit.ans");
         sampleContest.addDataFiles(contest, testDirectory, problems[1], "quads.in", "quads.ans");
         sampleContest.addDataFiles(contest, testDirectory, problems[4], "london.dat", "london.ans");
@@ -68,14 +68,14 @@ public class ExportYAMLTest extends AbstractTestCase {
 
         String actualFileName =testDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
         String expectedFileName = dataDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
-        
+
         // Start compare on line 4 to skip header/version/time information
         assertFileContentsEquals(new File(expectedFileName), new File(actualFileName), 4, getOverrideStringCompare());
 
 
         exportYAML = null;
     }
-    
+
     public void testStringJoin() {
 
         String [] expected = {
@@ -86,7 +86,7 @@ public class ExportYAMLTest extends AbstractTestCase {
             "a,b",
             ""
         };
-        
+
         for (int i = 0; i < expected.length; i++) {
             List<String> list = Arrays.asList(expected[i].split(", "));
             StringBuffer actual = ExportYAML.join(", ", list);
@@ -94,62 +94,62 @@ public class ExportYAMLTest extends AbstractTestCase {
         }
 
     }
-    
+
 //    public void testCreateYaml() throws Exception {
     public void UNUSED() throws Exception {
-        
+
         // TODO TODAY - fix the comparison, fails unit test on athena.
-        
+
         String dataDirectory = getDataDirectory("testCreateYaml");
         ensureDirectory(dataDirectory);
-        
+
         String testDirectory = getOutputDataDirectory("testCreateYaml");
         ensureDirectory(testDirectory);
-        
+
 //        startExplorer(dataDirectory);
 //        startExplorer(testDirectory);
-        
+
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
-        
+
         asertProblemShortAssigned(contest);
-        
+
         // Add Manual Evalution on problem 2
-        
+
         addManualReview(contest, 2, true);
-        
+
 //        addShortNames(contest);
 
         ExportYAML exportYAML = new ExportYAML();
 
         exportYAML.exportFiles(testDirectory, contest);
-        
+
         String actualContestYamlFile = testDirectory+File.separator+IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
-        
+
 //        String expectedContestYamlFile = getTestFilename("expected.contest.yaml");
         String expectedContestYamlFile = getTestFilename("expected.unix.contest.yaml");
         if (! "/".equals(File.separator)){
             convertToNativeFileSeperators (expectedContestYamlFile);
         }
-        
+
         // Have to strip out start time because it changes, it is always different
         stripStartTime(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
 //        editFile(actualContestYamlFile);
-        
+
         assertFileContentsEquals(new File(expectedContestYamlFile), new File(actualContestYamlFile), 4);
-        
+
 //        String filename = testDirectory + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
-        
+
         String actualFileName =testDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
         String expectedFileName = dataDirectory + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
-        
+
         // Start compare on line 4 to skip header/version/time information
         assertFileContentsEquals(new File(actualFileName), new File(expectedFileName), 4, getOverrideStringCompare());
 
         exportYAML = null;
 
     }
-    
+
     private OverrideStringCompare getOverrideStringCompare(){
         OverrideStringCompare op = new OverrideStringCompare(){
             @Override
@@ -159,17 +159,17 @@ public class ExportYAMLTest extends AbstractTestCase {
         };
         return op;
     }
-    
+
     public void testStringEqulas() throws Exception {
-        
+
         String [] data  = {//
-                "\\tmp\\file;/tmp/file", // 
+                "\\tmp\\file;/tmp/file", //
                 "work\\longfilename;work\\longfilename", //
                 "\\\\\\\\;////", //
-                "this is the way;this is the way", // 
+                "this is the way;this is the way", //
                 "c:\\tmp\\file2;c:/tmp/file2", //
         };
-        
+
         OverrideStringCompare comp = getOverrideStringCompare();
 
         for (String string : data) {
@@ -183,10 +183,10 @@ public class ExportYAMLTest extends AbstractTestCase {
         }
 
     }
-    
+
     /**
      * Test freeze time.
-     * 
+     *
      * @throws Exception
      */
     public void testFreezeTime() throws Exception {
@@ -203,13 +203,13 @@ public class ExportYAMLTest extends AbstractTestCase {
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
 
         ContestInformation contestInformation = contest.getContestInformation();
-        
-        String expectedFreezeTime = "02:00:00";
+
+        String expectedFreezeTime = "2:00:00";
         contestInformation.setFreezeTime(expectedFreezeTime);
         contest.updateContestInformation(contestInformation);
-        
+
         Problem[] problems = contest.getProblems();
-        
+
         sampleContest.addDataFiles(contest, outDir, problems[0], "sumit.in", "sumit.ans");
         sampleContest.addDataFiles(contest, outDir, problems[1], "quads.in", "quads.ans");
         sampleContest.addDataFiles(contest, outDir, problems[2], "quads.in", "quads.ans");
@@ -224,25 +224,25 @@ public class ExportYAMLTest extends AbstractTestCase {
         exportYAML.exportFiles(outDir, contest);
 
         String actualContestYamlFile = outDir + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
-        
+
         // Have to strip out start time because it changes, it is always different
         stripStartTime(actualContestYamlFile);
 
         String expectedContestYamlFile = dataDirectory  + File.separator + "expected.frz.unix.contest.yaml";
-        
+
         String outExpectedContestYamlfile  = outDir  + File.separator + "expected.frz.unix.contest.yaml";
-        
+
         copyFileOverwrite(expectedContestYamlFile, outExpectedContestYamlfile);
-        
+
         if (!"/".equals(File.separator)) {
             convertToNativeFileSeperators(outExpectedContestYamlfile);
         }
-        
+
 //        editFile(actualContestYamlFile);
 //        editFile(expectedContestYamlFile);
-        
+
         // Test Load
-        
+
         ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
         IInternalContest contest2 = loader.fromYaml(null, outDir);
         ContestInformation info = contest2.getContestInformation();
@@ -262,7 +262,7 @@ public class ExportYAMLTest extends AbstractTestCase {
 //          idx++;
 //      }
 //  }
-    
+
     private void stripStartTime(String filename) {
         File actualFile = new File(filename);
         try {
@@ -290,7 +290,7 @@ public class ExportYAMLTest extends AbstractTestCase {
     }
 
       private void asertProblemShortAssigned(IInternalContest contest) throws Exception {
-    
+
           for (Problem problem : contest.getProblems()) {
               assertNotNull("Problem short name not assigned "+problem,problem.getShortName());
           }
@@ -308,19 +308,19 @@ public class ExportYAMLTest extends AbstractTestCase {
           Problem problem = problems[problemNumber+1];
           problem.setManualReview(flag);
       }
-      
+
       /**
        * Test whether auto-stop-clock-at-end is written.
-       * 
+       *
        * @throws Exception
        */
       public void testExportHalt() throws Exception {
-          
+
           String outDir = getOutputDataDirectory(getName());
           ensureDirectory(outDir);
 
 //          startExplorer(outDir);
-          
+
           String cdpConfigDir = outDir;
 //          startExplorer(outDir);
 
@@ -346,14 +346,14 @@ public class ExportYAMLTest extends AbstractTestCase {
 
       /**
        * Test whether auto-stop-clock-at-end is not written.
-       * 
+       *
        * @throws Exception
        */
       public void testNoExportHaltAtEnd() throws Exception {
-          
+
           String outDir = getOutputDataDirectory(getName());
           ensureDirectory(outDir);
-          
+
           String cdpConfigDir = outDir;
 //          startExplorer(outDir);
 
@@ -362,10 +362,10 @@ public class ExportYAMLTest extends AbstractTestCase {
 
           ExportYAML exportYAML = new ExportYAML();
           exportYAML.exportFiles(outDir, contest);
-          
+
           String contestYamlFilename = outDir + File.separator+ IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
           assertFileExists(contestYamlFilename);
-          
+
               ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
               IInternalContest contest2 = loader.fromYaml(null, outDir, false);
               ContestInformation info = contest2.getContestInformation();
@@ -373,9 +373,9 @@ public class ExportYAMLTest extends AbstractTestCase {
     }
 
     private void addProblemDataFiles(String cdpConfigDir, IInternalContest contest) throws FileNotFoundException {
-        
+
         String testDirectory = getOutputDataDirectory(cdpConfigDir);
-        
+
         Problem[] problems = contest.getProblems();
 
         for (Problem problem : problems) {

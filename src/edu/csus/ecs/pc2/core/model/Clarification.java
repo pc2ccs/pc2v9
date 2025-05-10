@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 /**
  * Clarification.
- * 
+ *
  * A request for clarification from the judges.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -18,13 +18,13 @@ import java.util.ArrayList;
 public class Clarification extends Submission {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -6913818225948370496L;
 
     /**
      * Clarification States.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
     public enum ClarificationStates {
@@ -49,7 +49,7 @@ public class Clarification extends Submission {
          */
         ANNOUNCED,
     }
-    
+
     private boolean deleted = false;
 
     private ClientId whoCheckedItOutId = null;
@@ -95,18 +95,18 @@ public class Clarification extends Submission {
             return getFirstAnswer().getAnswer();
         }
     }
-    
+
 //    public String getDestinations() {
 //        if (answerList.size() == 0) {
 //            return null;
 //        } else {
 //            return getFirstAnswer().getDestinationsToString();
-//        }  
+//        }
 //    }
     private ClarificationAnswer getFirstAnswer() {
         return answerList.get(0);
     }
-    
+
     /**
      * @param answer
      *            The answer to set.
@@ -124,9 +124,9 @@ public class Clarification extends Submission {
         ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, contestTime);
         addAnswer(clarificationAnswer);
     }
-    
+
     /**
-     * 
+     *
      * @param answer The answer to set.
      * @param client
      * @param contestTime
@@ -148,11 +148,11 @@ public class Clarification extends Submission {
     public boolean isAnsweredorAnnounced() {
         return state == ClarificationStates.ANSWERED || state == ClarificationStates.ANNOUNCED;
     }
-    
+
     public boolean isAnnounced() {
         return state == ClarificationStates.ANNOUNCED;
     }
-    
+
     public boolean isNew() {
         return state == ClarificationStates.NEW;
     }
@@ -176,7 +176,7 @@ public class Clarification extends Submission {
             return getFirstAnswer().isSendToAll();
         }
     }
-    
+
     /**
      * Checks if clarification has destinations other than the submitter excluding is Send to All.
      * @return
@@ -187,7 +187,7 @@ public class Clarification extends Submission {
         }
         return getFirstAnswer().isThereDestinationOtherThanSubmitter();
     }
-    
+
     public ElementId[] getAllDestinationsGroup() {
         if (isAnsweredorAnnounced()) {
             return getFirstAnswer().getAllDestinationsGroup();
@@ -195,7 +195,7 @@ public class Clarification extends Submission {
             return null;
         }
     }
-    
+
     public ClientId[] getAllDestinationsTeam() {
         if (isAnsweredorAnnounced()) {
             return getFirstAnswer().getAllDestinationsTeam();
@@ -249,9 +249,10 @@ public class Clarification extends Submission {
         
         //there isn't any rule indicating that this clar should be allowed to go to the specified account
         return false;
-        
+
     }
-    
+
+    @Override
     public String toString() {
         return "Clarification " + getNumber() + " " + getState() + " from " + getSubmitter() + " at " + getElapsedMins() + " id=" + getElementId();
     }
@@ -307,7 +308,7 @@ public class Clarification extends Submission {
 
     /**
      * Add answer to list of answers.
-     * 
+     *
      * @param clarificationAnswer
      */
     public void addAnswer(ClarificationAnswer clarificationAnswer) {
@@ -321,6 +322,6 @@ public class Clarification extends Submission {
     }
 
     public ClarificationAnswer[] getClarificationAnswers() {
-        return (ClarificationAnswer[]) answerList.toArray(new ClarificationAnswer[answerList.size()]);
+        return answerList.toArray(new ClarificationAnswer[answerList.size()]);
     }
 }

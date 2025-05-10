@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
@@ -39,7 +39,7 @@ import edu.csus.ecs.pc2.core.util.DateDifferizer.DateFormat;
  * then the remaining or elapsed time will automatically
  * reflect that change.
  * <P>
- * Add a label and the format of the time {@link #addLabeltoUpdateList(JLabel, DisplayTimes, int)} 
+ * Add a label and the format of the time {@link #addLabeltoUpdateList(JLabel, DisplayTimes, int)}
  * <P>
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
@@ -47,7 +47,15 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     private static final long serialVersionUID = 8137635697344335832L;
 
-    private static final String NO_SCHEDULE_START_TIME = "No scheduled start";
+    private static final String NO_SCHEDULED_START_TIME = "No scheduled start";
+    private static final String NO_SCHEDULED_START_HINT = "Still no scheduled start";
+
+    private static final String COUNTDOWN_PAUSED = "Countdown Paused";
+
+    private static final String TIME_REMAINING_HINT = "Time remaining in the contest";
+    private static final String TIME_UNTIL_START_HINT = "Time until the contest starts";
+
+    private static final String CONTEST_STOPPED_TEAM = "STOPPED";
 
     /**
      * Labels to be updated with contest time.
@@ -65,35 +73,42 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
      * List of remaining time JLabels to update
      */
     private Hashtable<Integer, Vector<JLabel>> sitesRemainingtimeLabelList = new Hashtable<Integer, Vector<JLabel>>();
-    
+
     /**
      * List of scheduled start time JLabels to update.
      */
     private List<JLabel> scheduledStartTimeLabelList = new ArrayList<>();
 
     /**
-     * 
+     *
      */
     private List<JLabel> schedAndRemainingTimeLabelList = new ArrayList<>();
 
     private Hashtable<Integer, ContestTime> contestTimes = new Hashtable<Integer, ContestTime>();
-    
+
     /**
      * The date/time when the contest is scheduled (intended) to start.
      * This value is null (undefined) if no scheduled start time has been set.
-     * This value ONLY applies BEFORE THE CONTEST STARTS; once 
+     * This value ONLY applies BEFORE THE CONTEST STARTS; once
      * any "start contest" operation (e.g. pushing the "Start Button") has occurred,
      * this value no longer has meaning.
      */
     private GregorianCalendar scheduledStartTime = null ;
-    
+
+    /*
+     * The "REL" time string (HH:MM:SS) of when the countdown was paused, or null if
+     * not paused.  This value only applies before the contest starts, and the countdown
+     * was paused.
+     */
+    private String countdownPauseTime = null;
+
     private Timer timer = new Timer(500, this);
 
     private JFrame clientFrame = null;
 
     /**
      * Special display for team.
-     * 
+     *
      * Primarily if there are < 2 minutes in the contest or
      * beyond, will display < 2 minutes.
      */
@@ -112,18 +127,18 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
     private Log log = null;
     /**
      * Ways to display contest time.
-     * 
+     *
      */
 
     private IInternalController controller;
 
     private IInternalContest contest;
-    
+
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
-     * 
+     *
      */
     public enum DisplayTimes {
         /**
@@ -147,14 +162,14 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     /**
      * Update JLabels with contest time.
-     * 
+     *
      * If ContestTime.isRunning() is true, will start countdown timer, set label color to Color.BLACK. <br>
      * When contestTimer is not running, will stop countdown and set label color to Color.RED. <br>
      * isTeamDisplay == true, if clock is stopped shows STOPPED in label, if &lt; 2 minutes remaining will display "&lt; 2 mins".
      * <br>
      * isTeamDisplay == false, always shows remaining time.
-     * 
-     * 
+     *
+     *
      * @param contestTime
      *            contest time (running and values)
      * @param isTeamDisplay
@@ -172,45 +187,47 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         sitesRemainingtimeLabelList.put(localSiteNumber, remainingtimeLabelList);
 
         setClientFrame (clientFrame);
-        
+
         this.teamDisplayMode = isTeamDisplay;
         this.clientFrame = clientFrame;
         fireClockStateChange(contestTime);
 
     }
-    
-    
+
+
     /**
      * Update clock times with scheduled information.
-     * 
+     *
      * @param contestInformation
      */
     public void fireClockStateChange(final ContestInformation contestInformation) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 setScheduledStartTime(contestInformation);
                 updateTimeLabels();
             }
         });
-        
+
     }
 
 
     /**
      * Update clock display using contestTime.
-     * 
+     *
      * Uses contestTime state (running or not) to determine whether to update clock every second.
-     * 
+     *
      * The display is different for {@link #teamDisplayMode}.
-     * 
+     *
      * @param contestTime
      */
     public void fireClockStateChange(final ContestTime contestTime) {
-        
+
         contestTimes.put(contestTime.getSiteNumber(), contestTime);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (contestTime.isContestRunning()) {
                     startClockDisplay(contestTime.getSiteNumber());
@@ -229,22 +246,22 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         Enumeration<Integer> enumeration = contestTimes.keys();
 
         while (enumeration.hasMoreElements()) {
-            Integer element = (Integer) enumeration.nextElement();
+            Integer element = enumeration.nextElement();
             updateTimeLabel(element.intValue());
 
         }
-        
+
         updateScheduledStartLabels();
-        
+
     }
 
     /**
      * Update clock display using contestTime.
-     * 
+     *
      * Uses contestTime state (running or not) to determine whether to update clock every second.
-     * 
+     *
      * The display is different for {@link #teamDisplayMode}.
-     * 
+     *
      * @param contestTime
      * @param siteNumber
      */
@@ -255,6 +272,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         final ContestTime theContestTime = contestTimes.get(new Integer(siteNumber));
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (theContestTime.isContestRunning()) {
                     startClockDisplay(siteNumber);
@@ -266,22 +284,22 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             }
         });
     }
-    
-    
+
+
 
     /**
      * Add a label to be the update list.
      * <P>
      * This adds a label to update
-     * 
+     *
      * @param labelToUpdate the label to update
      * @param whichTime the remaining or elapsed time form
      * @param siteNumber the site number for this contest time.
      */
     public void addLabeltoUpdateList(JLabel labelToUpdate, DisplayTimes whichTime, int siteNumber) {
-        
+
         Vector<JLabel> list = null;
-        
+
         switch (whichTime) {
             case ELAPSED_TIME:
                 list = sitesElapsedTimeLabelList.get(new Integer(siteNumber));
@@ -291,23 +309,23 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
                 list.addElement(labelToUpdate);
                 sitesElapsedTimeLabelList.put(new Integer(siteNumber), list);
                 break;
-                
+
             case REMAINING_TIME:
-                
+
                 list = sitesRemainingtimeLabelList.get(new Integer(siteNumber));
-                
+
                 if (list == null) {
                     list = new Vector<JLabel>();
                 }
                 list.addElement(labelToUpdate);
                 sitesRemainingtimeLabelList.put(new Integer(siteNumber), list);
                 break;
-                
+
             case TO_SCHEDULED_START_TIME:
-                
+
                 scheduledStartTimeLabelList.add(labelToUpdate);
                 break;
-                
+
             case SCHEDULED_THEN_REMAINING_TIME:
                 schedAndRemainingTimeLabelList.add(labelToUpdate);
                 break;
@@ -317,7 +335,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         }
 
         updateTimeLabels();
-        
+
     }
 
     public void removeLabelFromAllUpdateLists(JLabel labelToUpdate) {
@@ -325,7 +343,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             Enumeration<Integer> enumeration = contestTimes.keys();
 
             while (enumeration.hasMoreElements()) {
-                Integer element = (Integer) enumeration.nextElement();
+                Integer element = enumeration.nextElement();
                 removeLabelFromUpdateList(labelToUpdate, element.intValue());
             }
         } catch (Exception e) {
@@ -356,7 +374,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     /**
      * Start the clock updating.
-     * 
+     *
      */
     private void startClockDisplay(final int siteNumber) {
         // public void schedule(TimerTask task, long delay, long period)
@@ -365,6 +383,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         timer.start();
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 Vector<JLabel> list = sitesElapsedTimeLabelList.get(siteNumber);
 
@@ -384,7 +403,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
                         list.elementAt(i).setForeground(Color.BLACK);
                     }
                 }
-                
+
                 for (JLabel jLabel : scheduledStartTimeLabelList) {
                     jLabel.setForeground(Color.BLACK);
                 }
@@ -394,7 +413,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     /**
      * Stop the display updating.
-     * 
+     *
      */
     private void stopClockDisplay(int siteNumber) {
         if (scheduledStartTime == null){
@@ -421,12 +440,13 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     /**
      * Update the label (display).
-     * 
+     *
      */
     private void updateTimeLabel(final int siteNumber) {
         final ContestTime contestTime = contestTimes.get(new Integer(siteNumber));
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 try {
@@ -446,7 +466,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
                             list.elementAt(i).setText(clockText);
                         }
                     }
-                    
+
                     updateScheduledStartLabels();
 
                     if (siteNumber == localSiteNumber.intValue() && clientFrame != null) { // only update Title bar if the local site
@@ -472,10 +492,10 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     /**
      * Adjust contest time display if after end of contest.
-     * 
+     *
      * If input time, ex remaining time, is -HHM:MM:SS will
-     * change string to +HH:MMSS, else returns string unchanged.  
-     * 
+     * change string to +HH:MMSS, else returns string unchanged.
+     *
      * @param string
      * @return +HH:MM:SS if input is -HH:MM:SS, else returns string unchanged.
      */
@@ -495,13 +515,16 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
         if (scheduledStartTimeLabelList.size() > 0) {
 
-            String text = NO_SCHEDULE_START_TIME;
-            String hint = "Still no scheduled start";
+            String text = NO_SCHEDULED_START_TIME;
+            String hint = NO_SCHEDULED_START_HINT;
 
             if (scheduledStartTime != null) {
 
                 text = getScheduledTimeClockText();
                 hint = getScheduledTimeClockHint();
+            } else if(countdownPauseTime != null) {
+                text = COUNTDOWN_PAUSED;
+                hint = "with " + countdownPauseTime + " before start";
             }
 
             for (JLabel jLabel : scheduledStartTimeLabelList) {
@@ -512,37 +535,57 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
         if (schedAndRemainingTimeLabelList.size() > 0) {
 
-//            String hint = "Still no scheduled start";
-
             ContestTime contestTime = contest.getContestTime();
 
-            String text = getScheduleOrRemainingTime(contestTime);
+            String [] textAndHint = getScheduledOrRemainingTimeAndHint(contestTime);
 
-            for (JLabel jLabel : schedAndRemainingTimeLabelList) {
-                jLabel.setText(text);
-                jLabel.setToolTipText(text);
+            if(textAndHint != null && textAndHint.length == 2) {
+                for (JLabel jLabel : schedAndRemainingTimeLabelList) {
+                    jLabel.setText(textAndHint[0]);
+                    jLabel.setToolTipText(textAndHint[1]);
+                }
             }
         }
     }
 
-    public String getScheduleOrRemainingTime(ContestTime contestTime) {
-        
-        String text = NO_SCHEDULE_START_TIME; 
-        
-        boolean showRemainingTime = true;
-        
-        if (scheduledStartTime  != null && ! contestTime.isContestStarted()){
-            showRemainingTime = false;
-        }
-        
-        if (showRemainingTime){
-            
-            /**
-             * Show Remaining time count down. 
+    /**
+     * Returns the text and tooltip (hint) of what should be displayed for the contest clock.
+     * If the contest is not started, it gives the count down to start of contest, unless the contest is
+     * paused, in which case it gives a message indicating the contest count down is paused.
+     * If the contest is underway, it gives the remaining time in contest.
+     *
+     * @param contestTime - provides information about clock state of the contest.
+     * @return two element string array
+     */
+    public String [] getScheduledOrRemainingTimeAndHint(ContestTime contestTime) {
+
+        String [] textAndHint = new String[2];
+
+        // These are always set below, but just in case someone forgets.
+        String text = NO_SCHEDULED_START_TIME;
+        String hint = NO_SCHEDULED_START_HINT;
+
+        boolean isContestStarted = contestTime.isContestStarted();
+
+        // If there's no scheduled start time or the contest is started,
+        // then we show the time remaining in the contest or,
+        // if the countdown is paused, we show a paused message
+        if (scheduledStartTime == null || isContestStarted){
+            /*
+             * if the contest is not started yet, see if the countdown is paused,
+             * if so, show the paused message instead of the contest length
              */
-            text = contestTime.getRemainingTimeStr();
-            text = adjustForPostContest(text);
-            
+            if(!isContestStarted && countdownPauseTime != null) {
+                text = COUNTDOWN_PAUSED;
+                hint = "with " + countdownPauseTime + " before start";
+            } else {
+                /**
+                 * Show Remaining time in contest count down.
+                 */
+                text = contestTime.getRemainingTimeStr();
+                text = adjustForPostContest(text);
+                hint = TIME_REMAINING_HINT;
+            }
         } else {
             /**
              * Show schedule start count down
@@ -551,11 +594,18 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             DateDifferizer differizer = new DateDifferizer(now, scheduledStartTime.getTime());
             differizer.setFormat(DateFormat.COUNT_DOWN);
             text = differizer.toString();
+            hint = TIME_UNTIL_START_HINT;
         }
-        
-        return text;
+
+        textAndHint[0] = text;
+        textAndHint[1] = hint;
+        return textAndHint;
     }
 
+    // This is used for unit tests only at the moment.
+    public String getScheduleOrRemainingTime(ContestTime contestTime) {
+        return getScheduledOrRemainingTimeAndHint(contestTime)[0];
+    }
 
     public String getScheduledTimeClockHint() {
         Date now = GregorianCalendar.getInstance().getTime();
@@ -572,6 +622,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         return text;
     }
 
+    @Override
     public void actionPerformed(ActionEvent arg0) {
         ContestTime contestTime = contestTimes.get(localSiteNumber);
         fireClockStateChange(contestTime);
@@ -579,7 +630,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     /**
      * Sets the default site and contest time.
-     * 
+     *
      * @param contestTime
      * @param siteNumber
      */
@@ -603,25 +654,27 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         this.titleTimeToDisplay = titleTimeToDisplay;
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
-        
+
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
         contest.addContestInformationListener(new ContestInformationListenerImplementation());
-        
+
         setScheduledStartTime(inContest.getContestInformation());
     }
 
+    @Override
     public String getPluginTitle() {
         return "Contest Clock Display";
     }
-    
-    
+
+
     /**
      * Listener.
-     * 
+     *
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
     public class ContestInformationListenerImplementation implements IContestInformationListener {
@@ -629,71 +682,77 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         @Override
         public void contestInformationAdded(ContestInformationEvent event) {
             fireClockStateChange(event.getContestInformation());
-            
+
         }
 
         @Override
         public void contestInformationChanged(ContestInformationEvent event) {
             fireClockStateChange(event.getContestInformation());
-            
+
         }
 
         @Override
         public void contestInformationRemoved(ContestInformationEvent event) {
             fireClockStateChange(event.getContestInformation());
-            
+
         }
 
         @Override
         public void contestInformationRefreshAll(ContestInformationEvent event) {
             fireClockStateChange(event.getContestInformation());
-            
+
         }
 
         @Override
         public void finalizeDataChanged(ContestInformationEvent event) {
             fireClockStateChange(event.getContestInformation());
-            
+
         }
-        
+
     }
-    
-    
+
+
     /**
      * Implementor.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     public class ContestTimeListenerImplementation implements IContestTimeListener {
 
+        @Override
         public void contestTimeAdded(ContestTimeEvent event) {
             fireClockStateChange(event.getContestTime(), event.getContestTime().getSiteNumber());
         }
 
+        @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
-            // no action 
-            
+            // no action
+
         }
 
+        @Override
         public void contestTimeChanged(ContestTimeEvent event) {
             fireClockStateChange(event.getContestTime(), event.getContestTime().getSiteNumber());
         }
 
+        @Override
         public void contestStarted(ContestTimeEvent event) {
             fireClockStateChange(event.getContestTime(), event.getContestTime().getSiteNumber());
-            
+
         }
 
+        @Override
         public void contestStopped(ContestTimeEvent event) {
             fireClockStateChange(event.getContestTime(), event.getContestTime().getSiteNumber());
-            
+
         }
 
+        @Override
         public void refreshAll(ContestTimeEvent event) {
             fireClockStateChange(event.getContestTime(), event.getContestTime().getSiteNumber());
         }
-        
+
         /** This method exists to support differentiation between manual and automatic starts,
          * in the event this is desired in the future.
          * Currently it just delegates the handling to the contestStarted() method.
@@ -706,13 +765,13 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     /**
      * Set Client Frame that when minimized changes to a countdown timer.
-     * 
+     *
      * This uses the default contest time when it updates the title.
      * The original frame title is saved, when frame is minimized will show
      * contest time, when non-minimized will show the saved frame title.
      * <P>
-     * Uses the contest time set using {@link #setContestTime(ContestTime, int)}. 
-     * 
+     * Uses the contest time set using {@link #setContestTime(ContestTime, int)}.
+     *
      * @param clientFrame
      */
     public void setClientFrame(JFrame clientFrame) {
@@ -725,17 +784,24 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
     public GregorianCalendar getScheduledStartTime() {
         return scheduledStartTime;
     }
-    
+
     public void setScheduledStartTime(GregorianCalendar scheduledStartTime) {
         this.scheduledStartTime = scheduledStartTime;
         if (scheduledStartTime != null){
             timer.start();
         }
     }
-    
+
+    /**
+     * Set the contest schedule start time from the supplied contest information
+     * This also sets the countdownPauseTime, if the start of the contest is paused.
+     *
+     * @param info ContestInformation
+     */
     public void setScheduledStartTime(ContestInformation info) {
         if (info != null){
             setScheduledStartTime(info.getScheduledStartTime());
+            countdownPauseTime = info.getContestCountdownPauseTime();
         }
     }
 
@@ -778,7 +844,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
             } else {
                 if (teamDisplayMode) {
-                    clockText = "STOPPED";
+                    clockText = CONTEST_STOPPED_TEAM;
                 } else {
                     clockText = contestTime.getRemainingTimeStr();
                     clockText = adjustForPostContest(clockText);

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -6,12 +6,12 @@ import java.util.Date;
 
 /**
  * A set of Judgement information for a run.
- * 
+ *
  * <br>
  * This contains all the information about a single judgement, who
  * judged the run, what the judgement was, how long it took to judge,
  * and whether the judgement {@link #isActive() is Active}
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -20,33 +20,33 @@ import java.util.Date;
 public class JudgementRecord implements Serializable, IGetDate {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -2043715842465711645L;
 
     /**
      * A Unique contest-wide identifier the judgement.
-     * 
+     *
      * Will match Judgement.getElementId();
      */
     private ElementId judgementId = null;
-    
+
     private long time = new Date().getTime();
 
     /**
      * A string that identifies this type.
-     * 
+     *
      * This string also is used in naming files on disk.
-     * 
+     *
      */
     public static final String JUDGEMENT_RECORD_ID = "JudgementRecord";
-    
+
     /**
      * A Unique contest-wide identifier this JudgementRecord instance.
-     * 
+     *
      */
-    
-    
+
+
     private ElementId elementId = new ElementId (JUDGEMENT_RECORD_ID);
 
     /**
@@ -58,12 +58,12 @@ public class JudgementRecord implements Serializable, IGetDate {
      * Is this judgement from a validator.
      */
     private boolean usedValidator = false;
-    
+
     private boolean acceptButtonHit = false;
 
     /**
      * Is this "the" judgement for a run.
-     * 
+     *
      * @see #isActive
      */
     private boolean active = true;
@@ -95,7 +95,7 @@ public class JudgementRecord implements Serializable, IGetDate {
 
     /**
      * The number of seconds it took to judge.
-     * 
+     *
      * This time is the number of seconds between the time when the Select Judgement dialog appears and when the Judge (person)
      * selects a judgement.
      */
@@ -110,19 +110,22 @@ public class JudgementRecord implements Serializable, IGetDate {
      * Send this judgement to team ?.
      */
     private boolean sendToTeam = true;
-    
+
     private String validatorResultString = null;
-    
+
     private ElementId runResultsElementId = null;
-    
+
     /**
-     * 
+     *
      */
     private boolean computerJudgement = false;
 
     private ElementId previousComputerJudgementId = null;
-    
+
     private boolean preliminaryJudgement = false;
+
+    // Copied from submission when judgement record is complete
+    private Date judgeStartDate = null;
 
 
     /**
@@ -138,18 +141,18 @@ public class JudgementRecord implements Serializable, IGetDate {
         this.usedValidator = usedValidator;
         this.solved = solved;
     }
-    
+
     public JudgementRecord(ElementId judgementId, ClientId judgerClientId, boolean solved, boolean usedValidator, boolean computerJudgement) {
         this(judgementId, judgerClientId, solved, usedValidator);
-        this.computerJudgement = computerJudgement; 
+        this.computerJudgement = computerJudgement;
     }
-    
+
     /**
      * Is this "the" Judgement. ?
-     * 
+     *
      * There may be many judgements for a run, if this returns true then this is the judgement shown to the teams and scoreboard and
      * is the official judgement which is used to rank teams.
-     * 
+     *
      * @return true if this is "the" judgement.
      */
     public boolean isActive() {
@@ -158,7 +161,7 @@ public class JudgementRecord implements Serializable, IGetDate {
 
     /**
      * Set this as "the" judgement.
-     * 
+     *
      * @see #isActive()
      * @param active
      */
@@ -221,7 +224,7 @@ public class JudgementRecord implements Serializable, IGetDate {
 
     /**
      * Elapsed time on server when this judgement was registered.
-     * 
+     *
      * @return the time
      */
     public long getWhenJudgedTime() {
@@ -229,7 +232,7 @@ public class JudgementRecord implements Serializable, IGetDate {
     }
 
     /**
-     * 
+     *
      * @param whenJudgedTime
      */
     public void setWhenJudgedTime(long whenJudgedTime) {
@@ -323,7 +326,7 @@ public class JudgementRecord implements Serializable, IGetDate {
     public long getExecuteMS() {
         return executeMS;
     }
-    
+
     /**
      * Set time in ms that it took to execute the team's solution.
      * @param executeMS
@@ -331,7 +334,8 @@ public class JudgementRecord implements Serializable, IGetDate {
     public void setExecuteMS(long executeMS) {
         this.executeMS = executeMS;
     }
-    
+
+    @Override
     public String toString() {
         String infoString = "No";
         if (isSolved() ) {
@@ -349,7 +353,7 @@ public class JudgementRecord implements Serializable, IGetDate {
     }
 
     /**
-     * 
+     *
      * @return null if no results, else a string result.
      */
     public String getValidatorResultString() {
@@ -395,7 +399,7 @@ public class JudgementRecord implements Serializable, IGetDate {
 
     /**
      * Is this judgement record a preliminary.
-     * 
+     *
      * @return true if preliminary judgement, false if a final judgement.
      */
     public boolean isPreliminaryJudgement() {
@@ -405,28 +409,46 @@ public class JudgementRecord implements Serializable, IGetDate {
     public void setPreliminaryJudgement(boolean preliminaryJudgement) {
         this.preliminaryJudgement = preliminaryJudgement;
     }
-    
+
 
     /**
      * Get wall clock time for submission.
-     * 
+     *
      * @return
      */
+    @Override
     public  Date getDate() {
         return new Date(time);
     }
-    
+
     /**
      * Set submission date.
-     * 
+     *
      * This field does not affect {@link #getElapsedMS()} or {@link #getElapsedMins()}.
-     * 
+     *
      * @param date Date, if null then sets Date long value to zero
      */
+    @Override
     public void setDate (Date date){
         time = 0;
         if (date != null){
             time = date.getTime();
         }
-    }    
+    }
+
+    /**
+     * When a judge starts judging (set's state to being judged), this date gets set to the current time
+     *
+     */
+    public void setJudgeStartDate(Date startDate) {
+        judgeStartDate = startDate;
+    }
+
+    /**
+     *
+     * @return date when judge started judging
+     */
+    public Date getJudgeStartDate() {
+        return judgeStartDate;
+    }
 }

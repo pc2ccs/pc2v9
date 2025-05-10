@@ -16,6 +16,7 @@ import { IWebsocketService } from './abstract-services/i-websocket.service';
 import { UiHelperService } from './services/ui-helper.service';
 import { SharedModule } from '../shared/shared.module';
 import { DEBUG_MODE } from 'src/constants';
+import { DisplayTimePipe } from './services/displayTimePipe.service';
 
 export function TeamsServiceFactory(http: HttpClient) {
   if (DEBUG_MODE) {
@@ -83,18 +84,23 @@ export function WebsocketServiceFactory(injector: Injector,
   providers: [
     { provide: ITeamsService, useFactory: TeamsServiceFactory, deps: [HttpClient] },
     { provide: IContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
+    { provide: ContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
     { provide: AuthService, useClass: AuthService },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: IWebsocketService, useFactory: WebsocketServiceFactory, deps: [Injector, UiHelperService, IContestService, ITeamsService, AuthService] },
     AuthGuard,
+    DisplayTimePipe,
 	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
     UiHelperService,
     ContestService
   ],
   imports: [
     HttpClientModule,
-    SharedModule
+    SharedModule,
+    DisplayTimePipe
   ],
-  exports: [],
+  exports: [
+    DisplayTimePipe
+  ]
 })
 export class CoreModule { }

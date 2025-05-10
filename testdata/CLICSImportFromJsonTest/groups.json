@@ -1,0 +1,47 @@
+[
+    {
+        "id": "17102",
+        "icpc_id": "17102",
+        "name": "Asia East"
+    },
+    {
+        "id": "17105",
+        "icpc_id": "17105",
+        "name": "Latin America"
+    },
+    {
+        "id": "17106",
+        "icpc_id": "17106",
+        "name": "Africa and the Middle East"
+    },
+    {
+        "id": "17117",
+        "icpc_id": "17117",
+        "name": "Northern Eurasia"
+    },
+    {
+        "id": "17118",
+        "icpc_id": "17118",
+        "name": "Asia West"
+    },
+    {
+        "id": "17119",
+        "icpc_id": "17119",
+        "name": "Asia Pacific"
+    },
+    {
+        "id": "17122",
+        "icpc_id": "17122",
+        "name": "North America"
+    },
+    {
+        "id": "17123",
+        "icpc_id": "17123",
+        "name": "Europe"
+    },
+    {
+        "id": "17124",
+        "icpc_id": "17124",
+        "name": "South Pacific"
+    }
+]

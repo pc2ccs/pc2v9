@@ -16,7 +16,7 @@
     <property name="main-class" value="config.JettyConfig" />
     <property name="bin" location="bin" />
     <property name="build.dir" location="build" />
-    <property name="wtiversion" value="1.1" />
+    <property name="wtiversion" value="1.2" />
     <property name="liblocation" location="WebContent\WEB-INF\lib" />
 	<property name="frontendlocation" location="../WTI-UI" />
     <property name="websockets" location="websockets" />

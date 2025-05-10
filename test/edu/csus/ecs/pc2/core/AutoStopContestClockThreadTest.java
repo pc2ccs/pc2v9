@@ -66,7 +66,7 @@ public class AutoStopContestClockThreadTest extends AbstractTestCase {
 
         ContestTime time = contest.getContestTime();
 
-        AutoStopContestClockThread thread = new AutoStopContestClockThread(controller, contest);
+        ContestClockMonitorThread thread = new ContestClockMonitorThread(controller, contest);
         assertFalse(thread.isRunning());
 
         int remainSecs = 5;

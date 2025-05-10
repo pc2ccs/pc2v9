@@ -66,6 +66,11 @@ export class AppComponent implements OnInit {
               private _uiHelperService: UiHelperService) { 
 	  if (DEBUG_MODE) {
 		  console.log("Executing AppComponent constructor...");
+		  console.log("Initial environment is:");
+		  console.log(environment);
+		  Object.entries(environment).forEach(([key,value]) => {
+			  console.log (`  Key:  ${key},  Value:  ${value}`) ;
+		  });
 	  }
   	//this.router.events.subscribe(console.log); //shows router tracing on console
   }
@@ -83,6 +88,10 @@ export class AppComponent implements OnInit {
 	    		  console.log("      Key: ", key, " Value: ", value);
 	    	}
 	    }
+	    console.log ("Environment:");
+		Object.entries(environment).forEach(([key,value]) => {
+			console.log (`  Key:  ${key},  Value:  ${value}`) ;
+		});
     }
 
     //check if we're loading for the first time
@@ -92,7 +101,16 @@ export class AppComponent implements OnInit {
         }
         //we have no current page so we must be starting from scratch;
         // the following matches the sum total of what ngOnInit() used to do before "F5 handling" was added -- jlc
+        if (DEBUG_MODE) {
+        	console.log ("...invoking loadEnvironment()...") ;
+        }
         this.loadEnvironment();
+        if (DEBUG_MODE) {
+        	console.log ("...environment after return from loadEnvironment():") ;
+  		    Object.entries(environment).forEach(([key,value]) => {
+			  console.log (`  Key:  ${key},  Value:  ${value}`) ;
+		    });
+        }
         
 	} else {
 	    //there is a current page stored; we must be reloading from (e.g.) an F5 refresh
@@ -102,9 +120,15 @@ export class AppComponent implements OnInit {
 	    
         //restore former environment
         if (DEBUG_MODE) {
-        	console.log ("...Loading environment...") ;
+        	console.log ("...invoking loadEnvironment()...") ;
         }
         this.loadEnvironment();
+        if (DEBUG_MODE) {
+        	console.log ("...environment after return from loadEnvironment():") ;
+  		    Object.entries(environment).forEach(([key,value]) => {
+			  console.log (`  Key:  ${key},  Value:  ${value}`) ;
+		    });
+        }
 
 		//The following was initially done by the login-page component's onSubmit() method during login;
 		// this F5 "restore state" code needs to accomplish the equivalent:
@@ -159,7 +183,7 @@ export class AppComponent implements OnInit {
 						console.log (this._contestService);
 					}
 					this._contestService.isContestRunning = val;
-					this._contestService.contestClock.next();
+					this._contestService.contestClockEvent.next();
 				});
 
         //get the most recently saved Option values from sessionStorage
@@ -180,6 +204,12 @@ export class AppComponent implements OnInit {
         	}
         }
         
+		//restore the contest clock on-screen display values (elapsed and remaining)
+	    if (DEBUG_MODE) {
+	    	console.log ('Updating local contest clock values from server');
+	    }
+		this._contestService.updateLocalContestClockFromServer();
+		
 	    // transfer to the (former) "current page".
 	    let page = getCurrentPage();
 	    if (DEBUG_MODE) {
@@ -187,7 +217,6 @@ export class AppComponent implements OnInit {
 	    }
 	    
 	    //navigate to the most recently saved page
-	    // TODO:  consider whether using history.pushState()/popState() is a better solution for this...
 	    this.router.navigate([page])
 	      .then(nav => {
 	         if (DEBUG_MODE) {
@@ -204,6 +233,7 @@ export class AppComponent implements OnInit {
   // Load appconfig.json from assets directory, overwrite environment.ts with these values
   loadEnvironment(): void {
 	if (DEBUG_MODE) {
+		console.log ("In method loadEnvironment()...");
 		console.log("...loading environment from 'assets/appconfig.json'...");
 	}
 	this._httpClient.get('assets/appconfig.json')
@@ -215,6 +245,11 @@ export class AppComponent implements OnInit {
 	        console.log('Could not find appconfig.json in assets directory. using default values!');
 	        this.configLoaded = true;
 	    });	
+		console.log("...updated environment:");
+		Object.entries(environment).forEach(([key,value]) => {
+			console.log (`  Key:  ${key},  Value:  ${value}`) ;
+		});
+
   }//end function loadEnvironment()
 
   /**
