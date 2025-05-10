@@ -115,7 +115,7 @@ public class Clarification extends Submission {
      * @param sendToAll
      */
     public void setAnswer(String answer, ClientId client, ContestTime contestTime, boolean sendToAll) {
-        if (question.equals("")) {
+        if (question.equals("") || question.equalsIgnoreCase("announcement")) {
             state = ClarificationStates.ANNOUNCED;
         }
         else {
@@ -130,18 +130,18 @@ public class Clarification extends Submission {
      * @param answer The answer to set.
      * @param client
      * @param contestTime
-     * @param destinationGroup
-     * @param destinationTeam
+     * @param destinationGroups An array of ElementIds indicating the group(s) to which this answer should be sent.
+     * @param destinationTeams  An array of ClientIds indicating individual clients (teams) to which this answer should be sent.
      * @param sendToAll
      */
-    public void setAnswer(String answer, ClientId client, ContestTime contestTime, ElementId[] destinationGroup, ClientId[] destinationTeam, boolean sendToAll) {
-        if (question.equals("")) {
+    public void setAnswer(String answer, ClientId client, ContestTime contestTime, ElementId[] destinationGroups, ClientId[] destinationTeams, boolean sendToAll) {
+        if (question.equals("") || question.equalsIgnoreCase("announcement")) {
             state = ClarificationStates.ANNOUNCED;
         }
         else {
             state = ClarificationStates.ANSWERED;
         }
-        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, destinationGroup, destinationTeam, contestTime);
+        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, destinationGroups, destinationTeams, contestTime);
         addAnswer(clarificationAnswer);
     }
 
@@ -189,53 +189,69 @@ public class Clarification extends Submission {
     }
 
     public ElementId[] getAllDestinationsGroup() {
-        if(answerList.size() == 0) {
-            return(null);
+        if (isAnsweredorAnnounced()) {
+            return getFirstAnswer().getAllDestinationsGroup();
+        } else {
+            return null;
         }
-        return getFirstAnswer().getAllDestinationsGroup();
     }
 
     public ClientId[] getAllDestinationsTeam() {
-        if(answerList.size() == 0) {
-            return(null);
+        if (isAnsweredorAnnounced()) {
+            return getFirstAnswer().getAllDestinationsTeam();
+        } else {
+            return null;
         }
-        return getFirstAnswer().getAllDestinationsTeam();
     }
 
+    /**
+     * Returns an indication of whether the specified account should be allowed to see this Clarification.
+     * Note that "Announcements" are a type of Clarification, and are treated as such by this method.
+     * 
+     * @param account The PC2 account about which access to this clarification is being sought.
+     * @return true if the specified account should be allowed to see this clarification; false if not.
+     */
     public boolean shouldAccountReceiveThisClarification(Account account) {
-
+        
+        //check if this clar goes to everyone (in which case it is allowed to be seen by the specified account)
         if (isSendToAll()) {
             return true;
         }
+        
+        //check if this clar was submitted by the specified account 
+        // (in which case it is allowed to be seen by that account) 
         if (getSubmitter().equals(account.getClientId())){
             return true;
         }
-        if (getAnswer() == null) {
-            //THere is no answer to this clar yet hence there are no destinations for it.
-            return false;
-        }
-        ElementId[] destinationGroup =  getAllDestinationsGroup();
-        ClientId[] destinationTeam = getAllDestinationsTeam();
-
-        if (destinationTeam != null) {
-            for (ClientId team: destinationTeam) {
+        
+        //check to see if the specified account is in the list of "destination teams" to which 
+        //this clar is targeted (in which case the clar is allowed to be seen by that account) 
+        ClientId[] destinationTeams = getAllDestinationsTeam();
+        if (destinationTeams != null) {
+            for (ClientId team: destinationTeams) {
                 if (team.equals(account.getClientId())){
                     return true;
                 }
             }
         }
-
-        if (destinationGroup != null) {
-            for (ElementId destination: destinationGroup){
-                if (account.isGroupMember(destination)) {  //checks if this announcement clar was sent to a group that this account belongs to
+        
+        //check to see if the specified account is in the list of "destination groups" to which
+        //this clar is targeted (in which case the clar is allowed to be seen by that account) 
+        ElementId[] destinationGroups =  getAllDestinationsGroup();
+        if (destinationGroups != null) {
+            for (ElementId destinationGroup: destinationGroups){
+                //check if this clar was sent to a group that this account belongs to
+                if (account.isGroupMember(destinationGroup)) {  
                     return true;
                 }
             }
         }
-        //check if an account has a group that matches with a group in
+        
+        //there isn't any rule indicating that this clar should be allowed to go to the specified account
         return false;
 
     }
+
     @Override
     public String toString() {
         return "Clarification " + getNumber() + " " + getState() + " from " + getSubmitter() + " at " + getElapsedMins() + " id=" + getElementId();
@@ -296,7 +312,7 @@ public class Clarification extends Submission {
      * @param clarificationAnswer
      */
     public void addAnswer(ClarificationAnswer clarificationAnswer) {
-        if (question.equals("")) {
+        if (question.equals("") || question.equalsIgnoreCase("announcement")) {
             state = ClarificationStates.ANNOUNCED;
         }
         else {

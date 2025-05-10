@@ -49,6 +49,7 @@ import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.ExportDataPane;
 import edu.csus.ecs.pc2.ui.FinalizePane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.GenerateAnnouncementPane;
 import edu.csus.ecs.pc2.ui.GroupsPane;
 import edu.csus.ecs.pc2.ui.ICPCLoadPane;
 import edu.csus.ecs.pc2.ui.ImportDataPane;
@@ -307,11 +308,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                  * add UI components involved with Running the contest to the RunContest tabbed pane
                  */
 
-                if (!controller.isSuppressConnectionsPaneDisplay()) {
-                    ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
-                    addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
-                }
-
+                GenerateAnnouncementPane announcementPane = new GenerateAnnouncementPane();
+                addUIPlugin(getRunContestTabbedPane(), "Announce", announcementPane);
+                
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
 
@@ -324,6 +323,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     }
                 }
 
+                if (!controller.isSuppressConnectionsPaneDisplay()) {
+                    ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
+                    addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
+                }
+
 //                EventFeedsPane eventFeedsPane = new EventFeedsPane();
 //                addUIPlugin(getRunContestTabbedPane(), "Event Feeds", eventFeedsPane);
 
@@ -333,7 +337,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 FinalizePane finalizePane = new FinalizePane();
                 addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
 
-                QuickJudgePane quickJudgePane = new QuickJudgePane();
+               QuickJudgePane quickJudgePane = new QuickJudgePane();
                 addUIPlugin(getRunContestTabbedPane(), "Judging Utilities", quickJudgePane);
 
                 if(StringUtilities.getBooleanValue(IniFile.getValue(SAMPLE_SUBMIT_PANE_KEY), false)) {

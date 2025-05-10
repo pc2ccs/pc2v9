@@ -12,14 +12,14 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 public class ContestClockModel {
 
 	private boolean isRunning;
-	private long contestLengthSecs;
+	private long contestLengthInSecs;
 	private long elapsedSecs;  			//total time in seconds that the contest has been running -- does NOT include time during any "pauses" 
 	private long wallClockStartTime;	//unix timestamp when the contest actually started (msec since the Epoch),
 										// or zero if contest has not ever been started.  Does not change due to "pauses".
 	
 	public ContestClockModel(boolean isRunning, long contestLengthInSecs, long elapsedSecs, long wallClockStartTime) {
 			this.isRunning = isRunning;
-			this.contestLengthSecs = contestLengthInSecs;
+			this.contestLengthInSecs = contestLengthInSecs;
 			this.elapsedSecs = elapsedSecs;
 			this.wallClockStartTime = wallClockStartTime;
 	}
@@ -30,8 +30,9 @@ public class ContestClockModel {
 		return isRunning;
 	}
 
-	public long getContestLengthSecs() {
-		return contestLengthSecs;
+	public long getContestLengthInSecs() {
+		return contestLengthInSecs;
+
 	}
 
 	public long getElapsedSecs() {

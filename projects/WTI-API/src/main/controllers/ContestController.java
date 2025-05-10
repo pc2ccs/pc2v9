@@ -40,6 +40,7 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -524,11 +525,12 @@ public class ContestController extends MainController {
 			}
 	
 	/***
-	 *  This method returns a list of all the clarifications in the PC^2 contest submitted by the specified team.  
-	 *  It first checks to see that the user (team) specified by the received "key" is currently logged in and that the 
-	 *  contest is running (contest clarifications are only allowed to be viewed when the contest is running). If so, the method
+	 *  This method returns a list of all the clarifications in the PC^2 contest which the requesting client is allowed to see.  
+	 *  It first checks to see that the user (team) specified by the received "key" is currently logged in. If so, the method
 	 *  returns the current team's clarifications, obtained from the PC2 {@link ServerConnection} for the team.
 	 * 
+	 *  Note that only clarifications which are allowed to be viewed by the requesting client are returned.
+	 *  
 	 * @param key a String containing a key which uniquely identifies the team making the request.  
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
 	 * 
@@ -551,7 +553,7 @@ public class ContestController extends MainController {
 
 		ServerConnection userInformation = connections.get(key);
 	    
-		//verify the user is logged in and the contest is running
+		//verify that the user is logged in
 		try {
 			// make sure we have connection information for this user (i.e. that the user is logged in)
 			if (userInformation == null) {
@@ -568,30 +570,63 @@ public class ContestController extends MainController {
 		
 		try {
 			
-		    //This function only gets clarifications that the current Client should receive.
+		    //get the clarifications associated with the invoking client's Id.
+			//Note that getClarificationsWithClientId() returns exactly, and only, clarifications that the current Client should receive.
+			//This includes clars that were submitted by the team as well as announcement clars directed to the team -- either
+			//specifically or as a result of being directed to "All Teams" or to a Group of which the team is a member.
 			IClarification[] clars = userInformation.getContest().getClarificationsWithClientId();
 			
-			//check all contest clars to see which should be returned to the team
+			//encode each PC2 clar into a WTI ClarificationModel
 			for(IClarification clar : clars) {
 				
-				boolean isJudge =  clar.getTeam().getType() == IClient.ClientType.JUDGE_CLIENT;
-								
-				//return to the team only those clars that came from the team, or from the judges
-				if(clar.getTeam().getLoginName().equalsIgnoreCase(userInformation.getMyClient().getLoginName()) || isJudge || clar.isSendToAll()) {
-				    //TODO must also include clars directed to here from group
-					
-					String displayName = (isJudge || clar.isSendToAll()) ? "All" : clar.getTeam().getDisplayName();
-					clarifications.add(new ClarificationModel(
-						displayName, 
-						clar.getProblem().getName(), 
-						clar.getQuestion(), 
-						clar.getAnswer(),
-						String.format("%s-%s", clar.getSiteNumber(), clar.getNumber()),
-						clar.getSubmissionTime(), 
-						clar.isAnswered()));
-				}
-			}
+				//holders for the lists of recipient teams and groups (if any)
+				ArrayList<String> teamRecipientList = new ArrayList<String>();
+				ArrayList<String> groupRecipientList = new ArrayList<String>();
+				
+				//find the teams (if any) and groups (if any) to whom the answer to this clar (if any) was sent
+				if (clar.isAnswered()) {
 
+					//add recipient team numbers to list
+					ArrayList<ClientId> teamRecipientIds = clar.getDestinationTeams();
+					for (ClientId client : teamRecipientIds) {
+						teamRecipientList.add(Integer.toString(client.getClientNumber()));
+					}
+					// add recipient group NAMES to list (the group "number" isn't useful/meaningful since it's just an internal PC2 ElementId)
+					ArrayList<ElementId> groupRecipientIds = clar.getDestinationGroups();
+					for (ElementId groupId : groupRecipientIds) {
+						String groupName = userInformation.getContest().getInternalContest().getGroup(groupId).getDisplayName();
+						groupRecipientList.add(groupName);
+					}
+				}
+				
+				// set the "recipient type" indicating whether this clar goes to the team because it was "sent to all",
+				// because it was sent to several teams including this team or a group containing this team,
+				// or it was sent only to this team. (The "recipient type" is used by the WTI-UI 
+				// to determine under what conditions to display the clar on the Clarifications page.)
+				String recipientType = "";
+				if (clar.isAnswered()) {
+					if (clar.isSendToAll()) {
+						recipientType = "All";
+					} else if (teamRecipientList.size() > 1 || !groupRecipientList.isEmpty()) {
+						recipientType = "Some";
+					} else {
+						recipientType = "My Team";
+					}
+				} else {
+					//clar hasn't been answered yet
+					recipientType = "No Answer Yet";
+				}
+				clarifications.add(new ClarificationModel(
+					recipientType, 
+					teamRecipientList,
+					groupRecipientList,
+					clar.getProblem().getName(), 
+					clar.getQuestion(), 
+					clar.getAnswer(),
+					String.format("%s-%s", clar.getSiteNumber(), clar.getNumber()),  //notional "id" for the clar
+					clar.getSubmissionTime(), 
+					clar.isAnswered()));
+			}
 		}
 		catch(NotLoggedInException e) {
 			return Response.status(Response.Status.UNAUTHORIZED)
@@ -603,7 +638,14 @@ public class ContestController extends MainController {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.clarifications()"))
 					.type(MediaType.APPLICATION_JSON).build();
-		}		
+		}
+		catch(Exception e) {
+			logger.severe(e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Exception in ContestController.clarifications(): " + e.getMessage()))
+					.type(MediaType.APPLICATION_JSON).build();
+		}
+		
 		
 		return Response.ok()
 				.entity(clarifications)

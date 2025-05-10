@@ -381,26 +381,44 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         FrameUtilities.showExceptionMessage(component, message, ex);
     }
     
+    /** TODO: this method applies to a (very) small subset of those things which "extend JPluginPane"; 
+     *  it doesn't seem like it belongs in this super-class.
+     *  
+     * @param groupIds an array of ElementIds for groups.
+     * @param teamIds an array of ClientIds for teams.
+     * @return a String of comma-separated group and team names for the specified group and team ids, or the empty string
+     *          if no groups or teams are specified.
+     */
     public String convertGroupsandTeamstoString(ElementId[] groupIds, ClientId[] teamIds) {
         StringBuilder stringBuilder = new StringBuilder();
         if (groupIds == null & teamIds == null) {
             return "";
         }
-        for (int i = 0; i < groupIds.length + teamIds.length; i++) {
-            if (i < groupIds.length) {
+        //check if we have any groups (the above test only returns if BOTH groups AND teams are null...)
+        if (groupIds != null) {
+            //we have some groups; append each group name to the string, with comma separators
+            for (int i = 0; i < groupIds.length; i++) {
+
                 Group group = getContest().getGroup(groupIds[i]);
                 stringBuilder.append(group.getDisplayName());
-            }
-            else {
-                stringBuilder.append("team"+teamIds[i].getClientNumber());
-            }
-            
-            if (i < groupIds.length + teamIds.length - 1) {
-                stringBuilder.append(", ");
+
+                if (i < groupIds.length-1) {
+                    stringBuilder.append(", ");
+                }
             }
         }
-        
+        //check if we have any teams
+        if (teamIds != null) {
+            // we have some teams; append each team name to the string, with comma separators
+            for (int i = 0; i < teamIds.length; i++) {
+                stringBuilder.append("team" + teamIds[i].getClientNumber());
+
+                if (i < teamIds.length - 1) {
+                    stringBuilder.append(", ");
+                }
+            }
+
+        }
         return stringBuilder.toString();
-        
     }
 }

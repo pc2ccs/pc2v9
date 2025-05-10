@@ -3933,7 +3933,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     @Override
     public ElementId submitAnnouncement(ClientId clientId, Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Clarification clarification = new Clarification(clientId, problem, "");
+
+        Clarification clarification = new Clarification(contest.getClientId(), problem, "Announcement");
 
         if (ultimateDestinationGroup.length + ultimateDestinationTeam.length> 0) {
             clarification.setAnswer(answer, clientId, contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, false);
