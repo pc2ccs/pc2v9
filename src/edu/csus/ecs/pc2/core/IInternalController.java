@@ -854,8 +854,9 @@ public interface IInternalController {
      * @param additionalFiles
      * @param overrideTimeMS
      * @param overrideRunId
+     * @throws Exception if an error occurs while attempting to send the Run to the Server
      */
-    void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
+    void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) throws Exception;
 
     /**
      * Submit a run to the server for a different client with entry_point
@@ -868,8 +869,9 @@ public interface IInternalController {
      * @param additionalFiles
      * @param overrideTimeMS
      * @param overrideRunId
+     * @throws Exception if an error occurs while attempting to send the Run to the Server
      */
-    void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
+    void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) throws Exception;
 
 
 }

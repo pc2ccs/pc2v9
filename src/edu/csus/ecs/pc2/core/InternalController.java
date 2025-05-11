@@ -607,11 +607,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         Run run = new Run(contest.getClientId(), language, problem);
 
-        //determine whether to apply the "current throttling strategy" to this submission 
+        //determine whether to apply the "current throttling strategy" to this submission
         // (i.e., whether to accept the run for submission to the PC2 Server)
         boolean accept = true;
         Account submitterAccount = contest.getAccount(contest.getClientId());
-        
+
         if (submitterAccount.isTeam()) {
             //Determine the throttling strategy to be applied to team submissions.
             //The following shows several alternative strategy selections, with only one being enabled.
@@ -625,11 +625,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest); //uses DEFAULT_MAX_SUBMISSIONS_PER_MINUTE; same as prev line
             accept = strategy.accept(run);
         }
-        
+
         Packet packet ;
         if (accept) {
             ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-            RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);            
+            RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);
             packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
             sendToLocalServer(packet);
         } else {
@@ -4989,22 +4989,50 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     @Override
-    public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
+    public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) throws Exception {
 
         submitRun(submitter, problem, language, null, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideRunId);
     }
 
     @Override
-    public void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideSubmissionId) {
+    public void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideSubmissionId) throws Exception {
 
-        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Run run = new Run(submitter, language, problem);
         run.setEntryPoint(entry_point);
-        RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
 
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
-        sendToLocalServer(packet);
+        //determine whether to apply the "current throttling strategy" to this submission
+        // (i.e., whether to accept the run for submission to the PC2 Server)
+        // Note: when shadowing, as opposed to getting submissions from the CLICS SubmissionService API
+        //       endpoint, we may have to tune the algorithm (or, in the case of MaxSubmissionsPerMinuteStrategy,
+        //       increase the # of subs/minute.  The shadow can feeds submissions very fast in normal operation
+        //       There should probably be a "bypass" flag that can be set via config file, or
+        //       a separate user created for receiving CLICS API requests.
+        boolean accept = true;
+        // use the submitter account, not this client.  This client is doing a proxy submit for a team.
+        Account submitterAccount = contest.getAccount(submitter);
 
+        if (submitterAccount.isTeam()) {
+            //Determine the throttling strategy to be applied to team submissions.
+            //The following shows several alternative strategy selections, with only one being enabled.
+            //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
+            // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
+            // GUI (such as the PC2 Admin)
+//            IThrottleStrategy strategy = new AcceptAllStrategy();
+//            IThrottleStrategy strategy = new RejectAllStrategy();
+            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest, 6);
+//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+
+            accept = strategy.accept(run);
+        }
+
+        if (accept) {
+            ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+            RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
+            Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
+            sendToLocalServer(packet);
+        } else {
+            throw new SubmissionRejectedException("Submission threshhold exceeded");
+        }
     }
 
 }
