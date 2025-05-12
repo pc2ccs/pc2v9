@@ -5,6 +5,9 @@
             <tr>
                 <th>Rank</th>
                 <th>Team</th>
+                <th *ngFor= "let letter of problemLetters.slice(0,numProblems)" >
+                	{{letter}}
+                </th>
                 <th>Solved</th>
                 <th>Score</th>
                 <th></th>
@@ -12,6 +15,17 @@
             <tr *ngFor= 'let team of teamStandings' >
                 <td>{{ team.rank }}</td>
                 <td>{{ team.teamName }}</td>
+                
+                <!-- Display results for each problem: submission count plus solution time if solved -->
+                <td *ngFor= 'let problem of team.problemSummaryInfo' >
+                	<ng-container *ngIf='problem.isSolved; else notSolved'>
+                		{{problem.attempts}}/{{problem.solutionTime}}
+                	</ng-container>
+                	<ng-template #notSolved>
+                		{{problem.attempts}}/--
+                	</ng-template>
+                </td>
+
                 <td>{{ team.solved }}</td>
                 <td>{{ team.points }}</td>
             </tr>
