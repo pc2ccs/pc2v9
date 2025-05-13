@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
@@ -2826,6 +2826,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             executionData.setCompileStderr(new SerializedFile(prefixExecuteDirname(COMPILER_STDERR_FILENAME)));
 
             program = new File(prefixExecuteDirname(programName));
+            // Ugh.  Kotlin allows you to specify a lowercase source file, but munges the output to start with upper case
+            // If it's kotlin and the source starts with a lower case, create a new File for the Uppercase name
+            if(language.getID().equals(Language.CLICS_LANGID_KOTLIN) && Character.isLowerCase(programName.charAt(0))) {
+                program = new File(prefixExecuteDirname(programName.substring(0,1).toUpperCase() + programName.substring(1)));
+            }
             File programWithPackage = program;
             if (packagePath.length() > 0) {
                 // if there is a packagePath and javac was invoked with `-d .` it will place the class
@@ -3071,7 +3076,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 }
                 newString = replaceString(newString, "{:mainfile}", runFiles.getMainFile().getName());
                 newString = replaceString(newString, Constants.CMDSUB_FILES_VARNAME, ExecuteUtilities.getAllSubmittedFilenames(runFiles));
-                newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
+                // Because Kotlin changes any lower case starting letter to upper case
+                String baseName = removeExtension(runFiles.getMainFile().getName());
+                if(language.getID().equals(Language.CLICS_LANGID_KOTLIN) && Character.isLowerCase(baseName.charAt(0))) {
+                    baseName = baseName.substring(0, 1).toUpperCase() + baseName.substring(1);
+                }
+                newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, baseName);
             }
             newString = replaceString(newString, "{:package}", packageName);
 
