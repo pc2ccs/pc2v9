@@ -17,8 +17,8 @@
                 <td>{{ team.teamName }}</td>
                 
                 <!-- Display results for each problem: submission count plus solution time if solved -->
-                <td *ngFor= 'let problem of team.problemSummaryInfo' >
-                	<ng-container style="text-align: center" *ngIf="problem.isSolved; else notSolved"> 
+                <td style="text-align: center" *ngFor= 'let problem of team.problemSummaryInfo' >
+                	<ng-container *ngIf="problem.isSolved; else notSolved"> 
                 		{{problem.attempts}}/{{problem.solutionTime}}
                 	</ng-container>
                 	<ng-template #notSolved>
