@@ -60,7 +60,7 @@ export class NewClarificationComponent implements OnInit, OnDestroy {
 
   private buildForm(): void {
     this.newClarificationForm = this._formBuilder.group({
-      problem: [undefined, []],
+      problem: [undefined, [Validators.required]],
       content: [undefined, [Validators.required]]
     });
   }
