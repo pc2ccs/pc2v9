@@ -6,14 +6,30 @@
   flex: 1;
 }
 
+td, th {
+  padding: 2px 4px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+%submission-common-style {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.2;
+}
 .yes {
+	@extend %submission-common-style;
 	background-color: #7fFF7f;
 }
 
 .no {
+	@extend %submission-common-style;
 	background-color: #FF3f3f;
 }
 
 .pending {
+	@extend %submission-common-style;
 	background-color: yellow;
 }
