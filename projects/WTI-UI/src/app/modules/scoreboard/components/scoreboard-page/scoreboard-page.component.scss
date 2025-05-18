@@ -6,19 +6,13 @@
   flex: 1;
 }
 
-td, th {
-  padding: 2px 4px;
-  text-align: center;
-  vertical-align: middle;
-}
-
 %submission-common-style {
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 4px;
   font-family: Arial, sans-serif;
   font-size: 12px;
-  line-height: 1.2;
 }
+
 .yes {
 	@extend %submission-common-style;
 	background-color: #7fFF7f;
