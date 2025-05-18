@@ -1,7 +1,7 @@
 <div class='filter-table-container'>
 
     <div class='table-container'>
-        <table style="border-collapse: separate; border-spacing: 2px;" >
+		<table style="border-collapse: separate; border-spacing: 0 2px;">
             <tr>
                 <th>Rank</th>
                 <th>Team</th>
@@ -17,7 +17,7 @@
                 <td>{{ team.teamName }}</td>
                 
                 <!-- Display results for each problem: submission count plus solution time if solved -->
- 				<td style="text-align: center; border: 1px solid black; border-radius: 8px; padding: 8px;" *ngFor= 'let problem of team.problemSummaryInfo' 
+ 				<td style="text-align: center; " *ngFor= 'let problem of team.problemSummaryInfo' 
  					[ngClass]="{'yes' : problem.isSolved, 
  								'no' : !problem.isSolved && problem.attempts>0 && !problem.isPending,
  								'pending' : !problem.isSolved && problem.isPending
