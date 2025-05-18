@@ -101,8 +101,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 			tempArray.push(temp);
 		}
 		
-		console.log("Individual Team Standings:");
-		console.log(tempArray);
+//		console.log("Individual Team Standings:");
+//		console.log(tempArray);
 		
 		return tempArray;
 	}
@@ -113,15 +113,15 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private getNumProblems(standings: any) : number {
 
 		const contest = standings.contestStandings ;
-		console.log("getNumProblems(): ContestStandings element:");
-		console.log(contest);
+//		console.log("getNumProblems(): ContestStandings element:");
+//		console.log(contest);
 		
 		const header = contest.standingsHeader ;
-		console.log("getNumProblems(): StandingsHeader elements:");
-		console.log(header);
+//		console.log("getNumProblems(): StandingsHeader elements:");
+//		console.log(header);
 		
 		const problemCount = header.problemCount;
-		console.log ("getNumProblems(): problemCount = ", problemCount)
+//		console.log ("getNumProblems(): problemCount = ", problemCount)
 		return problemCount;
 	}
 }
