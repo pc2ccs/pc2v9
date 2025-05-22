@@ -6,8 +6,13 @@
   flex: 1;
 }
 
+.scoreboard-table {
+	td, th {
+  		padding: 2px 4px !important;		
+	}
+}
+
 %submission-common-style {
-  padding: 2px 4px;
   border: 1px solid #ccc;
   border-radius: 8px;
 }
@@ -19,7 +24,7 @@
 
 .no {
 	@extend %submission-common-style;
-	background-color: #FF3f3f;
+	background-color: #FF6060;
 }
 
 .pending {
