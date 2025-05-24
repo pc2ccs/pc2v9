@@ -98,7 +98,14 @@ export class RunsPageComponent implements OnInit, OnDestroy {
     this._teamService.getRuns()
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((data: Run[]) => {
-        this.runs = data.sort((x: Run, y: Run) => y.time - x.time);
+        this.runs = data.sort((x: Run, y: Run) => 
+        {
+	      if (y.time !== x.time) {
+        	return y.time - x.time;//sort by descending order of time
+	      } else {
+	        return y.id.localeCompare(x.id); //if times are same sort by the id in descending order
+	      }
+    });
         this.filterData();
       });
   }
