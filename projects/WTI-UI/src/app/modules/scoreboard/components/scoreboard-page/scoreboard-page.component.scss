@@ -17,6 +17,14 @@
   border-radius: 8px;
 }
 
+//First-to-Solve
+.fts {
+  border-radius: 8px;
+  background-color: #7fFF7f;
+  background-image: radial-gradient(#0fff0f, #0c630f) !important;
+}
+
+//Solved, but not FTS
 .yes {
 	@extend %submission-common-style;
 	background-color: #7fFF7f;
