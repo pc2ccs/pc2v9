@@ -5,8 +5,14 @@
             <tr>
                 <th>Rank</th>
                 <th>Team</th>
-                <th style="text-align: center; padding:2px 2px" *ngFor= "let letter of problemLetters.slice(0,numProblems)" >
-                	{{letter}}
+                <th *ngFor="let item of problemDetailHeaders" 
+                	[ngStyle]="{
+                		'text-align': 'center',
+                		'padding': '2px 2px',
+                		'background-color': rgbToCss(item.color),
+                		'color': item.textColor
+                	}">
+                	{{item.label}}
                 </th>
                 <th style="text-align: center">Solved</th>
                 <th style="text-align: center">Score</th>

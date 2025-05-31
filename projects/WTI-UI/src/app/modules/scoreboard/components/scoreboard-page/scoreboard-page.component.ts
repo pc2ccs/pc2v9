@@ -17,6 +17,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	teamStandings: any = [];
 	numProblems: number = 0;
 	firstToSolveTimes: number[] = [];
+	problemDetailHeaders: [any] [] = [];
 	
 	//TODO: provide support for more than 26 problems
 	//TODO: provide support for the possibility that problems are not listed in alphabetical order
@@ -79,6 +80,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 				this.teamStandings = this.getTeamStandingsArray(standings);
 				this.numProblems = this.getNumProblems(standings);
 				this.firstToSolveTimes = this.getFirstToSolveTimes(standings);
+				this.problemDetailHeaders = this.getProblemDetailHeaders(standings);
 			});
 	}
 
@@ -170,5 +172,59 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		const problemNumber = problemLetter.charCodeAt(0) - 65 ;  //'A'.charCodeAt(0) === 65
 		//return the solution time for the specified problem (-1 if not solved)
 		return this.firstToSolveTimes[problemNumber] ;
+	}
+	
+	/* Returns an array of elements, one for each problem, containing text label (problem letter),
+	 * RGB color value (for use as a background), and the optimum text color for the problem label.
+	 */
+	private getProblemDetailHeaders(standings:any) : [any] [] {
+		
+		const contestStandings = standings.contestStandings ;
+		//console.log("ContestStandings element:");
+		//console.log(contest);
+		
+		const standingsHeader = contestStandings.standingsHeader ;
+		//console.log("ContestStandings header element:");
+		//console.log(header);
+
+		const problemColors = standingsHeader.colorList.colors ;
+		
+		const headers = problemColors.problem.map (problem => {
+				const color = this.hexToRgb(problem.rgb);
+				return {label: problem.letter, color:color, textColor: this.getBestTextColor(color)};
+			});
+			
+		return headers;
+	}
+	
+		
+	/* Accepts a string containing a hex RGB value, possibly with a leading "#" and returns
+	 * an array containing the individual RGB values.
+	 */
+	private hexToRgb(hex: string): [number, number, number] {
+  		const sanitized = hex.replace(/^#/, '');
+  		const intVal = parseInt(sanitized, 16);
+  		
+   		const r = (intVal >> 16) & 255;
+  		const g = (intVal >> 8) & 255;
+  		const b = intVal & 255;
+
+  		return [r, g, b];
+	}
+
+	private getLuminance([r, g, b]: [number, number, number]): number {
+  		const channel = (c: number) => {
+    		const v = c / 255;
+    		return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  		};
+ 		 return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+	}
+
+	private getBestTextColor(color: [number, number, number]): 'black' | 'white' {
+  		return this.getLuminance(color) > 0.179 ? 'black' : 'white';
+	}
+	
+	private rgbToCss(color: [number, number, number]): string {
+  		return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 	}
 }
