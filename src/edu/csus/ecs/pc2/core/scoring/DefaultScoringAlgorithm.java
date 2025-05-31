@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -23,12 +22,10 @@ import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
-import edu.csus.ecs.pc2.core.list.BalloonSettingsComparatorbySite;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -372,23 +369,68 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
 
         summaryMememento.putLong("problemCount", problems.length);
+        
         Site[] sites = theContest.getSites();
         summaryMememento.putInteger("siteCount", sites.length);
+        
         Group[] groups = theContest.getGroups();
         if (groups != null) {
+            //this method inserts the Group fields into the summaryMemento
             dumpGroupList(groups, summaryMememento, wantedGroups);
         }
-        BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
-        if (balloonSettings != null) {
-            Arrays.sort(balloonSettings, new BalloonSettingsComparatorbySite());
-            IMemento listMemento = summaryMememento.createChild("colorList");
-            for (int i = 0; i < balloonSettings.length; i++) {
-                int id = i + 1;
-                IMemento balloonSettingsMemento = listMemento.createChild("colors");
-                balloonSettingsMemento.putInteger("id", id);
-                dumpBalloonSettings(balloonSettings[i], problems, balloonSettingsMemento);
-            }
+        
+        //The following block of (commented-out) code sets the "colors" in the "colorlist" property of the "standingsHeader".
+        //However, it gets them from the "BalloonSettings" object in the contest object -- but there does 
+        // not appear to be any place that SETS those colors.  The "BalloonSettings" class was created as
+        // part of the Scoreboard Client's support for different colors of balloons for different sites.
+        // Since the Scoreboard Client balloon support has been pretty much superseded by using the ICPCTools
+        // "Balloon Manager", and also balloon colors are now almost always loaded via YAML problemset files,
+        // it probably makes more sense to deprecate PC2 BalloonSettings and instead
+        // to extract balloon colors directly from the problems.
+        // NB: there does remain a question as to what effect this has on PC2 multi-site support for different
+        // balloon colors at different sites (for the same problem).  However, that too seems to be a no-longer
+        // used concept.
+        // Accordingly, the following was commented out and replaced by the code (below) which inserts balloon
+        // colors into the XML directly from the Problem descriptions.   jlc 5/25
+//        BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
+//        if (balloonSettings != null) {
+//            Arrays.sort(balloonSettings, new BalloonSettingsComparatorbySite());
+//            IMemento listMemento = summaryMememento.createChild("colorList");
+//            for (int i = 0; i < balloonSettings.length; i++) {
+//                int id = i + 1;
+//                IMemento balloonSettingsMemento = listMemento.createChild("colors");
+//                balloonSettingsMemento.putInteger("id", id);
+//                dumpBalloonSettings(balloonSettings[i], problems, balloonSettingsMemento);
+//            }
+//        }
+        
+        //create the "colorList" element in the "standingsHeader" element
+        IMemento colorListMemento = summaryMememento.createChild("colorList");
+        
+        //add a "colors" element for each site
+        for (Site site : sites) {
+            // create the "colors" element for the current site
+            IMemento colorsMemento = colorListMemento.createChild("colors");
+            
+            // use the site number for this site as the id for this set of colors
+            int id = site.getSiteNumber();
+            colorsMemento.putInteger("id", id);
+            //add the site number explicitly (legacy; allows later changing the "id" to something other than site number)
+            colorsMemento.putInteger("siteNum",id);
+            
+            // add a "problem" element for each problem for the current site.  
+            // (Note that this is using the "problems" array for THIS site, so all site colors will be set 
+            // in the XML to the color of THIS site (not "the current site" mentioned in the outer for-loop)).
+            // TODO: pull the problems from each separate site and insert that site's colors into the XML.
+            for (Problem prob : problems) {
+                IMemento problemMemento = colorsMemento.createChild("problem");
+                problemMemento.putString("id", prob.getElementId().toString());
+                problemMemento.putString("colorName", prob.getColorName());
+                problemMemento.putString("rgb", prob.getColorRGB());
+                problemMemento.putString("letter", prob.getLetter());
+           }
         }
+        
         if (runs == null) {
             // Note: we do not deal with divisionNumber here since
             //   1) it is being deprecated
@@ -552,17 +594,18 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         return permissionList.isAllowed(type);
     }
 
-    private void dumpBalloonSettings(BalloonSettings balloonSettings, Problem[] problems, IMemento memento) {
-        memento.putInteger("siteNum", balloonSettings.getSiteNumber());
-        if (problems != null) {
-            for (int i = 0; i < problems.length; i++) {
-                int id = i + 1;
-                IMemento problemMemento = memento.createChild("problem");
-                problemMemento.putInteger("id", id);
-                problemMemento.putString("color", balloonSettings.getColor(problems[i]));
-            }
-        }
-    }
+    //the following method was removed during upgrading of the colors output; see comments in method getStandings()   jlc 5/25
+//    private void dumpBalloonSettings(BalloonSettings balloonSettings, Problem[] problems, IMemento memento) {
+//        memento.putInteger("siteNum", balloonSettings.getSiteNumber());
+//        if (problems != null) {
+//            for (int i = 0; i < problems.length; i++) {
+//                int id = i + 1;
+//                IMemento problemMemento = memento.createChild("problem");
+//                problemMemento.putInteger("id", id);
+//                problemMemento.putString("color", balloonSettings.getColor(problems[i]));
+//            }
+//        }
+//    }
 
     private void dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups) {
         memento.putInteger("groupCount", groups.length+1);
