@@ -191,7 +191,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		
 		const headers = problemColors.problem.map (problem => {
 				const color = this.hexToRgb(problem.rgb);
-				return {label: problem.letter, color:color, textColor: this.getBestTextColor(color)};
+				return {label: problem.letter, color:color, textColor: this.getBestTextColor(color), url: problem.url};
 			});
 			
 		return headers;
