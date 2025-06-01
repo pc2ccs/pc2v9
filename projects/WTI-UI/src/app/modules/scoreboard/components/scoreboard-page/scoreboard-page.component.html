@@ -10,9 +10,13 @@
                 		'text-align': 'center',
                 		'padding': '2px 2px',
                 		'background-color': rgbToCss(item.color),
-                		'color': item.textColor
+                		'color': item.textColor,
+                		'cursor': 'pointer' 
                 	}">
-                	{{item.label}}
+                	<a [href]="item.url" target="_blank" style="color: inherit; text-decoration: none; display: block;">
+    					{{ item.label }}
+  					</a>
+
                 </th>
                 <th style="text-align: center">Solved</th>
                 <th style="text-align: center">Score</th>
