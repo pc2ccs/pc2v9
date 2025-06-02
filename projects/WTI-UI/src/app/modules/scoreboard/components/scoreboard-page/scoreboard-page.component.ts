@@ -6,6 +6,7 @@ import { AppTitleService } from 'src/app/modules/core/services/app-title.service
 import { saveCurrentPage } from 'src/app/app.component';
 import * as Constants from 'src/constants';
 import { DEBUG_MODE } from 'src/constants';
+import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
 
 @Component({
 	templateUrl: './scoreboard-page.component.html',
@@ -25,8 +26,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 
 	constructor(
 		private _contestService: IContestService,
-		private _appTitleService: AppTitleService
-	) { }
+		private _appTitleService: AppTitleService,
+		private _uiHelper: UiHelperService) { }
 
 	ngOnInit(): void {
 
@@ -227,4 +228,18 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private rgbToCss(color: [number, number, number]): string {
   		return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 	}
+	
+	private isContestStarted() : boolean {
+		return this._contestService.getElapsedSecs()>0 ;
+	}
+	
+	/* Suppress navigation to the Problem PDFs, and pop up an error dialog, if the contest hasn't started. 
+	 */
+	onLinkClick(event: MouseEvent, url: string): void {
+  		if (!this.isContestStarted()) {
+    		event.preventDefault(); // block the link from navigating
+    		this._uiHelper.alertError('Contest has not started yet.') ;
+    	}
+    	return;
+  	}
 }
