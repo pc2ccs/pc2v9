@@ -13,7 +13,9 @@
                 		'color': item.textColor,
                 		'cursor': 'pointer' 
                 	}">
-                	<a [href]="item.url" target="_blank" style="color: inherit; text-decoration: none; display: block;">
+                	<a [href]="isContestStarted() ? item.url : null" 
+                			(click)="onLinkClick($event, item.url)" 
+                			target="_blank" style="color: inherit; text-decoration: none; display: block;">
     					{{ item.label }}
   					</a>
 
