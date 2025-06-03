@@ -5,7 +5,7 @@
             <tr>
                 <th>Rank</th>
                 <th>Team</th>
-                <th *ngFor="let item of problemDetailHeaders" 
+                <th *ngFor="let item of visibleProblemDetailHeaders" 
                 	[ngStyle]="{
                 		'text-align': 'center',
                 		'padding': '2px 2px',
@@ -28,21 +28,27 @@
                 <td style="text-align: center">{{ team.rank }}</td>
                 <td>{{ team.teamName }}</td>
                 
-                <!-- Display results for each problem: submission count plus solution time if solved -->
- 				<td style="text-align: center; white-space: nowrap; " *ngFor= 'let problem of team.problemSummaryInfo' 
- 					[ngClass]="{'fts' : problem.isSolved && (problem.solutionTime<=getBestSolutionTime(problem.problemId)),
- 								'yes' : problem.isSolved, 
- 								'no' : !problem.isSolved && problem.attempts>0 && !problem.isPending,
- 								'pending' : !problem.isSolved && problem.isPending
- 								}">
+  				<!-- Render problem detail cells, but only if the contest has started -->
+  				<ng-container *ngIf="isContestStarted()">
+    				<td *ngFor="let problem of team.problemSummaryInfo"
+        				style="text-align: center; white-space: nowrap;"
+        				[ngClass]="{
+          					'fts': problem.isSolved && (problem.solutionTime <= getBestSolutionTime(problem.problemId)),
+          					'yes': problem.isSolved,
+          					'no': !problem.isSolved && problem.attempts > 0 && !problem.isPending,
+          					'pending': !problem.isSolved && problem.isPending
+        					}"
+        				>
 
-      				<ng-container *ngIf="problem.isSolved; else notSolved">
-        				{{problem.attempts}}/{{problem.solutionTime}}
-      				</ng-container>
+      					<ng-container *ngIf="problem.isSolved; else notSolved">
+        					{{ problem.attempts }}/{{ problem.solutionTime }}
+      					</ng-container>
 
-                	<ng-template #notSolved>
-                		{{problem.attempts}}/--
-                	</ng-template>
+      					<ng-template #notSolved>
+        					{{ problem.attempts }}/--
+      					</ng-template>
+    				</td>
+  				</ng-container>
                 	
                 <td style="text-align: center">{{ team.solved }}</td>
                 <td style="text-align: center">{{ team.points }}</td>
