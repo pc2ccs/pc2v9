@@ -233,7 +233,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		return this._contestService.getElapsedSecs()>0 ;
 	}
 	
-	/* Suppress navigation to the Problem PDFs, and pop up an error dialog, if the contest hasn't started. 
+	/** Suppress navigation to the Problem PDFs, and pop up an error dialog, if the contest hasn't started. 
 	 */
 	onLinkClick(event: MouseEvent, url: string): void {
   		if (!this.isContestStarted()) {
@@ -242,4 +242,10 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
     	}
     	return;
   	}
+  	
+  	/** Return problem detail headers if contest is started, otherwise return an empty array.
+  	 */
+  	get visibleProblemDetailHeaders() {
+  		return this.isContestStarted() ? this.problemDetailHeaders : [];
+	}
 }
