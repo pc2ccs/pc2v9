@@ -470,6 +470,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 problemMemento.putString("colorName", prob.getColorName());
                 problemMemento.putString("rgb", prob.getColorRGB());
                 problemMemento.putString("letter", prob.getLetter());
+                problemMemento.putString("url", "problems/" + prob.getLetter() + ".pdf");
            }
         }
         
