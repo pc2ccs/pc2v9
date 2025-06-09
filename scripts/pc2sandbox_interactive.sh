@@ -604,22 +604,29 @@ do
 		REPORT_DEBUG Validator finishes with exit code $wstat
 		if test "$contestant_done" -eq 0
 		then
-			REPORT_DEBUG Waiting for submission pid $submissionpid to finish...
-			# Wait for child to finish - it has to, one way or the other (TLE or just finish)
-			wait -n "$submissionpid"
-			COMMAND_EXIT_CODE=$?
-
-			GetSandboxStats
-
-			if test $COMMAND_EXIT_CODE -eq 127
+			# Added this test 04/30/2025 - apparently it was missing.  We will only kill the submission if this
+			# flag is 1, as per the comment at the top of this script.
+			if test ${KILL_WA_VALIDATOR} -eq 0
 			then
-				REPORT_DEBUG No more children found.  Setting submission exit code to 0
-				COMMAND_EXIT_CODE=0
+				REPORT_DEBUG Waiting for submission pid $submissionpid to finish...
+				# Wait for child to finish - it has to, one way or the other (TLE or just finish)
+				wait -n "$submissionpid"
+				COMMAND_EXIT_CODE=$?
+	
+				GetSandboxStats
+	
+				if test $COMMAND_EXIT_CODE -eq 127
+				then
+					REPORT_DEBUG No more children found.  Setting submission exit code to 0
+					COMMAND_EXIT_CODE=0
+				else
+					FormatExitCode $COMMAND_EXIT_CODE
+					REPORT_DEBUG Contestant PID $submissionpid finished with exit code $result but after the validator
+				fi
+				ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
 			else
-				FormatExitCode $COMMAND_EXIT_CODE
-				REPORT_DEBUG Contestant PID $submissionpid finished with exit code $result but after the validator
+				REPORT_DEBUG Killing child submission pid $submissionpid since it is still running "(KILL_WA_VALIDATOR=1)"
 			fi
-			ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
 		fi
 
 		KillChildProcs
@@ -649,9 +656,9 @@ do
 				# If validator created a feedback file, put the last line in the judgement
 				if test -s "$feedbackfile"
 				then
-					GenXML "No - Wrong answer" `head -n 1 $feedbackfile`
+					GenXML "wrong answer" `head -n 1 $feedbackfile`
 				else
-					GenXML "No - Wrong answer" "No feedback file"
+					GenXML "wrong answer" "No feedback file"
 				fi
 				COMMAND_EXIT_CODE=0
 			fi
