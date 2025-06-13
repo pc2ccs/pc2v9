@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -48,7 +48,9 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.IMemento;
+import edu.csus.ecs.pc2.core.util.RunStatistics;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
+import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
@@ -483,7 +485,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 treeMap.put(record, record);
             }
 
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest.getContestInformation(), summaryMememento);
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMememento);
 
         } // mutex
 
@@ -603,8 +605,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      */
     private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot,
             AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups,
-            ContestInformation contestInformation, IMemento summaryMememento) {
+            IInternalContest theContest, IMemento summaryMememento) {
 
+        ContestInformation contestInformation = theContest.getContestInformation();
         // easy access
         Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
         Hashtable<Group, Integer> groupIndexHash = new Hashtable<Group, Integer>();
@@ -692,9 +695,21 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             divisionScore[i] = 0;
             divisionLastSolved[i] = 0;
         }
+
+        int standingsIndex = 0;
         while (iterator.hasNext()) {
             Object o = iterator.next();
-            StandingsRecord standingsRecord = (StandingsRecord) o;
+            srArray[standingsIndex++] = (StandingsRecord)o;
+        }
+
+        RunStatistics runStats = new RunStatistics(theContest);
+        ResultsFile resultsInfo = new ResultsFile();
+        // This next one only fills in the gold/silver/bronze.  It does not work for highest honors,
+        // etc.  because the ranks arent filled in yet.
+        CitationRankInformation ri = resultsInfo.createCitationRankInformation(theContest, srArray);
+
+        for(index = 0; index < standingsIndex; index++) {
+            StandingsRecord standingsRecord = srArray[index];
             indexRank++;
             if (!isTeamTied(standingsRecord, numSolved, score, lastSolved)) {
                 numSolved = standingsRecord.getNumberSolved();
@@ -710,12 +725,13 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             long totalAttempts = 0;
             long problemsAttempted = 0;
             IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
+            int teamRank = standingsRecord.getRankNumber();
             standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
             standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
             standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
             standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
-            standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
-            standingsRecordMemento.putInteger("overallRank", standingsRecord.getRankNumber());
+            standingsRecordMemento.putInteger("rank", teamRank);
+            standingsRecordMemento.putInteger("overallRank", teamRank);
             standingsRecordMemento.putInteger("index", index);
             Account account = accountList.getAccount(standingsRecord.getClientId());
 
@@ -786,6 +802,23 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     standingsRecordMemento.putInteger("divisionRank", standingsRecord.getDivisionRankNumber());
                 }
             }
+
+            if(ri.getFirstHonorableMentionRank() > 0 && teamRank >= ri.getFirstHonorableMentionRank()) {
+                standingsRecordMemento.putBoolean("isHonable", true);
+            } else if(ri.getLastGoldRank() > 0 && teamRank <= ri.getLastGoldRank()) {
+                standingsRecordMemento.putBoolean("isGold", true);
+            } else if(ri.getLastSilverRank() > 0 && teamRank <= ri.getLastSilverRank()) {
+                standingsRecordMemento.putBoolean("isSilver", true);
+            } else if(ri.getLastBronzeRank() > 0 && teamRank <= ri.getLastBronzeRank()) {
+                standingsRecordMemento.putBoolean("isBronze", true);
+            }
+            if(ri.getLastHighestHonorsRank() > 0 && teamRank <= ri.getLastHighestHonorsRank()) {
+                standingsRecordMemento.putBoolean("isHighest", true);
+            } else if(ri.getLastHighHonorsRank() > 0 && teamRank <= ri.getLastHighHonorsRank()) {
+                standingsRecordMemento.putBoolean("isHigh", true);
+            } else if(ri.getLastHonorsRank() > 0 && teamRank <= ri.getLastHonorsRank()) {
+                standingsRecordMemento.putBoolean("isHonors", true);
+            }
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {
                 int id = i + 1;
@@ -804,6 +837,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     psiMemento.putLong("solutionTime", psi.getSolutionTime());
                     psiMemento.putBoolean("isSolved", psi.isSolved());
                     psiMemento.putBoolean("isPending", psi.isUnJudgedRuns());
+                    psiMemento.putBoolean("fts", runStats.isFirstToSolve(standingsRecord.getClientId(), psi.getProblemId()));
                     problemAttempts[id] += psi.getNumberSubmitted();
                     totalAttempts += psi.getNumberSubmitted();
                     grandTotalAttempts += psi.getNumberSubmitted();
@@ -825,7 +859,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putLong("totalAttempts",totalAttempts);
             standingsRecordMemento.putLong("problemsAttempted",problemsAttempted);
 
-            srArray[index++] = standingsRecord;
+//            srArray[index++] = standingsRecord;
         }
 
         summaryMememento.putInteger("medianProblemsSolved", getMedian(srArray));
@@ -929,7 +963,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             IMemento problemMemento = summaryMememento.createChild("problem");
             problemMemento.putInteger("id", id);
             problemMemento.putString("title", problems[i].getDisplayName());
-            // problemMemento.putString("color", problems[i].get);
+            problemMemento.putString("color", problems[i].getColorName());
+            problemMemento.putString("rgb", problems[i].getColorRGB());
             problemMemento.putLong("attempts", problemAttempts[id]);
             if (problemAttempts[id] > 0) {
                 grandTotalProblemAttempts++;
@@ -1133,6 +1168,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
         }
         memento.putString("scoreboardMessage", value);
+        memento.putString("elapsedtime", contestTime.getElapsedTimeStr());
+        memento.putString("remainingtime",  contestTime.getRemainingTimeStr());
 
         return memento;
     }

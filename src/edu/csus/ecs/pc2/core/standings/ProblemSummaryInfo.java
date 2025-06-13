@@ -6,14 +6,17 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
- * scoreboard XML group element 
- * 
+ * scoreboard XML group element
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
 @XmlRootElement(name = "problemSummaryInfo")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonIgnoreProperties({"fts", "isGold", "isSilver", "isBronze"})
 public class ProblemSummaryInfo {
 
     // <problemSummaryInfo attempts="0" index="12" isPending="false"
@@ -37,7 +40,7 @@ public class ProblemSummaryInfo {
 
     @XmlAttribute
     private String problemId;
-    
+
     @XmlAttribute
     private String shortName;
 
@@ -91,7 +94,7 @@ public class ProblemSummaryInfo {
     public void setProblemId(String problemId) {
         this.problemId = problemId;
     }
-    
+
     public String getShortName() {
         return shortName;
     }

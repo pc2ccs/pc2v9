@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.scoring.CitationRankInformation;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.FinalsStandingsRecordComparator;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
@@ -225,7 +226,7 @@ public class ResultsFile {
             // 6 Time of the last submission 233 integer
 
             String reservationId = account.getExternalId();
-            
+
             boolean isHighestHonor = false;
             boolean isHighHonor = false;
             boolean isHonor = false;
@@ -279,6 +280,115 @@ public class ResultsFile {
         }
 
         return lines.toArray(new String[lines.size()]);
+    }
+
+    /**
+     * Create CCS rank cut-offs for each ranking citation.  gold, silver, bronze, highest honors,
+     * high honors, honors, honorable mention
+     *
+     * @param contest
+     * @param standingsRecords sorted array of StandingsRecord
+     * @return CititationInformation (ranks for each citation)
+     */
+    public CitationRankInformation createCitationRankInformation(IInternalContest contest, StandingsRecord [] standingsRecords)  {
+
+        int median = getMedian(standingsRecords);
+        int highestHonorSolvedCount = 0;
+        int highHonorSolvedCount = 0;
+        CitationRankInformation ri = new CitationRankInformation();
+
+        finalizeData = contest.getFinalizeData();
+        if (finalizeData == null) {
+            finalizeData = GenDefaultFinalizeData();
+        }
+
+        if (finalizeData.isUseWFGroupRanking() && finalizeData.isCustomizeHonorsSolvedCount()) {
+            if (finalizeData.getHighestHonorSolvedCount() != 0) {
+                highestHonorSolvedCount = finalizeData.getHighestHonorSolvedCount();
+            }
+            if (finalizeData.getHighHonorSolvedCount() != 0) {
+                highHonorSolvedCount = finalizeData.getHighHonorSolvedCount();
+            }
+            if (finalizeData.getHonorSolvedCount() != 0) {
+                median = finalizeData.getHonorSolvedCount();
+            }
+        }
+
+        int lastMedalRank = finalizeData.getBronzeRank();
+        int lastSolvedNum = 0;
+        int rankNumber = 0;
+
+        ri.setLastGoldRank(finalizeData.getGoldRank());
+        ri.setLastSilverRank(finalizeData.getSilverRank());
+        ri.setLastBronzeRank(finalizeData.getBronzeRank());
+
+        // resort standingsRecord based on lastMedalRank and median
+        Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
+        AccountList accountList = new AccountList();
+        for (Account account : accounts) {
+            accountList.add(account);
+        }
+        comparator = new FinalsStandingsRecordComparator();
+        comparator.setCachedAccountList(accountList);
+        comparator.setLastRank(lastMedalRank);
+        comparator.setMedian(median);
+        comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
+        Arrays.sort(standingsRecords, comparator);
+
+        int realRank = 0;
+        if (highestHonorSolvedCount == 0) {
+            highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
+        }
+        if (highHonorSolvedCount == 0) {
+            highHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved() - 1;
+        }
+
+        for (StandingsRecord record : standingsRecords) {
+            realRank++;
+
+            boolean isHighestHonor = false;
+            boolean isHighHonor = false;
+            boolean isHonor = false;
+
+            if (finalizeData.isUseWFGroupRanking()) {
+                if (record.getNumberSolved() >= highestHonorSolvedCount) {
+                    isHighestHonor = true;
+                } else if (record.getNumberSolved() >= highHonorSolvedCount) {
+                    isHighHonor = true;
+                } else if (record.getNumberSolved() >= median) {
+                    isHonor = true;
+                }
+            } else if (record.getNumberSolved() >= median) {
+                isHonor = true;
+            }
+
+            String award = getMedalCitation(record.getRankNumber(), finalizeData, isHighestHonor, isHighHonor, isHonor);
+            if (record.getNumberSolved() == 0) {
+                award = HONORABLE;
+            }
+
+            if (!HONORABLE.equalsIgnoreCase(award)) {
+                if (finalizeData.isUseWFGroupRanking() && realRank > lastMedalRank) {
+                    if (record.getNumberSolved() != lastSolvedNum) {
+                        lastSolvedNum = record.getNumberSolved();
+                        rankNumber = realRank;
+                    }
+                    record.setRankNumber(rankNumber);
+                    if(isHighestHonor) {
+                        ri.setLastHighestHonorsRank(realRank);
+                    } else if(isHighHonor) {
+                        ri.setLastHighHonorsRank(realRank);
+                    } else if(isHonor) {
+                        ri.setLastHonorsRank(realRank);
+                    }
+                }
+            } else if(ri.getFirstHonorableMentionRank() == 0) {
+                ri.setFirstHonorableMentionRank(realRank);
+            }
+        }
+
+        return ri;
     }
 
     /**
