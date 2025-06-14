@@ -101,15 +101,21 @@ table tr.even {
         background-color: #EEEEFF; color: black;
 }
 table tr td.yes {
-        background-color: #50e050; color: black;
+        background-color: #7fff7f; color: black;
+        text-align: center;
+}
+table tr td.firstYes {
+        background-color: #7fFF7f;
+  		background-image: radial-gradient(#0fff0f, #0c630f);
+		color: black;
         text-align: center;
 }
 table tr td.pending {
-        background-color: #e0e050; color: black;
+        background-color: #3e9ae9; color: black;
         text-align: center;
 }
 table tr td.no {
-        background-color: #e05050; color: black;
+        background-color: #ff6060; color: black;
         text-align: center;
 }
 table tr td.center {
@@ -119,3 +125,17 @@ table tr td.right {
         text-align: right;
 }
 
+table td.remaining {
+	border-bottom: none;
+	text-align: left;
+}
+
+table td.elapsed {
+	border-bottom: none;
+	text-align: right;
+}
+
+table td.freeze {
+	border-bottom: none;
+	text-align: center;
+}
