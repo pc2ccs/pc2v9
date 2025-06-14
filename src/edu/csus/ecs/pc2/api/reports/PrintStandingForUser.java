@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.reports;
 
 import edu.csus.ecs.pc2.api.IClient;
@@ -8,7 +8,7 @@ import edu.csus.ecs.pc2.api.ITeam;
 
 /**
  * Print standings for current user.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -34,7 +34,8 @@ public class PrintStandingForUser extends APIAbstractTest {
             for (IProblemDetails det : details) {
                 boolean solved = det.getSolutionTime() != 0;
                 println("  solved=" + solved + " solutionTime=" + det.getSolutionTime() + //
-                        " points=" + det.getPenaltyPoints() + " attempts=" + det.getAttempts());
+                        " points=" + det.getPenaltyPoints() + " attempts=" + det.getAttempts() + //
+                        " fts=" + det.isFts());
             }
         }
 

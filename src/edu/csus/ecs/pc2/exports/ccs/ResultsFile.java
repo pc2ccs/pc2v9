@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.util.ArrayList;
@@ -287,7 +287,8 @@ public class ResultsFile {
      * high honors, honors, honorable mention
      *
      * @param contest
-     * @param standingsRecords sorted array of StandingsRecord
+     * @param standingsRecords array of StandingsRecord (this will be modified and sorted according to the
+     *        current standings sorting rules in effect.  eg. Bill Rules for WF)
      * @return CititationInformation (ranks for each citation)
      */
     public CitationRankInformation createCitationRankInformation(IInternalContest contest, StandingsRecord [] standingsRecords)  {
@@ -302,6 +303,8 @@ public class ResultsFile {
             finalizeData = GenDefaultFinalizeData();
         }
 
+        int lastMedalRank = finalizeData.getBronzeRank();
+
         if (finalizeData.isUseWFGroupRanking() && finalizeData.isCustomizeHonorsSolvedCount()) {
             if (finalizeData.getHighestHonorSolvedCount() != 0) {
                 highestHonorSolvedCount = finalizeData.getHighestHonorSolvedCount();
@@ -314,13 +317,11 @@ public class ResultsFile {
             }
         }
 
-        int lastMedalRank = finalizeData.getBronzeRank();
-        int lastSolvedNum = 0;
-        int rankNumber = 0;
-
-        ri.setLastGoldRank(finalizeData.getGoldRank());
-        ri.setLastSilverRank(finalizeData.getSilverRank());
-        ri.setLastBronzeRank(finalizeData.getBronzeRank());
+        // The medal counts are fixed and are based solely on the order of finishing
+        // the contest.
+        ri.setLastGoldPlace(finalizeData.getGoldRank());
+        ri.setLastSilverPlace(finalizeData.getSilverRank());
+        ri.setLastBronzePlace(finalizeData.getBronzeRank());
 
         // resort standingsRecord based on lastMedalRank and median
         Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
@@ -337,6 +338,7 @@ public class ResultsFile {
         Arrays.sort(standingsRecords, comparator);
 
         int realRank = 0;
+        int rank;
         if (highestHonorSolvedCount == 0) {
             highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
         }
@@ -360,31 +362,25 @@ public class ResultsFile {
                     isHonor = true;
                 }
             } else if (record.getNumberSolved() >= median) {
+                // We set this so we don't just return "HONORABLE" for everyone.  getMedalCitation() below
+                // will return HONORABLE unless one of isHighestHonor, isHighHonor or isHonor is set.
                 isHonor = true;
             }
 
-            String award = getMedalCitation(record.getRankNumber(), finalizeData, isHighestHonor, isHighHonor, isHonor);
-            if (record.getNumberSolved() == 0) {
-                award = HONORABLE;
-            }
+            rank = record.getRankNumber();
 
-            if (!HONORABLE.equalsIgnoreCase(award)) {
-                if (finalizeData.isUseWFGroupRanking() && realRank > lastMedalRank) {
-                    if (record.getNumberSolved() != lastSolvedNum) {
-                        lastSolvedNum = record.getNumberSolved();
-                        rankNumber = realRank;
-                    }
-                    record.setRankNumber(rankNumber);
+            if (record.getNumberSolved() > 0 && !HONORABLE.equalsIgnoreCase(getMedalCitation(rank, finalizeData, isHighestHonor, isHighHonor, isHonor))) {
+                if (finalizeData.isUseWFGroupRanking()) {
                     if(isHighestHonor) {
-                        ri.setLastHighestHonorsRank(realRank);
+                        ri.updateLastHighestHonorsRank(rank);
                     } else if(isHighHonor) {
-                        ri.setLastHighHonorsRank(realRank);
+                        ri.updateLastHighHonorsRank(rank);
                     } else if(isHonor) {
-                        ri.setLastHonorsRank(realRank);
+                        ri.updateLastHonorsRank(rank);
                     }
                 }
-            } else if(ri.getFirstHonorableMentionRank() == 0) {
-                ri.setFirstHonorableMentionRank(realRank);
+            } else {
+                ri.updateFirstHonorableMentionRank(rank);
             }
         }
 

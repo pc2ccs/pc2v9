@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
 
 
@@ -7,12 +7,12 @@ package edu.csus.ecs.pc2.api;
  * Scoring Algorithm.
  * <P>
  * An {@link IStanding} object contains information about the standing (ranking) of one particular problem.
- * 
+ *
  * <p>
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
  * @author pc2@ecs.csus.edu
  * @version $Id$
- * 
+ *
  */
 
 // $HeadURL$
@@ -20,7 +20,7 @@ public interface IProblemDetails {
 
     /**
      * The client for this problem data.
-     * 
+     *
      * @return the client info for this problem details.
      */
     IClient getClient();
@@ -33,29 +33,29 @@ public interface IProblemDetails {
 
     /**
      * The number of attempts for this problem.
-     * 
+     *
      * @return number of attempts for this problem.
      */
     long getAttempts();
 
     /**
      * The Problem Number for this problem
-     * 
+     *
      * @return the number of the problem in the contest (numbers start at 1)
      */
     int getProblemId();
 
     /**
      * The solution time for this problem
-     * 
+     *
      * @return number of elapsed minutes when problem was solved.
      */
     long getSolutionTime();
 
     /**
-     * 
+     *
      * In Version 8, this was ProblemScoreData.getScore()
-     * 
+     *
      * @return number of penalty points
      */
     long getPenaltyPoints();
@@ -66,4 +66,9 @@ public interface IProblemDetails {
      */
     boolean isSolved();
 
+    /**
+     * Was this a "first to solve"?
+     * @return true if fts, else false.
+     */
+    boolean isFts();
 }

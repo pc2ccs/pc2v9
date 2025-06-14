@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -377,8 +378,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Site[] sites = theContest.getSites();
         summaryMememento.putInteger("siteCount", sites.length);
         Group[] groups = theContest.getGroups();
+        boolean bGroupsExcluded = false;
         if (groups != null) {
-            dumpGroupList(groups, summaryMememento, wantedGroups);
+            bGroupsExcluded = dumpGroupList(groups, summaryMememento, wantedGroups);
         }
         BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
         if (balloonSettings != null) {
@@ -485,7 +487,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 treeMap.put(record, record);
             }
 
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMememento);
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMememento, bGroupsExcluded);
 
         } // mutex
 
@@ -566,10 +568,22 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
     }
 
-    private void dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups) {
+    /**
+     * dumpGroupList - Creates XML mementos for each group.  If any groups are not included in the scoreboard
+     * calculation, that is, wantedGroups is not empty and is a subset of all groups, then we return a flag
+     * indicating we excluded some groups.   This information is used by the teamStandings memento generator
+     * so it will not include medal / citation information in the teamStanding memento.
+     *
+     * @param groups All groups configured
+     * @param memento Where to put the group XML informtion
+     * @param wantedGroups - specific groups the scoreboard is being generated for
+     * @return true if any groups were excluded from the scoreboard because of wanted groups
+     */
+    private boolean dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups) {
         memento.putInteger("groupCount", groups.length+1);
         IMemento groupsMemento = memento.createChild("groupList");
         int id = 0;
+        boolean excludedGroups = false;
         for (int i = 0; i < groups.length; i++) {
             if (!groups[i].isDisplayOnScoreboard()) {
                 continue;
@@ -586,8 +600,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 groupMemento.putInteger("included", 1);
             } else {
                 groupMemento.putInteger("included", 0);
+                excludedGroups = true;
             }
         }
+        return(excludedGroups);
     }
 
     /**
@@ -605,7 +621,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      */
     private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot,
             AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups,
-            IInternalContest theContest, IMemento summaryMememento) {
+            IInternalContest theContest, IMemento summaryMememento, boolean excludedGroups) {
 
         ContestInformation contestInformation = theContest.getContestInformation();
         // easy access
@@ -696,20 +712,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             divisionLastSolved[i] = 0;
         }
 
-        int standingsIndex = 0;
+        RunStatistics runStats = new RunStatistics(theContest);
+
+        ArrayList<IMemento> teamStandingsMementos = new ArrayList<IMemento>();
+
         while (iterator.hasNext()) {
             Object o = iterator.next();
-            srArray[standingsIndex++] = (StandingsRecord)o;
-        }
 
-        RunStatistics runStats = new RunStatistics(theContest);
-        ResultsFile resultsInfo = new ResultsFile();
-        // This next one only fills in the gold/silver/bronze.  It does not work for highest honors,
-        // etc.  because the ranks arent filled in yet.
-        CitationRankInformation ri = resultsInfo.createCitationRankInformation(theContest, srArray);
-
-        for(index = 0; index < standingsIndex; index++) {
-            StandingsRecord standingsRecord = srArray[index];
+            StandingsRecord standingsRecord = (StandingsRecord)o;
             indexRank++;
             if (!isTeamTied(standingsRecord, numSolved, score, lastSolved)) {
                 numSolved = standingsRecord.getNumberSolved();
@@ -725,6 +735,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             long totalAttempts = 0;
             long problemsAttempted = 0;
             IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
+            // Remember each team's standing's record so we can add citation info later
+            teamStandingsMementos.add(standingsRecordMemento);
+
             int teamRank = standingsRecord.getRankNumber();
             standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
             standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
@@ -803,22 +816,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
             }
 
-            if(ri.getFirstHonorableMentionRank() > 0 && teamRank >= ri.getFirstHonorableMentionRank()) {
-                standingsRecordMemento.putBoolean("isHonable", true);
-            } else if(ri.getLastGoldRank() > 0 && teamRank <= ri.getLastGoldRank()) {
-                standingsRecordMemento.putBoolean("isGold", true);
-            } else if(ri.getLastSilverRank() > 0 && teamRank <= ri.getLastSilverRank()) {
-                standingsRecordMemento.putBoolean("isSilver", true);
-            } else if(ri.getLastBronzeRank() > 0 && teamRank <= ri.getLastBronzeRank()) {
-                standingsRecordMemento.putBoolean("isBronze", true);
-            }
-            if(ri.getLastHighestHonorsRank() > 0 && teamRank <= ri.getLastHighestHonorsRank()) {
-                standingsRecordMemento.putBoolean("isHighest", true);
-            } else if(ri.getLastHighHonorsRank() > 0 && teamRank <= ri.getLastHighHonorsRank()) {
-                standingsRecordMemento.putBoolean("isHigh", true);
-            } else if(ri.getLastHonorsRank() > 0 && teamRank <= ri.getLastHonorsRank()) {
-                standingsRecordMemento.putBoolean("isHonors", true);
-            }
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {
                 int id = i + 1;
@@ -859,12 +856,52 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putLong("totalAttempts",totalAttempts);
             standingsRecordMemento.putLong("problemsAttempted",problemsAttempted);
 
-//            srArray[index++] = standingsRecord;
+            srArray[index++] = standingsRecord;
         }
 
         summaryMememento.putInteger("medianProblemsSolved", getMedian(srArray));
         generateSummaryTotalsForProblem (problems, problemsIndexHash, summaryMememento);
 
+        // We do not do medal or honors citations for individual groups/sites
+        // since it does not make sense.  The values set for those are for the
+        // entire contest, not one particular group (or groups).  So, if any groups were excluded
+        // from the scoreboard, we do not fill in citations.
+        if(!excludedGroups) {
+            // Now go back and fill in the awards for each team if not for specific group
+            ResultsFile resultsInfo = new ResultsFile();
+            // Note that createCitationRankInformation() may change the order of srArray
+            CitationRankInformation ri = resultsInfo.createCitationRankInformation(theContest, srArray);
+            if(index == teamStandingsMementos.size()) {
+                int teamRank, sIndex;
+                IMemento standingsRecordMemento;
+                for(sIndex = 0; sIndex < index; ) {
+                    standingsRecordMemento = teamStandingsMementos.get(sIndex);
+                    teamRank = srArray[sIndex].getRankNumber();
+                    sIndex++;
+
+                    // For medals, we use the "place" not the "rank"
+                    // For honors we rank since multiple ranks can be part of each of the honors groups.
+                    if(ri.getFirstHonorableMentionRank() > 0 && teamRank >= ri.getFirstHonorableMentionRank()) {
+                        standingsRecordMemento.putBoolean("isHonable", true);
+                    } else if(ri.getLastGoldPlace() > 0 && sIndex <= ri.getLastGoldPlace()) {
+                        standingsRecordMemento.putBoolean("isGold", true);
+                    } else if(ri.getLastSilverPlace() > 0 && sIndex <= ri.getLastSilverPlace()) {
+                        standingsRecordMemento.putBoolean("isSilver", true);
+                    } else if(ri.getLastBronzePlace() > 0 && sIndex <= ri.getLastBronzePlace()) {
+                        standingsRecordMemento.putBoolean("isBronze", true);
+                    }
+                    if(ri.getLastHighestHonorsRank() > 0 && teamRank <= ri.getLastHighestHonorsRank()) {
+                        standingsRecordMemento.putBoolean("isHighest", true);
+                    } else if(ri.getLastHighHonorsRank() > 0 && teamRank <= ri.getLastHighHonorsRank()) {
+                        standingsRecordMemento.putBoolean("isHigh", true);
+                    } else if(ri.getLastHonorsRank() > 0 && teamRank <= ri.getLastHonorsRank()) {
+                        standingsRecordMemento.putBoolean("isHonors", true);
+                    }
+                }
+            } else {
+                log.warning("Could not fill in honors XML flags in standings - arrays don't match: " + index + " != " + teamStandingsMementos.size());
+            }
+        }
     }
 
     /**

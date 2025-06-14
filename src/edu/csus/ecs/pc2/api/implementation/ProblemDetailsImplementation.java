@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
 import edu.csus.ecs.pc2.api.IClient;
@@ -7,7 +7,7 @@ import edu.csus.ecs.pc2.api.IProblemDetails;
 
 /**
  * API IClient implementation.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -29,31 +29,39 @@ public class ProblemDetailsImplementation implements IProblemDetails {
 
     private long attempts;
 
+    private boolean fts;
+
     public ProblemDetailsImplementation(IClient client) {
         super();
         this.client = client;
     }
 
+    @Override
     public long getAttempts() {
         return attempts;
     }
 
+    @Override
     public IClient getClient() {
         return client;
     }
 
+    @Override
     public long getPenaltyPoints() {
         return penaltyPoints;
     }
 
+    @Override
     public IProblem getProblem() {
         return problem;
     }
 
+    @Override
     public int getProblemId() {
         return problemId;
     }
 
+    @Override
     public long getSolutionTime() {
         return solutionTime;
     }
@@ -86,7 +94,17 @@ public class ProblemDetailsImplementation implements IProblemDetails {
         this.attempts = attempts;
     }
 
+    @Override
     public boolean isSolved() {
         return solved;
+    }
+
+    public void setFts(boolean fts) {
+        this.fts = fts;
+    }
+
+    @Override
+    public boolean isFts() {
+        return fts;
     }
 }

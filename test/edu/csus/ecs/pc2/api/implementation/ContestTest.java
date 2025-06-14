@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
 import java.io.File;
@@ -165,7 +165,8 @@ public class ContestTest extends AbstractTestCase {
             boolean solved = det.getSolutionTime() != 0;
             println("  " + detailCounter + " " + problems[det.getProblemId() - 1].getName() + //
                     " solved=" + solved + " solutionTime=" + det.getSolutionTime() + //
-                    " points=" + det.getPenaltyPoints() + " attempts=" + det.getAttempts()+" "+det.getClient().getLoginName());
+                    " points=" + det.getPenaltyPoints() + " attempts=" + det.getAttempts() + //
+                    " fts=" + det.isFts() + " "+det.getClient().getLoginName());
 
         }
     }

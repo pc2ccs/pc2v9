@@ -2,59 +2,87 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 /**
+ * CitationRankInformation - class to hold ranks for the various citations.
+ * The medal places, gold, silver and bronze are what they are, independent of rank.
+ * The "honors" ranks (Bill rules) may be comprised of multiple ranks.
+ * Honorable mention rank is the highest rank for any team in honorable mention.
+ *
  * @author John Buck
  *
  */
 public class CitationRankInformation {
-    private int lastGoldRank;
-    private int lastSilverRank;
-    private int lastBronzeRank;
+    private int lastGoldPlace;
+    private int lastSilverPlace;
+    private int lastBronzePlace;
     private int lastHighestHonorsRank;
     private int lastHighHonorsRank;
     private int lastHonorsRank;
     private int firstHonorableMentionRank;
 
-    public int getLastGoldRank() {
-        return lastGoldRank;
+    public int getLastGoldPlace() {
+        return lastGoldPlace;
     }
-    public void setLastGoldRank(int lastGoldRank) {
-        this.lastGoldRank = lastGoldRank;
+    public void setLastGoldPlace(int lastGoldPlace) {
+        this.lastGoldPlace = lastGoldPlace;
     }
-    public int getLastSilverRank() {
-        return lastSilverRank;
+    public int getLastSilverPlace() {
+        return lastSilverPlace;
     }
-    public void setLastSilverRank(int lastSilverRank) {
-        this.lastSilverRank = lastSilverRank;
+    public void setLastSilverPlace(int lastSilverPlace) {
+        this.lastSilverPlace = lastSilverPlace;
     }
-    public int getLastBronzeRank() {
-        return lastBronzeRank;
+    public int getLastBronzePlace() {
+        return lastBronzePlace;
     }
-    public void setLastBronzeRank(int lastBronzeRank) {
-        this.lastBronzeRank = lastBronzeRank;
+    public void setLastBronzePlace(int lastBronzePlace) {
+        this.lastBronzePlace = lastBronzePlace;
     }
     public int getLastHighestHonorsRank() {
         return lastHighestHonorsRank;
     }
-    public void setLastHighestHonorsRank(int lastHighestHonorsRank) {
-        this.lastHighestHonorsRank = lastHighestHonorsRank;
+    /**
+     * Updates highest honors rank if supplied rank is smaller than current one
+     * @param lastHighestHonorsRank
+     */
+    public void updateLastHighestHonorsRank(int lastHighestHonorsRank) {
+        if(lastHighestHonorsRank > this.lastHighestHonorsRank) {
+            this.lastHighestHonorsRank = lastHighestHonorsRank;
+        }
     }
     public int getLastHighHonorsRank() {
         return lastHighHonorsRank;
     }
-    public void setLastHighHonorsRank(int lastHighHonorsRank) {
-        this.lastHighHonorsRank = lastHighHonorsRank;
+    /**
+     * Updates high honors rank if supplied rank is bigger than current one
+     * @param lastHighestHonorsRank
+     */
+    public void updateLastHighHonorsRank(int lastHighHonorsRank) {
+        if(lastHighHonorsRank > this.lastHighHonorsRank) {
+            this.lastHighHonorsRank = lastHighHonorsRank;
+        }
     }
     public int getLastHonorsRank() {
         return lastHonorsRank;
     }
-    public void setLastHonorsRank(int lastHonorsRank) {
-        this.lastHonorsRank = lastHonorsRank;
+    /**
+     * Updates honors rank if supplied rank is bigger than current one
+     * @param lastHighestHonorsRank
+     */
+    public void updateLastHonorsRank(int lastHonorsRank) {
+        if(lastHonorsRank > this.lastHonorsRank) {
+            this.lastHonorsRank = lastHonorsRank;
+        }
     }
     public int getFirstHonorableMentionRank() {
         return firstHonorableMentionRank;
     }
-    public void setFirstHonorableMentionRank(int firstHonorableMentionRank) {
-        this.firstHonorableMentionRank = firstHonorableMentionRank;
+    /**
+     * Updates highest honorable mention rank if bigger rank is larger than current one
+     * @param lastHighestHonorsRank
+     */
+   public void updateFirstHonorableMentionRank(int firstHonorableMentionRank) {
+        if(this.firstHonorableMentionRank == 0 || firstHonorableMentionRank < this.firstHonorableMentionRank) {
+            this.firstHonorableMentionRank = firstHonorableMentionRank;
+        }
     }
-
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
 import java.io.IOException;
@@ -23,15 +23,15 @@ import edu.csus.ecs.pc2.api.IProblemDetails;
 import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
- * API generate IStandings array using DefaultScoringAlgorithm. 
- * 
+ * API generate IStandings array using DefaultScoringAlgorithm.
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -40,10 +40,10 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 public class GenerateStandings {
 
     private ProblemDetailsComparator detailsComparator = new ProblemDetailsComparator();
-    
+
     /**
      * Fetch string from nodes.
-     * 
+     *
      * @param node
      * @return
      */
@@ -80,7 +80,7 @@ public class GenerateStandings {
 
     /**
      * return IProblemDetails for client and problem from detailList.
-     * 
+     *
      * @param client
      * @param problem
      * @param detailList
@@ -97,15 +97,15 @@ public class GenerateStandings {
                 }
             }
         }
-        
-        IProblemDetails[] details = (IProblemDetails[]) outvect.toArray(new IProblemDetails[outvect.size()]);
+
+        IProblemDetails[] details = outvect.toArray(new IProblemDetails[outvect.size()]);
         Arrays.sort(details, detailsComparator);
         return details;
     }
 
     /**
      * Replace/add problem details into standings
-     * 
+     *
      * @param standings
      * @param details
      */
@@ -118,7 +118,7 @@ public class GenerateStandings {
     }
 
     /**
-     * 
+     *
      * @param contest
      * @param xmlString
      * @param log
@@ -141,7 +141,7 @@ public class GenerateStandings {
         NodeList list = document.getDocumentElement().getChildNodes();
 
         for (int i = 0; i < list.getLength(); i++) {
-            Node node = (Node) list.item(i);
+            Node node = list.item(i);
             String name = node.getNodeName();
             if (name.equals("teamStanding")) {
                 try {
@@ -168,12 +168,12 @@ public class GenerateStandings {
             }
         }
 
-        return (IProblemDetails[]) details.toArray(new IProblemDetails[details.size()]);
+        return details.toArray(new IProblemDetails[details.size()]);
     }
 
     /**
      * Returns all IProblemDetails for all teams.
-     * 
+     *
      * @param contest
      * @param log
      * @return
@@ -197,7 +197,7 @@ public class GenerateStandings {
     }
 
     /**
-     * 
+     *
      * @param contest
      * @param clientId
      * @param parentNode
@@ -224,16 +224,16 @@ public class GenerateStandings {
                     ProblemImplementation problemImplementation = new ProblemImplementation(elementId, contest);
                     problemDetails.setProblem(problemImplementation);
                     detailsList.add(problemDetails);
-                } 
+                }
                 // else there was no problem data, nothing to add
             }
         }
 
-        return (IProblemDetails[]) detailsList.toArray(new IProblemDetails[detailsList.size()]);
+        return detailsList.toArray(new IProblemDetails[detailsList.size()]);
     }
 
     /**
-     * 
+     *
      * @param parentNode
      * @param clientId
      * @return
@@ -263,11 +263,13 @@ public class GenerateStandings {
                 problemDetailsImplementation.setAttempts(intvalue);
 
             } else if (name.equals("isSolved")) {
-                problemDetailsImplementation.setSolved(value.equals("true"));
+                problemDetailsImplementation.setSolved("true".equals(value));
             } else if (name.equals("points")) {
                 problemDetailsImplementation.setPenaltyPoints(intvalue);
             } else if (name.equals("solutionTime")) {
                 problemDetailsImplementation.setSolutionTime(intvalue);
+            } else if (name.equals("fts")) {
+                problemDetailsImplementation.setFts("true".equals(value));
             }
 //              problemId is the element id not a number
 //                        } else if (name.equals("problemId")) {
@@ -277,12 +279,12 @@ public class GenerateStandings {
 
         return problemDetailsImplementation;
     }
-    
+
 
 
     /**
      * Return the contest standings.
-     * 
+     *
      * @param contest
      * @param log
      * @return an array of the teams and their ranks and standing information.
@@ -306,7 +308,7 @@ public class GenerateStandings {
             NodeList list = document.getDocumentElement().getChildNodes();
 
             for (int i = 0; i < list.getLength(); i++) {
-                Node node = (Node) list.item(i);
+                Node node = list.item(i);
                 String name = node.getNodeName();
                 if (name.equals("teamStanding")) {
                     try {
@@ -321,7 +323,7 @@ public class GenerateStandings {
                         int siteNumber = Integer.parseInt(cols[5]);
 
                         ClientId clientId = new ClientId(siteNumber, Type.TEAM, clientNumber);
-                        
+
                         IClient client = new ClientImplementation(clientId, contest);
 
                         IProblemDetails[] clientProblemDetails = getClientProblemDetails(contest, client, node);
@@ -338,6 +340,6 @@ public class GenerateStandings {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
         }
-        return (StandingImplementation[]) standings.toArray(new StandingImplementation[standings.size()]);
+        return standings.toArray(new StandingImplementation[standings.size()]);
     }
-} 
+}
