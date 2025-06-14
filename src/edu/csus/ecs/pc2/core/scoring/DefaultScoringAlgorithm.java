@@ -1205,8 +1205,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
         }
         memento.putString("scoreboardMessage", value);
-        memento.putString("elapsedtime", contestTime.getElapsedTimeStr());
-        memento.putString("remainingtime",  contestTime.getRemainingTimeStr());
+        if(contestTime != null) {
+            memento.putString("elapsedtime", contestTime.getElapsedTimeStr());
+            memento.putString("remainingtime",  contestTime.getRemainingTimeStr());
+        } else {
+            // we use standard defaults if the time were not set.  JUnits do not set times.
+            memento.putString("elapsedtime", "5:00:00");
+            memento.putString("remainingtime",  "0:00:00");
+        }
 
         return memento;
     }
