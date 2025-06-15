@@ -4,11 +4,13 @@ package edu.csus.ecs.pc2.core.execute;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileAlreadyExistsException;
@@ -161,6 +163,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * Validator stderr filename.
      */
     public static final String VALIDATOR_STDERR_FILENAME = "vstderr.pc2";
+
+    /**
+     * Information about the submission source file
+     */
+    public static final String SOURCE_CATALOG_FILENAME = "src_catalog.json";
 
     /**
      * The default limit (in seconds) for validation of a single run (test case) of a submission.
@@ -2760,6 +2767,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             String cmdline = substituteAllStrings(run, language.getCompileCommandLine());
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
+            // create submission catalog file
+            BufferedWriter catlog = new BufferedWriter(new FileWriter(prefixExecuteDirname(SOURCE_CATALOG_FILENAME)));
+            if(runFiles != null) {
+                runFiles.createCatalogJSON(catlog);
+                catlog.flush();
+            }
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false));
             BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false));
 
