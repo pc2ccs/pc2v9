@@ -303,7 +303,22 @@ public class ResultsFile {
             finalizeData = GenDefaultFinalizeData();
         }
 
+        // The medal counts are fixed and are based solely on the order of finishing
+        // the contest.
+        ri.setLastGoldPlace(finalizeData.getGoldRank());
+        ri.setLastSilverPlace(finalizeData.getSilverRank());
+        ri.setLastBronzePlace(finalizeData.getBronzeRank());
+
         int lastMedalRank = finalizeData.getBronzeRank();
+        // If there are more medals awarded than the number of teams in the standings,
+        // cap the last medal rank at the last team.
+        if(lastMedalRank > standingsRecords.length) {
+            lastMedalRank = standingsRecords.length;
+        }
+        // This would mean that there are no teams in the standings report.
+        if(lastMedalRank == 0) {
+            return(ri);
+        }
 
         if (finalizeData.isUseWFGroupRanking() && finalizeData.isCustomizeHonorsSolvedCount()) {
             if (finalizeData.getHighestHonorSolvedCount() != 0) {
@@ -316,12 +331,6 @@ public class ResultsFile {
                 median = finalizeData.getHonorSolvedCount();
             }
         }
-
-        // The medal counts are fixed and are based solely on the order of finishing
-        // the contest.
-        ri.setLastGoldPlace(finalizeData.getGoldRank());
-        ri.setLastSilverPlace(finalizeData.getSilverRank());
-        ri.setLastBronzePlace(finalizeData.getBronzeRank());
 
         // resort standingsRecord based on lastMedalRank and median
         Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
@@ -337,7 +346,6 @@ public class ResultsFile {
         comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
         Arrays.sort(standingsRecords, comparator);
 
-        int realRank = 0;
         int rank;
         if (highestHonorSolvedCount == 0) {
             highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
@@ -347,7 +355,6 @@ public class ResultsFile {
         }
 
         for (StandingsRecord record : standingsRecords) {
-            realRank++;
 
             boolean isHighestHonor = false;
             boolean isHighHonor = false;
