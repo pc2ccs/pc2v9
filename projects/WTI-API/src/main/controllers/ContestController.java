@@ -18,6 +18,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -25,7 +30,6 @@ import org.json.XML;
 import communication.WTIWebsocket;
 import config.ServerInit;
 import edu.csus.ecs.pc2.api.IClarification;
-import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IJudgement;
@@ -107,6 +111,9 @@ public class ContestController extends MainController {
 	//mutex to insure at most one browser client at a time can attempt to use the above DSA to update standings
 	private static Boolean updateStandingsMutex = new Boolean(false);
 	
+	//an HTTP Client for generating localhost callbacks when the contest has started
+    private final HttpClient httpClient;
+	
 	/**
 	 * Constructs a ContestController for the WTI server. Construction includes
 	 * invoking the super-class {@link MainController}, constructor, which has the
@@ -178,6 +185,18 @@ public class ContestController extends MainController {
 			e.printStackTrace();
 			throw e;
 		}
+		
+		//create an HTTP client, which will be used to make a self-referencing http callback when the ScoreboardListener
+		//receives a notice that the contest has started (see method postContestHasStarted()).
+		//This is created here (in the constructor) so that it is immediately available.
+        httpClient = new HttpClient();
+        try {
+			httpClient.start();
+		} catch (Exception e) {
+			logger.severe("Exception starting http client (intended for making 'contestHasStarted' callbacks):" );
+			System.err.println ("Exception starting http client (intended for making 'contestHasStarted' callbacks)" );
+			e.printStackTrace();
+		} 
 	}
 
 	/***
@@ -890,5 +909,49 @@ public class ContestController extends MainController {
 		
 		return connections;
 	}
+
+	public void postContestHasStarted() {
+		
+		logger.info("ContestController.postContestHasStarted() invoked; making localhost POST callback");
+		
+        try {
+        	//TODO:  update the following URL to contain the proper port number!
+        	System.out.println ("WARNING:  ContestController.postContestHasStarted() method has not been updated to handle webserver port numbers other than the default (8080)!");
+        	logger.warning("ContestController.postContestHasStarted() method has not been updated to handle webserver port numbers other than the default (8080)!");
+        	
+            Request request = httpClient.newRequest("http://localhost:8080/internal/contestStarted")
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.CONTENT_TYPE, "text/plain")
+                    .content(new StringContentProvider("LocalHost callback: posting Contest Has Started"));
+
+            request.send(new org.eclipse.jetty.client.api.Response.CompleteListener() {
+            	//the following method is invoked when the send completes;
+            	//it logs whether the POST completed successfully or not
+                @Override
+                public void onComplete(org.eclipse.jetty.client.api.Result result) {
+                    int status = result.getResponse().getStatus();
+
+                    if (status == 200) {
+                        logger.info("POST to /internal/contestStarted succeeded with status: " + status);
+                        System.out.println(">>> POST to /internal/contestStarted succeeded with status: " + status);
+                    } else {
+                        logger.warning("POST to /internal/contestStarted failed with status: " + status);
+                        System.err.println(">>> POST to /internal/contestStarted failed with status: " + status);
+                        if (result.getFailure() != null) {
+                            result.getFailure().printStackTrace();
+                        }
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+        	logger.warning("Exception in ContestController.postContestHasStarted()");
+            e.printStackTrace(); 
+        }
+    }
+
+    public void stop() throws Exception {
+        httpClient.stop(); // Clean shutdown at application end
+    }
 	
 }
