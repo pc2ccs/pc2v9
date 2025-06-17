@@ -1,5 +1,6 @@
 package services;
 
+import java.util.Calendar;
 import java.util.HashMap;
 
 import javax.json.Json;
@@ -8,6 +9,7 @@ import javax.json.JsonObject;
 import WebsocketEnums.WebsocketMsgType;
 import communication.WTIWebsocket;
 import controllers.ContestController;
+import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.listener.ContestEvent;
@@ -18,6 +20,7 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 
 	private ContestController contestController ;
 	private WTIWebsocket socket ;
+	private boolean contestHasStarted = false;
 	
 	/**
 	 * Constructs a new ScoreboardChangeListener which listens for changes in standings-related items 
@@ -123,10 +126,13 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 * Sets the contest controller's "wtiServerStandingsAreCurrent" flag false, since
 	 * updating a configuration item (for example, changing the "display on scoreboard" property of
 	 * a team acount) potentially changes the standings.
+	 * Also checks to see whether the specified event indicates that the contest has just started, and if
+	 * so POSTS a message to the webserver indicating the contest has started.
 	 */
 	@Override
 	public void configurationItemUpdated(ContestEvent contestEvent) {
 		markStandingsNotCurrent();
+		checkContestStartedState(contestEvent);
 	}
 
 	/**
@@ -174,5 +180,46 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 		}
 
 	}
+	
+	/**
+	 * Checks to see whether we've previously seen a Contest Started event; if not, checks the specified ContestEvent to see 
+	 * whether it indicates the contest has started and if so sets the global flag indicating the contest has started and makes
+	 * an HTTP POST indicating the contest has started.
+	 * 
+	 * @param contestEvent the {@link ContestEvent} to check if we haven't already seen a contest started event.
+	 */
+	private void checkContestStartedState(ContestEvent contestEvent) {
+		
+		//check whether we've already seen a contest started event (this check avoids making repeated contest-has-started posts).
+		if (!contestHasStarted) {
 
+			//we haven't yet seen a Contest Start yet; check if the event is a ContestClock event
+			if (contestEvent.getEventType().equals(ContestEvent.EventType.CONTEST_CLOCK)) {
+				
+				//get the clock out of the event and see if the contest has started
+				IContestClock clock = contestEvent.getContestClock();
+				Calendar startTime = clock.getContestStartTime();
+				
+				if (startTime != null) {
+					
+					//yes, the contest has started; mark it so
+					contestHasStarted = true;
+					
+					//post a contest-started notification to the webserver (Note that this amounts to posting
+					// to ourselves; it's necessary because we can't detect contest-started within the webserver
+					// until after the PC2 API has been constructed, and the only way the webserver can get contest state
+					// changes is via the PC2 API.
+					
+					postContestHasStarted();
+				}
+			}
+		} 
+	}
+	
+	/**
+	 * Invokes the ContestController to issue an HTTP POST indicating that the contest has started.
+	 */
+	private void postContestHasStarted() {
+		contestController.postContestHasStarted();
+	}
 }
