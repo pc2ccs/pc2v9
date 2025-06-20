@@ -132,8 +132,96 @@
 		<xsl:choose>
 		    <xsl:when test="@index mod 2 = 0">
 				<tr class="even">
-					<td><xsl:value-of select="@rank"/></td>
-					<td><xsl:value-of select="@teamName"/></td>
+					<td>
+						<xsl:if test="@isGold = 'true'">
+							<xsl:attribute name="class">gold</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isSilver = 'true'">
+							<xsl:attribute name="class">silver</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isBronze = 'true'">
+							<xsl:attribute name="class">bronze</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isHighest = 'true'">
+							<xsl:if test="not(@isGold) or @isGold = 'false'">
+								<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+									<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+										<xsl:attribute name="class">highest</xsl:attribute>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:if test="@isHigh = 'true'">
+							<xsl:if test="not(@isHighest) or @isHighest = 'false'">
+								<xsl:if test="not(@isGold) or @isGold = 'false'">
+									<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+										<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+											<xsl:attribute name="class">high</xsl:attribute>
+										</xsl:if>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:if test="@isHonors = 'true'">
+							<xsl:if test="not(@isHigh) or @isHigh = 'false'">
+								<xsl:if test="not(@isHighest) or @isHighest = 'false'">
+									<xsl:if test="not(@isGold) or @isGold = 'false'">
+										<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+											<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+												<xsl:attribute name="class">honors</xsl:attribute>
+											</xsl:if>
+										</xsl:if>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:value-of select="@rank"/>
+					</td>
+					<td>
+						<xsl:if test="@isGold = 'true'">
+							<xsl:attribute name="class">gold</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isSilver = 'true'">
+							<xsl:attribute name="class">silver</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isBronze = 'true'">
+							<xsl:attribute name="class">bronze</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isHighest = 'true'">
+							<xsl:if test="not(@isGold) or @isGold = 'false'">
+								<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+									<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+										<xsl:attribute name="class">highest</xsl:attribute>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:if test="@isHigh = 'true'">
+							<xsl:if test="not(@isHighest) or @isHighest = 'false'">
+								<xsl:if test="not(@isGold) or @isGold = 'false'">
+									<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+										<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+											<xsl:attribute name="class">high</xsl:attribute>
+										</xsl:if>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:if test="@isHonors = 'true'">
+							<xsl:if test="not(@isHigh) or @isHigh = 'false'">
+								<xsl:if test="not(@isHighest) or @isHighest = 'false'">
+									<xsl:if test="not(@isGold) or @isGold = 'false'">
+										<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+											<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+												<xsl:attribute name="class">honors</xsl:attribute>
+											</xsl:if>
+										</xsl:if>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:value-of select="@teamName"/>
+					</td>
 					<td>
 						<xsl:attribute name="class">center</xsl:attribute>
 						<xsl:value-of select="@solved"/>
@@ -149,8 +237,96 @@
 		    </xsl:when>
 		    <xsl:otherwise>
 		        <tr class="odd">
-					<td><xsl:value-of select="@rank"/></td>
-					<td><xsl:value-of select="@teamName"/></td>
+					<td>
+						<xsl:if test="@isGold = 'true'">
+							<xsl:attribute name="class">gold</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isSilver = 'true'">
+							<xsl:attribute name="class">silver</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isBronze = 'true'">
+							<xsl:attribute name="class">bronze</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isHighest = 'true'">
+							<xsl:if test="not(@isGold) or @isGold = 'false'">
+								<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+									<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+										<xsl:attribute name="class">highest</xsl:attribute>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:if test="@isHigh = 'true'">
+							<xsl:if test="not(@isHighest) or @isHighest = 'false'">
+								<xsl:if test="not(@isGold) or @isGold = 'false'">
+									<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+										<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+											<xsl:attribute name="class">high</xsl:attribute>
+										</xsl:if>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:if test="@isHonors = 'true'">
+							<xsl:if test="not(@isHigh) or @isHigh = 'false'">
+								<xsl:if test="not(@isHighest) or @isHighest = 'false'">
+									<xsl:if test="not(@isGold) or @isGold = 'false'">
+										<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+											<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+												<xsl:attribute name="class">honors</xsl:attribute>
+											</xsl:if>
+										</xsl:if>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:value-of select="@rank"/>
+					</td>
+					<td>
+						<xsl:if test="@isGold = 'true'">
+							<xsl:attribute name="class">gold</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isSilver = 'true'">
+							<xsl:attribute name="class">silver</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isBronze = 'true'">
+							<xsl:attribute name="class">bronze</xsl:attribute>
+						</xsl:if>
+						<xsl:if test="@isHighest = 'true'">
+							<xsl:if test="not(@isGold) or @isGold = 'false'">
+								<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+									<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+										<xsl:attribute name="class">highest</xsl:attribute>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:if test="@isHigh = 'true'">
+							<xsl:if test="not(@isHighest) or @isHighest = 'false'">
+								<xsl:if test="not(@isGold) or @isGold = 'false'">
+									<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+										<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+											<xsl:attribute name="class">high</xsl:attribute>
+										</xsl:if>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:if test="@isHonors = 'true'">
+							<xsl:if test="not(@isHigh) or @isHigh = 'false'">
+								<xsl:if test="not(@isHighest) or @isHighest = 'false'">
+									<xsl:if test="not(@isGold) or @isGold = 'false'">
+										<xsl:if test="not(@isSilver) or @isSilver = 'false'">
+											<xsl:if test="not(@isBronze) or @isBronze = 'false'">
+												<xsl:attribute name="class">honors</xsl:attribute>
+											</xsl:if>
+										</xsl:if>
+									</xsl:if>
+								</xsl:if>
+							</xsl:if>
+						</xsl:if>
+						<xsl:value-of select="@teamName"/>
+					</td>
 					<td>
 						<xsl:attribute name="class">center</xsl:attribute>
 						<xsl:value-of select="@solved"/>
