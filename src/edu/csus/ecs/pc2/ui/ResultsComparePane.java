@@ -290,7 +290,6 @@ public class ResultsComparePane extends JPanePlugin {
 
         ClientSettings clientSet = getClientSettings(getContest());
         String exportDir = clientSet.getProperty(ClientSettings.PC2_RESULTS_DIR);
-        exportDir = ""; // JB TEST
         if(exportDir.isEmpty()) {
             exportDir = guessResultsDirectory(CCS_SHADOW_DIR);
         }
@@ -298,7 +297,6 @@ public class ResultsComparePane extends JPanePlugin {
         exportDirectoryLabel.setToolTipText(exportDir);
 
         String primaryResultsDir = clientSet.getProperty(ClientSettings.PRIMARY_CCS_RESULTS_DIR);
-        primaryResultsDir = ""; // JB TEST
         if(primaryResultsDir.isEmpty()) {
             primaryResultsDir = guessResultsDirectory(CCS_PRIMARY_DIR);
         }
