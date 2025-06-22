@@ -1,9 +1,11 @@
 // Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 
@@ -27,7 +29,15 @@ public class CLICSScore {
 //    private int score;
 
     @JsonProperty
-    private String time;
+    private int time;
+
+    /**
+     * Provide empty constructor for Jackson deserialization
+     */
+    @JsonCreator
+    public CLICSScore() {
+
+    }
 
     /**
      * Fill in the properties for a team's score
@@ -39,8 +49,20 @@ public class CLICSScore {
         total_time = Utilities.nullSafeToInt(teamStanding.getPoints(), 0);
         if(num_solved > 0) {
             // Problem solution time is in minutes.
-            time = teamStanding.getLastSolved();
+            time = StringUtilities.getIntegerValue(teamStanding.getLastSolved(), 0);
         }
+    }
+
+    public int getNum_solved() {
+        return num_solved;
+    }
+
+    public int getTotal_time() {
+        return total_time;
+    }
+
+    public int getTime() {
+        return time;
     }
 
 }

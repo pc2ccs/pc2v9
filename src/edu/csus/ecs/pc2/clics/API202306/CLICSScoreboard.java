@@ -6,17 +6,18 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -50,10 +51,18 @@ public class CLICSScoreboard {
     private CLICSScoreboardRow [] rows;
 
     /**
+     * Provide empty constructor for Jackson deserialization
+     */
+    @JsonCreator
+    public CLICSScoreboard() {
+
+    }
+
+    /**
      * Fill in the scoreboard information
      *
      */
-    public CLICSScoreboard(IInternalContest model, IInternalController controller, Group group, Integer division)  throws IllegalContestState, JAXBException, IOException {
+    public CLICSScoreboard(IInternalContest model, Group group, Integer division)  throws IllegalContestState, JAXBException, IOException {
 
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
@@ -114,6 +123,15 @@ public class CLICSScoreboard {
         } else {
             rows = new CLICSScoreboardRow[0];
         }
+    }
+
+    /**
+     * Get the per-team scoreboard rows as a List
+     *
+     * @return List of scoreboard rows
+     */
+    public List<CLICSScoreboardRow> getRows() {
+        return Arrays.asList(rows);
     }
 
     public String toJSON() {

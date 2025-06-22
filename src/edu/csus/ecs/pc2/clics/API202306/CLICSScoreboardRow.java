@@ -2,8 +2,11 @@
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -34,6 +37,14 @@ public class CLICSScoreboardRow {
     private CLICSProblemScore [] problems;
 
     /**
+     * Provide empty constructor for Jackson deserialization
+     */
+    @JsonCreator
+    public CLICSScoreboardRow() {
+
+    }
+
+    /**
      * Fill in API scoreboard row information properties (for scoreboard endpoint)
      *
      * @param probEleToShortName hashmap for mapping problem elementid to shortname
@@ -50,5 +61,21 @@ public class CLICSScoreboardRow {
             pslist.add(new CLICSProblemScore(probEleToShortName, psi));
         }
         problems = pslist.toArray(new CLICSProblemScore[0]);
+    }
+
+    public int getRank() {
+        return rank;
+    }
+
+    public String getTeam_id() {
+        return team_id;
+    }
+
+    public CLICSScore getScore() {
+        return score;
+    }
+
+    public List<CLICSProblemScore> getProblems() {
+        return Arrays.asList(problems);
     }
 }

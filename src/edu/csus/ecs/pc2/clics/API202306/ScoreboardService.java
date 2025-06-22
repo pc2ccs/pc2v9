@@ -104,7 +104,7 @@ public class ScoreboardService implements Feature {
 
                 // ok to return scoreboard
                 try {
-                    CLICSScoreboard scoreboard = new CLICSScoreboard(model, controller, specificGroup, divNumber);
+                    CLICSScoreboard scoreboard = new CLICSScoreboard(model, specificGroup, divNumber);
                     return Response.ok(scoreboard.toJSON(), MediaType.APPLICATION_JSON).build();
                 } catch (IllegalContestState | JAXBException | IOException e) {
                     controller.getLog().log(Log.WARNING, "Exception creating PC2 scoreboard JSON: " + e.getMessage(), e);

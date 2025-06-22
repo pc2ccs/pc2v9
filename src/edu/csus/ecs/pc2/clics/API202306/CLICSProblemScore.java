@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.HashMap;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -40,6 +41,14 @@ public class CLICSProblemScore {
     private int time;
 
     /**
+     * Provide empty constructor for Jackson deserialization
+     */
+    @JsonCreator
+    public CLICSProblemScore() {
+
+    }
+
+    /**
      * Fill in API problem score information properties (for scoreboard endpoint)
      *
      * @param probEleToShort hashmap for mapping problem elementid to shortname
@@ -73,5 +82,29 @@ public class CLICSProblemScore {
         } catch (Exception e) {
             return defaultBool;
         }
+    }
+
+    public String getProblem_id() {
+        return problem_id;
+    }
+
+    public int getNum_judged() {
+        return num_judged;
+    }
+
+    public int getNum_pending() {
+        return num_pending;
+    }
+
+    public boolean isSolved() {
+        return solved;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
     }
 }

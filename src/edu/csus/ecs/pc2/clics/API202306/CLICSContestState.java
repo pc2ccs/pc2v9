@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.clics.API202306;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,6 +67,14 @@ public class CLICSContestState {
      */
     @JsonProperty
     private String contest_time;
+
+    /**
+     * Provide empty constructor for Jackson deserialization
+     */
+    @JsonCreator
+    public CLICSContestState() {
+
+    }
 
     /**
      * Fill in properties for contest state as per 2023-06 spec
