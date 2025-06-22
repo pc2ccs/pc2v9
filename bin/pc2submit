@@ -324,8 +324,9 @@ def check_netrc() :
     
 # Get user name from credentials in .netrc only if ADDSUBMITCREDENTIALS is in environment otherwise
 # see if user has credentials in his .netrc for the url machine 
-# If there aren't any credentials in the .netrc, then prompt the user to enter them
+# If there aren't any credentials in the .netrc, then prompt the user to enter them if ADDSUBMITCREDENTIALS is in environment,
 # and we save them in the .netrc
+# If ADDSUBMITCREDENTIALS is not set in the environment, the call will fail telling the user we can't determine who they are.
 def get_netrc_user() :    
     bAdd = False
     nrc_user = None
