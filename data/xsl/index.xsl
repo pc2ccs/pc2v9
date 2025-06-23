@@ -180,12 +180,15 @@
 					<td>
 						<xsl:if test="@isGold = 'true'">
 							<xsl:attribute name="class">gold</xsl:attribute>
+							<img src="gold.png" alt="Gold Medal" style="height:1em;vertical-align:middle;"/>
 						</xsl:if>
 						<xsl:if test="@isSilver = 'true'">
 							<xsl:attribute name="class">silver</xsl:attribute>
+							<img src="silver.png" alt="Silver Medal" style="height:1em;vertical-align:middle;"/>
 						</xsl:if>
 						<xsl:if test="@isBronze = 'true'">
 							<xsl:attribute name="class">bronze</xsl:attribute>
+							<img src="bronze.png" alt="Bronze Medal" style="height:1em;vertical-align:middle;"/>
 						</xsl:if>
 						<xsl:if test="@isHighest = 'true'">
 							<xsl:if test="not(@isGold) or @isGold = 'false'">
@@ -285,12 +288,15 @@
 					<td>
 						<xsl:if test="@isGold = 'true'">
 							<xsl:attribute name="class">gold</xsl:attribute>
+							<img src="gold.png" alt="Gold Medal" style="height:1em;vertical-align:middle;"/>
 						</xsl:if>
 						<xsl:if test="@isSilver = 'true'">
 							<xsl:attribute name="class">silver</xsl:attribute>
+							<img src="silver.png" alt="Silver Medal" style="height:1em;vertical-align:middle;"/>
 						</xsl:if>
 						<xsl:if test="@isBronze = 'true'">
 							<xsl:attribute name="class">bronze</xsl:attribute>
+							<img src="bronze.png" alt="Bronze Medal" style="height:1em;vertical-align:middle;"/>
 						</xsl:if>
 						<xsl:if test="@isHighest = 'true'">
 							<xsl:if test="not(@isGold) or @isGold = 'false'">
