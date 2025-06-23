@@ -480,7 +480,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         loadDataFileContents = ContestImportUtilities.fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
 
-        String shortContestName = fetchValue(content, CLICS_CONTEST_ID);
+        String shortContestName = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_ID);
 
         // Check if id is CLICS compliant
         if (!StringUtilities.isEmpty(shortContestName)) {
@@ -496,13 +496,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         } else {
             // only if CLICS id is not present do we try older key `short-name`
-            shortContestName = fetchValue(content, SHORT_NAME_KEY);
+            shortContestName = ContestImportUtilities.fetchValue(content, SHORT_NAME_KEY);
             shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
         }
 
         // only if both CLICS id and `short-name` is not present do we try the key `name`
         if (StringUtilities.isEmpty(shortContestName)) {
-            shortContestName = fetchValue(content, CLICS_CONTEST_NAME);
+            shortContestName = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_NAME);
             shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
         }
         // only set short name if string is present AND not empty
@@ -1002,7 +1002,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (scoreboardFreezeTime.length() > 2) {
             long seconds = parseTimeIntoSeconds(scoreboardFreezeTime, -1);
             if(seconds == -1) {
-                syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds or HH:MM:SS");
+                ContestImportUtilities.syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds or HH:MM:SS");
             }
             scoreboardFreezeTime = ContestTime.formatTime(seconds);
         }
