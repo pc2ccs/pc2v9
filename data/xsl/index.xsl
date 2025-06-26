@@ -2,9 +2,9 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:output method="html" indent="yes"/>
 <xsl:decimal-format decimal-separator="." grouping-separator="," />
-<xsl:variable name="divStop" select="10"/>
-<xsl:variable name="divStart" select="7"/>
-<xsl:variable name="totalTeams" select="52" />
+<xsl:variable name="divStart" select="3"/>
+<xsl:variable name="divStop" select="25"/>
+<xsl:variable name="totalTeams" select="130" />
 <xsl:variable name="teamCount" select="count(/contestStandings/teamStanding)" />
 <xsl:template match="contestStandings">
 	<HTML>
@@ -28,23 +28,24 @@
 					&#160;
 					<!-- XXX probably can remove these with the full title -->
 					<br/>
-					<table style="width:100%">
-						<tr>
-							<td class="remaining">
-								<h2>Remaining: <xsl:value-of select="/contestStandings/standingsHeader/@remainingtime"/></h2>
-							</td>
-							<td class="freeze">
-								<xsl:value-of select="/contestStandings/standingsHeader/@scoreboardMessage"/>
-							</td>
-							<td class="elapsed">
-								<h2>Elapsed: <xsl:value-of select="/contestStandings/standingsHeader/@elapsedtime"/></h2>
-							</td>
-						</tr>
-					</table>
+					<xsl:value-of select="/contestStandings/standingsHeader/@scoreboardMessage"/>
+					<br/>
+					Generated: <xsl:value-of select="/contestStandings/standingsHeader/@currentDate"/>
+					<br/>
+					<xsl:choose>
+						<xsl:when test="/contestStandings/standingsHeader/@remainingtime = '0:00:00'">
+							The contest has ended
+						</xsl:when>
+						<xsl:otherwise>
+							With: <xsl:value-of select="/contestStandings/standingsHeader/@remainingtime"/> Contest Time Remaining
+						</xsl:otherwise>
+					</xsl:choose>
 					<br/>
 					<xsl:choose>
 						<xsl:when test="$teamCount = $totalTeams">
-							<h3>NAC 2025 Contest Standings</h3>
+							<h3>
+								<xsl:value-of select="/contestStandings/standingsHeader/@title"/> Standings
+							</h3>
 						</xsl:when>
 						<xsl:otherwise>
 							<h3>
@@ -76,13 +77,6 @@
 						<xsl:call-template name="problemTitle"/>
 						<th>Total att/solv</th>
 					</tr>
-					<!-- <tr>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<xsl:call-template name="problemColor"/>
-					</tr> -->
 					<xsl:call-template name="teamStanding"/>
 					<xsl:call-template name="summary"/>
 				</TABLE>
@@ -392,23 +386,6 @@
         </th>
     </xsl:for-each>
 </xsl:template>
-
-<!-- <xsl:template name="problemColor">
-	<xsl:for-each select="/contestStandings/standingsHeader/colorList/colors[@siteNum = 1]/problem">
-		<td>
-			<center>
-				<xsl:choose>
-					<xsl:when test="@colorName">
-						<xsl:value-of select="@colorName"/>
-					</xsl:when>
-					<xsl:otherwise>
-						Color<xsl:value-of select="@letter"/>
-					</xsl:otherwise>
-				</xsl:choose>
-			</center>
-		</td>
-    </xsl:for-each>
-</xsl:template> -->
 
 <xsl:template name="groupLink">
     <xsl:param name="group"/>

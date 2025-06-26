@@ -166,18 +166,3 @@ table tr td.center {
 table tr td.right {
         text-align: right;
 }
-
-table td.remaining {
-	border-bottom: none;
-	text-align: left;
-}
-
-table td.elapsed {
-	border-bottom: none;
-	text-align: right;
-}
-
-table td.freeze {
-	border-bottom: none;
-	text-align: center;
-}
