@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ public class StandingsJSON {
             return "[]";
         }
 
+        boolean needCommaSep = false;
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
         scoringAlgorithm.setContest(contest);
 
@@ -51,7 +52,12 @@ public class StandingsJSON {
         StringBuffer buffer = new StringBuffer();
 
         for (StandingsRecord sr : standingsRecords) {
-            buffer.append('{');
+            if(needCommaSep) {
+                buffer.append(",{");
+            } else {
+                buffer.append('{');
+                needCommaSep = true;
+            }
             ClientId clientId = sr.getClientId();
             Account account = contest.getAccount(clientId);
             String universityName = account.getDisplayName();

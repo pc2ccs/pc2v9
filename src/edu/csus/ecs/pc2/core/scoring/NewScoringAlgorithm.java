@@ -688,6 +688,12 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         return (i.intValue());
     }
 
+    private boolean getPropBooleanValue(Properties inProperties, String key) {
+        String s = inProperties.getProperty(key);
+        Boolean b = Boolean.parseBoolean(s);
+        return (b.booleanValue());
+    }
+
     private int getNoPenalty(Properties properties) {
         // private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, {
         // BASE_POINTS_PER_YES, "0:Integer" } };
@@ -719,6 +725,8 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         int numberJudged = 0;
 
+        boolean ignoreSub = false;
+
         Arrays.sort(runs, new RunCompartorByElapsed());
 
         for (Run run : runs) {
@@ -726,9 +734,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                 continue;
             }
 
-            numberSubmissions++;
-
-//            System.out.println(numberSubmissions + " "+run.getElapsedMins()+ " "+run);
+            ignoreSub = false;
 
             if (run.isJudged()) {
                 numberJudged++;
@@ -752,12 +758,24 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
                 if (Judgement.ACRONYM_COMPILATION_ERROR.equals(judgment.getAcronym())) {
                     compilationErrorsBeforeYes++;
+                    if(isCEIgnore(properties)) {
+                        ignoreSub = true;
+                    }
                 } else if (Judgement.ACRONYM_SECURITY_VIOLATION.equals(judgment.getAcronym())) {
                     securityViolationBeforeYes++;
+                    if(isSVIgnore(properties)) {
+                        ignoreSub = true;
+                    }
                 } else {
                     submissionsBeforeYes++;
                 }
             }
+
+            if(!ignoreSub) {
+                numberSubmissions++;
+            }
+
+//          System.out.println(numberSubmissions + " "+run.getElapsedMins()+ " "+run);
         }
 
         if (solved) {
@@ -777,6 +795,16 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     private int getSVPenalty(Properties properties) {
         return getPropIntValue(properties, DefaultScoringAlgorithm.POINTS_PER_NO_SECURITY_VIOLATION, "0");
+    }
+
+    private boolean isCEIgnore(Properties properties) {
+        return(getPropBooleanValue(properties, DefaultScoringAlgorithm.IGNORE_COMPILATION_ERROR) &&
+               getCEPenalty(properties) == 0);
+    }
+
+    private boolean isSVIgnore(Properties properties) {
+        return(getPropBooleanValue(properties, DefaultScoringAlgorithm.IGNORE_SECURITY_VIOLATION) &&
+               getSVPenalty(properties) == 0);
     }
 
     /**
