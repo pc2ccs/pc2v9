@@ -106,6 +106,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     private int grandTotalProblemAttempts;
 
+    private int grandTotalTeams;
+
     private int[] problemBestTime = null;
 
     private int[] problemLastTime = null;
@@ -380,7 +382,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Group[] groups = theContest.getGroups();
         boolean bGroupsExcluded = false;
         if (groups != null) {
-            bGroupsExcluded = dumpGroupList(groups, summaryMememento, wantedGroups);
+            bGroupsExcluded = dumpGroupList(groups, summaryMememento, wantedGroups, accountList);
         }
         BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
         if (balloonSettings != null) {
@@ -419,7 +421,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
             }
 
-           initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, wantedGroups);
+            grandTotalTeams = 0;
+            initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, wantedGroups);
 
             for (int i = 0; i < runs.length; i++) {
                 Account account = accountList.getAccount(runs[i].getSubmitter());
@@ -577,18 +580,29 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param groups All groups configured
      * @param memento Where to put the group XML informtion
      * @param wantedGroups - specific groups the scoreboard is being generated for
+     * @param accountList - list of accounts so we can count how many in each group
      * @return true if any groups were excluded from the scoreboard because of wanted groups
      */
-    private boolean dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups) {
+    private boolean dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups, AccountList accountList) {
         memento.putInteger("groupCount", groups.length+1);
         IMemento groupsMemento = memento.createChild("groupList");
         int id = 0;
+        int aCount;
         boolean excludedGroups = false;
         for (int i = 0; i < groups.length; i++) {
             if (!groups[i].isDisplayOnScoreboard()) {
                 continue;
             }
             id = id + 1;
+            // Count number of scoreboard displayed teams in this group
+            aCount = 0;
+            for (Account account : accountList.getList()) {
+                if (account.isGroupMember(groups[i].getElementId()) &&
+                    account.getClientId().getClientType() == ClientType.Type.TEAM &&
+                    account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                    aCount++;
+                }
+            }
             IMemento groupMemento = groupsMemento.createChild("group");
             groupMemento.putInteger("id", id);
             groupMemento.putString("title", groups[i].getDisplayName());
@@ -602,6 +616,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 groupMemento.putInteger("included", 0);
                 excludedGroups = true;
             }
+            groupMemento.putInteger("teamCount", aCount);
         }
         return(excludedGroups);
     }
@@ -1015,6 +1030,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMememento.putInteger("totalAttempts", grandTotalAttempts);
         summaryMememento.putInteger("totalSolved", grandTotalSolutions);
         summaryMememento.putInteger("problemsAttempted", grandTotalProblemAttempts);
+        summaryMememento.putInteger("totalTeams", grandTotalTeams);
 
 
     }
@@ -1117,6 +1133,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         for (int i = 0; i < accountList.size(); i++) {
             Account account = accounts[i];
             if (account.getClientId().getClientType() == ClientType.Type.TEAM && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                // keep track of the total number of teams on the unfiltered scoreboard.  That is, all teams
+                // regardless of whether we are going to filter them out below based on division or group
+                grandTotalTeams++;
                 if (divisionNumber != null) {
                     String div = ScoreboardUtilities.getDivision(theContest, account.getClientId());
                     // div may be null if the team is not a member of any division group, but is being shown on the board.
