@@ -141,7 +141,7 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	        this._teamService.runsUpdated.next();
 	    },
 	    error: (error: any) => {
-	      this._uiHelper.alertError('Error submitting problem! Check console for details');
+	      this._uiHelper.alertError('Not accepting submissions at this time');
 	        console.error(error);
 	    },
 	    complete: () => {
