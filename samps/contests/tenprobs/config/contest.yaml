@@ -61,7 +61,7 @@ accounts:
 
   - account: SCOREBOARD
     site: 1
-    count: 1
+    count: 2
 
   - account: FEEDER
     site: 1
