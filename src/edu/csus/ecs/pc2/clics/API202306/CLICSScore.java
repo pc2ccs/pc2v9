@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 
@@ -43,13 +42,14 @@ public class CLICSScore {
      * Fill in the properties for a team's score
      *
      * @param teamStanding The team's scoring information
+     * @throws NumberFormatException if bad scores are in the standings
      */
     public CLICSScore(TeamStanding teamStanding) {
         num_solved = Utilities.nullSafeToInt(teamStanding.getSolved(), 0);
-        total_time = Utilities.nullSafeToInt(teamStanding.getPoints(), 0);
+        total_time = Integer.parseInt(teamStanding.getPoints());
         if(num_solved > 0) {
             // Problem solution time is in minutes.
-            time = StringUtilities.getIntegerValue(teamStanding.getLastSolved(), 0);
+            time = Integer.parseInt(teamStanding.getLastSolved());
         }
     }
 
