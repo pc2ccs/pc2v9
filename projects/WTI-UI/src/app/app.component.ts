@@ -106,10 +106,7 @@ export class AppComponent implements OnInit {
         }
         this.loadEnvironment();
         if (DEBUG_MODE) {
-        	console.log ("...environment after return from loadEnvironment():") ;
-  		    Object.entries(environment).forEach(([key,value]) => {
-			  console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		    });
+        	console.log ("...returned from loadEnvironment(); waiting for asynchronous callback.") ;
         }
         
 	} else {
@@ -124,10 +121,7 @@ export class AppComponent implements OnInit {
         }
         this.loadEnvironment();
         if (DEBUG_MODE) {
-        	console.log ("...environment after return from loadEnvironment():") ;
-  		    Object.entries(environment).forEach(([key,value]) => {
-			  console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		    });
+        	console.log ("...returned from loadEnvironment(); waiting for asynchronous callback.") ;
         }
 
 		//The following was initially done by the login-page component's onSubmit() method during login;
@@ -234,21 +228,37 @@ export class AppComponent implements OnInit {
   loadEnvironment(): void {
 	if (DEBUG_MODE) {
 		console.log ("In method loadEnvironment()...");
-		console.log("...loading environment from 'assets/appconfig.json'...");
+		console.log("...invoking asynchronous HttpClient.get() to get environment from 'assets/appconfig.json'; subscribing to result callback...");
 	}
 	this._httpClient.get('assets/appconfig.json')
-	    .subscribe((data: any) => {
-	        this.configLoaded = true;
-	        if (!data) { return; }
-	        Object.keys(data).forEach((key: string) => environment[key] = data[key]);
-	    }, (error: any) => {
-	        console.log('Could not find appconfig.json in assets directory. using default values!');
-	        this.configLoaded = true;
-	    });	
-		console.log("...updated environment:");
-		Object.entries(environment).forEach(([key,value]) => {
-			console.log (`  Key:  ${key},  Value:  ${value}`) ;
-		});
+	    .subscribe(
+			(data: any) => {
+	        	this.configLoaded = true;
+	        	if (!data) { 
+					if (DEBUG_MODE) {
+						console.log("Received callback from asynchronous HttpClient.get() but returned data was null; using default configuration");
+					}
+					return; 
+				}
+	        	//copy returned data into environment
+	        	Object.keys(data).forEach((key: string) => environment[key] = data[key]);
+	        	
+	        	//display updated environment
+				if (DEBUG_MODE) {
+					console.log("Received callback from asynchronous HttpClient.get(); updated environment:");
+					Object.entries(environment).forEach(([key,value]) => {console.log (`  Key:  ${key},  Value:  ${value}`)}) ;
+				}
+	    	}, 
+	    	(error: any) => {
+	        	console.log(`Received error callback from asynchronous HttpClient.get(): ${error}`);
+	        	console.log('Using default configuration');
+	        	this.configLoaded = true;
+	    	}
+	    );	
+	    
+	if (DEBUG_MODE) {
+		console.log("Returning from method loadEnvironment()");
+	}
 
   }//end function loadEnvironment()
 
