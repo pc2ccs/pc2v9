@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="package-WTI" default="archives" basedir=".">
+<project name="package-WTI" default="archives" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless" >
 	
     <property environment="env"/>
     <condition property="exists.GITHUB_RUN_NUMBER">
@@ -66,16 +66,33 @@
 	</target>
 
     <target name="-execgit" unless="exists.GITHUB_RUN_NUMBER">
-        <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
+        <!-- make sure git_hash is set, this will probably always be HEAD for this non-github target -->
+        <condition property="git_hash" value="${env.GIT_COMMIT}" else="HEAD" >
+            <isset property="env.GIT_COMMIT"/>
+        </condition>
+        <exec executable="git" outputproperty="repo.version1" failifexecutionfails="false" errorproperty="genv.error">
             <arg value="rev-list"/>
             <arg value="${git_hash}"/>
             <arg value="--count"/>
         </exec>
-        <!-- if above failed, set the repo.version to 0 -->
-        <condition property="repo.version" value="0">
+        <!-- genv.error wont be set if the exec failed so set it to empty -->
+        <condition property="genv.error" value="" >
             <not>
-               <isset property="repo.version"/>
+                <isset property="genv.error" />
             </not>
+        </condition>
+        <!-- Show error, for example, if there are git errors, bad hash, credentials, etc. -->
+        <echo unless:blank="${genv.error}" message="Git Error: ${genv.error}" />
+        
+        <!-- if above exec failed, set the repo.version to 0 -->
+        <!-- note that if the git fails, repo.version1 will likely be set to "" -->
+        <condition property="repo.version" value="0" else="${repo.version1}" >
+            <or>
+                <not>
+                    <isset property="repo.version1"/>
+                </not>
+                <equals arg1="${repo.version1}" arg2="" />
+            </or>
         </condition>
     </target>
     <target name="-getenv" if="exists.GITHUB_RUN_NUMBER">
@@ -84,7 +101,15 @@
 TODO consider switching back to this at 9.8.0/9.9build
         <property name="repo.version0" value="${env.GITHUB_RUN_NUMBER}"/>
 -->
-        <condition property="version.add" value="~${env.GITHUB_REF_NAME}" else="">
+        <!-- PRs have pr#/merge as the GITHUB_REF_NAME, use GITHUB_HEAD_REF instead -->
+        <condition property="version.add0" value="pr${env.GITHUB_HEAD_REF}" else="${env.GITHUB_REF_NAME}">
+            <and>
+                <isset property="env.GITHUB_HEAD_REF" />
+                <matches string="${env.GITHUB_REF_NAME}" pattern="^.+/merge$$" />
+            </and>
+        </condition>
+
+        <condition property="version.add" value="~${version.add0}" else="">
            <not>
                <equals arg1="${env.GITHUB_REF_NAME}" arg2="master"/>
            </not>
