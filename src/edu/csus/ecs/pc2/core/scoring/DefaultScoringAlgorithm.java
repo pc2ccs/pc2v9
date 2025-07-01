@@ -587,7 +587,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         memento.putInteger("groupCount", groups.length+1);
         IMemento groupsMemento = memento.createChild("groupList");
         int id = 0;
-        int aCount;
+        int teamCount;
         boolean excludedGroups = false;
         for (int i = 0; i < groups.length; i++) {
             if (!groups[i].isDisplayOnScoreboard()) {
@@ -595,12 +595,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
             id = id + 1;
             // Count number of scoreboard displayed teams in this group
-            aCount = 0;
+            teamCount = 0;
             for (Account account : accountList.getList()) {
                 if (account.isGroupMember(groups[i].getElementId()) &&
                     account.getClientId().getClientType() == ClientType.Type.TEAM &&
                     account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                    aCount++;
+                    teamCount++;
                 }
             }
             IMemento groupMemento = groupsMemento.createChild("group");
@@ -616,7 +616,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 groupMemento.putInteger("included", 0);
                 excludedGroups = true;
             }
-            groupMemento.putInteger("teamCount", aCount);
+            groupMemento.putInteger("teamCount", teamCount);
         }
         return(excludedGroups);
     }
@@ -882,7 +882,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // entire contest, not one particular group (or groups).  So, if any groups were excluded
         // from the scoreboard, we do not fill in citations.
         if(!excludedGroups) {
-            // Now go back and fill in the awards for each team if not for specific group
+            // Now go back and fill in any award citations for the teams
             ResultsFile resultsInfo = new ResultsFile();
             // Note that createCitationRankInformation() may change the order of srArray
             CitationRankInformation ri = resultsInfo.createCitationRankInformation(theContest, srArray);
@@ -897,7 +897,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     // For medals, we use the "place" not the "rank"
                     // For honors we rank since multiple ranks can be part of each of the honors groups.
                     if(ri.getFirstHonorableMentionRank() > 0 && teamRank >= ri.getFirstHonorableMentionRank()) {
-                        standingsRecordMemento.putBoolean("isHonable", true);
+                        standingsRecordMemento.putBoolean("isHonorable", true);
                     } else if(ri.getLastGoldPlace() > 0 && sIndex <= ri.getLastGoldPlace()) {
                         standingsRecordMemento.putBoolean("isGold", true);
                     } else if(ri.getLastSilverPlace() > 0 && sIndex <= ri.getLastSilverPlace()) {
@@ -920,10 +920,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     }
 
     /**
-     * Input is a sorted ranking list.  What is the median number of problems solved.
+     * Input is a sorted ranking list.  What is the number of problems solved by the median team?
      *
      * @param srArray
-     * @return median number of problems solved
+     * @return number of problems solved by the median team
      */
     private int getMedian(StandingsRecord[] srArray) {
         int median;

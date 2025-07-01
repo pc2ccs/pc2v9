@@ -41,7 +41,7 @@ public class CitationRankInformation {
         return lastHighestHonorsRank;
     }
     /**
-     * Updates highest honors rank if supplied rank is smaller than current one
+     * Updates highest honors rank if supplied rank is bigger than current one
      * @param lastHighestHonorsRank
      */
     public void updateLastHighestHonorsRank(int lastHighestHonorsRank) {

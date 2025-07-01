@@ -96,10 +96,10 @@ public class ResultsFile {
     }
 
     /**
-     * Input is a sorted ranking list.  What is the median number of problems solved.
+     * Input is a sorted ranking list.  What is the number of problems solved by the median team?
      * copied from DefaultScoringAlgorithm, maybe it should be a common location?
      * @param srArray
-     * @return median number of problems solved
+     * @return number of problems solved by the median team
      */
     private int getMedian(StandingsRecord[] srArray) {
         int median;
@@ -289,7 +289,7 @@ public class ResultsFile {
      * @param contest
      * @param standingsRecords array of StandingsRecord (this will be modified and sorted according to the
      *        current standings sorting rules in effect.  eg. Bill Rules for WF)
-     * @return CititationInformation (ranks for each citation)
+     * @return CitationInformation (ranks for each citation)
      */
     public CitationRankInformation createCitationRankInformation(IInternalContest contest, StandingsRecord [] standingsRecords)  {
 
