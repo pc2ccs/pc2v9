@@ -5,7 +5,7 @@ package edu.csus.ecs.pc2.core.scoring;
  * CitationRankInformation - class to hold ranks for the various citations.
  * The medal places, gold, silver and bronze are what they are, independent of rank.
  * The "honors" ranks (Bill rules) may be comprised of multiple ranks.
- * Honorable mention rank is the highest rank for any team in honorable mention.
+ * Honorable mention rank is the smallest rank for any team in honorable mention.
  *
  * @author John Buck
  *
@@ -77,7 +77,10 @@ public class CitationRankInformation {
         return firstHonorableMentionRank;
     }
     /**
-     * Updates highest honorable mention rank if bigger rank is larger than current one
+     * Updates honorable mention rank if rank is smaller than current one.
+     * This keeps track of the lowest rank for HM so all teams with this rank and
+     * higher are HM.
+     *
      * @param lastHighestHonorsRank
      */
    public void updateFirstHonorableMentionRank(int firstHonorableMentionRank) {
