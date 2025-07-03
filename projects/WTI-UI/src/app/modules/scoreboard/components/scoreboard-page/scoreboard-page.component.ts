@@ -15,6 +15,11 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	
 	private _unsubscribe = new Subject<void>();
 	teamStandings: any = [];
+	numProblems: number = 0;
+	
+	//TODO: provide support for more than 26 problems
+	//TODO: provide support for the possibility that problems are not listed in alphabetical order
+	problemLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
 
 	constructor(
 		private _contestService: IContestService,
@@ -71,6 +76,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 				//console.log("standings string:");
 				//console.log(standings);
 				this.teamStandings = this.getTeamStandingsArray(standings);
+				this.numProblems = this.getNumProblems(standings);
 			});
 	}
 
@@ -95,10 +101,27 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 			tempArray.push(temp);
 		}
 		
-		//console.log("Individual Team Standings:");
-		//console.log(tempArray);
+//		console.log("Individual Team Standings:");
+//		console.log(tempArray);
 		
 		return tempArray;
 	}
 
+	/**
+	 * Returns the problem count from the specified JSON standings.
+	 */
+	private getNumProblems(standings: any) : number {
+
+		const contest = standings.contestStandings ;
+//		console.log("getNumProblems(): ContestStandings element:");
+//		console.log(contest);
+		
+		const header = contest.standingsHeader ;
+//		console.log("getNumProblems(): StandingsHeader elements:");
+//		console.log(header);
+		
+		const problemCount = header.problemCount;
+//		console.log ("getNumProblems(): problemCount = ", problemCount)
+		return problemCount;
+	}
 }

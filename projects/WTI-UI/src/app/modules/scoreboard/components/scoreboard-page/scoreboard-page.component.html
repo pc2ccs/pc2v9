@@ -1,19 +1,38 @@
 <div class='filter-table-container'>
 
-    <div class='table-container'>
-        <table>
+    <div class='table-container scoreboard-table'>
+		<table style="border-collapse: separate; border-spacing: 6px 6px;">
             <tr>
                 <th>Rank</th>
                 <th>Team</th>
-                <th>Solved</th>
-                <th>Score</th>
+                <th style="text-align: center; padding:2px 2px" *ngFor= "let letter of problemLetters.slice(0,numProblems)" >
+                	{{letter}}
+                </th>
+                <th style="text-align: center">Solved</th>
+                <th style="text-align: center">Score</th>
                 <th></th>
             </tr>
             <tr *ngFor= 'let team of teamStandings' >
-                <td>{{ team.rank }}</td>
+                <td style="text-align: center">{{ team.rank }}</td>
                 <td>{{ team.teamName }}</td>
-                <td>{{ team.solved }}</td>
-                <td>{{ team.points }}</td>
+                
+                <!-- Display results for each problem: submission count plus solution time if solved -->
+ 				<td style="text-align: center; white-space: nowrap; " *ngFor= 'let problem of team.problemSummaryInfo' 
+ 					[ngClass]="{'yes' : problem.isSolved, 
+ 								'no' : !problem.isSolved && problem.attempts>0 && !problem.isPending,
+ 								'pending' : !problem.isSolved && problem.isPending
+ 								}">
+
+      				<ng-container *ngIf="problem.isSolved; else notSolved">
+        				{{problem.attempts}}/{{problem.solutionTime}}
+      				</ng-container>
+
+                	<ng-template #notSolved>
+                		{{problem.attempts}}/--
+                	</ng-template>
+                	
+                <td style="text-align: center">{{ team.solved }}</td>
+                <td style="text-align: center">{{ team.points }}</td>
             </tr>
         </table>
     </div>
