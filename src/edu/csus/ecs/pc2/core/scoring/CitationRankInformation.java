@@ -54,7 +54,7 @@ public class CitationRankInformation {
     }
     /**
      * Updates high honors rank if supplied rank is bigger than current one
-     * @param lastHighestHonorsRank
+     * @param lastHighHonorsRank
      */
     public void updateLastHighHonorsRank(int lastHighHonorsRank) {
         if(lastHighHonorsRank > this.lastHighHonorsRank) {
@@ -66,7 +66,7 @@ public class CitationRankInformation {
     }
     /**
      * Updates honors rank if supplied rank is bigger than current one
-     * @param lastHighestHonorsRank
+     * @param lastHonorsRank
      */
     public void updateLastHonorsRank(int lastHonorsRank) {
         if(lastHonorsRank > this.lastHonorsRank) {
@@ -81,7 +81,7 @@ public class CitationRankInformation {
      * This keeps track of the lowest rank for HM so all teams with this rank and
      * higher are HM.
      *
-     * @param lastHighestHonorsRank
+     * @param firstHonorableMentionRank
      */
    public void updateFirstHonorableMentionRank(int firstHonorableMentionRank) {
         if(this.firstHonorableMentionRank == 0 || firstHonorableMentionRank < this.firstHonorableMentionRank) {
