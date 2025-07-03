@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 
 /**
  * Contains methods that compute various statistics.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: RunStatistics.java 336 2013-06-21 08:15:14Z laned $
  */
@@ -69,7 +69,7 @@ public class RunStatistics {
 
     /**
      * Get list of runs that are first solution for each problem.
-     * 
+     *
      * @return returns 0 length array of Run, or list of Runs that first solved each problem.
      */
     public Run[] firstSolvedRuns() {
@@ -87,13 +87,13 @@ public class RunStatistics {
             }
         }
 
-        return (Run[]) list.toArray(new Run[list.size()]);
+        return list.toArray(new Run[list.size()]);
 
     }
 
     /**
      * Get first run that solves input problem.
-     * 
+     *
      * @param problem
      * @return null if no run/solution for problem, else returns run.
      */
@@ -102,8 +102,18 @@ public class RunStatistics {
     }
 
     /**
+     * Get first run that solves input problem by its element id.
+     *
+     * @param problem element id
+     * @return null if no run/solution for problem, else returns run.
+     */
+    public Run getFirstSolved(ElementId probEleId) {
+        return solvedMap.get(probEleId);
+    }
+
+    /**
      * Is the input team the first to solve this problem?.
-     * 
+     *
      * @see #getFirstSolved(Problem)
      * @param id
      * @param problem
@@ -111,6 +121,23 @@ public class RunStatistics {
      */
     public boolean isFirstToSolve(ClientId id, Problem problem) {
         Run run = getFirstSolved(problem);
+        if (run != null) {
+            return run.getSubmitter().equals(id);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Is the input team the first to solve this problem by its element id?.
+     *
+     * @see #getFirstSolved(ElementId)
+     * @param id ClientId
+     * @param problem ElementId of problem
+     * @return false if not the first to solve.
+     */
+    public boolean isFirstToSolve(ClientId id, ElementId probEleId) {
+        Run run = getFirstSolved(probEleId);
         if (run != null) {
             return run.getSubmitter().equals(id);
         } else {

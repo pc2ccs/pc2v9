@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -6,14 +6,17 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * SA XML scoreboard  problem element.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
 @XmlRootElement(name = "problem")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonIgnoreProperties({ "color", "rgb" })
 public class ScoringProblem {
 
     // <problem attempts="78" bestSolutionTime="2" id="2" lastSolutionTime="83" numberSolved="53" title="Candle Box"/>

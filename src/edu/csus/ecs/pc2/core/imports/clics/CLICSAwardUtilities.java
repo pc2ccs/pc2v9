@@ -61,6 +61,10 @@ public class CLICSAwardUtilities {
 
     public static final String ID_GOLD_MEDAL = "gold-medal";
 
+    public static final String ID_FIRST_TO_SOLVE_PREFIX = "first-to-solve-";
+
+    public static final String FIRST_TO_SOLVE_TITLE_PREFIX = "First to solve problem";
+
     private static ObjectMapper mapperField;
 
     // {"id":"group-winner-4","citation":"Winner(s) of group Eindhoven University of Technology","team_ids":["28"]},
@@ -267,7 +271,7 @@ public class CLICSAwardUtilities {
                 list.add(firstToSolveAward);
             }
 
-             teams = getTeamIdsByRankWhereSolved(scoreRows, lastRankGolds, lastRankSilver, 1);
+            teams = getTeamIdsByRankWhereSolved(scoreRows, lastRankGolds, lastRankSilver, 1);
             if (teams.length > 0) {
                 CLICSAward firstToSolveAward = new CLICSAward(ID_SILVER_MEDAL, "Silver medal winner", teams);
                 list.add(firstToSolveAward);
@@ -348,7 +352,7 @@ public class CLICSAwardUtilities {
             ClientId clientId = new ClientId(site, ClientType.Type.TEAM, clientNumber);
             if (teamRow.getScore().getNum_solved() > 0 && winnerId == null & isActive(contest, clientId)) {
                 winnerId = Integer.toString(teamRow.getTeam_id());
-
+                break;
             }
         }
 
@@ -397,8 +401,8 @@ public class CLICSAwardUtilities {
 // dj { "citation": "First to solve problem C", "id": "first-to-solve-cram", "team_ids": [ "27" ] },
 //            s2 {"id":"first-to-solve-cram","citation":"First to solve problem cram","team_ids":["27"]},
 
-            String awardId = "first-to-solve-" + problem.getShortName();
-            String citation = "First to solve problem " + problem.getLetter();
+            String awardId = ID_FIRST_TO_SOLVE_PREFIX + problem.getShortName();
+            String citation = FIRST_TO_SOLVE_TITLE_PREFIX + " " + problem.getLetter();
 
             CLICSAward firstToSolveAward = new CLICSAward(awardId, citation, "" + clientId.getClientNumber());
             list.add(firstToSolveAward);

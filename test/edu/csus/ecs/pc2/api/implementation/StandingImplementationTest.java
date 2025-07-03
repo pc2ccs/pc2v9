@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
 import edu.csus.ecs.pc2.api.IProblemDetails;
@@ -11,20 +11,22 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test class for StandingsImplementation (IStanding).
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
 public class StandingImplementationTest extends AbstractTestCase {
-    
+
     private final boolean debugMode = false;
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
     }
 
+    @Override
     protected void tearDown() throws Exception {
         super.tearDown();
     }
@@ -34,7 +36,7 @@ public class StandingImplementationTest extends AbstractTestCase {
 
         // RunID TeamID Prob Time Result
 
-        String[] runsData = { // 
+        String[] runsData = { //
         "2,8,C,1,No", //
                 "15,8,D,1,Yes", //
                 "23,8,D,1,No", //
@@ -56,7 +58,7 @@ public class StandingImplementationTest extends AbstractTestCase {
         Contest apiContest = new Contest(contest, sample.createController(contest, true, true), log);
 
         IStanding[] standings = apiContest.getStandings();
-        
+
         if (debugMode){
             System.out.println("Standings count = " + standings.length);
         }
@@ -68,15 +70,16 @@ public class StandingImplementationTest extends AbstractTestCase {
                         + standing.getClient().getLoginName() + " " + detailList.length + " detail rows");
             }
             for (IProblemDetails detail : detailList) {
-                
+
                 String loginName = detail.getClient().getLoginName() ;
                 int problemNumber = detail.getProblemId();
-                
+
                 if (isDebugMode() && (detail.getAttempts() > 0 || standing.getNumProblemsSolved() > 0)) {
                     System.out.println(detail.getClient().getLoginName() + ", prob=" + detail.getProblemId() + ", att=" + //
-                            detail.getAttempts() + ", time=" + detail.getSolutionTime() + ", pts=" + detail.getPenaltyPoints());
+                            detail.getAttempts() + ", time=" + detail.getSolutionTime() + ", pts=" + detail.getPenaltyPoints() + //
+                            ", fts=" + detail.isFts());
                 }
-                
+
                 if (loginName.equals("team8") && problemNumber == 3) {
                     // team8, prob=4, att=1, time=1, pts=1
 
@@ -92,7 +95,7 @@ public class StandingImplementationTest extends AbstractTestCase {
                     assertTrue(detailInfo + " Points should be 1 found " + detail.getPenaltyPoints(), detail.getPenaltyPoints() == 1);
                     assertTrue(detailInfo + " time should be 1 found " + detail.getSolutionTime(), detail.getSolutionTime() == 1);
                 }
-                
+
                 if (loginName.equals("team6") && problemNumber == 1) {
                     // team8, prob=4, att=1, time=1, pts=1
 
@@ -100,20 +103,21 @@ public class StandingImplementationTest extends AbstractTestCase {
                     assertTrue(detailInfo + " Points should be 51 found " + detail.getPenaltyPoints(), detail.getPenaltyPoints() == 51);
                     assertTrue(detailInfo + " time should be 31 found " + detail.getSolutionTime(), detail.getSolutionTime() == 31);
                 }
-                
+
             }
         }
-        
+
         if (debugMode){
             System.out.println();
 
             for (IRun run : apiContest.getRuns()) {
                 System.out.println("Run " + run.getNumber() + " " + run.getTeam().getLoginName() + " " + run.getJudgementName());
             }
-            
+
         }
     }
 
+    @Override
     public boolean isDebugMode() {
         return debugMode;
     }

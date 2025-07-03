@@ -1,8 +1,9 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -48,7 +49,9 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.IMemento;
+import edu.csus.ecs.pc2.core.util.RunStatistics;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
+import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
@@ -102,6 +105,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private int grandTotalSolutions;
 
     private int grandTotalProblemAttempts;
+
+    private int grandTotalTeams;
 
     private int[] problemBestTime = null;
 
@@ -375,8 +380,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Site[] sites = theContest.getSites();
         summaryMememento.putInteger("siteCount", sites.length);
         Group[] groups = theContest.getGroups();
+        boolean bGroupsExcluded = false;
         if (groups != null) {
-            dumpGroupList(groups, summaryMememento, wantedGroups);
+            bGroupsExcluded = dumpGroupList(groups, summaryMememento, wantedGroups, accountList);
         }
         BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
         if (balloonSettings != null) {
@@ -415,7 +421,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
             }
 
-           initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, wantedGroups);
+            grandTotalTeams = 0;
+            initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, wantedGroups);
 
             for (int i = 0; i < runs.length; i++) {
                 Account account = accountList.getAccount(runs[i].getSubmitter());
@@ -483,7 +490,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 treeMap.put(record, record);
             }
 
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest.getContestInformation(), summaryMememento);
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMememento, bGroupsExcluded);
 
         } // mutex
 
@@ -564,15 +571,38 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
     }
 
-    private void dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups) {
+    /**
+     * dumpGroupList - Creates XML mementos for each group.  If any groups are not included in the scoreboard
+     * calculation, that is, wantedGroups is not empty and is a subset of all groups, then we return a flag
+     * indicating we excluded some groups.   This information is used by the teamStandings memento generator
+     * so it will not include medal / citation information in the teamStanding memento.
+     *
+     * @param groups All groups configured
+     * @param memento Where to put the group XML informtion
+     * @param wantedGroups - specific groups the scoreboard is being generated for
+     * @param accountList - list of accounts so we can count how many in each group
+     * @return true if any groups were excluded from the scoreboard because of wanted groups
+     */
+    private boolean dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups, AccountList accountList) {
         memento.putInteger("groupCount", groups.length+1);
         IMemento groupsMemento = memento.createChild("groupList");
         int id = 0;
+        int teamCount;
+        boolean excludedGroups = false;
         for (int i = 0; i < groups.length; i++) {
             if (!groups[i].isDisplayOnScoreboard()) {
                 continue;
             }
             id = id + 1;
+            // Count number of scoreboard displayed teams in this group
+            teamCount = 0;
+            for (Account account : accountList.getList()) {
+                if (account.isGroupMember(groups[i].getElementId()) &&
+                    account.getClientId().getClientType() == ClientType.Type.TEAM &&
+                    account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                    teamCount++;
+                }
+            }
             IMemento groupMemento = groupsMemento.createChild("group");
             groupMemento.putInteger("id", id);
             groupMemento.putString("title", groups[i].getDisplayName());
@@ -584,8 +614,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 groupMemento.putInteger("included", 1);
             } else {
                 groupMemento.putInteger("included", 0);
+                excludedGroups = true;
             }
+            groupMemento.putInteger("teamCount", teamCount);
         }
+        return(excludedGroups);
     }
 
     /**
@@ -603,8 +636,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      */
     private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot,
             AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups,
-            ContestInformation contestInformation, IMemento summaryMememento) {
+            IInternalContest theContest, IMemento summaryMememento, boolean excludedGroups) {
 
+        ContestInformation contestInformation = theContest.getContestInformation();
         // easy access
         Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
         Hashtable<Group, Integer> groupIndexHash = new Hashtable<Group, Integer>();
@@ -692,9 +726,15 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             divisionScore[i] = 0;
             divisionLastSolved[i] = 0;
         }
+
+        RunStatistics runStats = new RunStatistics(theContest);
+
+        ArrayList<IMemento> teamStandingsMementos = new ArrayList<IMemento>();
+
         while (iterator.hasNext()) {
             Object o = iterator.next();
-            StandingsRecord standingsRecord = (StandingsRecord) o;
+
+            StandingsRecord standingsRecord = (StandingsRecord)o;
             indexRank++;
             if (!isTeamTied(standingsRecord, numSolved, score, lastSolved)) {
                 numSolved = standingsRecord.getNumberSolved();
@@ -710,12 +750,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             long totalAttempts = 0;
             long problemsAttempted = 0;
             IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
+            // Remember each team's standing's record so we can add citation info later
+            teamStandingsMementos.add(standingsRecordMemento);
+
+            int teamRank = standingsRecord.getRankNumber();
             standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
             standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
             standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
             standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
-            standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
-            standingsRecordMemento.putInteger("overallRank", standingsRecord.getRankNumber());
+            standingsRecordMemento.putInteger("rank", teamRank);
+            standingsRecordMemento.putInteger("overallRank", teamRank);
             standingsRecordMemento.putInteger("index", index);
             Account account = accountList.getAccount(standingsRecord.getClientId());
 
@@ -786,6 +830,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     standingsRecordMemento.putInteger("divisionRank", standingsRecord.getDivisionRankNumber());
                 }
             }
+
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {
                 int id = i + 1;
@@ -804,6 +849,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     psiMemento.putLong("solutionTime", psi.getSolutionTime());
                     psiMemento.putBoolean("isSolved", psi.isSolved());
                     psiMemento.putBoolean("isPending", psi.isUnJudgedRuns());
+                    psiMemento.putBoolean("fts", runStats.isFirstToSolve(standingsRecord.getClientId(), psi.getProblemId()));
                     problemAttempts[id] += psi.getNumberSubmitted();
                     totalAttempts += psi.getNumberSubmitted();
                     grandTotalAttempts += psi.getNumberSubmitted();
@@ -831,13 +877,53 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMememento.putInteger("medianProblemsSolved", getMedian(srArray));
         generateSummaryTotalsForProblem (problems, problemsIndexHash, summaryMememento);
 
+        // We do not do medal or honors citations for individual groups/sites
+        // since it does not make sense.  The values set for those are for the
+        // entire contest, not one particular group (or groups).  So, if any groups were excluded
+        // from the scoreboard, we do not fill in citations.
+        if(!excludedGroups) {
+            // Now go back and fill in any award citations for the teams
+            ResultsFile resultsInfo = new ResultsFile();
+            // Note that createCitationRankInformation() may change the order of srArray
+            CitationRankInformation ri = resultsInfo.createCitationRankInformation(theContest, srArray);
+            if(index == teamStandingsMementos.size()) {
+                int teamRank, sIndex;
+                IMemento standingsRecordMemento;
+                for(sIndex = 0; sIndex < index; ) {
+                    standingsRecordMemento = teamStandingsMementos.get(sIndex);
+                    teamRank = srArray[sIndex].getRankNumber();
+                    sIndex++;
+
+                    // For medals, we use the "place" not the "rank"
+                    // For honors we rank since multiple ranks can be part of each of the honors groups.
+                    if(ri.getFirstHonorableMentionRank() > 0 && teamRank >= ri.getFirstHonorableMentionRank()) {
+                        standingsRecordMemento.putBoolean("isHonorable", true);
+                    } else if(ri.getLastGoldPlace() > 0 && sIndex <= ri.getLastGoldPlace()) {
+                        standingsRecordMemento.putBoolean("isGold", true);
+                    } else if(ri.getLastSilverPlace() > 0 && sIndex <= ri.getLastSilverPlace()) {
+                        standingsRecordMemento.putBoolean("isSilver", true);
+                    } else if(ri.getLastBronzePlace() > 0 && sIndex <= ri.getLastBronzePlace()) {
+                        standingsRecordMemento.putBoolean("isBronze", true);
+                    }
+                    if(ri.getLastHighestHonorsRank() > 0 && teamRank <= ri.getLastHighestHonorsRank()) {
+                        standingsRecordMemento.putBoolean("isHighest", true);
+                    } else if(ri.getLastHighHonorsRank() > 0 && teamRank <= ri.getLastHighHonorsRank()) {
+                        standingsRecordMemento.putBoolean("isHigh", true);
+                    } else if(ri.getLastHonorsRank() > 0 && teamRank <= ri.getLastHonorsRank()) {
+                        standingsRecordMemento.putBoolean("isHonors", true);
+                    }
+                }
+            } else {
+                log.warning("Could not fill in honors XML flags in standings - arrays don't match: " + index + " != " + teamStandingsMementos.size());
+            }
+        }
     }
 
     /**
-     * Input is a sorted ranking list.  What is the median number of problems solved.
+     * Input is a sorted ranking list.  What is the number of problems solved by the median team?
      *
      * @param srArray
-     * @return median number of problems solved
+     * @return number of problems solved by the median team
      */
     private int getMedian(StandingsRecord[] srArray) {
         int median;
@@ -929,7 +1015,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             IMemento problemMemento = summaryMememento.createChild("problem");
             problemMemento.putInteger("id", id);
             problemMemento.putString("title", problems[i].getDisplayName());
-            // problemMemento.putString("color", problems[i].get);
+            problemMemento.putString("color", problems[i].getColorName());
+            problemMemento.putString("rgb", problems[i].getColorRGB());
             problemMemento.putLong("attempts", problemAttempts[id]);
             if (problemAttempts[id] > 0) {
                 grandTotalProblemAttempts++;
@@ -943,6 +1030,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMememento.putInteger("totalAttempts", grandTotalAttempts);
         summaryMememento.putInteger("totalSolved", grandTotalSolutions);
         summaryMememento.putInteger("problemsAttempted", grandTotalProblemAttempts);
+        summaryMememento.putInteger("totalTeams", grandTotalTeams);
 
 
     }
@@ -1045,6 +1133,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         for (int i = 0; i < accountList.size(); i++) {
             Account account = accounts[i];
             if (account.getClientId().getClientType() == ClientType.Type.TEAM && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                // keep track of the total number of teams on the unfiltered scoreboard.  That is, all teams
+                // regardless of whether we are going to filter them out below based on division or group
+                grandTotalTeams++;
                 if (divisionNumber != null) {
                     String div = ScoreboardUtilities.getDivision(theContest, account.getClientId());
                     // div may be null if the team is not a member of any division group, but is being shown on the board.
@@ -1133,6 +1224,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
         }
         memento.putString("scoreboardMessage", value);
+        if(contestTime != null) {
+            memento.putString("elapsedtime", contestTime.getElapsedTimeStr());
+            memento.putString("remainingtime",  contestTime.getRemainingTimeStr());
+        } else {
+            // we use standard defaults if the time were not set.  JUnits do not set times.
+            memento.putString("elapsedtime", "5:00:00");
+            memento.putString("remainingtime",  "0:00:00");
+        }
 
         return memento;
     }

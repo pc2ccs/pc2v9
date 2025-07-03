@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.reports;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import edu.csus.ecs.pc2.api.implementation.ProblemDetailsComparator;
 
 /**
  * Print all standings details
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -19,7 +19,7 @@ public class PrintAllProblemDetails extends APIAbstractTest {
 
     @Override
     public void printTest() {
-        
+
         IProblem[] problems = getContest().getProblems();
 
         println("Standings - " + getContest().getStandings().length + " teams to rank");
@@ -42,9 +42,10 @@ public class PrintAllProblemDetails extends APIAbstractTest {
             for (IProblemDetails det : details) {
                 detailCounter ++;
                 boolean solved = det.getSolutionTime() != 0;
-                println("  " + detailCounter + " " + problems[det.getProblemId()-1].getName() + // 
+                println("  " + detailCounter + " " + problems[det.getProblemId()-1].getName() + //
                         " solved=" + solved + " solutionTime=" + det.getSolutionTime() + //
-                        " points=" + det.getPenaltyPoints() + " attempts=" + det.getAttempts());
+                        " points=" + det.getPenaltyPoints() + " attempts=" + det.getAttempts() + //
+                        " fts=" + det.isFts());
             }
         }
         println();
