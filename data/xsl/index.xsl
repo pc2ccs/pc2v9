@@ -81,6 +81,41 @@
 					<xsl:call-template name="summary"/>
 				</TABLE>
 			</center>
+			<TABLE>
+				<tr><th><strong><u>Legend</u></strong></th></tr>
+				<xsl:if test="$totalTeamCount = $totalTeams">
+					<tr class="even">
+						<td><xsl:attribute name="class">gold</xsl:attribute>Gold Medalists</td>
+					</tr>
+					<tr class="even">
+						<td><xsl:attribute name="class">silver</xsl:attribute>Silver Medalists</td>
+					</tr>
+					<tr class="even">
+						<td><xsl:attribute name="class">bronze</xsl:attribute>Bronze Medalists</td>
+					</tr>
+					<tr class="even">
+						<td><xsl:attribute name="class">highest</xsl:attribute>Highest Honors</td>
+					</tr>
+					<tr class="even">
+						<td><xsl:attribute name="class">high</xsl:attribute>High Honors</td>
+					</tr>
+					<tr class="even">
+						<td><xsl:attribute name="class">honors</xsl:attribute>Honors</td>
+					</tr>
+				</xsl:if>
+				<tr>
+					<td><xsl:attribute name="class">yes</xsl:attribute>Solved</td>
+				</tr>
+				<tr>
+					<td><xsl:attribute name="class">firstYes</xsl:attribute>First to Solve</td>
+				</tr>
+				<tr>
+					<td><xsl:attribute name="class">pending</xsl:attribute>Pending</td>
+				</tr>
+				<tr>
+					<td><xsl:attribute name="class">no</xsl:attribute>Wrong</td>
+				</tr>
+			</TABLE>
 			<div class="tail">
 				<span class="right">
 					<A HREF="https://pc2ccs.github.io/">PC^2 Homepage</A><br/>
@@ -384,14 +419,6 @@
 			</a>
 			&#160;&#160;&#160;&#160;<br/>
         </th>
-    </xsl:for-each>
-</xsl:template>
-
-<xsl:template name="groupLink">
-    <xsl:param name="group"/>
-    <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@title = $group]">
-		<a href="group_{$group}.html"><xsl:value-of select="@title"/> Per Site Standings</a>
-        <br/>
     </xsl:for-each>
 </xsl:template>
         
