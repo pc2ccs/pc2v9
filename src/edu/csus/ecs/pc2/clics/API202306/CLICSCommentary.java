@@ -88,7 +88,7 @@ public class CLICSCommentary {
         ContestInformation ci = model.getContestInformation();
         ContestTime ct = model.getContestTime();
         if (ct.isContestStarted()) {
-            contest_time = ContestTime.formatTimeMS(ct.getElapsedMS());
+            contest_time = Utilities.formatDuration(ct.getElapsedMS());
         } else {
             contest_time = getScheduledTimeClockText(ci);
         }

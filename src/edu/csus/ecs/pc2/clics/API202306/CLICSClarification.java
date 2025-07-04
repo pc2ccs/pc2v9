@@ -13,7 +13,6 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -161,13 +160,13 @@ public class CLICSClarification {
             }
             text = clarAns.getAnswer();
             time = Utilities.getIso8601formatterWithMS().format(clarAns.getDate());
-            contest_time = ContestTime.formatTimeMS(clarAns.getElapsedMS());
+            contest_time = Utilities.formatDuration(clarAns.getElapsedMS());
         } else {
             // the request goes to a judge not a team, so to_team_id and reply_to_id is null
             // fill in question and time fields
             text = clar.getQuestion();
             time = Utilities.getIso8601formatterWithMS().format(clar.getCreateDate());
-            contest_time = ContestTime.formatTimeMS(clar.getElapsedMS());
+            contest_time = Utilities.formatDuration(clar.getElapsedMS());
         }
         // if not a general clar and it's not a special category clar, then we need to supply the problem id.
         if (!clar.getProblemId().equals(model.getGeneralProblem().getElementId()) && model.getCategory(clar.getProblemId()) == null) {

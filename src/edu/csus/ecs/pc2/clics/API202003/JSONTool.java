@@ -175,12 +175,12 @@ public class JSONTool implements IJSONTool {
             element.put("text", clarificationAnswers[lastAnswer].getAnswer());
             String time = Utilities.getIso8601formatterWithMS().format(clarificationAnswers[lastAnswer].getDate());
             element.put("time", time);
-            element.put("contest_time", ContestTime.formatTimeMS(clarificationAnswers[lastAnswer].getElapsedMS()));
+            element.put("contest_time", Utilities.formatDuration(clarificationAnswers[lastAnswer].getElapsedMS()));
         } else {
             element.put("text", clarification.getQuestion());
             String time = Utilities.getIso8601formatterWithMS().format(clarification.getCreateDate());
             element.put("time", time);
-            element.put("contest_time", ContestTime.formatTimeMS(clarification.getElapsedMS()));
+            element.put("contest_time", Utilities.formatDuration(clarification.getElapsedMS()));
         }
         return element;
     }
@@ -417,7 +417,7 @@ public class JSONTool implements IJSONTool {
         element.put("submission_id", IJSONTool.getSubmissionId(submission));
         // SOMEDAY this is suppose to be when the judge retrieves it, not the submission time.
         element.put("start_time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
-        element.put("start_contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
+        element.put("start_contest_time", Utilities.formatDuration(submission.getElapsedMS()));
         if (submission.isJudged()) {
 
             JudgementRecord judgementRecord = submission.getJudgementRecord();
@@ -434,7 +434,7 @@ public class JSONTool implements IJSONTool {
                     element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
                 } // is null if there are no elapsedMinutes in the contest
                   // when judged is in minutes convert to milliseconds
-                element.put("end_contest_time", ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime() * 60000));
+                element.put("end_contest_time", Utilities.formatDuration(judgementRecord.getWhenJudgedTime() * 60000));
             }
         }
 
@@ -471,7 +471,7 @@ public class JSONTool implements IJSONTool {
         // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
         // note this is the contest_time as seen on the judge
-        element.put("contest_time", ContestTime.formatTimeMS(run.getContestTimeMS()));
+        element.put("contest_time", Utilities.formatDuration(run.getContestTimeMS()));
         return element;
     }
 

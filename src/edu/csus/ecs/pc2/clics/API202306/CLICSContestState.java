@@ -91,7 +91,7 @@ public class CLICSContestState {
                 }
             }
 
-            contest_time = ContestTime.formatTimeMS(ct.getElapsedMS());
+            contest_time = Utilities.formatDuration(ct.getElapsedMS());
             if(ct.isContestRunning() == false) {
                 if(ended == null) {
                     // This means the contest was paused - can't pause a contest if it is ended... so ended must be null

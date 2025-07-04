@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
@@ -59,7 +58,7 @@ public class CLICSTestCase {
         // SOMEDAY get the time from the server instead of the judge
         time = Utilities.getIso8601formatterWithMS().format(testCase.getDate().getTime());
         // note this is the contest_time as seen on the judge
-        contest_time = ContestTime.formatTimeMS(testCase.getContestTimeMS());
+        contest_time = Utilities.formatDuration(testCase.getContestTimeMS());
         run_time = (testCase.getElapsedMS())/1000.;
     }
 
