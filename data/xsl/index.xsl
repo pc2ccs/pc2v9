@@ -2,10 +2,8 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:output method="html" indent="yes"/>
 <xsl:decimal-format decimal-separator="." grouping-separator="," />
-<xsl:variable name="divStart" select="3"/>
-<xsl:variable name="divStop" select="25"/>
-<xsl:variable name="totalTeams" select="130" />
-<xsl:variable name="teamCount" select="count(/contestStandings/teamStanding)" />
+<xsl:variable name="totalTeams" select="/contestStandings/standingsHeader/@totalTeams" />
+<xsl:variable name="totalTeamCount" select="count(/contestStandings/teamStanding)" />
 <xsl:template match="contestStandings">
 	<HTML>
 		<HEAD>
@@ -42,7 +40,7 @@
 					</xsl:choose>
 					<br/>
 					<xsl:choose>
-						<xsl:when test="$teamCount = $totalTeams">
+						<xsl:when test="$totalTeamCount = $totalTeams">
 							<h3>
 								<xsl:value-of select="/contestStandings/standingsHeader/@title"/> Standings
 							</h3>
@@ -53,14 +51,16 @@
 							</h3>
 						</xsl:otherwise>
 					</xsl:choose>
-					<xsl:if test="$teamCount != $totalTeams">
+					<xsl:if test="$totalTeamCount != $totalTeams">
 						<a href="index.html">Full Contest Standings</a>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
 					</xsl:if>
-					<xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@id &gt;= $divStart and @id &lt;= $divStop]">
-						<xsl:if test="$teamCount = $totalTeams or /contestStandings/teamStanding[1]/@teamGroupId != @id">
-							<a href="index_{@title}.html">
-								<xsl:value-of select="@title"/> Standings
-							</a>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
+					<xsl:for-each select="/contestStandings/standingsHeader/groupList/group">
+						<xsl:if test="@teamCount &gt; '0'">
+							<xsl:if test="$totalTeamCount = $totalTeams or /contestStandings/teamStanding[1]/@teamGroupId != @id">
+								<a href="index_{@title}.html">
+									<xsl:value-of select="@title"/> Standings
+								</a>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
+							</xsl:if>
 						</xsl:if>
 					</xsl:for-each>
 					<br/>
