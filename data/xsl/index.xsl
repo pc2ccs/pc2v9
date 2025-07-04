@@ -31,7 +31,7 @@
 					Generated: <xsl:value-of select="/contestStandings/standingsHeader/@currentDate"/>
 					<br/>
 					<xsl:choose>
-						<xsl:when test="/contestStandings/standingsHeader/@remainingtime = '0:00:00'">
+						<xsl:when test="/contestStandings/standingsHeader/@remainingtime = '0:00:00' or starts-with(/contestStandings/standingsHeader/@remainingtime, '-')">
 							The contest has ended
 						</xsl:when>
 						<xsl:otherwise>
