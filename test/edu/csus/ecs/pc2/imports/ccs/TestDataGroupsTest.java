@@ -175,10 +175,10 @@ public class TestDataGroupsTest extends AbstractTestCase {
         assertEquals("Expecting 4 testcases in group 2 ", 4, group.getTestDataGroups().get(1).getTotalTestCases());
         assertEquals("Expecting 9 testcases in group 3 ", 9, group.getTestDataGroups().get(2).getTotalTestCases());
 
-        ArrayList<TestCaseInfo> arInfo = secret.getAllTestCaseInfo();
-        System.out.println("There are " + arInfo.size() + " test cases:");
-        for(TestCaseInfo tc : arInfo) {
-            System.out.println(tc.toString());
-        }
+//        ArrayList<TestCaseInfo> arInfo = secret.getAllTestCaseInfo();
+//        System.out.println("There are " + arInfo.size() + " test cases:");
+//        for(TestCaseInfo tc : arInfo) {
+//            System.out.println(tc.toString());
+//        }
     }
 }
