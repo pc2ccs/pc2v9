@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
@@ -16,16 +16,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import edu.csus.ecs.pc2.clics.API202306.CLICSProblemScore;
+import edu.csus.ecs.pc2.clics.API202306.CLICSScoreboard;
+import edu.csus.ecs.pc2.clics.API202306.CLICSScoreboardRow;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
-import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.core.standings.json.ProblemScoreRow;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
@@ -60,7 +61,7 @@ public class FileComparisonUtilities {
         if(checkFilesExist(fileComparison, firstFilename, secondFilename)) {
             try {
 
-                List<TeamScoreRow> firstTeamScoreRows = null;
+                List<CLICSScoreboardRow> firstTeamScoreRows = null;
                 try {
                     firstTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getFirstFilename());
                 } catch (JsonMappingException e) {
@@ -68,7 +69,7 @@ public class FileComparisonUtilities {
                     ExecuteUtilities.rethrow(rte);
                 }
 
-                List<TeamScoreRow> secondTeamScoreRows = null;
+                List<CLICSScoreboardRow> secondTeamScoreRows = null;
                 try {
                     secondTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getSecondFilename());
                 } catch (JsonMappingException e) {
@@ -84,8 +85,8 @@ public class FileComparisonUtilities {
                 numberRows += minLines;
 
                 for (int rowNum = 0; rowNum < minLines; rowNum++) {
-                    TeamScoreRow firstRow = firstTeamScoreRows.get(rowNum);
-                    TeamScoreRow secondScoreRow = secondTeamScoreRows.get(rowNum);
+                    CLICSScoreboardRow firstRow = firstTeamScoreRows.get(rowNum);
+                    CLICSScoreboardRow secondScoreRow = secondTeamScoreRows.get(rowNum);
                     String rowString = "[" + rowNum + "]";
 
                     String fieldName = "rank";
@@ -107,16 +108,16 @@ public class FileComparisonUtilities {
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "team_id";
-                    valueOne = Long.toString(firstRow.getTeam_id());
-                    valueTwo = Long.toString(secondScoreRow.getTeam_id());
+                    valueOne = firstRow.getTeam_id();
+                    valueTwo = secondScoreRow.getTeam_id();
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     // compare problems
-                    List<ProblemScoreRow> probs1 = firstRow.getProblems();
-                    List<ProblemScoreRow> probs2 = secondScoreRow.getProblems();
+                    List<CLICSProblemScore> probs1 = firstRow.getProblems();
+                    List<CLICSProblemScore> probs2 = secondScoreRow.getProblems();
                     if(probs1 != null && probs2 != null) {
-                        ProblemScoreRow p1, p2;
+                        CLICSProblemScore p1, p2;
                         int ptime1, ptime2;
                         String probString, probId;
                         boolean foundProblem;
@@ -231,7 +232,7 @@ public class FileComparisonUtilities {
                 }
 
                 for (int rowNum = minLines; rowNum < firstTeamScoreRows.size(); rowNum++) {
-                    TeamScoreRow firstRow = firstTeamScoreRows.get(rowNum);
+                    CLICSScoreboardRow firstRow = firstTeamScoreRows.get(rowNum);
                     String rowString = "[" + rowNum + "]";
 
                     numberRows ++;
@@ -254,7 +255,7 @@ public class FileComparisonUtilities {
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "team_id";
-                    valueOne = Long.toString(firstRow.getTeam_id());
+                    valueOne = firstRow.getTeam_id();
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
@@ -270,7 +271,7 @@ public class FileComparisonUtilities {
 
                     numberRows ++;
 
-                    TeamScoreRow teamScoreRow = secondTeamScoreRows.get(rowNum);
+                    CLICSScoreboardRow teamScoreRow = secondTeamScoreRows.get(rowNum);
 
                     String valueOne = null;
 
@@ -291,7 +292,7 @@ public class FileComparisonUtilities {
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "team_id";
-                    valueTwo = Long.toString(teamScoreRow.getTeam_id());
+                    valueTwo = teamScoreRow.getTeam_id();
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
@@ -712,9 +713,9 @@ public class FileComparisonUtilities {
         }
     }
 
-    public static  List<TeamScoreRow> loadTeamRows(String scoreboardJSONFilename) throws IOException {
+    public static  List<CLICSScoreboardRow> loadTeamRows(String scoreboardJSONFilename) throws IOException {
 
-        List<TeamScoreRow> rows = new ArrayList<TeamScoreRow>();
+        List<CLICSScoreboardRow> rows = null;
 
         String[] lines = Utilities.loadFile(scoreboardJSONFilename);
         String firstLineString = String.join(" ", lines);
@@ -724,6 +725,9 @@ public class FileComparisonUtilities {
         if (clicsScoreboard != null)
         {
             rows = clicsScoreboard.getRows();
+        } else {
+            rows = new ArrayList<CLICSScoreboardRow>();
+
         }
 
         return rows;

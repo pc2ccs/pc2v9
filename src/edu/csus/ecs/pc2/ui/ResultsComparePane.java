@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -54,6 +54,9 @@ public class ResultsComparePane extends JPanePlugin {
 
     private static final boolean DEFAULT_IGNORE_EMPTY_AWARDS = true;
 
+    private static final String CCS_SHADOW_DIR = "shadow";
+    private static final String CCS_PRIMARY_DIR = "primary";
+
     private static final long serialVersionUID = -2726716271169661000L;
 
     private JTextField pc2ResultsDirectoryTextField;
@@ -90,8 +93,8 @@ public class ResultsComparePane extends JPanePlugin {
         });
         primaryCCSResultsDirectoryTextField.setColumns(40);
 
-        JLabel prmaryCCSLabel = new JLabel("Primary CCS Results Directory");
-        primarySourcePanel.add(prmaryCCSLabel);
+        JLabel primaryCCSLabel = new JLabel("Primary CCS Results Directory");
+        primarySourcePanel.add(primaryCCSLabel);
         primarySourcePanel.add(primaryCCSResultsDirectoryTextField);
 
         JButton selectPrimaryCCSResultsDirectoryButton = new JButton("Select...");
@@ -266,14 +269,37 @@ public class ResultsComparePane extends JPanePlugin {
         });
     }
 
+    /**
+     * Attempt to find the cdp results folder so we can prepopulate the
+     * primary/shadow results paths so it saves time during EOC
+     *
+     * @param ccs "shadow" or "primary"
+     * @return The results folder for the primary/shadow
+     */
+    private String guessResultsDirectory(String ccs)
+    {
+        File resultsDir = new File("current" + File.separator + "results" + File.separator + ccs);
+        String resName = "";
+        if(resultsDir.isDirectory()) {
+            resName = resultsDir.getAbsolutePath();
+        }
+        return(resName);
+    }
+
     protected void populateGUI() {
 
         ClientSettings clientSet = getClientSettings(getContest());
         String exportDir = clientSet.getProperty(ClientSettings.PC2_RESULTS_DIR);
+        if(exportDir.isEmpty()) {
+            exportDir = guessResultsDirectory(CCS_SHADOW_DIR);
+        }
         pc2ResultsDirectoryTextField.setText(exportDir);
         exportDirectoryLabel.setToolTipText(exportDir);
 
         String primaryResultsDir = clientSet.getProperty(ClientSettings.PRIMARY_CCS_RESULTS_DIR);
+        if(primaryResultsDir.isEmpty()) {
+            primaryResultsDir = guessResultsDirectory(CCS_PRIMARY_DIR);
+        }
         primaryCCSResultsDirectoryTextField.setText(primaryResultsDir);
 
         textArea.removeAll();

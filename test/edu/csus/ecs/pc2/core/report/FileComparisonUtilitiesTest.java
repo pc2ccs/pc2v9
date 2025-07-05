@@ -6,12 +6,12 @@ import java.util.List;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.clics.API202306.CLICSScoreboardRow;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
-import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
@@ -110,10 +110,10 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         //        editFile(comp.getSecondFilename());
         //        editFile(comp.getFirstFilename());
 
-        List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows(comp.getFirstFilename());
+        List<CLICSScoreboardRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows(comp.getFirstFilename());
         assertEquals("Expecting team score rows in " + comp.getFirstFilename(), 124, firstTeamScoreRows.size());
 
-        List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows(comp.getSecondFilename());
+        List<CLICSScoreboardRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows(comp.getSecondFilename());
         assertEquals("Expecting team score rows in " + comp.getSecondFilename(), 124, secondTeamScoreRows.size());
     }
 

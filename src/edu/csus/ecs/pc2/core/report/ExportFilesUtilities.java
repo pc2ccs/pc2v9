@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import edu.csus.ecs.pc2.clics.API202306.CLICSScoreboard;
 import edu.csus.ecs.pc2.clics.API202306.EventFeedJSON;
 import edu.csus.ecs.pc2.clics.API202306.JSONTool;
 import edu.csus.ecs.pc2.core.Constants;
@@ -16,11 +17,8 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAwardUtilities;
-import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 public class ExportFilesUtilities {
@@ -64,9 +62,8 @@ public class ExportFilesUtilities {
         }
 
         try {
-            ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
-            CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contestStandings);
-            String json = clicsScoreboard.toString();
+            CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contest, null, null);
+            String json = clicsScoreboard.toJSON();
             String[] sa = { json };
             FileUtilities.writeFileContents(scoreboardJsonFilename, sa);
 
