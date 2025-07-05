@@ -3,21 +3,33 @@ package edu.csus.ecs.pc2.imports.ccs;
 
 /**
  * Information about a specific test case
- * 
+ *
  * @author John Buck, PC^2 Team, pc2@ecs.csus.edu
  */
 public class TestCaseInfo {
     public static final String TEST_CASE_INPUT_EXTENSION = ".in";
     public static final String TEST_CASE_ANSWER_EXTENSION = ".ans";
-    
+
     private String inputFileName;
     private String answerFileName;
-    
-    public TestCaseInfo(String inFile, String ansFile) {
+    private TestDataGroup group;
+
+    public TestCaseInfo(String inFile, String ansFile, TestDataGroup group) {
         inputFileName = inFile;
         answerFileName = ansFile;
+        this.group = group;
     }
-    
+
+    @Override
+    public String toString() {
+        String groupName;
+        if(group == null) {
+            groupName = "None";
+        } else {
+            groupName = group.getGroupName();
+        }
+        return "group: " + groupName + "; inputFileName: " + inputFileName + "; answerFileName: " + answerFileName;
+    }
     /**
      * @return the inputFileName
      */
@@ -42,5 +54,11 @@ public class TestCaseInfo {
     public void setAnswerFileName(String answerFileName) {
         this.answerFileName = answerFileName;
     }
-    
+
+    /**
+     * @return the TestDataGroup where this test case resides
+     */
+    public TestDataGroup GetGroup() {
+        return group;
+    }
 }
