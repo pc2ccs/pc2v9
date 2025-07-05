@@ -143,6 +143,27 @@ public class ContestImportUtilities {
         return defaultValue;
     }
 
+    public static Double fetchDoubleValue(Map<String, Object> map, String key) {
+        Double value = null;
+        if (map != null) {
+            Object oVal = map.get(key);
+            if(oVal instanceof Integer) {
+                value = Double.valueOf(((Integer)oVal).doubleValue());
+            } else {
+                value = (Double) oVal;
+            }
+            if (value != null) {
+                try {
+                    return value;
+                } catch (Exception e) {
+                    syntaxError("Expecting double after " + key + ": field, found '" + value + "'");
+                }
+            }
+        }
+        return value;
+    }
+
+
     public static Integer fetchIntValue(Map<String, Object> map, String key) {
         if (map == null) {
             // SOMEDAY figure out why map would every be null
@@ -172,7 +193,7 @@ public class ContestImportUtilities {
             return null;
         }
     }
-    
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static String[] fetchStringList(String[] yamlLines, String key) {
         Map<String, Object> content = loadYaml(null, yamlLines);
@@ -230,7 +251,7 @@ public class ContestImportUtilities {
             throw new YamlLoadException(getSnakeParserDetails(e), e, filename);
         }
     }
-    
+
     /**
      * read directory and return list of files with given extension
      * @param directoryName to search
@@ -245,7 +266,7 @@ public class ContestImportUtilities {
         String[] entries = dir.list();
         HashSet<String> fileNames = new HashSet<String>();
         String ansFile;
-        
+
         if (entries != null) {
             Arrays.sort(entries);
 
@@ -259,7 +280,7 @@ public class ContestImportUtilities {
                     if(!fileNames.contains(ansFile)) {
                         throw new YamlLoadException("Missing answer file " + ansFile + " for input file " + name);
                     }
-                    list.add(new TestCaseInfo(name, ansFile));
+                    list.add(new TestCaseInfo(name, ansFile, null));
                 }
             }
         }
