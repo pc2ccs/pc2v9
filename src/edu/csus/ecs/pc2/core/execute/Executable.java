@@ -2770,7 +2770,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             // create submission catalog file
             BufferedWriter catlog = new BufferedWriter(new FileWriter(prefixExecuteDirname(SOURCE_CATALOG_FILENAME)));
             if(runFiles != null) {
-                runFiles.createCatalogJSON(catlog);
+                runFiles.createCatalogJSON(catlog, log);
                 catlog.flush();
             }
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false));

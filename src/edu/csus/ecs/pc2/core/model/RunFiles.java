@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.log.Log;
+
 /**
  * The files that were submitted with a Run.
  *
@@ -193,12 +195,12 @@ public class RunFiles implements Serializable {
     }
 
     /**
-     * createCatalogJSON - Generate detailed JSON information about the files submitted and it to the
+     * createCatalogJSON - Generate detailed JSON information about the files submitted and write it to the
      * supplied BufferedWriter.  Similar to toString above, but supplies more details.
      *
      * @param catlog Where to send the detailed JSON about the submission files
      */
-    public void createCatalogJSON(BufferedWriter catlog) {
+    public void createCatalogJSON(BufferedWriter catlog, Log log) {
         try {
             boolean needComma = false;
             catlog.write("[");
@@ -232,9 +234,8 @@ public class RunFiles implements Serializable {
             catlog.write(']');
             catlog.newLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.log(Log.WARNING, "Exception writing RunFiles catalog file for run " + getRunId().toString(), e);
         }
-
     }
 
     /**
