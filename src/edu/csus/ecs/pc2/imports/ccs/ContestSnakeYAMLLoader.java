@@ -1272,7 +1272,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                             // Note that interactive problems require a custom validator
                             isInteractive = true;
                         } else if(valOpts[1].equals(Constants.VALIDATION_SCORE)) {
-                            ContestImportUtilities.syntaxError("Unsupported validation type: custom score");
+//                            ContestImportUtilities.syntaxError("Unsupported validation type: custom score");
+                            if(problemTitle == null) {
+                                System.out.println("Custom validation type 'score' specified for untitled problem");
+                            } else {
+                                System.out.println("Custom validation type 'score' specified for problem " + problemTitle);
+                            }
                         } else {
                             ContestImportUtilities.syntaxError("Unknown valudation type: custom " + valOpts[1]);
                         }
@@ -1307,7 +1312,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         problem.setDisplayName(problemTitle);
 
-        String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
+        String dataFileBaseDirectory = problemDirectory + File.separator + "data";
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
@@ -1315,7 +1320,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             String dataFileName = ContestImportUtilities.fetchValue(content, "datafile");
             String answerFileName = ContestImportUtilities.fetchValue(content, "answerfile");
 
-            loadPc2ProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, dataFileName, answerFileName);
+            loadPc2ProblemFiles(contest, dataFileBaseDirectory + File.separator + "secret", problem, problemDataFiles, dataFileName, answerFileName);
         } else {
             loadCCSProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles);
         }
@@ -2793,68 +2798,77 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
          */
         boolean loadExternalFile = problem.isUsingExternalDataFiles();
 
-        boolean loadSamples = contest.getContestInformation().isLoadSampleJudgesData();
-
-        String sampleDataDirectory = dataFileBaseDirectory.replaceAll("secret$", "sample");
-
-        String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
-
-        String[] answerFileNames = getFileNames(dataFileBaseDirectory, ".ans");
-
-        if (inputFileNames.length == 0) {
-            throw new YamlLoadException("No input (.in) file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
+        TestDataGroup mainDataGroup = new TestDataGroup("data", dataFileBaseDirectory, null);
+        if(mainDataGroup.readTestCases(StaticLog.getLog()) == false) {
+            throw new YamlLoadException("Could not read test cases for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
         }
 
-        if (answerFileNames.length == 0) {
-            throw new YamlLoadException("No answer (.ans) file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
-        }
+        // Pretty much the same as the original code for now
+        ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
+        ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
+        ArrayList<TestDataGroup> dataGroups = new ArrayList<TestDataGroup>();
 
-        if (inputFileNames.length == answerFileNames.length) {
+        loadDataFiles(problem, dataFiles, answerFiles, dataGroups, mainDataGroup, loadExternalFile);
 
-            ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
-            ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
 
-            if (loadSamples) {
-                loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
-            }
+        if (dataFiles.size() > 0) {
 
-            // Load all secret files
-            loadDataFiles(problem, dataFiles, answerFiles, dataFileBaseDirectory, loadExternalFile);
+            SerializedFile[] data = dataFiles.toArray(new SerializedFile[dataFiles.size()]);
+            SerializedFile[] answer = answerFiles.toArray(new SerializedFile[answerFiles.size()]);
 
-            if (dataFiles.size() > 0) {
+            // dumpSerialzedFileList (problem, "Judges data", data);
+            // dumpSerialzedFileList (problem, "Judges answer", answer);
 
-                SerializedFile[] data = dataFiles.toArray(new SerializedFile[dataFiles.size()]);
-                SerializedFile[] answer = answerFiles.toArray(new SerializedFile[answerFiles.size()]);
+            problemDataFiles.setJudgesDataFiles(data);
+            problemDataFiles.setJudgesAnswerFiles(answer);
+            problemDataFiles.setJudgesDataGroups(dataGroups);
 
-                // dumpSerialzedFileList (problem, "Judges data", data);
-                // dumpSerialzedFileList (problem, "Judges answer", answer);
-
-                problemDataFiles.setJudgesDataFiles(data);
-                problemDataFiles.setJudgesAnswerFiles(answer);
-
-                problem.setDataFileName(inputFileNames[0]);
-                problem.setAnswerFileName(inputFileNames[0].replaceAll(".in$", ".ans"));
-            } else {
-                syntaxWarning("There were no data files found/loaded for " + problem.getShortName());
-            }
-
-            problem.setReadInputDataFromSTDIN(true);
-
+            // this is farce - I think it's just for the problem editor gui
+            problem.setDataFileName(problem.getDataFileName(1));
+            problem.setAnswerFileName(problem.getAnswerFileName(1));
         } else {
-            throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
-                    answerFileNames.length + " .ans files " + " in " + dataFileBaseDirectory);
+            syntaxWarning("There were no data files found/loaded for " + problem.getShortName());
         }
 
-        if (inputFileNames.length == 0) {
-            throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
-                    answerFileNames.length + " .ans files " + " in " + dataFileBaseDirectory);
-        }
+        problem.setReadInputDataFromSTDIN(true);
 
         contest.addProblem(problem, problemDataFiles);
 
         validateCCSData(contest, problem);
 
         return problem;
+    }
+
+    /**
+     * Per problem, add files names into datafiles and answerfiles from the TestDataGroup.
+     *
+     * @param problem
+     * @param dataFiles input data files
+     * @param answerFiles input answer files
+     * @param dataGroups input data groups
+     * @param testDataGroup - main test data group (top level)
+     * @param loadExternalFile - load as external data fils
+     */
+    protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, ArrayList<TestDataGroup> dataGroups, TestDataGroup testDataGroup, boolean loadExternalFile) {
+
+        ArrayList<TestCaseInfo> testCases = testDataGroup.getAllTestCaseInfo();
+        if(testCases == null || testCases.size() == 0) {
+            throw new YamlLoadException("No test data available for " + problem.getDisplayName() + " in dir " + testDataGroup.getDataDirectoryName());
+        }
+
+        problem.addTestCaseFilenames(testCases);
+        for (TestCaseInfo testCase : testCases) {
+
+            String dataFileName = testCase.getInputFileName();
+            String answerFileName = testCase.getAnswerFileName();
+
+            checkForFile(dataFileName, "Missing " + dataFileName + " file for " + problem.getShortName());
+            checkForFile(answerFileName, "Missing " + answerFileName + " file for " + problem.getShortName());
+
+            dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
+            answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
+            dataGroups.add(testCase.getGroup());
+        }
     }
 
     /**

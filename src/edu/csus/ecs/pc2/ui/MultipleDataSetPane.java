@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -18,6 +17,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -45,11 +45,9 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 
-import javax.swing.JCheckBox;
-
 /**
  * Multiple Test Data set UI.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 
@@ -57,7 +55,7 @@ import javax.swing.JCheckBox;
 public class MultipleDataSetPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -5975163495479418935L;
 
@@ -96,7 +94,7 @@ public class MultipleDataSetPane extends JPanePlugin {
     private final ButtonGroup inputStorageButtonGroup = new ButtonGroup();
 
     private String loadDirectory = null;
-    
+
     //John's local machine testing directory
 //    private String loadDirectory = "C:\\clevengr\\contest\\PC2\\v9\\TestContests\\sumithello2\\config\\sumit";
 
@@ -109,7 +107,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public MultipleDataSetPane() {
         super();
@@ -119,7 +117,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setSize(new Dimension(766, 526));
@@ -139,7 +137,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     /**
      * Clone data files and populate in pane.
-     * 
+     *
      * @param aProblemDataFiles
      * @throws CloneNotSupportedException
      */
@@ -159,6 +157,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         this.problemDataFiles = datafiles;
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateUI();
             }
@@ -172,11 +171,11 @@ public class MultipleDataSetPane extends JPanePlugin {
     }
 
     /**
-     * This method updates the MultipleDataSetPane UI with the data currently specified in the 
+     * This method updates the MultipleDataSetPane UI with the data currently specified in the
      * tableModel, problem, and problemDataFiles fields (variables within this class).
      */
     protected void populateUI() {
-        
+
         tableModel.setFiles(problemDataFiles);
         tableModel.fireTableDataChanged();
 
@@ -196,10 +195,10 @@ public class MultipleDataSetPane extends JPanePlugin {
                 }
             }
             enableInputDataStoragePanel(enable);
-            
+
             //set the StopOnFirstFailedTestCase checkbox to match what is specified in the problem
             getChckbxStopOnFirstFailedTestCase().setSelected(problem.isStopOnFirstFailedTestCase());
-            
+
             getLoadSamplesFirstCheckbox().setSelected(problem.isLoadDataFilesSamplesFirst());
         }
 
@@ -228,10 +227,13 @@ public class MultipleDataSetPane extends JPanePlugin {
                     width = 100;
                     break;
                 case 1:
-                    width = 300;
+                    width = 200;
                     break;
                 case 2:
-                    width = 300;
+                    width = 200;
+                    break;
+                case 3:
+                    width = 200;
                     break;
                 default:
                     System.err.println("MultipleDataSetPane.resizeColumnWidthUnhandled col " + col);
@@ -274,7 +276,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     /**
      * This method initializes centerPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JScrollPane getListBoxScrollPane() {
@@ -287,7 +289,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     /**
      * This method initializes testDataSetsListBox
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.MCLB
      */
     public JTable getTestDataSetsListBox() {
@@ -331,7 +333,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     /**
      * Compares current set of data sets to input datafiles.
-     * 
+     *
      */
     boolean hasChanged(ProblemDataFiles originalFiles) {
 
@@ -363,7 +365,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     /**
      * Compare serializedfile arrays.
-     * 
+     *
      * @param listOne
      * @param listTwo
      * @return 0 if identical, non-zero if different, returns 2 if either input are null.
@@ -392,6 +394,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             btnDelete = new JButton("Delete");
             btnDelete.setToolTipText("Delete selected data sets");
             btnDelete.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     int rowNumber = testDataSetsListBox.getSelectedRow();
                     if (rowNumber != -1) {
@@ -406,7 +409,7 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     /**
      * Remove the specified ROW from the table model holding Test Cases. Note that while Test Cases are numbered starting from 1, ROW NUMBERS start from 0!
-     * 
+     *
      * @param rowNumber
      *            - the row to remove, where the first row is row 0
      */
@@ -483,17 +486,17 @@ public class MultipleDataSetPane extends JPanePlugin {
 
             String sampleBaseDirectoryName = new File(baseDirectoryName).getParent() + File.separator +"sample";
             boolean ishere = new File(sampleBaseDirectoryName).isDirectory();
-            
+
             if (loadSamplesFirstCheckbox.isSelected() && new File(sampleBaseDirectoryName).isDirectory()) {
 
                 getLog().info("Loading sample files from sample dir " + sampleBaseDirectoryName);
 
-                // load sample files first 
+                // load sample files first
                 problemDataFiles = loadDataFiles(problem, problemDataFiles, sampleBaseDirectoryName, ".in", ".ans", externalFiles);
             }
 
             problemDataFiles = loadDataFiles(problem, problemDataFiles, baseDirectoryName, ".in", ".ans", externalFiles);
-   
+
         } catch (Exception e) {
             getController().getLog().log(Log.INFO, e.getMessage(), e);
             showMessage(this, "Import Failed", e.getMessage());
@@ -502,24 +505,24 @@ public class MultipleDataSetPane extends JPanePlugin {
             dump(problemDataFiles, "debug after load");
         }
 
-        //Populate the MultipleDataSetPane 
+        //Populate the MultipleDataSetPane
         populateUI();
 
         // Populate General Pane data and answer files too
         editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
-        
+
         //update the Input Validator status: since we're loading new data files, any prior "I.V. Run Results" are invalid
         getEditProblemPane().getInputValidatorPane().setCustomInputValidatorResults(new InputValidationResult[0]);
         getEditProblemPane().getInputValidatorPane().setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
         getEditProblemPane().getInputValidatorPane().setCustomInputValidatorHasBeenRun(false);
-        
+
         getEditProblemPane().getInputValidatorPane().setVivaInputValidatorResults(new InputValidationResult[0]);
         getEditProblemPane().getInputValidatorPane().setVivaInputValidationStatus(InputValidationStatus.NOT_TESTED);
         getEditProblemPane().getInputValidatorPane().setVivaInputValidatorHasBeenRun(false);
-        
+
         //update the Results table: since we're loading new data files, any prior results are invalid
         getEditProblemPane().getInputValidatorPane().updateResultsTable(new InputValidationResult[0]);
-        
+
         //ask the user if they want to run the currently-selected Input Validator (if any)
         if (okToRunInputValidator()) {
             INPUT_VALIDATOR_TYPE currentIV = getEditProblemPane().getInputValidatorPane().getCurrentInputValidatorType();
@@ -527,7 +530,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             msg += "\nDo you want to run the currently-selected Input Validator on the new input data files?";
             int result = JOptionPane.showConfirmDialog(this, msg, "Run Input Validator? ", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
-                
+
                 //attempt to run the currently-selected Input Validator.  Note that this method will fail with an error msg/
                 // dialog if there is no selected and properly configured Input Validator.
                 getEditProblemPane().getInputValidatorPane().runCurrentlySelectedInputValidator();
@@ -535,7 +538,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         getEditProblemPane().enableUpdateButton();
     }
-    
+
     private boolean okToRunInputValidator() {
         return (getEditProblemPane().getInputValidatorPane().okToRunInputValidator());
     }
@@ -546,6 +549,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             btnLoad.setToolTipText("Load data sets from directory");
 
             btnLoad.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     loadDataFiles();
                 }
@@ -586,23 +590,23 @@ public class MultipleDataSetPane extends JPanePlugin {
             throw new RuntimeException("Mismatch: expecting the same number of  '" + dataExtension + "'  and  '" + answerExtension + "'  files in " + dataFileBaseDirectory + "\n (found "
                     + inputFileNames.length + "  '" + dataExtension + "'  files vs. " + answerFileNames.length + "  '" + answerExtension + "'  files)");
         }
-        
+
         SerializedFile[] inputFiles = Utilities.createSerializedFiles(dataFileBaseDirectory, inputFileNames, externalDataFiles);
         SerializedFile[] answertFiles = Utilities.createSerializedFiles(dataFileBaseDirectory, answerFileNames, externalDataFiles);
 
         SerializedFile [] existingFiles = files.getJudgesDataFiles();
-        
+
         if (existingFiles != null && existingFiles.length > 0){
             /**
              * Existing files present, concatenate files
              */
-            
+
             Object[] newFiles = Utilities.concatenateArrays(existingFiles, inputFiles);
             inputFiles = (SerializedFile[]) newFiles;
         }
-        
+
         existingFiles = files.getJudgesAnswerFiles();
-        
+
         if (existingFiles != null && existingFiles.length > 0){
             /**
              * Existing files present, concatenate files
@@ -628,7 +632,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             inputDataStoragePanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Choose storage option before loading data files:", TitledBorder.LEADING, TitledBorder.TOP,
                     new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new Color(0, 0, 0)));
             inputDataStoragePanel.setAlignmentX(0.0f);
-            inputDataStoragePanel.setLayout(new BoxLayout((Container) inputDataStoragePanel, BoxLayout.Y_AXIS));
+            inputDataStoragePanel.setLayout(new BoxLayout(inputDataStoragePanel, BoxLayout.Y_AXIS));
             inputDataStoragePanel.add(getRdbtnCopyDataFiles());
             inputDataStoragePanel.add(getRdBtnKeepDataFilesExternal());
             inputDataStoragePanel.add(getLblWhatsThis());
@@ -653,6 +657,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         if (rdBtnKeepDataFilesExternal == null) {
             rdBtnKeepDataFilesExternal = new JRadioButton("Keep Data Files external to PC2 (requires you to copy files to Judge's machines)");
             rdBtnKeepDataFilesExternal.addItemListener(new ItemListener() {
+                @Override
                 public void itemStateChanged(ItemEvent e) {
                     if (rdBtnKeepDataFilesExternal.isSelected()) {
                         verifyJudgeDataPathIsSet();
@@ -733,7 +738,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return verticalStrut_2;
     }
-    
+
     private JLabel getLblWhatsThis() {
         if (lblWhatsThis == null) {
             lblWhatsThis = new JLabel("<What's This?>");
@@ -748,7 +753,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return lblWhatsThis;
     }
-    
+
     private String whatsThisMessage = "PC2 has two different ways of handling data files: Internal and External.  "
             + "\n\n'Internal' means that PC2 will load the file data internally into PC2 memory.  "
             + "\nThe advantage of this is that it allows PC2 to automatically transmit the file data to a Judge each time the Judge requests to judge a submission."
@@ -773,12 +778,13 @@ public class MultipleDataSetPane extends JPanePlugin {
             horizontalStrut_1.setMinimumSize(new Dimension(30, 0));
         }
         return horizontalStrut_1;
-    }    
-    
+    }
+
     protected JCheckBox getChckbxStopOnFirstFailedTestCase() {
         if (chckbxStopOnFirstFailedTestCase == null) {
             chckbxStopOnFirstFailedTestCase = new JCheckBox("Stop execution on first failed test case");
             chckbxStopOnFirstFailedTestCase.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     getEditProblemPane().enableUpdateButton();
                 }
@@ -803,7 +809,7 @@ public class MultipleDataSetPane extends JPanePlugin {
     public boolean isLoadSamplesFirst() {
         return getLoadSamplesFirstCheckbox().isSelected();
     }
-    
+
     private Component getHorizontalStrut_2() {
         if (horizontalStrut_2 == null) {
         	horizontalStrut_2 = Box.createHorizontalStrut(20);
@@ -812,5 +818,5 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return horizontalStrut_2;
     }
-    
+
 } // @jve:decl-index=0:visual-constraint="10,10"

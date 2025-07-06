@@ -4,23 +4,27 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.imports.ccs.TestDataGroup;
 
+// JB TODO - this will have to be reworked if we intend to update data files AFTER the CDP
+// has been loaded.  Specifically, the judgesDataGroups will need to be addressed.
 
 /**
  * Data files and programs (validator) for a Problem.
- * 
- * Multiple data sets are supported.  
+ *
+ * Multiple data sets are supported.
  * <P>
- * 
- * 
+ *
+ *
  * @see #getJudgesAnswerFile()
  * @see #getJudgesDataFile()
- * 
+ *
  * @see #getJudgesAnswerFiles()
  * @see #getJudgesDataFiles()
- * 
+ *
  * @see edu.csus.ecs.pc2.core.model.Problem
  * @see edu.csus.ecs.pc2.core.model.ProblemDataFilesList
  *
@@ -39,9 +43,9 @@ public class ProblemDataFiles implements IElementObject {
     private ElementId elementId = new ElementId("ProblemDF");
 
     private ElementId problemId = null;
-    
+
     private SerializedFile outputValidatorFile;
-    
+
     private SerializedFile inputValidatorFile;
 
     public ProblemDataFiles(Problem problem) {
@@ -64,9 +68,14 @@ public class ProblemDataFiles implements IElementObject {
     private SerializedFile[] judgesAnswerFiles = new SerializedFile[0];
 
     /**
+     * Data groups for each test file
+     */
+    private TestDataGroup[] judgesDataGroups = new TestDataGroup[0];
+
+    /**
      * This should be invoked with the new Problem and will attempt to copy
      * the existing ProblemDataFiles into a new ProblemDataFiles.
-     * 
+     *
      * @param problem
      * @return a copy of this ProblemDataFiles
      * @throws CloneNotSupportedException
@@ -75,7 +84,7 @@ public class ProblemDataFiles implements IElementObject {
         ProblemDataFiles clone = new ProblemDataFiles(problem);
         // inherited field
         clone.setSiteNumber(getSiteNumber());
-        
+
         // local fields
 //        clone.elementId = elementId;
 //        clone.problemId = getProblemId();
@@ -85,7 +94,9 @@ public class ProblemDataFiles implements IElementObject {
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
-        
+        // JB TODO - Does this have to be cloned?  I dont think tso.
+        clone.judgesDataGroups = getJudgesDataGroups();
+
         return clone;
     }
 
@@ -112,7 +123,7 @@ public class ProblemDataFiles implements IElementObject {
 
     /**
      * Return array of answer files.
-     * 
+     *
      * @return the judge answer files or a single zero length array.
      */
     public SerializedFile[] getJudgesAnswerFiles() {
@@ -121,11 +132,20 @@ public class ProblemDataFiles implements IElementObject {
 
     /**
      * Return array of data files.
-     * 
+     *
      * @return Returns the judge data files or a single zero length array.
      */
     public SerializedFile[] getJudgesDataFiles() {
         return judgesDataFiles;
+    }
+
+    /**
+     * Return array of data groups.
+     *
+     * @return Returns the judge data groups.
+     */
+    public TestDataGroup [] getJudgesDataGroups() {
+        return judgesDataGroups;
     }
 
     /**
@@ -134,6 +154,14 @@ public class ProblemDataFiles implements IElementObject {
      */
     public void setJudgesAnswerFiles(SerializedFile[] judgesAnswerFiles) {
         this.judgesAnswerFiles = judgesAnswerFiles;
+    }
+
+    /**
+     * @param dataGroups
+     *            The dataGroups for each test case.
+     */
+    public void setJudgesDataGroups(ArrayList<TestDataGroup> dataGroups) {
+        judgesDataGroups = dataGroups.toArray(new TestDataGroup [dataGroups.size()]);
     }
 
     /**
@@ -171,7 +199,7 @@ public class ProblemDataFiles implements IElementObject {
         files[0] = judgesDataFile;
         setJudgesDataFiles(files);
     }
-    
+
     /**
      * Get the judge data file.
      * @return a file or null if not present.
@@ -184,10 +212,10 @@ public class ProblemDataFiles implements IElementObject {
             return files[0];
         }
     }
-    
+
     /**
      * Get the judge answer file.
-     * 
+     *
      * @return a file or null if not present.
      */
     public SerializedFile getJudgesAnswerFile() {
@@ -202,18 +230,22 @@ public class ProblemDataFiles implements IElementObject {
     /**
      * @return Returns the elementId.
      */
+    @Override
     public ElementId getElementId() {
         return elementId;
     }
 
+    @Override
     public int versionNumber() {
         return elementId.getVersionNumber();
     }
 
+    @Override
     public int getSiteNumber() {
         return elementId.getSiteNumber();
     }
 
+    @Override
     public void setSiteNumber(int siteNumber) {
         elementId.setSiteNumber(siteNumber);
     }
@@ -225,10 +257,10 @@ public class ProblemDataFiles implements IElementObject {
     protected void setProblemId(ElementId problemId) {
         this.problemId = problemId;
     }
-    
+
     /**
      * Returns the output validator program file.
-     * 
+     *
      * @return a SerializedFile containing the output validator code, or null if no output validator has been specified
      */
     public SerializedFile getOutputValidatorFile() {
@@ -238,10 +270,10 @@ public class ProblemDataFiles implements IElementObject {
     public void setOutputValidatorFile(SerializedFile validatorFile) {
         this.outputValidatorFile = validatorFile;
     }
-    
+
     /**
      * Returns the custom input validator program file associated with this ProblemDataFiles object.
-     * 
+     *
      * @return a SerializedFile containing the input validator code, or null if no custom input validator has been specified.
      */
     public SerializedFile getCustomInputValidatorFile() {
@@ -250,14 +282,14 @@ public class ProblemDataFiles implements IElementObject {
 
     /**
      * Sets the custom input validator program file associated with this ProblemDataFiles object.
-     * 
+     *
      * @param validatorFile a SerializedFile containing the custom input validator program to be associated with this ProblemDataFiles.
      */
     public void setCustomInputValidatorFile(SerializedFile validatorFile) {
         this.inputValidatorFile = validatorFile;
     }
-    
-   
+
+
 
     private boolean compareSerializedFiles(SerializedFile oldFile, SerializedFile newFile) {
         if (oldFile == null) {
@@ -295,7 +327,7 @@ public class ProblemDataFiles implements IElementObject {
         }
         return true;
     }
-    
+
     private boolean compareSerializedFileArrays(SerializedFile[] oldList, SerializedFile[] newList) {
         if (oldList == null) {
             return(newList == null);
@@ -315,7 +347,7 @@ public class ProblemDataFiles implements IElementObject {
         }
         return true;
     }
-    
+
     public boolean isSameAs(ProblemDataFiles newProblemDataFiles) {
         try {
             if (newProblemDataFiles == null) {
@@ -333,9 +365,9 @@ public class ProblemDataFiles implements IElementObject {
             if (!compareSerializedFiles(this.getCustomInputValidatorFile(), newProblemDataFiles.getCustomInputValidatorFile())) {
                 return false;
             }
-            
+
             // TODO 917 should compare the other problemDataFile fields too.
-                
+
             return true;
         } catch (Exception e) {
             // TODO Log to static exception Log
@@ -343,7 +375,7 @@ public class ProblemDataFiles implements IElementObject {
             return false;
         }
     }
-    
+
     @Override
     public String toString() {
 
@@ -354,20 +386,20 @@ public class ProblemDataFiles implements IElementObject {
 
         int numDataFiles = judgesDataFiles.length;
         int numAnsFiles = judgesAnswerFiles.length;
-        
+
         buf.append(numDataFiles);
         buf.append(" data files, ");
-        
+
         buf.append(numAnsFiles);
         buf.append(" answer files. ");
-        
+
         buf.append("Data: ");
         SerializedFile [] list = judgesDataFiles;
         for (SerializedFile file : list) {
             buf.append(file.getName());
             buf.append(" ");
         }
-        
+
         buf.append("Answer: ");
         list = judgesAnswerFiles;
         for (SerializedFile file : list) {
@@ -395,27 +427,27 @@ public class ProblemDataFiles implements IElementObject {
 
         return buf.toString();
     }
-    
-    
+
+
     /**
      * Returns the full path for judge data filenames.
-     * 
+     *
      * Expected locations vary depending on the client type (Admin or Judge) and
      * whether the problem has external or internal files.
-     * 
+     *
      * See {@link Utilities#getProblemfullFilenames(IInternalContest, Problem, SerializedFile[], String)} for details.
-     * 
+     *
      * <pre>
      * Sample code: for Judge
      * String [] filenames = Utilities.getFullJudgesDataFilenames(contest, executable.getExecuteDirectoryName());
-     * 
+     *
      * Sample code: for Admin
      * String [] filenames = Utilities.getFullJudgesDataFilenames(contest, null);
-     * 
+     *
      * </pre>
-     * 
+     *
      * @param contest
-     * @param executableDir 
+     * @param executableDir
      */
     public String[] getFullJudgesDataFilenames(IInternalContest contest, String executableDir) {
         return Utilities.fullJudgesDataFilenames(contest, this, executableDir);
@@ -423,22 +455,22 @@ public class ProblemDataFiles implements IElementObject {
 
     /**
      * Returns the full path for judge answer filenames.
-     * 
+     *
      * <pre>
      * Sample code:
      * String [] filenames = Utilities.getFullJudgesAnswerFilenames(contest, executable.getExecuteDirectoryName());
-     * </pre>     
-     *  
+     * </pre>
+     *
      * @param contest
      * @param executableDir
      */
     public String[] getFullJudgesAnswerFilenames(IInternalContest contest, String executableDir) {
         return Utilities.fullJudgesAnswerFilenames(contest, this, executableDir);
     }
-    
+
     /**
      * Check for existence of all judge data and answer files, may create data files if needed.
-     * 
+     *
      * Will not create files if problem has external files, {@link Problem#isUsingExternalDataFiles()} set true.
      * <P>
      * Will create judges answer and and data files (in exedcutableDir) if problem has internal files.
@@ -447,8 +479,8 @@ public class ProblemDataFiles implements IElementObject {
      * <pre>
      * Sample code:
      * checkAndCreateFiles(contest, executable.getExecuteDirectoryName());
-     * </pre>     
-     * 
+     * </pre>
+     *
      * @param contest
      * @param executableDir directory where internal files are expected.
      * @throws FileNotFoundException if external files not found or cannot create internal file
@@ -507,7 +539,7 @@ public class ProblemDataFiles implements IElementObject {
 
     /**
      * Remove data set from problem data sets.
-     * 
+     *
      * @param index zero based data set row
      */
     public void removeDataSet(int index) {
