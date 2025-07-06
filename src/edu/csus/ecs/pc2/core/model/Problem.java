@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.VivaInputValidatorSettings;
+import edu.csus.ecs.pc2.imports.ccs.TestCaseInfo;
 import edu.csus.ecs.pc2.ui.EditProblemSandboxPane;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
@@ -1385,6 +1386,42 @@ public class Problem implements IElementObject {
         }
     }
 
+    /**
+     * Add data and answer filenames to list of test cases from the TestCaseInfo ArrayList
+     * This is better than adding them one-at-a-time and reallocating the array for each addition.
+     *
+     * @see #removeAllTestCaseFilenames()
+     * @param testCases - all the test cases in a ArrayList
+     */
+    public void addTestCaseFilenames (ArrayList<TestCaseInfo> testCases){
+
+        int nCases = testCases.size();
+        testCaseDataFilenames = new String[nCases];
+        testCaseAnswerFilenames = new String[nCases];
+        TestCaseInfo testCase;
+        String groupPath;
+
+        for(int iCase = 0; iCase < nCases; iCase++) {
+            testCase= testCases.get(iCase);
+            testCaseDataFilenames[iCase] = extractFileNameFromPath(testCase.getInputFileName());
+            testCaseAnswerFilenames[iCase] = extractFileNameFromPath(testCase.getAnswerFileName());
+        }
+    }
+
+    /**
+     * Returns last component of a path (the filename).
+     * It relies on the fact that the last component has a File.separator before it. If not,
+     * then the whole string is returned.
+     * @param fileName
+     * @return the filename component of the path
+     */
+    private String extractFileNameFromPath(String fileName) {
+        int idx= fileName.lastIndexOf(File.separator);
+        if(idx == -1) {
+            return(fileName);
+        }
+        return(fileName.substring(idx+1));
+    }
 
     /**
      * Remove all test case filenames.

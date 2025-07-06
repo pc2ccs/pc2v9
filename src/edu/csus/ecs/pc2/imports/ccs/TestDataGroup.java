@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,7 +18,9 @@ import edu.csus.ecs.pc2.core.log.Log;
  *
  * @author John Buck, PC^2 Team, pc2@ecs.csus.edu
  */
-public class TestDataGroup {
+public class TestDataGroup implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public static final String SAMPLE_GROUP = "sample";
     public static final String SECRET_GROUP = "secret";
@@ -298,6 +301,10 @@ public class TestDataGroup {
 
     public int getTotalTestCases() {
         return totalTestCases;
+    }
+
+    public String getDataDirectoryName() {
+        return dataDirectoryName;
     }
 
     public ArrayList<TestDataGroup> getTestDataGroups() {

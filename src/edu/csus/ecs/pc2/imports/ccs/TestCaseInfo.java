@@ -1,12 +1,17 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
+import java.io.Serializable;
+
 /**
  * Information about a specific test case
  *
  * @author John Buck, PC^2 Team, pc2@ecs.csus.edu
  */
-public class TestCaseInfo {
+public class TestCaseInfo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     public static final String TEST_CASE_INPUT_EXTENSION = ".in";
     public static final String TEST_CASE_ANSWER_EXTENSION = ".ans";
 
@@ -58,7 +63,7 @@ public class TestCaseInfo {
     /**
      * @return the TestDataGroup where this test case resides
      */
-    public TestDataGroup GetGroup() {
+    public TestDataGroup getGroup() {
         return group;
     }
 }
