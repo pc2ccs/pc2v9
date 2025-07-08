@@ -159,22 +159,24 @@ public class LegacyGrader {
             for(JudgmentCodes jcode : JudgmentCodes.values()) {
                 if(code.equals(jcode.toString())) {
                     idx = jcode.ordinal();
+                    // Tally score - we do this even for reject cases(!)
+                    scoreSum += score;
+                    scoreCount += 1;
+
+                    // keep track of min and max score
+                    if(score < scoreMin) {
+                        scoreMin = score;
+                    }
+                    if(score > scoreMax) {
+                        scoreMax = score;
+                    }
+
                     // check for first failure
                     if(idx > 0) {
                         if(firstError == null) {
                             firstError = jcode.toString();
                         }
                         anyFailures = true;
-                    } else {
-                        // Accepted case, remember scores for later
-                        scoreSum += score;
-                        scoreCount += 1;
-                        if(score < scoreMin) {
-                            scoreMin = score;
-                        }
-                        if(score > scoreMax) {
-                            scoreMax = score;
-                        }
                     }
                     sawJudgment[idx] = true;
                     found = true;
