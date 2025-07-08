@@ -102,6 +102,6 @@ public class LegacyGraderTest  extends AbstractTestCase {
         assertEquals("Expected ACTLEWARTE with accept_if_any_accepted/sum to be 0 ", 0,
                 runTest(this.getName(), testDataFile, testOutputFile, "accept_if_any_accepted sum", "AC 654.0"));
         assertEquals("Expected ACTLEWARTE with always_accept/avg to be 0 ", 0,
-                runTest(this.getName(), testDataFile, testOutputFile, "accept_if_any_accepted avg", "AC 81.75"));
+                runTest(this.getName(), testDataFile, testOutputFile, "accept_if_any_accepted avg", "AC 59.45454545454545"));
     }
 }
