@@ -34,6 +34,7 @@ public class TestDataGroupsTest extends AbstractTestCase {
             System.err.println("could not find " + loadDir);
             throw new Exception("Unable to locate " + loadDir);
         }
+        ensureStaticLog();
         super.setUp();
     }
 
@@ -164,7 +165,6 @@ public class TestDataGroupsTest extends AbstractTestCase {
         String inputTestDirectory = getDataDirectory("testTestDataGroup") + File.separator + "data";
         String testDir = getOutputDataDirectory();
 
-        ensureStaticLog();
         TestDataGroup secret = new TestDataGroup("data", inputTestDirectory, null);
         assertTrue(secret.readTestCases(StaticLog.getLog()));
         assertEquals("Expecting total test case of 16 ", 16, secret.getTotalTestCases());

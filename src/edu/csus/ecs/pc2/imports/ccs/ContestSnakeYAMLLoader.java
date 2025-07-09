@@ -2783,7 +2783,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public String getCCSDataFileDirectory(String yamlDirectory, String shortDirName) {
-        return yamlDirectory + File.separator + shortDirName + File.separator + "data" + File.separator + "secret";
+        return yamlDirectory + File.separator + shortDirName + File.separator + "data";
     }
 
     @Override
