@@ -156,7 +156,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             String value = propList[i][1];
             int colon = value.indexOf(":");
             String defaultValue = value.substring(0, colon);
-            // apparently, the "type" portion of the string is ignored (stuff after the colonr) - JB
+            // apparently, the "type" portion of the string is ignored (stuff after the colon) - JB
             props.put(key, defaultValue);
         }
         // props.put(POINTS_PER_NO, "20");
