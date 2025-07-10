@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.util.List;
@@ -19,13 +19,20 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class JudgementUtilitiesTest extends AbstractTestCase {
-    
+
     private SampleContest sample = new SampleContest();
-//    
+
+    @Override
+    protected void setUp() throws Exception {
+        ensureStaticLog();
+        super.setUp();
+    }
+
+    //
     public String getDefaultJudgementAcronym(IInternalContest contest){
 //        return contest.getJudgements()[1].getAcronym(); // CE
         return contest.getJudgements()[2].getAcronym(); // WA
@@ -33,75 +40,75 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
 
     /**
      * Test compile error.
-     * 
+     *
      * @throws Exception
      */
     public void testForCE() throws Exception {
 
         IInternalContest contest = createContest();
-        
+
         ExecutionData executionData = new ExecutionData();
-        
+
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
         Run run = runs[0];
-        
+
         /**
          * Test Compilation error
          */
         executionData.setCompileSuccess(false);
         JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "Works for me");
-        
+
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         assertEquals(Judgement.ACRONYM_COMPILATION_ERROR, judgmeent.getAcronym());
     }
-    
+
     /**
      * Test for execute.
-     * 
+     *
      * An exception is thrown during execute.
-     * 
+     *
      * @throws Exception
      */
     public void testForExec() throws Exception {
         IInternalContest contest = createContest();
-        
+
         ExecutionData executionData = new ExecutionData();
-        
+
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
         Run run = runs[0];
-        
+
         /**
          * Test Execution Error
          */
         executionData.setCompileSuccess(true);
-        
+
         executionData.setExecutionException(new Exception("unit test M1"));
-        
+
         JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "Works for me");
-        
+
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
-        
+
         assertEquals(getDefaultJudgementAcronym(contest), judgmeent.getAcronym());
-        
+
         String expectedMessage = "Execption during execution unit test M1";
         assertEquals(expectedMessage, judgementRecord.getValidatorResultString());
     }
-    
+
     /**
      * Test for validator.
-     * 
+     *
      * Judgement matches judgement  in list.
-     * 
+     *
      * @throws Exception
      */
     public void testforValidatePositive() throws Exception {
         IInternalContest contest = createContest();
-        
+
         ExecutionData executionData = new ExecutionData();
-        
+
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
         Run run = runs[0];
-        
+
         /**
          * Test compile ok, exec and validate not so much..
          */
@@ -111,30 +118,30 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
         Judgement judgement = contest.getJudgements()[4];
         String expected = judgement.getDisplayName();
         executionData.setValidationResults(expected);
-        
+
         JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         assertEquals("WA2", judgmeent.getAcronym());
-        
+
         String expectedMessage = "You have no clue"; // this is the judgement!
         assertEquals(expectedMessage, judgementRecord.getValidatorResultString());
     }
-    
+
     /**
      * Test for validate.
-     * 
+     *
      * Where judgement does not match any contest judgement name.
      * @throws Exception
      */
     public void testforValidateNegative() throws Exception {
-        
+
         IInternalContest contest = createContest();
-        
+
         ExecutionData executionData = new ExecutionData();
-        
+
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
         Run run = runs[0];
-        
+
         /**
          * Test compile ok, exec and validate not so much..
          */
@@ -144,62 +151,62 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
         Judgement judgement = contest.getJudgements()[4];
         String expected = judgement.getDisplayName();
         executionData.setValidationResults(expected);
-        
+
         JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "It's alright");
-        
+
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         assertEquals(getDefaultJudgementAcronym(contest), judgmeent.getAcronym());
-        
+
         String expectedMessage = "Undetermined";
         assertEquals(expectedMessage, judgementRecord.getValidatorResultString());
 
     }
-    
+
     /**
      * Test when validate nor execute was successful.
-     * 
+     *
      * @throws Exception
      */
     public void testForNoExecuteNoValidate() throws Exception {
-        
+
         IInternalContest contest = createContest();
-        
+
         ExecutionData executionData = new ExecutionData();
-        
+
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
         Run run = runs[0];
-        
+
         /**
          * Test compile ok, exec and validate not so much..
          */
         executionData.setCompileSuccess(true);
         executionData.setExecuteSucess(false);;
         executionData.setValidationSuccess(false);
-        
+
         JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "Works for me");
-        
+
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         assertEquals(getDefaultJudgementAcronym(contest), judgmeent.getAcronym());
-        
+
         String expectedMessage = "Undetermined";
         assertEquals(expectedMessage, judgementRecord.getValidatorResultString());
     }
-    
+
     /**
      * Test when judgement is Yes/solved.
-     * 
+     *
      * @throws Exception
      */
     public void testYes() throws Exception {
-        
-        
+
+
         IInternalContest contest = createContest();
-        
+
         ExecutionData executionData = new ExecutionData();
-        
+
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
         Run run = runs[0];
-        
+
         /**
          * Test compile ok, exec and validate not so much..
          */
@@ -208,75 +215,75 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
         executionData.setValidationSuccess(true);
         Judgement judgement22 = contest.getJudgements()[0];
         executionData.setValidationResults("accepted");
-        
+
         JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "accepted");
-        
+
         Judgement newJudgment = contest.getJudgement(judgementRecord.getJudgementId());
-        
+
         String expected = judgement22.getAcronym();
         String actual = newJudgment.getAcronym();
-        
+
         assertEquals(expected, actual);
-        
+
         String expectedMessage = "Yes.";
         assertEquals(expectedMessage, judgementRecord.getValidatorResultString());
 
     }
-    
+
 
     private IInternalContest createContest() {
         IInternalContest contest = sample.createStandardContest();
         return contest;
     }
-    
-    
+
+
     public void testgetLastTestCaseJudgementList() throws Exception {
 
         IInternalContest contest = createContest();
-        
+
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
         Run run = runs[0];
-        
+
         Judgement noJudgement = contest.getJudgements()[4];
-        
+
         Problem problem = contest.getProblem(run.getProblemId());
-        
+
         for (int i = 0; i < 8; i++) {
             problem.addTestCaseFilenames("sumit.dat", "sumit.ans");
         }
-        
+
         assertTrue("Expecting more than four test cases, got "+problem.getNumberTestCases(), problem.getNumberTestCases() > 4);
-        
+
         // Add all Yes judgements
         addAllTestCases(run, problem, sample.getYesJudgement(contest));
-        
+
         /**
          * Test case, base 1, to assign a NO judgement to.
          */
-        
+
         // add no judgement at test case 2
         addTestCases(run, problem, 2, noJudgement, sample.getYesJudgement(contest));
-        
+
         int noTestCaseNumber = 4;
         // Add all yes, except a No at noTestCaseNumber
         addTestCases(run, problem, noTestCaseNumber, noJudgement, sample.getYesJudgement(contest));
 
         List<Judgement> jList = JudgementUtilities.getLastTestCaseJudgementList(contest, run);
         assertNotNull (jList);
-        
+
         int tcn = problem.getNumberTestCases();
         assertEquals("test cases expected ", tcn, jList.size());
-        
+
         Judgement expectedNo = jList.get(noTestCaseNumber-1);
         assertEquals(noJudgement, expectedNo);
-        
+
         int yesCount = 0;
         for (Judgement judgement : jList) {
             if (Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym())){
                 yesCount++;
             }
         }
-        
+
         assertEquals("Expected yes judgement count ", 7, yesCount);
     }
 
@@ -287,7 +294,7 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
      * @param judgement
      */
     private void addAllTestCases(Run run, Problem problem, Judgement judgement) {
-        
+
         for (int i = 0; i < problem.getNumberTestCases(); i++) {
             boolean passed = Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym());
             ClientId judgerClientId = new ClientId(1, Type.JUDGE, 1);
@@ -295,12 +302,12 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
             RunTestCase runTestCaseResult = new RunTestCase(run, record, i, passed);
             run.addTestCase(runTestCaseResult);
         }
-        
+
     }
 
     /**
      * Add judgements to run, add single NO to list of judgements
-     * 
+     *
      * @param run
      * @param problem
      * @param testCaseNumberForNoJudgement test case number to assign judgement, base 1.
@@ -309,13 +316,13 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
      */
     private void addTestCases(Run run, Problem problem, int testCaseNumberForNoJudgement, Judgement noJudgement, Judgement yesJudgement) {
         for (int i = 0; i < problem.getNumberTestCases(); i++) {
-            
+
             Judgement judgement = yesJudgement;
-            
+
             if (i + 1 == testCaseNumberForNoJudgement){
                 judgement = noJudgement;
             }
-            
+
             boolean passed = Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym());
             ClientId judgerClientId = new ClientId(1, Type.JUDGE, 1);
             JudgementRecord record  = new JudgementRecord(judgement.getElementId(), judgerClientId, passed, true);
@@ -326,9 +333,9 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
 
     /**
      * Test with sample contest/default judgements.
-     * 
+     *
      * By default will use the judgements from the current site (site number 3)
-     * 
+     *
      * @throws Exception
      */
     public void testgetSingleListofJudgements() throws Exception {
@@ -351,9 +358,9 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
 
     /**
      * Test to ensure that all judgements found are on site 1.
-     * 
+     *
      * When there are judgements from site 1, use those judgements.
-     * 
+     *
      * @throws Exception
      */
     public void testgetSingleListofJudgementsWithSite1Judgements() throws Exception {
@@ -426,7 +433,7 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
             addRunTestCase(contest, run, testCaseNum, acJudgement, judges[0].getClientId());
         }
         recs = JudgementUtilities.getLastTestCaseArray(contest, run);
-        
+
         assertEquals("Expected test cases ", 10, recs.length);
         // Add second set of test cases - all WA
         for (int testCaseNum = 1; testCaseNum <= problem.getNumberTestCases(); testCaseNum++) {
@@ -434,9 +441,9 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
         }
         assertEquals("Expected total test cases ", 20, run.getRunTestCases().length);
         recs = JudgementUtilities.getLastTestCaseArray(contest, run);
-        
+
         assertEquals("Expected test cases ", 10, recs.length);
-        
+
         // Test that all judgements are WA
         for (RunTestCase runTestCase : recs) {
             ElementId judgementId = runTestCase.getJudgementId();
@@ -485,5 +492,5 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
         run.addTestCase(runTestCase);
     }
 
-    
+
 }

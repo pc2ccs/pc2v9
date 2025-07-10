@@ -88,6 +88,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        ensureStaticLog();
         super.setUp();
 
         // setDebugMode(true); // debug mode
@@ -1597,7 +1598,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             loader.loadCCSProblemFiles(contest, secretDataDir, problem, problemDataFiles);
 
             assertTrue("Expecting more than one data set in " + secretDataDir, problemDataFiles.getJudgesDataFiles().length > 1);
-            assertTrue("Expecting more than on data set in " + secretDataDir, problemDataFiles.getJudgesAnswerFiles().length > 1);
+            assertTrue("Expecting more than one data set in " + secretDataDir, problemDataFiles.getJudgesAnswerFiles().length > 1);
         }
     }
 
