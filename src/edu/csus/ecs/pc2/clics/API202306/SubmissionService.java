@@ -279,7 +279,7 @@ public class SubmissionService implements Feature {
         if(clientId != null) {
             account = model.getAccount(clientId);
         }
-        // only admin and analyst are authorized to access this endpoint, and analyst is restricted in that
+        // admins and analysts are authorized to access this endpoint, and analyst is restricted in that
         // they can't see it during freeze period.
         boolean allowed = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
             sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) ||
@@ -287,9 +287,12 @@ public class SubmissionService implements Feature {
                 Utilities.getFreezeTime(model) > model.getContestTime().getElapsedSecs() &&
                 !model.getContestInformation().isUnfrozen());
 
+        // only teams with a real account can fetch their runs
+        boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM) && (account != null);
+
         // In order to get source code for a run, the user role must be allowed AND if it's
         // a pc2 account, the account has to have permission to fetch the run.
-        if (!allowed || (account != null && !account.isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN))) {
+        if ((!allowed && !isTeam) || (account != null && !account.isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN))) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
         // get the submissions from the contest
@@ -300,6 +303,9 @@ public class SubmissionService implements Feature {
             Run submission = runs[i];
             if (IJSONTool.getSubmissionId(submission).equals(submissionId)) {
 
+                if(isTeam && !submission.getSubmitter().equals(clientId)) {
+                    return Response.status(Response.Status.FORBIDDEN).build();
+                }
                 //we found the requested Submission ID in the list of runs returned from the model; try to get the runfiles for Submission
                 runFiles = null;
                 try {
