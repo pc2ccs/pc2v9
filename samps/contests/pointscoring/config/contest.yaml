@@ -5,6 +5,8 @@
 name: Point Scoring Contest  
 short-name: pointscoring
 
+scoreboard_type: "pass-fail"  # needs to be changed to "score" once ContestSnakeYAMLLoader is updated to recognize such...
+
 team-scoreboard-display-format-string : 'Team{:clientnumber} : {:teamname}' 
 
 duration:  5:00:00
