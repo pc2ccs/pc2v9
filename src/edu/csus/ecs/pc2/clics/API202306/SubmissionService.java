@@ -51,6 +51,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -502,14 +503,14 @@ public class SubmissionService implements Feature {
                 log.info("User " + user + " attempted to POST submission from an invalid client");
                 // Client must be a valid account, not from realm.properties, we need to
                 // check permissions, this is why.
-                return Response.status(Response.Status.FORBIDDEN).build();
+                return Response.status(Response.Status.FORBIDDEN.getStatusCode(), "No client for user " + user).build();
             }
             Account account = model.getAccount(clientId);
             if(account == null) {
                 log.info("User " + user + " attempted to POST submission from a non-existing account");
                 // Client must be a valid account, not from realm.properties, we need to
                 // check permissions, this is why.
-                return Response.status(Response.Status.FORBIDDEN).build();
+                return Response.status(Response.Status.FORBIDDEN.getStatusCode(), "No account for user " + user).build();
             }
             ContestTime ct = model.getContestTime();
             boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
@@ -551,20 +552,20 @@ public class SubmissionService implements Feature {
                 if(bad) {
                     msg.append(" DENIED.");
                     log.info(msg.toString());
-                    return Response.status(Response.Status.FORBIDDEN).build();
+                    return Response.status(Response.Status.FORBIDDEN.getStatusCode(), msg.toString()).build();
                 }
                 // Force team id for team submission
                 sub.setTeam_id("" + clientId.getClientNumber());
             } else if(account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM)) {
                 if(sub.getTime() != null || sub.getContest_time() != null || sub.getId() != null) {
                     log.info(user + " attempted to POST submission as PROXY but specified time, contest_time or id");
-                    return Response.status(Response.Status.FORBIDDEN).build();
+                    return Response.status(Response.Status.FORBIDDEN.getStatusCode(), "No proxy permission").build();
                 }
             } else if((!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) ||
                        (!account.isAllowed(Permission.Type.SUBMIT_RUN) && !account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM))) {
                 // non admins can't post anything
                 log.info(user + " attempted to POST submission without permission");
-                return Response.status(Response.Status.FORBIDDEN).build();
+                return Response.status(Response.Status.FORBIDDEN.getStatusCode(), "This account does not have permission to submit.").build();
             } else {
                 // ** Departure from CLICS Spec - they say this should be done only by PUT
                 // I happen to disagree. --JB
@@ -672,6 +673,9 @@ public class SubmissionService implements Feature {
                 // No run entered, this is really really bad
                 log.log(Level.WARNING, "No Run added after submitting CLICS API run for team " + team_id + " by " + user);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to add submission").build();
+            } catch (SubmissionRejectedException sje) {
+                log.log(Level.WARNING, "SubmissionRejectedException submitting CLICS API run for team " + team_id + " by " + user);
+                return Response.status(Response.Status.TOO_MANY_REQUESTS).entity("Unable to submit run: " + sje.getLocalizedMessage()).build();
             } catch (Exception e) {
                 log.log(Level.WARNING, "Exception submitting CLICS API run for team " + team_id + " by " + user, e);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to submit run: " + e.getLocalizedMessage()).build();

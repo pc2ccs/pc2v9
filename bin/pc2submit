@@ -29,7 +29,14 @@ import urllib3
 from urllib.parse import urlparse
 import netrc
 import getpass
+import io
+import zipfile
+import html2text
+
+from pathlib import Path
 from typing import NoReturn
+from http import HTTPStatus
+
 try:
     import magic
 except ModuleNotFoundError:
@@ -106,6 +113,19 @@ def print_if_json(text: str):
         print(json.dumps(data, indent=2))
     except json.decoder.JSONDecodeError:
         pass
+
+def extract_reason_from_html(text: str) :
+    '''Extra reason string from html on failed request'''
+    reason = None
+    if text.lower().find('<body>') :
+        converted = True
+        reason = html2text.html2text(text)
+        cleanText = reason.replace('\n', ' ').replace('\r', ' ')
+        match = re.fullmatch(r'^.+Reason:[\s]*(.+)[\s]*\* \* \*.*$', cleanText)
+        if match :
+            reason = match.group(1)
+    return reason
+        
 
 def read_contests() -> list:
     '''Read all contests from the API.
@@ -301,8 +321,56 @@ def check_netrc() :
     except Exception as exc :
         pass
     return False
+    
+# Get user name from credentials in .netrc only if ADDSUBMITCREDENTIALS is in environment otherwise
+# see if user has credentials in his .netrc for the url machine 
+# If there aren't any credentials in the .netrc, then prompt the user to enter them if ADDSUBMITCREDENTIALS is in environment,
+# and we save them in the .netrc
+# If ADDSUBMITCREDENTIALS is not set in the environment, the call will fail telling the user we can't determine who they are.
+def get_netrc_user() :    
+    bAdd = False
+    nrc_user = None
+    try :
+        urlCrack = urlparse(baseurl)
+        if urlCrack.netloc != None :
+            # Strip off any port that may be on the network host
+            netHost = urlCrack.netloc.split(':')[0]
+            netrc_path = os.path.join(os.path.expanduser("~"), ".netrc")
+            try :
+                netrc_info = netrc.netrc(netrc_path)
+                nrc_user, nrc_acct, nrc_pass = netrc_info.authenticators(netHost)
+            except Exception as exc :
+                # No .netrc file or can't open?
+                bAdd = True
+            if bAdd :
+                if not ENV_SUBMITCREDENTIALS in os.environ or os.environ[ENV_SUBMITCREDENTIALS] != 'yes' :
+                    logging.info(f"Not updating .netrc since {ENV_SUBMITCREDENTIALS} is not set to 'yes' in the environment")
+                    return False
+                return prompt_for_creds(netrc_path, netHost)
+        else :
+            return False
+    except Exception as exc :
+        pass
+    return nrc_user
 
 def do_api_request(name: str):
+    '''Perform an API call to the given endpoint and return its data.
+
+    Parameters:
+        name (str): the endpoint to call
+
+    Returns:
+        The endpoint contents.
+
+    Raises:
+        RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
+    '''
+
+    response = do_api_raw_request(name)
+    
+    return json.loads(response.text)
+
+def do_api_raw_request(name: str):
     '''Perform an API call to the given endpoint and return its data.
 
     Parameters:
@@ -320,6 +388,7 @@ def do_api_request(name: str):
 
     url = f'{baseurl}{api_component}{api_version}{name}'
 
+    response = None
     # We do a loop in case we manually enter credentials we can retry.
     while True :
         logging.info(f'Connecting to {url}')
@@ -332,7 +401,7 @@ def do_api_request(name: str):
         logging.debug(f"API call '{name}' returned:\n{response.text}")
         if response.status_code >= 300:
             print_if_json(response.text)
-            if response.status_code == 401:
+            if response.status_code == HTTPStatus.UNAUTHORIZED:
                 if check_netrc() :
                     continue
                 raise RuntimeError(f'Authentication failed, please check your {APP_NAME} credentials in your ~/.netrc file')
@@ -340,11 +409,11 @@ def do_api_request(name: str):
                 raise RuntimeError(f'API request {name} failed (code {response.status_code}).')
         break
     
-    return json.loads(response.text)
+    return response
 
 def test_api_endpoint(name: str, user: str, password: str) :
     '''Perform an API call to the given endpoint to see if it works.
-    No errors rae printed if it doesn't.
+    No errors are printed if it doesn't.
 
     Parameters:
         name (str): the endpoint to call
@@ -488,14 +557,23 @@ def do_api_submit():
         logging.debug(f"API submitting call returned:\n{response.text}")
         if response.status_code >= 300:
             print_if_json(response.text)
-            if response.status_code == 401:
+            if response.status_code == HTTPStatus.UNAUTHORIZED:
                 if check_netrc() :
                     continue
-                raise RuntimeError('Authentication failed, please check your {APP_NAME} credentials in ~/.netrc.')
+                raise RuntimeError(f'Authentication failed, please check your {APP_NAME} credentails in ~/.netrc')
+            elif response.status_code == HTTPStatus.TOO_MANY_REQUESTS :
+                raise RuntimeError(f'Submission threshold exceeded - wait a minute and try again.')
+            elif response.status_code == HTTPStatus.FORBIDDEN :
+                reason = extract_reason_from_html(response.text)
+                if not reason :
+                    reason = 'Submission failed: Submissions are forbidden.'
+                else :
+                    reason = f'Submission failed: {reason}'
+                raise RuntimeError(reason)    
             else:
                 raise RuntimeError(f'Submission failed (code {response.status_code} - {response.text})')
         break
-    
+
     # We got a successful HTTP response. It worked.
     # But check that we indeed received a submission ID.
 
@@ -519,6 +597,162 @@ def do_api_submit():
     sid = submission['id']
     print(f"Submission received: id = s{sid}, time = {time}")
 
+def get_subs(problems, languages) :
+    '''Read all submissions for the current contest from the API.
+    '''
+
+    try:
+        endpoint = 'contests/' + my_contest['id'] + '/submissions'
+        data = do_api_request(endpoint)
+    except RuntimeError as e:
+        logging.warning(e)
+        return
+
+    if not isinstance(data, list):
+        logging.warning("CLICS API returned unexpected JSON data for endpoint 'submissions'.")
+        return
+
+    logging.info(f'Read {len(data)} submissions(s) from the API.')
+
+    curuser = get_netrc_user()
+    if curuser :
+        # Extra team number, or, if no team number, then all will be listed
+        teamNum = None
+        match = re.fullmatch(r'team(\d+)', curuser)
+        if match :
+            teamNum = match.group(1)
+        probMap = {}
+        langMap = {}
+        for prob in problems :
+            if 'id' in prob :
+                probMap[prob['id']] = prob
+        for lang in languages :
+            if 'id' in lang :
+                langMap[lang['id']] = lang
+        sublist = []
+        firstSub = True
+        longestProb = 8
+        for sub in data:
+            if ('id' not in sub
+                    or 'language_id' not in sub
+                    or 'problem_id' not in sub
+                    or 'team_id' not in sub
+                    or 'contest_time' not in sub
+                    or 'time' not in sub
+                    or 'files' not in sub) :
+                continue
+            teamId = sub['team_id']
+            if teamNum and teamNum != teamId :
+                continue
+            probId = sub['problem_id']
+            if probId not in probMap :
+                print(f"Unknown problem id {probId} for submission {subId}")
+                continue
+            probLen = len(probMap[probId]['name'])
+            if probLen > longestProb :
+                longestProb = probLen
+            sublist.append(sub)
+        sortedSubs = sorted(sublist, key=lambda d: int(d['id']))
+        # Account for Problem letter and colon
+        longestProb = longestProb + 2
+        for sub in sortedSubs :
+            subId = sub['id']
+            probId = sub['problem_id']
+            langId = sub['language_id']
+            if probId not in probMap :
+                print(f"Unknown problem id {probId} for submission {subId}")
+                continue
+            if langId not in langMap :
+                print(f"Unknown language id {langId} for submission {subId}")
+                continue
+            if firstSub :
+                firstSub = False
+                print(f"Sub# {'Problem':<{longestProb}} Language       Time Submitted       Time Into Contest")
+                print(f"---- {'------':-<{longestProb}} -------- -------------------------- -----------------")
+                #      1234 1234567891123456789 12345678 12345678941234567895123456 12345678971234567898
+            prob = probMap[probId]
+            print(f"{subId:>4} {prob['label']+':'+prob['name']:<{longestProb}.{longestProb}} {langMap[langId]['name']:^8} {sub['time'].replace('T', ' '):^26} {sub['contest_time']:^17}")
+    else :
+        print("Could not determine who you are, so submissions can not be obtained")
+
+    return
+
+def extract_without_overwrite(dest_dir, zip_data, assume_yes):
+    with zipfile.ZipFile(zip_data, 'r') as zip_ref:
+        for member in zip_ref.infolist():
+            dest_path = os.path.join(dest_dir, member.filename)
+            if not assume_yes and os.path.exists(dest_path) :
+                if not confirm(f'The file {dest_path} already exists. Do you want to overwrite it?'):
+                    print(f'{dest_path} skipped.')
+                    continue               
+            zip_ref.extract(member, dest_dir)
+            print(f'Extracted submission {dest_path}...')
+
+def fetch_subs(subs, assume_yes) :
+    '''fetch and unzip all supplied submissions for the current contest from the API.
+    '''
+    curuser = get_netrc_user()
+    if curuser :
+        # Extra team number, or, if no team number, then all will be listed
+        teamNum = None
+        match = re.fullmatch(r'team(\d+)', curuser)
+        if match :
+            teamNum = match.group(1)
+            
+        for subsubs in subs :
+            for subNum in subsubs :
+                try:
+                    endpoint = 'contests/' + my_contest['id'] + f'/submissions/{subNum}'
+                    sub = do_api_request(endpoint)
+                except RuntimeError as e:
+                    logging.warning(e)
+                    return
+
+                logging.info(f'Read submissions {sub} from the API.')
+                teamId = sub['team_id']
+
+                if ('id' not in sub
+                        or 'problem_id' not in sub
+                        or 'team_id' not in sub
+                        or 'contest_time' not in sub
+                        or 'time' not in sub) :
+                    continue
+                # If this fails, it means the team doesn't have access
+                if ('language_id' not in sub
+                        or 'files' not in sub
+                        or teamNum and teamNum != teamId) :
+                    print(f'Submission {subNum} is not yours - can not fetch it')
+                    continue
+                files = sub['files']
+                file = files[0]
+                href = file['href']
+                if href.startswith('/') :
+                    href = href[1:]
+                logging.info(f'Source file URL: {href}')
+                try :
+                    response = do_api_raw_request(href)
+                    if response.status_code == HTTPStatus.OK :
+                        if 'content-type' in response.headers:
+                            mime_type = response.headers['content-type']
+                            if mime_type != file['mime'] :
+                                print(f"Unexpected MIME type for source files for submission {subNum}: {mime_type} - expected {file['mime']}")
+                            else :
+                                dirName = f"sub_{subNum}"
+                                try :
+                                    Path(dirName).mkdir(parents=True, exist_ok=True)
+                                    extract_without_overwrite(dirName, io.BytesIO(response.content), assume_yes)
+                                except Exception as e:
+                                    print(f'Error extracting submission {subNum} to {dirName}')
+                        else:
+                            print("MIME type not found in response headers.")
+                    else :
+                        print(f"ERROR: Got back HTTP Status {response.status_code} for submission source {subNum}")
+                except Exception as e :
+                    print(f"ERROR: Submission {subNum}: Exception fetching submission source code: {e}")
+    else :
+        print('Could not determine who you are, so submissions can not be obtained')
+
+    return    
 
 version_text = '''
 pc2submit -- part of PC2
@@ -551,6 +785,8 @@ parser.add_argument('-h', '--help', help='display this help and exit', action='s
 parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM', default='')
 parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE', default='')
 parser.add_argument('-e', '--entry_point', help='set an explicit entry_point, e.g. the java main class')
+parser.add_argument('-L', '--listsubs', help='list previous submissions', action='store_true')
+parser.add_argument('-F', '--fetchsub', help='fetch a submission by submission #', type=int, action='append', nargs='*')
 parser.add_argument('-v', '--verbose', help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')  # NOQA
 parser.add_argument('-q', '--quiet', help='suppress warning/info messages', action='store_true')
 parser.add_argument('-y', '--assume-yes', help='suppress user input and assume yes', action='store_true')
@@ -624,7 +860,7 @@ elif contests:
         if contest['id'].lower() == contest_id or contest['name'].lower() == contest_id:
             my_contest = contest
             break
-
+    
 languages: list = []
 problems: list = []
 if my_contest and baseurl:
@@ -633,6 +869,16 @@ if my_contest and baseurl:
         exit(1)
     languages = read_languages()
     problems = read_problems()
+
+# Check if they are extracting submissions    
+if args.fetchsub :
+    fetch_subs(args.fetchsub, args.assume_yes)
+    sys.exit(0)
+    
+# Check if they want a submission list
+if args.listsubs :
+    get_subs(problems, languages)
+    sys.exit(0)
 
 parser.epilog = get_epilog()
 
@@ -769,5 +1015,8 @@ if not args.assume_yes:
     if not confirm('Do you want to continue?'):
         error('submission aborted by user')
 
-do_api_submit()
+try :
+    do_api_submit()
+except RuntimeError as e :
+    print(e)
 
