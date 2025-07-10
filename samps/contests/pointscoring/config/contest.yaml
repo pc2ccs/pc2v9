@@ -7,6 +7,7 @@ short-name: pointscoring
 
 scoreboard_type: score
 
+
 team-scoreboard-display-format-string : 'Team{:clientnumber} : {:teamname}' 
 
 duration:  5:00:00
