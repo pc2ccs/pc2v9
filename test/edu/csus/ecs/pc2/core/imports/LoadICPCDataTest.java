@@ -48,6 +48,7 @@ public class LoadICPCDataTest extends AbstractTestCase {
         accountList.generateNewAccounts(ClientType.Type.TEAM, 45 ,PasswordType.JOE, 1, true);
         accountList.generateNewAccounts(ClientType.Type.TEAM, 45 ,PasswordType.JOE, 2, true);
         ensureStaticLog();
+        super.setUp();
     }
 
     public void testOne() {
