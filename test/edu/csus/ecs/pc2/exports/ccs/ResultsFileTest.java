@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.io.File;
@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Test ResultsFile class.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: ResultsFileTest.java 193 2011-05-14 05:02:16Z laned $
  */
@@ -25,9 +25,15 @@ public class ResultsFileTest extends AbstractTestCase {
 
     private final boolean debugMode = false;
 
+    @Override
+    protected void setUp() throws Exception {
+        ensureStaticLog();
+        super.setUp();
+    }
+
     /**
      * Sample Finalize Data.
-     * 
+     *
      * @param rank
      * @return
      */
@@ -57,33 +63,33 @@ public class ResultsFileTest extends AbstractTestCase {
 
     /**
      * Test for results file with no runs.
-     * 
+     *
      * @throws Exception
      */
     public void testcreateTSVFileLinesEmpty() throws Exception {
-        
+
         // If everybody solved 0 problems then they all should be Honorable
         String[] expectedResults = { //
-                "2020;;Honorable;0", // results 
-                "2021;;Honorable;0", // results 
-                "2022;;Honorable;0", // results 
-                "2023;;Honorable;0", // results 
-                "2024;;Honorable;0", // results 
-                "2025;;Honorable;0", // results 
-                "2026;;Honorable;0", // results 
-                "2027;;Honorable;0", // results 
-                "2028;;Honorable;0", // results 
-                "2029;;Honorable;0", // results 
-                "2030;;Honorable;0", // results 
-                "2031;;Honorable;0", // results 
-                "2032;;Honorable;0", // results 
-                "2033;;Honorable;0", // results 
-                "2034;;Honorable;0", // results 
-                "2035;;Honorable;0", // results 
-                "2036;;Honorable;0", // results 
-                "2037;;Honorable;0", // results 
-                "2038;;Honorable;0", // results 
-                "2039;;Honorable;0", // results 
+                "2020;;Honorable;0", // results
+                "2021;;Honorable;0", // results
+                "2022;;Honorable;0", // results
+                "2023;;Honorable;0", // results
+                "2024;;Honorable;0", // results
+                "2025;;Honorable;0", // results
+                "2026;;Honorable;0", // results
+                "2027;;Honorable;0", // results
+                "2028;;Honorable;0", // results
+                "2029;;Honorable;0", // results
+                "2030;;Honorable;0", // results
+                "2031;;Honorable;0", // results
+                "2032;;Honorable;0", // results
+                "2033;;Honorable;0", // results
+                "2034;;Honorable;0", // results
+                "2035;;Honorable;0", // results
+                "2036;;Honorable;0", // results
+                "2037;;Honorable;0", // results
+                "2038;;Honorable;0", // results
+                "2039;;Honorable;0", // results
         };
 
         ResultsFile resultsFile = new ResultsFile();
@@ -96,25 +102,25 @@ public class ResultsFileTest extends AbstractTestCase {
         IInternalContest contest = sample.createContest(1, 1, numTeams, 12, true);
 
         SampleContest.assignReservationIds(contest, 2020);
-        
+
         contest.setFinalizeData(finalizeData);
 
          String[] results = resultsFile.createTSVFileLines(contest); // using getStandingsRecords
 //        String[] results = resultsFile.createTSVFileLinesTwo(contest); // using XML
-         
+
         assertEquals("Number results file lines ", numTeams + 1, results.length);
 
         compareResults(results, expectedResults);
 
     }
-    
+
     /**
      * Bug 1156 - tests places
-     * 
+     *
      * Each team has its proper place (not individual rankings).
      */
     public void testPlaces() throws Exception {
-        
+
 
         String[] runsData = SampleContest.loadStringArrayFromCSV(getDataDirectory()+File.separator+"run_5_field.txt");
 
@@ -137,17 +143,17 @@ public class ResultsFileTest extends AbstractTestCase {
         if (judgements.length == 0) {
             // copied from InternalController.loadDefaultJudgements
             String[] judgementNames = { //
-                    "Yes", // 
-                    "No - Compilation Error", // 
-                    "No - Run-time Error", // 
-                    "No - Time Limit Exceeded", // 
-                    "No - Wrong Answer", // 
-                    "No - Excessive Output", // 
-                    "No - Output Format Error", // 
+                    "Yes", //
+                    "No - Compilation Error", //
+                    "No - Run-time Error", //
+                    "No - Time Limit Exceeded", //
+                    "No - Wrong Answer", //
+                    "No - Excessive Output", //
+                    "No - Output Format Error", //
                     "No - Other - Contact Staff" //
             };
             String [] judgementAcronyms = {
-                    Judgement.ACRONYM_ACCEPTED, // 
+                    Judgement.ACRONYM_ACCEPTED, //
                     Judgement.ACRONYM_COMPILATION_ERROR, //
                     Judgement.ACRONYM_RUN_TIME_ERROR, //
                     Judgement.ACRONYM_TIME_LIMIT_EXCEEDED, //
@@ -156,7 +162,7 @@ public class ResultsFileTest extends AbstractTestCase {
                     Judgement.ACRONYM_OUTPUT_FORMAT_ERROR, //
                     Judgement.ACRONYM_OTHER_CONTACT_STAFF, //
             };
-            
+
             int i = 0;
             for (String judgementName : judgementNames) {
                 Judgement judgement = new Judgement(judgementName, judgementAcronyms[i]);
@@ -166,7 +172,7 @@ public class ResultsFileTest extends AbstractTestCase {
         }
 
         addRuns(contest, runsData);
-        
+
         contest.setFinalizeData(finalizeData);
         ClientId clientId = new ClientId(1, Type.SCOREBOARD, 1);
         contest.setClientId(clientId);
@@ -177,15 +183,15 @@ public class ResultsFileTest extends AbstractTestCase {
 
             // printExpectedTestData(results);
         }
-        
+
         compareResults(results, expectedResults);
-    
-        
+
+
     }
 
     /**
      * Test with 27 or more runs.
-     * 
+     *
      * @throws Exception
      */
     public void testcreateTSVFileLinesComplex() throws Exception {
@@ -228,26 +234,26 @@ public class ResultsFileTest extends AbstractTestCase {
 
         // for medal ranks 4, 8, 12
         String[] expectedResults = { //
-                "2024;1;Gold Medal;2", // results 
-                "2031;2;Gold Medal;2", // results 
-                "2026;3;Gold Medal;2", // results 
-                "2038;4;Gold Medal;2", // results 
-                "2029;5;Silver Medal;1", // results 
-                "2020;6;Silver Medal;1", // results 
-                "2030;7;Silver Medal;1", // results 
-                "2021;8;Silver Medal;1", // results 
-                "2032;9;Bronze Medal;1", // results 
-                "2033;10;Bronze Medal;1", // results 
-                "2034;11;Bronze Medal;1", // results 
-                "2022;12;Bronze Medal;1", // results 
-                "2023;13;Ranked;1", // results 
-                "2025;;Honorable;0", // results 
-                "2027;;Honorable;0", // results 
-                "2028;;Honorable;0", // results 
-                "2035;;Honorable;0", // results 
-                "2036;;Honorable;0", // results 
-                "2037;;Honorable;0", // results 
-                "2039;;Honorable;0", // results 
+                "2024;1;Gold Medal;2", // results
+                "2031;2;Gold Medal;2", // results
+                "2026;3;Gold Medal;2", // results
+                "2038;4;Gold Medal;2", // results
+                "2029;5;Silver Medal;1", // results
+                "2020;6;Silver Medal;1", // results
+                "2030;7;Silver Medal;1", // results
+                "2021;8;Silver Medal;1", // results
+                "2032;9;Bronze Medal;1", // results
+                "2033;10;Bronze Medal;1", // results
+                "2034;11;Bronze Medal;1", // results
+                "2022;12;Bronze Medal;1", // results
+                "2023;13;Ranked;1", // results
+                "2025;;Honorable;0", // results
+                "2027;;Honorable;0", // results
+                "2028;;Honorable;0", // results
+                "2035;;Honorable;0", // results
+                "2036;;Honorable;0", // results
+                "2037;;Honorable;0", // results
+                "2039;;Honorable;0", // results
         };
 
         // for medal ranks 3, 6, 10
@@ -288,7 +294,7 @@ public class ResultsFileTest extends AbstractTestCase {
         SampleContest.assignReservationIds(contest, 2020);
 
         addRuns(contest, runsData);
-        
+
         contest.setFinalizeData(finalizeData);
 
         String[] results = resultsFile.createTSVFileLines(contest); // using getStandingsRecords
@@ -302,7 +308,7 @@ public class ResultsFileTest extends AbstractTestCase {
 
         compareResults(results, expectedResults);
     }
-    
+
     @SuppressWarnings("unused")
     private void printExpectedTestData(String[] expected) {
 
@@ -327,7 +333,7 @@ public class ResultsFileTest extends AbstractTestCase {
 
     /**
      * Compare results file info to expected info.
-     * 
+     *
      * @param results
      * @param expectedResults
      */

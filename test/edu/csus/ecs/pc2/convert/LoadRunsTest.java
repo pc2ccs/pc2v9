@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.convert;
 
 import java.io.File;
@@ -40,7 +40,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit Tests.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class LoadRunsTest extends AbstractTestCase {
@@ -55,6 +55,12 @@ public class LoadRunsTest extends AbstractTestCase {
 
     public LoadRunsTest(String name) {
         super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        ensureStaticLog();
+        super.setUp();
     }
 
     public void testLoadCDP() throws Exception {
@@ -89,7 +95,7 @@ public class LoadRunsTest extends AbstractTestCase {
 
     /**
      * Load contest from contest.yaml.
-     * 
+     *
      * @param contest
      * @param configDir
      * @return
@@ -112,7 +118,7 @@ public class LoadRunsTest extends AbstractTestCase {
 
     /**
      * Test loading runs and EF runs content.
-     * 
+     *
      * @throws Exception
      */
     public void testLoadEFRuns() throws Exception {
@@ -164,7 +170,7 @@ public class LoadRunsTest extends AbstractTestCase {
 
     /**
      * Load contest runs based on yaml.
-     * 
+     *
      * @throws Exception
      */
     public void testLoadContestRuns() throws Exception {
@@ -235,7 +241,7 @@ public class LoadRunsTest extends AbstractTestCase {
 
     /**
      * Compare event feeds.
-     * 
+     *
      * @param inputEventFeed
      * @param outputEventFeedFilename
      * @throws ParserConfigurationException
@@ -338,7 +344,7 @@ public class LoadRunsTest extends AbstractTestCase {
 
     /**
      * Test loading runs into model but not from yaml.
-     * 
+     *
      * @throws Exception
      */
     public void testLoadRuns() throws Exception {
@@ -458,7 +464,7 @@ public class LoadRunsTest extends AbstractTestCase {
 
     /**
      * Load groups.tsv and teams.tsv files.
-     * 
+     *
      * @param contest
      * @param dir
      * @throws Exception
@@ -495,7 +501,7 @@ public class LoadRunsTest extends AbstractTestCase {
             /**
              * Update Groups
              */
-            Group[] updatedGroups = (Group[]) groupList.toArray(new Group[groupList.size()]);
+            Group[] updatedGroups = groupList.toArray(new Group[groupList.size()]);
             for (Group group : updatedGroups) {
                 // getController().updateGroup(group);
                 contest.updateGroup(group);
@@ -504,7 +510,7 @@ public class LoadRunsTest extends AbstractTestCase {
             /**
              * UpdateAccounts
              */
-            Account[] updatedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
+            Account[] updatedAccounts = accountList.toArray(new Account[accountList.size()]);
             // getController().updateAccounts(updatedAccounts);
             for (Account account : updatedAccounts) {
                 contest.updateAccount(account);
@@ -514,7 +520,7 @@ public class LoadRunsTest extends AbstractTestCase {
 
     /**
      * Lookup group by externalId
-     * 
+     *
      * @param contest2
      * @param externalId
      * @return

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.util;
 
 import java.util.Arrays;
@@ -16,6 +16,12 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  *
  */
 public class ScoreboardVariableReplacerTest extends AbstractTestCase {
+
+    @Override
+    protected void setUp() throws Exception {
+        ensureStaticLog();
+        super.setUp();
+    }
 
     /**
      * Test substituteDisplayNameVariables with var string, account and group.
