@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Class to load "custom" Permissions from yaml file.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
@@ -33,7 +33,7 @@ public class PermissionYamlLoader {
 
     public PermissionYamlLoader(String[] yamlLines, Account[] accounts) {
         if (accounts == null || accounts.length == 0) {
-            
+
             // no accounts to update - done here.
             return;
         }
@@ -67,7 +67,7 @@ public class PermissionYamlLoader {
         Map<String, Object> content = loadYaml(null, yamlLines);
 
         ArrayList permissionList = fetchList(content, "permissions");
-        
+
         if (permissionList == null) {
             // No permissions section in yaml - nothing more to do.
             return;
@@ -90,7 +90,7 @@ public class PermissionYamlLoader {
             int siteNumber = accountList.get(0).getClientId().getSiteNumber();
 
             int[] clientNumbers = getClientNumbers(accountList, numberString, clientType);
-            
+
             for (int i = 0; i < clientNumbers.length; i++) {
 
                 ClientId clientId = new ClientId(siteNumber, clientType, clientNumbers[i]);
@@ -158,30 +158,6 @@ public class PermissionYamlLoader {
         return number;
     }
 
-    int[] getNumberList(String numberString) {
-
-        String[] list = numberString.split(",");
-        if (list.length == 1) {
-            int[] out = new int[1];
-            out[0] = getIntegerValue(list[0], 0);
-            // if (out[0] < 1) {
-            // // SOMEDAY 669 throw invalid number in list exception
-            // }
-            return out;
-        } else {
-            int[] out = new int[list.length];
-            int i = 0;
-            for (String n : list) {
-                out[i] = getIntegerValue(n, 0);
-                // if (out[i] < 1) {
-                // // SOMEDAY 669 throw invalid number in list exception
-                // }
-                i++;
-            }
-            return out;
-        }
-    }
-
     private int[] getClientNumbers(List<Account> list, String numberString, Type type) {
 
         int[] outList = null;
@@ -189,7 +165,7 @@ public class PermissionYamlLoader {
         if ("all".equalsIgnoreCase(numberString)) {
             outList = getAccountNumbers(list, type);
         } else {
-            outList = getNumberList(numberString.trim());
+            outList = StringUtilities.getNumberList(numberString.trim());
         }
         return outList;
     }
@@ -216,7 +192,7 @@ public class PermissionYamlLoader {
     }
 
     public Account[] getAccountsArray() {
-        return (Account[]) accountList.toArray(new Account[accountList.size()]);
+        return accountList.toArray(new Account[accountList.size()]);
     }
 
     List<Account> getAccounts() {
@@ -237,7 +213,7 @@ public class PermissionYamlLoader {
 
     /**
      * Create a simple string with parse info.
-     * 
+     *
      * @param markedYAMLException
      * @return
      */
