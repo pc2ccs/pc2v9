@@ -1,0 +1,12 @@
+# Point Scoring problem configuration, problem 'c', version 1.0 (currently a duplicat of problem 'a')
+--- 
+
+name: c
+type: scoring
+
+limits: 
+   timeout: 1
+
+input: 
+   readFromSTDIN: true
+

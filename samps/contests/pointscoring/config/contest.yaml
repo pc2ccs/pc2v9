@@ -1,0 +1,112 @@
+#
+#
+--- 
+
+name: Point Scoring Contest  
+short-name: pointscoring
+
+team-scoreboard-display-format-string : 'Team{:clientnumber} : {:teamname}' 
+
+duration:  5:00:00
+
+# freeze time before end of contest
+scoreboard-freeze-length: 01:00:00
+
+# pc2 specific settings
+# elapsed: 0:00:00
+# remaining: 5:00:00
+running: true
+
+# default stop of first fail
+stop-on-first-failed-test-case: false
+
+# Halt contest clock at end of contest
+auto-stop-clock-at-end: true
+
+# Do not halt contest clock at end of contest, default setting
+# auto-stop-clock-at-end: false
+
+
+# default pc2 judging types
+computer-judged: true
+manual-review: false
+send-prelim-judgement: false
+
+# pc2 Shadow CCS settings
+# enable shadow mode
+shadow-mode: true
+# base URL for primary CCS REST service
+ccs-url: https://localhost:50443/contest
+# primary CCS REST login
+ccs-login: admin
+# primary CCS REST password
+ccs-password: admin
+
+languages:
+  - name: 'Java'
+    clics-id: 'java'
+
+  - name: 'python'
+    clics-id: 'pythonCLICSId'
+
+accounts:
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: SCOREBOARD
+    site: 1
+    count: 2
+
+  - account: FEEDER
+    site: 1
+    count: 4
+
+  - account: ADMINISTRATOR
+    site: 1
+    count: 3
+    
+# set feeder1 as proxy
+team-proxy-accounts:
+  - account: FEEDER
+    number: 1
+
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 6,7,8,9
+    letters: All
+    enabled: yes
+
+# General forms
+#  permissions:
+#    - account: TYPE
+#      number: 10,11,12,13,14,15
+#      number: All
+#      enable:  list of permissions 
+#      disable:  list of permissions 
+#  
+#  
+
+# disable Contest Security Alert window
+
+# account permissions
+permissions:
+
+  - account: ADMINISTRATOR
+    number: 1,2,3
+    disable: VIEW_SECURITY_ALERTS
+
+  - account: JUDGE
+    number: All
+    enable: GIVE_RUN
+
+
+# enable EDIT_RUN for FEEDER 3
+
+  - account: FEEDER
+    number: 3
+    enable: SHADOW_PROXY_TEAM, EDIT_RUN
+
+# EOF Contest Configuration
