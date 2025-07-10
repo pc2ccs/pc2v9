@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -17,11 +17,17 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit Test ICPCTSVLoader.
- * 
+ *
  */
 public class ICPCTSVLoaderTest extends AbstractTestCase {
 
     private boolean debugMode = false;
+
+    @Override
+    protected void setUp() throws Exception {
+        ensureStaticLog();
+        super.setUp();
+    }
 
     private String findTestDataFile(String filename) throws IOException {
 
@@ -46,7 +52,7 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
 
     /**
      * Test load of groups and teams tsv files.
-     * 
+     *
      * @throws Exception
      */
     public void testLoad() throws Exception {
@@ -65,26 +71,26 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
 
         assertNotEquals("Missing InstituionCode", "", accounts[0].getInstitutionCode());
     }
-    
-    
+
+
     /**
      * Test 7th and 8th column for teams.tsv.
-     * 
-     * Bug 1229 
+     *
+     * Bug 1229
      * @throws Exception
      */
     public void testLoad78fields() throws Exception {
-        
+
         String configDir = getTestSampleContestDirectory("sumitMTC") + File.separator + IContestLoader.CONFIG_DIRNAME;
         assertDirectoryExists(configDir);
-        
+
 //        startExplorer(configDir);
 
         String groupFile = configDir + File.separator + "groups.tsv";
         String teamFileName = configDir + File.separator + "teams.tsv";
-        
+
 //        editFile(teamFileName);
-        
+
         ICPCTSVLoader.loadGroups(groupFile);
         Account[] accounts = ICPCTSVLoader.loadAccounts(teamFileName);
 
@@ -132,9 +138,9 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
 
     /**
      * Test load accounts.tsv with teamN login names.
-     * 
+     *
      * Bug 1241.
-     * 
+     *
      * @throws Exception
      */
     public void testTeamNumberfromAccountsTSVFile() throws Exception {
@@ -154,12 +160,12 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
 
         Vector<Account> va = contest.getAccounts(Type.TEAM);
         Account[] accounts =
-                (Account[]) va.toArray(new Account[va.size()]);
+                va.toArray(new Account[va.size()]);
 
         assertEquals("Expecting N accounts", 128, accounts.length);
 
         Arrays.sort(accounts, new AccountComparator());
-        
+
         for (int i = 1; i < accounts.length + 1; i++) {
             assertEquals("Expeting team number " + i, "team" + i, accounts[i - 1].getTeamName());
         }
@@ -168,7 +174,7 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
 
     /**
      * Load contest from contest.yaml.
-     * 
+     *
      * @param contest
      * @param configDir
      * @return

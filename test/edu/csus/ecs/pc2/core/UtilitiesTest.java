@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -24,6 +24,12 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
  * Unit test.
  */
 public class UtilitiesTest extends AbstractTestCase {
+
+    @Override
+    protected void setUp() throws Exception {
+        ensureStaticLog();
+        super.setUp();
+    }
 
     public void testOne() {
         char[] array1 = null;
@@ -203,7 +209,7 @@ public class UtilitiesTest extends AbstractTestCase {
     }
 
     /**
-     * 
+     *
      * @throws Exception
      */
     public void testvalidateCDP() throws Exception {
@@ -220,7 +226,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
         // ContestYAMLLoader loader = new ContestYAMLLoader();
         IContestLoader loader = new ContestSnakeYAMLLoader();
-        
+
         IInternalContest contest = loader.fromYaml(null, testDirectory);
 
         Problem[] problems = contest.getProblems();
@@ -260,7 +266,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
     /**
      * test
-     * 
+     *
      * @throws Exception
      */
     public void testTestLocateFile() throws Exception {
@@ -294,7 +300,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
     /**
      * Test java.util.Arrays.equals.
-     * 
+     *
      * @throws Exception
      */
     public void testArrayCompare() throws Exception {
@@ -322,15 +328,15 @@ public class UtilitiesTest extends AbstractTestCase {
         problemNumber = 26;
         actual = Utilities.getProblemLetter(problemNumber);
         assertEquals("Expect letter for " + problemNumber, "Z", actual);
-        
+
         problemNumber = 27;
         actual = Utilities.getProblemLetter(problemNumber);
         assertEquals("Expect letter for " + problemNumber, "AA", actual);
-        
+
         problemNumber = 28;
         actual = Utilities.getProblemLetter(problemNumber);
         assertEquals("Expect letter for " + problemNumber, "AB", actual);
-        
+
         problemNumber = 55;
         actual = Utilities.getProblemLetter(problemNumber);
         assertEquals("Expect letter for " + problemNumber, "BC", actual);
@@ -358,26 +364,26 @@ public class UtilitiesTest extends AbstractTestCase {
         expected = 0;
         assertEquals("Expeting number " + expected + " for problem " + probMissing, expected, actual2);
     }
-    
+
     public void testUnixify() throws Exception {
-        
+
         String input = ".\\testout\\ExportYAMLTest\\testOne\\sumit\\data\\secret\\sumit.dat";
         String expected = "./testout/ExportYAMLTest/testOne/sumit/data/secret/sumit.dat";
-        
+
         String actual = Utilities.unixifyPath(input);
-        
+
         assertEquals(expected, actual);
-        
-        
+
+
     }
-    
+
     /**
      * Test OS Type.
      */
     public void testGetGetOSType() {
-        
+
         OSType type = Utilities.getOSType();
-        
+
         switch (type) {
             case UNCLASSIFIED:
                 /**
@@ -385,32 +391,32 @@ public class UtilitiesTest extends AbstractTestCase {
                  */
                 fail ("Expecting OS Type to not be "+OSType.UNCLASSIFIED);
                 break;
-                
+
             case UNDEFINED:
                 /**
                  * OS type must not be undefined.
                  */
                 fail ("Expecting OS Type to not be "+OSType.UNDEFINED);
                 break;
-                
+
             default:
                 break;
         }
-        
+
         /**
          * Tests for when running unit test on Windows
          */
         debugPrint("OS Type is: "+type);
-        
+
 //        assertEquals("Windows", type.toString());
 //        assertEquals(OSType.WINDOWS, type);
-        
-        
+
+
     }
-    
+
     /**
      * Test for files that are considered executable.
-     * 
+     *
      * @throws Exception
      */
     public void testisExecutableExtension() throws Exception {
@@ -435,7 +441,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
     /**
      * Test for files that are not considered executable.
-     * 
+     *
      * @throws Exception
      */
     public void testTwo() throws Exception {
@@ -481,43 +487,43 @@ public class UtilitiesTest extends AbstractTestCase {
             assertEquals("Expected basename ", expected, actual);
         }
     }
-    
+
     /**
      * Test loadFile(String, long);
-     * 
+     *
      * @throws Exception
      */
     public void testloadFileWithNum() throws Exception {
-        
+
         String filename = "samps/pc2v9.ini";
-        
+
         int num = 10;
-        
+
         String[] lines = Utilities.loadFile(filename, num);
         assertEquals("Expecting "+num+" lines", num, lines.length);
-        
+
         num = 36;
         lines = Utilities.loadFile(filename, num);
         assertEquals("Expecting "+num+" lines", num, lines.length);
     }
-    
+
     /**
      * Test get data directory names.
-     * 
+     *
      * @throws Exception
      */
     public void testgetCDPDataDirectories() throws Exception {
         String dataFileBaseDirectory = "samps/contests/tenprobs/config";
         List<String> dataDirs = Utilities.getCDPDataDirectories(dataFileBaseDirectory);
         assertEquals("Expecting data dirs for under "+dataFileBaseDirectory, 10, dataDirs.size());
-        
+
         dataFileBaseDirectory = "samps/contests/sumithello/config";
         dataDirs = Utilities.getCDPDataDirectories(dataFileBaseDirectory);
         assertEquals("Expecting data dirs for under "+dataFileBaseDirectory, 2, dataDirs.size());
-        
-        
+
+
     }
-    
+
     /**
      * Test where both arrays are null.
      * @throws Exception
@@ -534,7 +540,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
     /**
      * Test where first array is null.
-     * 
+     *
      * @throws Exception
      */
     public void testCopyEmptyOneNull() throws Exception {
@@ -554,7 +560,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
     /**
      * Test where second array is null.
-     * 
+     *
      * @throws Exception
      */
     public void testCopyEmptyTwoNull() throws Exception {
@@ -586,7 +592,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
     /**
      * Test copy non-empty arrays.
-     * 
+     *
      * @throws Exception
      */
     public void testCopyArrays() throws Exception {
@@ -621,26 +627,26 @@ public class UtilitiesTest extends AbstractTestCase {
 
     }
 
-    
-    
+
+
     public void testLocatingSampleFiles() throws Exception {
 
         IInternalContest contest = loadFullSampleContest(null, "mini");
         assertNotNull(contest);
-        
+
         ContestInformation info = contest.getContestInformation();
-        
+
         String judgeCDP = info.getJudgeCDPBasePath();
-        
+
         Problem[] problems = contest.getProblems();
-        
+
         int totFiles = 0;
         for (Problem problem : problems) {
             totFiles += problem.getNumberTestCases();
         }
-        
+
         assertEquals("Expecting total data and sample files",10, totFiles);
-        
+
         for (Problem problem : problems) {
 
             ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
@@ -653,7 +659,7 @@ public class UtilitiesTest extends AbstractTestCase {
             }
         }
     }
-    
+
     /**
      * Test whether fullJudgesDataFilenames finds data files, esp. samples.
      */

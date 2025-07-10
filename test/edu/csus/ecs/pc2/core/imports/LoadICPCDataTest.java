@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
@@ -10,15 +10,14 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
-
-import junit.framework.TestCase;
 
 /**
  * @author PC2
  *
  */
-public class LoadICPCDataTest extends TestCase {
+public class LoadICPCDataTest extends AbstractTestCase {
 
     private String loadDir = "testdata"+File.separator;
     private Site[] sites = new Site[2];
@@ -31,6 +30,7 @@ public class LoadICPCDataTest extends TestCase {
     public LoadICPCDataTest(String arg0) {
         super(arg0);
     }
+    @Override
     protected void setUp() throws Exception {
         String projectPath=JUnitUtilities.locate(loadDir);
         if (projectPath == null) {
@@ -47,6 +47,7 @@ public class LoadICPCDataTest extends TestCase {
         sites[1] = new Site("NORTH", 1);
         accountList.generateNewAccounts(ClientType.Type.TEAM, 45 ,PasswordType.JOE, 1, true);
         accountList.generateNewAccounts(ClientType.Type.TEAM, 45 ,PasswordType.JOE, 2, true);
+        ensureStaticLog();
     }
 
     public void testOne() {
@@ -92,7 +93,7 @@ public class LoadICPCDataTest extends TestCase {
                     break;
                 }
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             assertTrue("exception", false);

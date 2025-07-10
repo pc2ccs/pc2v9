@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.File;
@@ -18,14 +19,20 @@ import edu.csus.ecs.pc2.util.ContestLoadUtilities;
 
 /**
  * Unit test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class RemoteEventFeedMonitorTest extends AbstractTestCase {
 
+    @Override
+    protected void setUp() throws Exception {
+        ensureStaticLog();
+        super.setUp();
+    }
+
     /**
      * Contact app server?
-     * 
+     *
      * true = yes, contact server at {@link #LOCALHOST_CONTEST_EVENT_FEED}
      * false = no, skip test.
      */
@@ -39,7 +46,7 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
 
     /**
      * Tests RemoteEventFeedMonitor using running pc2 server with feeder login.
-     * 
+     *
      * @throws Exception
      */
     public void testSubmmissonsLive() throws Exception {
