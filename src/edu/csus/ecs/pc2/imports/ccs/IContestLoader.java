@@ -66,6 +66,9 @@ public interface IContestLoader {
     final String CLICS_CONTEST_DURATION = "duration";
     final String CLICS_CONTEST_FREEZE_DURATION = "scoreboard_freeze_duration";
     final String CLICS_CONTEST_SCOREBOARD_TYPE = "scoreboard_type";
+    final String CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL = "pass-fail";
+    final String CLICS_CONTEST_SCOREBOARD_TYPE_SCORE = "score";
+
     // This is not currently used, but penalty_time SHOULD be used instead of
     // reading it from properties. It is here for completeness, and, it happens
     // to be a required value in the yaml, but we do not enforce that.
