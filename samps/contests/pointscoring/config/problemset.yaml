@@ -1,0 +1,19 @@
+problems:
+  - letter:     A
+    short-name: a
+    clics-id : 'A-problem'
+    color:      Dark green
+    rgb:        '#399956'
+
+  - letter:     B
+    short-name: b
+    clics-id : 'B-problem'
+    color:      Purple
+    rgb:        '#825eaa'
+
+  - letter:     C
+    short-name: c
+    clics-id : 'C-problem'
+    color:      Red
+    rgb:        '#df1328'
+
