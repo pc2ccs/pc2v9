@@ -110,7 +110,7 @@ public class CLICSContestInfo {
         if(ci.getThawed() != null) {
             scoreboard_thaw_time = Utilities.getIso8601formatterWithMS().format(ci.getThawed());
         }
-        scoreboard_type = "pass-fail";
+        scoreboard_type = ci.getScoreboardType().toString().toLowerCase();
     }
 
     public String toJSON() {

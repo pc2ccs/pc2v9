@@ -147,6 +147,23 @@ public class ContestInformation implements Serializable{
         ALIAS,
     }
 
+    public enum ScoreboardType {
+        PASSFAIL("pass-fail"),
+        SCORE("score");
+
+        private final String type;
+
+        private ScoreboardType(String type) {
+            this.type = type;
+        }
+        public String getType() {
+            return type;
+        }
+
+    }
+
+    private ScoreboardType scoreboardType = ScoreboardType.PASSFAIL;
+
     private Properties scoringProperties = new Properties();
 
     /**
@@ -472,7 +489,38 @@ public class ContestInformation implements Serializable{
                 return false;
             }
 
-           return true;
+            if(stopOnFirstFailedtestCase != contestInformation.isStopOnFirstFailedtestCase()) {
+                return false;
+            }
+
+            if(memoryLimitInMeg != contestInformation.getMemoryLimitInMeg()) {
+                return false;
+            }
+
+            if(!StringUtilities.stringSame(sandboxCommandLine, contestInformation.getSandboxCommandLine())){
+                return false;
+            }
+
+            if(!StringUtilities.stringSame(overrideLoadAccountsFilename, contestInformation.getOverrideLoadAccountsFilename())){
+                return false;
+            }
+
+            if(loadSampleJudgesData != contestInformation.isLoadSampleJudgesData()) {
+                return false;
+            }
+
+            if(sandboxGraceTimeSecs != contestInformation.getSandboxGraceTimeSecs()) {
+                return false;
+            }
+
+            if(sandboxInteractiveGraceMultiplier != contestInformation.getSandboxInteractiveGraceMultiplier()) {
+                return false;
+            }
+
+            if (scoreboardType != contestInformation.getScoreboardType()) {
+                return false;
+            }
+            return true;
         } catch (Exception e) {
             e.printStackTrace(System.err); // TODO log this exception
             return false;
@@ -989,4 +1037,45 @@ public class ContestInformation implements Serializable{
         this.allowZeroLengthSubmissionFiles = allowZeroLengthSubmissionFiles;
     }
 
+    /**
+     * Set contest scoreboard type based on the string passed in.
+     *
+     * @param type one of "pass-fail" or "score", currently.
+     */
+    public void setScoreboardType(String type) {
+        for(ScoreboardType sbType : ScoreboardType.values()) {
+            if(type.compareToIgnoreCase(sbType.getType()) == 0) {
+                scoreboardType = sbType;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Accessor for contest scoreboard type.  Note there are convenient shorthands
+     * available below.
+     *
+     * @return scoreboardType enum
+     */
+    public ScoreboardType getScoreboardType() {
+        return scoreboardType;
+    }
+
+    /**
+     * Shorthand to determine if the contest is pass-fail scoring.
+     *
+     * @return true if the contest is pass-fail
+     */
+    public boolean isScoreboardTypePassFail() {
+        return (scoreboardType == ScoreboardType.PASSFAIL);
+    }
+
+    /**
+     * Shorthand to determine if the contest is score (point scoring).
+     *
+     * @return true of the contest is point scoring
+     */
+    public boolean isScoreboardTypeScore() {
+        return (scoreboardType == ScoreboardType.SCORE);
+    }
 }
