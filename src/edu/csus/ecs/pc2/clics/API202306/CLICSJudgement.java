@@ -3,12 +3,17 @@ package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -17,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * Contains the judgment for a submission (Accepted, Wrong Answer, etc).
@@ -38,9 +44,8 @@ public class CLICSJudgement {
     @JsonProperty
     private String judgement_type_id;
 
-//    Only for "score" type contests, N/A for ICPC pass/fail
-//    @JsonProperty
-//    private String score;
+    @JsonProperty
+    private double score;
 
     @JsonProperty
     private String start_time;
@@ -57,6 +62,8 @@ public class CLICSJudgement {
     @JsonProperty
     private double max_run_time;
 
+    private boolean isPointScoring = false;
+
     /**
      * Fill in properties for a judgment description.
      *
@@ -70,6 +77,9 @@ public class CLICSJudgement {
         // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
         id = submission.getElementId().toString();
         submission_id = IJSONTool.getSubmissionId(submission);
+
+        // Remember this for serialization
+        isPointScoring = model.getContestInformation().isScoreboardTypeScore();
 
         Date startJudgeDate = submission.getJudgeStartDate();
         if(startJudgeDate == null) {
@@ -129,5 +139,34 @@ public class CLICSJudgement {
             start_contest_time = ContestTime.formatTimeMS(startJudgeDate.getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
         }
         // else not much to do here if no start date.
+    }
+
+    public String toJSON() {
+        Set<String> exceptProps = new HashSet<String>();
+
+        getExceptProps(exceptProps);
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            // for this judgment, create filter to omit inappropriate properties,
+            // 'score' in this case if not Point Scoring contest
+            SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
+            FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
+            mapper.setFilters(fp);
+            return mapper.writeValueAsString(this);
+        } catch (Exception e) {
+            return "Error creating JSON for judgment " + e.getMessage();
+        }
+    }
+
+    /**
+     * Get set of properties for which we do not want to serialize into JSON.
+     * This is so we don't serialize score for pass-fail contests
+     *
+     * @param exceptProps Set to fill in with property names to omit
+     */
+    public void getExceptProps(Set<String> exceptProps) {
+        if(!isPointScoring){
+            exceptProps.add("score");
+        }
     }
 }

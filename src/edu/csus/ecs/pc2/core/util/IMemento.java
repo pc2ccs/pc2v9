@@ -1,11 +1,11 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**********************************************************************
  * Copyright (c) 2003, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - Initial API and implementation
  **********************************************************************/
@@ -34,7 +34,7 @@ import java.util.List;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -43,7 +43,7 @@ import java.util.List;
 public interface IMemento {
     /**
      * Special reserved key used to store the memento id (value <code>"org.eclipse.ui.id"</code>).
-     * 
+     *
      * @see #getId
      */
     String TAG_ID = "IMemento.internal.id"; //$NON-NLS-1$
@@ -53,7 +53,7 @@ public interface IMemento {
      * <p>
      * The <code>getChild</code> and <code>getChildren</code> methods are used to retrieve children of a given type.
      * </p>
-     * 
+     *
      * @param type
      *            the type
      * @return a new child memento
@@ -68,7 +68,7 @@ public interface IMemento {
      * <p>
      * The <code>getChild</code> and <code>getChildren</code> methods are used to retrieve children of a given type.
      * </p>
-     * 
+     *
      * @param type
      *            the type
      * @param id
@@ -80,7 +80,7 @@ public interface IMemento {
 
     /**
      * Returns the first child with the given type id.
-     * 
+     *
      * @param type
      *            the type id
      * @return the first child with the given type
@@ -89,7 +89,7 @@ public interface IMemento {
 
     /**
      * Returns all children with the given type id.
-     * 
+     *
      * @param type
      *            the type id
      * @return the list of children with the given type
@@ -98,7 +98,7 @@ public interface IMemento {
 
     /**
      * Returns the floating point value of the given key.
-     * 
+     *
      * @param key
      *            the key
      * @return the value, or <code>null</code> if the key was not found or was found but was not a floating point number
@@ -106,8 +106,17 @@ public interface IMemento {
     Float getFloat(String key);
 
     /**
+     * Returns the double precision point value of the given key.
+     *
+     * @param key
+     *            the key
+     * @return the value, or <code>null</code> if the key was not found or was found but was not a double precision point number
+     */
+    Double getDouble(String key);
+
+    /**
      * Returns the id for this memento.
-     * 
+     *
      * @return the memento id, or <code>null</code> if none
      * @see #createChild(java.lang.String,java.lang.String)
      */
@@ -115,7 +124,7 @@ public interface IMemento {
 
     /**
      * Returns the name for this memento.
-     * 
+     *
      * @return the memento name, or <code>null</code> if none
      * @see #createChild(java.lang.String,java.lang.String)
      */
@@ -123,7 +132,7 @@ public interface IMemento {
 
     /**
      * Returns the integer value of the given key.
-     * 
+     *
      * @param key
      *            the key
      * @return the value, or <code>null</code> if the key was not found or was found but was not an integer
@@ -132,7 +141,7 @@ public interface IMemento {
 
     /**
      * Returns the long value of the given key.
-     * 
+     *
      * @param key
      *            the key
      * @return the value, or <code>null</code> if the key was not found or was found but was not an integer
@@ -141,7 +150,7 @@ public interface IMemento {
 
     /**
      * Returns the string value of the given key.
-     * 
+     *
      * @param key
      *            the key
      * @return the value, or <code>null</code> if the key was not found or was found but was not an integer
@@ -150,7 +159,7 @@ public interface IMemento {
 
     /**
      * Returns the boolean value of the given key.
-     * 
+     *
      * @param key
      *            the key
      * @return the value, or <code>null</code> if the key was not found or was found but was not a boolean
@@ -159,14 +168,14 @@ public interface IMemento {
 
     /**
      * Return the list of names.
-     * 
+     *
      * @return a possibly empty list of names
      */
     List<String> getNames();
 
     /**
      * Sets the value of the given key to the given floating point number.
-     * 
+     *
      * @param key
      *            the key
      * @param value
@@ -175,8 +184,18 @@ public interface IMemento {
     void putFloat(String key, float value);
 
     /**
+     * Sets the value of the given key to the given double precision point number.
+     *
+     * @param key
+     *            the key
+     * @param value
+     *            the value
+     */
+    void putDouble(String key, double value);
+
+    /**
      * Sets the value of the given key to the given integer.
-     * 
+     *
      * @param key
      *            the key
      * @param value
@@ -186,7 +205,7 @@ public interface IMemento {
 
     /**
      * Sets the value of the given key to the given long.
-     * 
+     *
      * @param key
      *            the key
      * @param value
@@ -196,7 +215,7 @@ public interface IMemento {
 
     /**
      * Sets the value of the given key to the given boolean value.
-     * 
+     *
      * @param key
      *            the key
      * @param value
@@ -206,7 +225,7 @@ public interface IMemento {
 
     /**
      * Copy the attributes and children from <code>memento</code> to the receiver.
-     * 
+     *
      * @param memento
      *            the IMemento to be copied.
      */
@@ -214,7 +233,7 @@ public interface IMemento {
 
     /**
      * Sets the value of the given key to the given string.
-     * 
+     *
      * @param key
      *            the key
      * @param value
@@ -224,17 +243,17 @@ public interface IMemento {
 
     /**
      * Create an element with a value.
-     * 
+     *
      * {@link #createChild(String)} and {@link #createChild(String, String)} do not create an XML element with a value.
      * <P>
      * For example <code>createChild("name", "Jenny")</code> will create the following XML:
-     * 
+     *
      * <pre> &lt;name IMemento.internal.id="Jenny&gt;</pre>
-     * 
+     *
      * This method places a value into the element, for example to create and element use the following <code> createChildNode("name", "Jenny")</code>
-     * 
+     *
      * <pre> &lt;name&gt;Jenny&lt;/name&gt;</pre>
-     * 
+     *
      * @see #getValue()
      * @param name
      *            name for element
@@ -246,11 +265,11 @@ public interface IMemento {
 
     /**
      * Get value/String for element.
-     * 
+     *
      * Returns the value for the element. Ex.
-     * 
+     *
      * <pre> &lt;name&gt;Troy&lt;/name&gt; </pre>
-     * 
+     *
      * <code> getValue() </code> would return: Troy
      * <P>
      * @see #createChildNode(String, String)
