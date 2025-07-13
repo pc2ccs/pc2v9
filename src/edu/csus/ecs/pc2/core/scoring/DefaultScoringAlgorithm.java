@@ -6,6 +6,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -39,6 +40,7 @@ import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -241,6 +243,72 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         problemSummaryInfo.setProblemId(problemId);
         problemSummaryInfo.setNumberSubmitted(attempts);
         problemSummaryInfo.setPenaltyPoints(score);
+        problemSummaryInfo.setUnJudgedRuns(unJudgedRun);
+        return problemSummaryInfo;
+    }
+
+    /**
+     * Get the Point Scoring and Statistics information for one problem.
+     *
+     * @return pc2.ex.ProblemScoreData
+     * @param treeMap
+     *            java.util.TreeMap
+     */
+    private ProblemSummaryInfo calcProblemPointScoreData(TreeMap<Run,Run> treeMap, IInternalContest theContest) throws IllegalContestState {
+        ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
+        double score = 0.0;
+        int attempts = 0;
+        ElementId problemId = null;
+        long solutionTime = -1;
+        boolean solved = false;
+        boolean unJudgedRun = false;
+        JudgementRecord judgmentRecord;
+
+        if (treeMap.isEmpty()) {
+            problemSummaryInfo = null; // ProblemScoreData must have ProblemId to be valid
+        } else {
+            Collection<Run> coll = treeMap.values();
+            Object[] o;
+            Run run;
+            o = coll.toArray();
+            for (int i = 0; i < o.length; i++) {
+                run = (Run) o[i];
+                // this should not have made it into the incoming treeMap
+                if (run.isDeleted()) {
+                    continue;
+                }
+                attempts++;
+                problemId = run.getProblemId();
+                // added isValidJudgement to check and obey preliminary results
+                if (run.isSolved() && isValidJudgement(run)) {
+                    // TODO: we might want some differing logic here if all
+                    // yes's are counted
+                    // and/or no's after yes's are counted
+                    solved = true;
+                    solutionTime = run.getElapsedMins();
+                    judgmentRecord = run.getJudgementRecord();
+                    if(judgmentRecord != null) {
+                        score = judgmentRecord.getScore();
+                    }
+                    break;
+                } else {
+                    // we should really only do this if it's been judged
+                    if (!isValidJudgement(run)) {
+                        unJudgedRun = true;
+                    }
+                }
+            }
+        }
+        // TODO put another if around this if there was a setting to include all
+        // no's before yes
+        if (!solved) {
+            score = 0.0;
+        }
+        problemSummaryInfo.setSolved(solved);
+        problemSummaryInfo.setSolutionTime(solutionTime);
+        problemSummaryInfo.setProblemId(problemId);
+        problemSummaryInfo.setNumberSubmitted(attempts);
+        problemSummaryInfo.setScore(score);
         problemSummaryInfo.setUnJudgedRuns(unJudgedRun);
         return problemSummaryInfo;
     }
@@ -479,11 +547,27 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
             } // else no runs
 
-            applyScoringAdjustments(standingsRecordHash, accountList);
+            Comparator<StandingsRecord> src;
+
+            // Note: each of DefaultStandingsRecordComparator and DefaultPointScoringStandingsRecordComparator
+            // implements the java.util.Comparator<?> interface.  However, we need additional information in the
+            // comparator for StandingsRecord, namely, the accountList (for looking up names).  This is why we
+            // instantiate each object separately, set the accountlist then assign to src. I suppose we could create
+            // another interface that extends java.util.Comparator<?> without our method to set the cached account list.
+            if(theContest.getContestInformation().isScoreboardTypePassFail()) {
+                // Not applicable for point scoring contests, is it?  JB
+                applyScoringAdjustments(standingsRecordHash, accountList);
+                DefaultStandingsRecordComparator srcPassFailRecordComparator = new DefaultStandingsRecordComparator();
+                srcPassFailRecordComparator.setCachedAccountList(accountList);
+                src = srcPassFailRecordComparator;
+
+            } else {
+                DefaultPointScoringStandingsRecordComparator srcPointScoringRecordComparator = new DefaultPointScoringStandingsRecordComparator();
+                srcPointScoringRecordComparator.setCachedAccountList(accountList);
+                src = srcPointScoringRecordComparator;
+            }
 
             // use TreeMap to sort
-            DefaultStandingsRecordComparator src = new DefaultStandingsRecordComparator();
-            src.setCachedAccountList(accountList);
             TreeMap<StandingsRecord, StandingsRecord> treeMap = new TreeMap<StandingsRecord, StandingsRecord>(src);
             Collection<StandingsRecord> enumeration = standingsRecordHash.values();
             for (StandingsRecord record : enumeration) {
@@ -639,6 +723,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             IInternalContest theContest, IMemento summaryMememento, boolean excludedGroups) {
 
         ContestInformation contestInformation = theContest.getContestInformation();
+        boolean isPointScoring = contestInformation.isScoreboardTypeScore();
+
         // easy access
         Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
         Hashtable<Group, Integer> groupIndexHash = new Hashtable<Group, Integer>();
@@ -695,6 +781,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
         // assign the ranks
         long numSolved = -1, score = 0, lastSolved = 0;
+        double pointScore = 0.0;
         int rank = 0, indexRank = 0;
         int index = 0;
         // these are indexed by groupIndex
@@ -703,6 +790,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupNumSolved[i] = -1;
         }
         long[] groupScore = new long[groupCount];
+        double[] groupPointScore = new double[groupCount];
         long[] groupLastSolved = new long[groupCount];
         int[] groupRank = new int[groupCount];
         int[] groupIndexRank = new int[groupCount];
@@ -711,6 +799,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupLastSolved[i] = 0;
             groupRank[i] = 0;
             groupIndexRank[i] = 0;
+            groupPointScore[i] = 0.0;
         }
         long[] divisionNumSolved = new long[divisionCount];
         for (int i = 0; i < divisionCount; i++) {
@@ -719,12 +808,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         int[] divisionRank = new int[divisionCount];
         int[] divisionIndexRank = new int[divisionCount];
         long[] divisionScore = new long[divisionCount];
+        double[] divisionPointScore = new double[divisionCount];
         long[] divisionLastSolved = new long[divisionCount];
         for (int i = 0; i < divisionCount; i++) {
             divisionRank[i] = 0;
             divisionIndexRank[i] = 0;
             divisionScore[i] = 0;
             divisionLastSolved[i] = 0;
+            divisionPointScore[i] = 0.0;
         }
 
         RunStatistics runStats = new RunStatistics(theContest);
@@ -736,9 +827,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
             StandingsRecord standingsRecord = (StandingsRecord)o;
             indexRank++;
-            if (!isTeamTied(standingsRecord, numSolved, score, lastSolved)) {
+            if (!isTeamTied(standingsRecord, isPointScoring, pointScore, numSolved, score, lastSolved)) {
                 numSolved = standingsRecord.getNumberSolved();
                 score = standingsRecord.getPenaltyPoints();
+                pointScore = standingsRecord.getScore();
                 lastSolved = standingsRecord.getLastSolved();
                 rank = indexRank;
                 standingsRecord.setRankNumber(rank);
@@ -757,6 +849,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
             standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
             standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
+            standingsRecordMemento.putDouble("score", standingsRecord.getScore());
             standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
             standingsRecordMemento.putInteger("rank", teamRank);
             standingsRecordMemento.putInteger("overallRank", teamRank);
@@ -797,9 +890,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 int groupIndex = groupIndexHash.get(group).intValue();
                 // do the same thing as above, now for the group
                 groupIndexRank[groupIndex]++;
-                if (!isTeamTied(standingsRecord,groupNumSolved[groupIndex], groupScore[groupIndex],groupLastSolved[groupIndex])) {
+                if (!isTeamTied(standingsRecord, isPointScoring, groupPointScore[groupIndex],groupNumSolved[groupIndex], groupScore[groupIndex],groupLastSolved[groupIndex])) {
                     groupNumSolved[groupIndex] = standingsRecord.getNumberSolved();
                     groupScore[groupIndex] = standingsRecord.getPenaltyPoints();
+                    groupPointScore[groupIndex] = standingsRecord.getScore();
                     groupLastSolved[groupIndex] = standingsRecord.getLastSolved();
                     groupRank[groupIndex] = groupIndexRank[groupIndex];
                     standingsRecord.setGroupRankNumber(groupRank[groupIndex]);
@@ -816,9 +910,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 if (divisionIndexHash.containsKey(group)) {
                     int divisionIndex = divisionIndexHash.get(group).intValue()-1;
                     divisionIndexRank[divisionIndex]++;
-                    if (!isTeamTied(standingsRecord, divisionNumSolved[divisionIndex], divisionScore[divisionIndex],divisionLastSolved[divisionIndex])) {
+                    if (!isTeamTied(standingsRecord, isPointScoring, divisionPointScore[divisionIndex], divisionNumSolved[divisionIndex], divisionScore[divisionIndex],divisionLastSolved[divisionIndex])) {
                         divisionNumSolved[divisionIndex] = standingsRecord.getNumberSolved();
                         divisionScore[divisionIndex] = standingsRecord.getPenaltyPoints();
+                        divisionPointScore[divisionIndex] = standingsRecord.getScore();
                         divisionLastSolved[divisionIndex] = standingsRecord.getLastSolved();
                         divisionRank[divisionIndex] = divisionIndexRank[divisionIndex];
                         standingsRecord.setDivisionRankNumber(divisionRank[divisionIndex]);
@@ -846,6 +941,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     psiMemento.putString("shortName", problems[problemsIndexHash.get(psi.getProblemId())-1].getShortName());
                     psiMemento.putInteger("attempts", psi.getNumberSubmitted());
                     psiMemento.putInteger("points", psi.getPenaltyPoints());
+                    psiMemento.putDouble("score", psi.getScore());
                     psiMemento.putLong("solutionTime", psi.getSolutionTime());
                     psiMemento.putBoolean("isSolved", psi.isSolved());
                     psiMemento.putBoolean("isPending", psi.isUnJudgedRuns());
@@ -984,12 +1080,18 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param lastSolved
      * @return True if the long parameters match the corresponding numbers in the StandingsRecord
      */
-    boolean isTeamTied(StandingsRecord standingsRecord, long numSolved, long score, long lastSolved) {
-        if (numSolved != standingsRecord.getNumberSolved()) {
-            return false;
-        }
-        if (score != standingsRecord.getPenaltyPoints()) {
-            return false;
+    boolean isTeamTied(StandingsRecord standingsRecord, boolean isPointScoring, double pointScore, long numSolved, long score, long lastSolved) {
+        if(isPointScoring) {
+            if(pointScore != standingsRecord.getScore()) {
+                return false;
+            }
+        } else {
+            if (numSolved != standingsRecord.getNumberSolved()) {
+                return false;
+            }
+            if (score != standingsRecord.getPenaltyPoints()) {
+                return false;
+            }
         }
         if (lastSolved != standingsRecord.getLastSolved()) {
             return false;
@@ -1058,18 +1160,32 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // cannot be null for 1st run
         String lastUser = "";
         String lastProblem = "";
+        double dScore;
+        boolean isPointScoreContest = theContest.getContestInformation().isScoreboardTypeScore();
 
         while (runIterator.hasNext()) {
             Object o = runIterator.next();
             Run run = (Run) o;
             if (!lastUser.equals(run.getSubmitter().toString()) || !lastProblem.equals(run.getProblemId().toString())) {
                 if (!problemTreeMap.isEmpty()) {
-                    ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap, theContest);
+                    ProblemSummaryInfo problemSummaryInfo;
+                    if(isPointScoreContest) {
+                        problemSummaryInfo = calcProblemPointScoreData(problemTreeMap, theContest);
+                    } else {
+                        problemSummaryInfo = calcProblemScoreData(problemTreeMap, theContest);
+                    }
                     StandingsRecord standingsRecord = standingsHash.get(lastUser);
                     SummaryRow summaryRow = standingsRecord.getSummaryRow();
                     summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
                     standingsRecord.setSummaryRow(summaryRow);
-                    standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
+                    if(isPointScoreContest) {
+                        // we just sum them up
+                        dScore = problemSummaryInfo.getScore();
+                        standingsRecord.setScore(standingsRecord.getScore() + dScore);
+                    } else {
+                        standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
+                    }
+
                     if (problemSummaryInfo.isSolved()) {
                         standingsRecord.setNumberSolved(standingsRecord.getNumberSolved() + 1);
                         oldTime = standingsRecord.getLastSolved();
@@ -1093,12 +1209,25 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
         // handle last run
         if (!problemTreeMap.isEmpty()) {
-            ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap, theContest);
+            ProblemSummaryInfo problemSummaryInfo;
+            if(isPointScoreContest) {
+                problemSummaryInfo = calcProblemPointScoreData(problemTreeMap, theContest);
+            } else {
+                problemSummaryInfo = calcProblemScoreData(problemTreeMap, theContest);
+            }
             StandingsRecord standingsRecord = standingsHash.get(lastUser);
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
             standingsRecord.setSummaryRow(summaryRow);
-            standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
+            if(isPointScoreContest) {
+                // we just care about the biggest score for the problem.
+                dScore = problemSummaryInfo.getScore();
+                if(dScore > standingsRecord.getScore()) {
+                    standingsRecord.setScore(dScore);
+                }
+            } else {
+                standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
+            }
             if (problemSummaryInfo.isSolved()) {
                 standingsRecord.setNumberSolved(standingsRecord.getNumberSolved() + 1);
                 oldTime = standingsRecord.getLastSolved();
@@ -1157,6 +1286,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
                     problemSummaryInfo.setProblemId(problems[j].getElementId());
                     problemSummaryInfo.setPenaltyPoints(0);
+                    problemSummaryInfo.setScore(0.0);
                     summaryRow.put(j + 1, problemSummaryInfo);
                 }
                 standingsRecord.setSummaryRow(summaryRow);
@@ -1188,6 +1318,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
         memento.putString("systemURL", versionInfo.getSystemURL());
         memento.putString("currentDate", new Date().toString());
+        memento.putString("scoreType", contestInformation.getScoreboardType().toString().toLowerCase());
         memento.putString("generatorId", "$Id$");
         // bug 1540
         String value = "Live (unfrozen) scoreboard";

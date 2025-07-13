@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.Serializable;
@@ -7,7 +7,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
  * Problem (Scoring) Summary Info.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 public class ProblemSummaryInfo implements Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -4157597862536104668L;
 
@@ -28,6 +28,8 @@ public class ProblemSummaryInfo implements Serializable {
 
     private int penaltyPoints = 0;
 
+    private double score = 0.0;
+
     private boolean unJudgedRuns = false;
 
     private int pendingRunCount = 0;
@@ -35,7 +37,7 @@ public class ProblemSummaryInfo implements Serializable {
     private int judgedRunCount = 0;
 
     private ElementId problemId = null;
-    
+
     private String shortName = "";
 
     /**
@@ -52,11 +54,11 @@ public class ProblemSummaryInfo implements Serializable {
     public void setProblemId(edu.csus.ecs.pc2.core.model.ElementId problemId) {
         this.problemId = problemId;
     }
-    
+
     public String getShortName() {
         return shortName;
     }
-    
+
     public void setShortName(String shortName) {
         this.shortName = shortName;
     }
@@ -143,6 +145,20 @@ public class ProblemSummaryInfo implements Serializable {
 
     public int getJudgedRunCount() {
         return judgedRunCount;
+    }
+
+    /**
+     * @return the score
+     */
+    public double getScore() {
+        return score;
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setScore(double score) {
+        this.score = score;
     }
 
 }

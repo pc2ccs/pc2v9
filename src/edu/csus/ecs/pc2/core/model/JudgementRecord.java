@@ -127,6 +127,8 @@ public class JudgementRecord implements Serializable, IGetDate {
     // Copied from submission when judgement record is complete
     private Date judgeStartDate = null;
 
+    // For point scoring contests
+    private double score = 0.0;
 
     /**
      * Create a Judgement Record.
@@ -450,5 +452,22 @@ public class JudgementRecord implements Serializable, IGetDate {
      */
     public Date getJudgeStartDate() {
         return judgeStartDate;
+    }
+
+    /**
+     *
+     * @return the score, for point scoring contests
+     */
+    public double getScore() {
+        return score;
+    }
+
+    /**
+     * Set the score for point scoring contests
+     *
+     * @param score
+     */
+    public void setScore(double score) {
+        this.score = score;
     }
 }
