@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.standings.ProblemSummaryInfo;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 
@@ -50,15 +51,15 @@ public class CLICSScoreboardRow {
      * @param probEleToShortName hashmap for mapping problem elementid to shortname
      * @param teamStanding xml representation of the standings for a team
      */
-    public CLICSScoreboardRow(HashMap<String, String> probEleToShortName, TeamStanding teamStanding) {
+    public CLICSScoreboardRow(IInternalContest model, HashMap<String, String> probEleToShortName, TeamStanding teamStanding) {
         team_id = teamStanding.getTeamId();
         rank = Utilities.nullSafeToInt(teamStanding.getRank(), 0);
-        score = new CLICSScore(teamStanding);
+        score = new CLICSScore(model, teamStanding);
 
         ArrayList<CLICSProblemScore> pslist = new ArrayList<CLICSProblemScore>();
 
         for( ProblemSummaryInfo psi : teamStanding.getProblemSummaryInfos()) {
-            pslist.add(new CLICSProblemScore(probEleToShortName, psi));
+            pslist.add(new CLICSProblemScore(model, probEleToShortName, psi));
         }
         problems = pslist.toArray(new CLICSProblemScore[0]);
     }

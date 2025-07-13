@@ -1,10 +1,11 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.api.BaseClient;
 import edu.csus.ecs.pc2.core.model.ClientId;
 
 /**
@@ -31,12 +32,18 @@ public class StandingsRecord {
      * Rank within the Group.
      */
     private int groupRankNumber = 0;
-    
+
     /**
      * Penalty Points.
      *
      */
     private long penaltyPoints;
+
+    /**
+     * Point score
+     *
+     */
+    private double score;
 
     /**
      * Number of problems solved.
@@ -192,14 +199,14 @@ public class StandingsRecord {
     public void setGroupRankNumber(int groupRankNumber) {
         this.groupRankNumber = groupRankNumber;
     }
-    
+
     /**
      * Returns a String representation of this object in JSON format.
      */
     @Override
     public String toString() {
         ObjectMapper mapper = new ObjectMapper();
-      
+
         String jsonString = "{}";
         try {
             jsonString = mapper.writeValueAsString(this);
@@ -220,5 +227,18 @@ public class StandingsRecord {
         this.divisionRankNumber = divisionRankNumber;
     }
 
+    /**
+     * @return the score
+     */
+    public double getScore() {
+        return score;
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setScore(double score) {
+        this.score = score;
+    }
 
 }
