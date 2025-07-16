@@ -80,8 +80,8 @@ public class DefaultPointScoringStandingsRecordComparator implements Serializabl
         //
         // Primary Sort = score (high to low)
         // Secondary Sort = earliest submittal of last submission (low to high)
-        // Forth Sort = teamName (low to high)
-        // Fifth Sort = clientId (low to high)
+        // Third Sort = teamName (low to high)
+        // Fourth Sort = clientId (low to high)
 
         if ((bScore == aScore) && (bLastSolvedTime == aLastSolvedTime) && (nameComparison == 0)
                 && (bClientHash == aClientHash)) {
@@ -92,9 +92,9 @@ public class DefaultPointScoringStandingsRecordComparator implements Serializabl
                     || ((bScore == aScore) && (bLastSolvedTime == aLastSolvedTime) && (nameComparison > 0))
                     || ((bScore == aScore) && (bLastSolvedTime == aLastSolvedTime)
                             && (nameComparison == 0) && (bClientHash < aClientHash))) {
-                status = 1; // a greater then b
+                status = 1; // a to be considered greater than b
             } else {
-                status = -1; // a less then b
+                status = -1; // a to be considered less than b
             }
         }
         return status;

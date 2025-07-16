@@ -182,9 +182,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     /**
      * Get the Score and Statistics information for one problem.
      *
-     * @return pc2.ex.ProblemScoreData
-     * @param treeMap
-     *            java.util.TreeMap
+     * @param treeMap java.util.TreeMap of filtered Runs
+     * @param theContest
+     * @return ProblemSummaryInfo
+     * @throws IllegalContestState
      */
     private ProblemSummaryInfo calcProblemScoreData(TreeMap<Run,Run> treeMap, IInternalContest theContest) throws IllegalContestState {
         ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
@@ -264,9 +265,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     /**
      * Get the Point Scoring and Statistics information for one problem.
      *
+     * @param treeMap java.util.TreeMap of filtered Runs
+     * @param theContest
      * @return ProblemSummaryInfo
-     * @param treeMap
-     *            java.util.TreeMap
+     * @throws IllegalContestState
      */
     private ProblemSummaryInfo calcProblemPointScoreData(TreeMap<Run,Run> treeMap, IInternalContest theContest) throws IllegalContestState {
         ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();

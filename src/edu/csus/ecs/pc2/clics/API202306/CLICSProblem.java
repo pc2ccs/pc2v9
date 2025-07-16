@@ -98,7 +98,7 @@ public class CLICSProblem {
             ProblemDataFiles problemDataFiles = model.getProblemDataFile(problem);
             if(problemDataFiles != null) {
                 TestDataGroup [] testDataGroups = problemDataFiles.getJudgesDataGroups();
-                // Really, there's only 1 top level TestDataGruop
+                // Really, there's only 1 top level TestDataGroup
                 if(testDataGroups != null && testDataGroups.length > 0) {
                     max_score = testDataGroups[0].getRangeMax();
                 }
