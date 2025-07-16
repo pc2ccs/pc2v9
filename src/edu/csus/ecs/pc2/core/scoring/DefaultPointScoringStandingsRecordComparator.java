@@ -87,6 +87,16 @@ public class DefaultPointScoringStandingsRecordComparator implements Serializabl
                 && (bClientHash == aClientHash)) {
             status = 0; // elements equal, this shouldn't happen, Tammy...
         } else {
+            // The sorting algorithm sorts things from "low to high" by default (ascending).
+            // The comparators should return a value as to whether the first thing (A) should be
+            // considered(!) less-than, equal-to or greater-than the 2nd thing (B). That is,
+            // does A appear AFTER B in the sorted result.
+            // For Point Scoring, the item with the biggest score should be the first thing
+            // in the result. When comparing 2 things (ascore and bscore), we have to determine
+            // if we want ascore to come after bscore. (IE if ascore is smaller than bscore,
+            // then A comes after B, and should be considered that A is bigger than B
+            // in terms of how the sorting is done, so we return 1, indicating that A should
+            // come after B in the sorted list.
             if ((bScore > aScore)
                     || ((bScore == aScore) && (bLastSolvedTime < aLastSolvedTime))
                     || ((bScore == aScore) && (bLastSolvedTime == aLastSolvedTime) && (nameComparison > 0))
