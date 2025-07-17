@@ -31,7 +31,6 @@ import netrc
 import getpass
 import io
 import zipfile
-import html2text
 
 from pathlib import Path
 from typing import NoReturn
@@ -113,19 +112,6 @@ def print_if_json(text: str):
         print(json.dumps(data, indent=2))
     except json.decoder.JSONDecodeError:
         pass
-
-def extract_reason_from_html(text: str) :
-    '''Extra reason string from html on failed request'''
-    reason = None
-    if text.lower().find('<body>') :
-        converted = True
-        reason = html2text.html2text(text)
-        cleanText = reason.replace('\n', ' ').replace('\r', ' ')
-        match = re.fullmatch(r'^.+Reason:[\s]*(.+)[\s]*\* \* \*.*$', cleanText)
-        if match :
-            reason = match.group(1)
-    return reason
-        
 
 def read_contests() -> list:
     '''Read all contests from the API.
@@ -564,11 +550,7 @@ def do_api_submit():
             elif response.status_code == HTTPStatus.TOO_MANY_REQUESTS :
                 raise RuntimeError(f'Submission threshold exceeded - wait a minute and try again.')
             elif response.status_code == HTTPStatus.FORBIDDEN :
-                reason = extract_reason_from_html(response.text)
-                if not reason :
-                    reason = 'Submission failed: Submissions are forbidden.'
-                else :
-                    reason = f'Submission failed: {reason}'
+                reason = 'Submission failed: Submissions are forbidden.'
                 raise RuntimeError(reason)    
             else:
                 raise RuntimeError(f'Submission failed (code {response.status_code} - {response.text})')
