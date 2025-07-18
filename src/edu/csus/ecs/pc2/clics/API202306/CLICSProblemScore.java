@@ -2,22 +2,13 @@
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.standings.ProblemSummaryInfo;
-import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * Contains information about the score a team received for a single problem.
@@ -28,7 +19,6 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
  *
  */
 
-@JsonFilter("rtFilter")
 public class CLICSProblemScore {
 
     @JsonProperty
@@ -44,12 +34,10 @@ public class CLICSProblemScore {
     private boolean solved;
 
     @JsonProperty
-    private double score;
+    private Double score;
 
     @JsonProperty
     private int time;
-
-    private boolean isPointScoring = false;
 
     /**
      * Provide empty constructor for Jackson deserialization
@@ -65,7 +53,7 @@ public class CLICSProblemScore {
      * @param probEleToShort hashmap for mapping problem elementid to shortname
      * @param versionInfo
      */
-    public CLICSProblemScore(IInternalContest model, HashMap<String, String> probEleToShort, ProblemSummaryInfo psi) {
+    public CLICSProblemScore(HashMap<String, String> probEleToShort, ProblemSummaryInfo psi) {
         num_judged = Utilities.nullSafeToInt(psi.getAttempts(), 0);
         num_pending = Utilities.nullSafeToInt(psi.getIsPending(), 0);
         problem_id = psi.getProblemId();
@@ -77,38 +65,6 @@ public class CLICSProblemScore {
         if(solved) {
             // Problem solution time is in minutes
             time = StringUtilities.getIntegerValue(psi.getSolutionTime(), 0);
-        }
-        if(model != null) {
-            isPointScoring = model.getContestInformation().isScoreboardTypeScore();
-        }
-    }
-
-    public String toJSON() {
-        Set<String> exceptProps = new HashSet<String>();
-
-        getExceptProps(exceptProps);
-        try {
-            ObjectMapper mapper = JSONUtilities.getObjectMapper();
-            // for this problem's score, create filter to omit inappropriate properties,
-            // 'score' in this case if not Point Scoring contest
-            SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
-            FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
-            mapper.setFilters(fp);
-            return mapper.writeValueAsString(this);
-        } catch (Exception e) {
-            return "Error creating JSON for CLICSProblemScore " + e.getMessage();
-        }
-    }
-
-    /**
-     * Get set of properties for which we do not want to serialize into JSON.
-     * This is so we don't serialize score for pass-fail contests
-     *
-     * @param exceptProps Set to fill in with property names to omit
-     */
-    public void getExceptProps(Set<String> exceptProps) {
-        if(!isPointScoring){
-            exceptProps.add("score");
         }
     }
 
