@@ -67,6 +67,7 @@ public class RunList implements Serializable {
     private int getINIBaseRunNumber() {
         int retVal ;
         if (IniFile.isFilePresent()) {
+            new IniFile(); // JB todo fix right, runlist is initialized before start() is called.
             try {
                 String baseNum = IniFile.getValue("server.baseRunNumber") ;
                 if (baseNum == null || baseNum.equals("")) {

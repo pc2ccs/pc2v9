@@ -115,6 +115,8 @@ public class RemoteEventFeedMonitor implements Runnable {
     private boolean attemptConnectRetries = ATTEMPT_RECONNECTS;
     private int tossedMessages = 0;
 
+    private int numRunsUpdated = 0;
+
     // Should we allow submissions/judgements from remote prior to contest start
     private boolean allowPrestartActivity = ALLOW_PRESTART_ACTIVITY;
 
@@ -500,7 +502,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         + " submissionID " + overrideSubmissionID);
                                     try {
                                         submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
-                                                runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
+                                                runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, -overrideSubmissionID);
                                     } catch (Exception e) {
 
                                         // Send message, message will add to connectStatusTable
@@ -568,6 +570,11 @@ public class RemoteEventFeedMonitor implements Runnable {
                                            continue;
                                        }
 
+                                       if (updateRun(submissionID, judgement)) {
+                                           numRunsUpdated++;
+                                       }
+                                       logAndDebugPrint(log, Level.INFO, "Updated judgement for submission " + submissionID + " to " + judgement);
+                                       // Modify judgement as if we resolved it.
 
                                            //TODO: make sure this is a judgement for a submission we know about.
                                            //  Question: isn't it possible the remote system will send us a "judgement" before it sends us
@@ -578,9 +585,10 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         // this (appears to be) a judgement we want; save it in the global judgements map under a key of
                                         // the judgement ID with value "submissionID:judgement"
 //                                                  System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");
-                                        synchronized (remoteJudgementsMapLock) {
-                                            getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
-                                        }
+                                          // We do not add to our remote judgement map if we are combining.
+//                                        synchronized (remoteJudgementsMapLock) {
+//                                            getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+//                                        }
                                     }
                                 }
 
@@ -1362,6 +1370,6 @@ public class RemoteEventFeedMonitor implements Runnable {
          }
          return(nextEvent);
 
-     }
+    }
 
 }

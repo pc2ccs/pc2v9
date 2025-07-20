@@ -1631,9 +1631,9 @@ public class InternalContest implements IInternalContest {
             case CHECKED_OUT:
             case BEING_JUDGED:
             case BEING_RE_JUDGED:
-            case HOLD:
                 checkOutRun = true;
                 break;
+            case HOLD:
             case JUDGED:
             case NEW:
             case REJUDGE:

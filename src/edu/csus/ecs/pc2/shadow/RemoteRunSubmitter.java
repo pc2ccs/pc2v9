@@ -80,11 +80,11 @@ public class RemoteRunSubmitter {
         {
             throw new InvalidParameterException("Parameter mainFile is null");
         }
-
-        if (overrideRunId <= 0)
-        {
-            throw new InvalidParameterException("Parameter overrideRunId has invalid id.  " + overrideRunId + " <= 0");
-        }
+        
+//        if (overrideRunId <= 0)
+//        {
+//            throw new InvalidParameterException("Parameter overrideRunId has invalid id.  " + overrideRunId + " <= 0");
+//        }
 
         /**
          * Verify input fields
