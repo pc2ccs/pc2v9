@@ -591,7 +591,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                logAndDebugPrint(log, Level.WARNING, "No submission " + submissionID + " found for judgementID" +
                                                        judgementID + " (" + judgement + ") - maybe the judgment came before the submission");
                                            } else {
-                                               if (updateRun(submissionID, judgement)) {
+                                               if (updateRun(submissionID, judgement, judgementEventDataMap.get("score"))) {
                                                    numRunsUpdated++;
                                                }
                                                logAndDebugPrint(log, Level.INFO, "Updated judgement for submission " + submissionID + " to " + judgement);
@@ -1229,10 +1229,11 @@ public class RemoteEventFeedMonitor implements Runnable {
       *
       * @param submissionIdStr the Id of the run to be updated.
       * @param newJudgementStr the judgement which should be applied to the specified run.
+      * @param score for scoring contests, the score (this is a double)
       *
       * @return true if the run was successfully updated; false if the run could not be updated for some reason
       */
-     protected boolean updateRun(String submissionIdStr, String newJudgementStr) {
+     protected boolean updateRun(String submissionIdStr, String newJudgementStr, Object score) {
          int submissionId;
 
          Log log = pc2Controller.getLog();
@@ -1296,6 +1297,16 @@ public class RemoteEventFeedMonitor implements Runnable {
                          + " for run " + targetRun);
 
                  //update the run in PC2
+                 if(score != null) {
+                     double dscore = 0;
+
+                     if(score instanceof Double) {
+                         dscore = ((Double)score).doubleValue();
+                     } else {
+                         dscore = Double.parseDouble(score.toString());
+                     }
+                     judgementRecord.setScore(dscore);
+                 }
                  judgementRecord.setSendToTeam(false);
                  pc2Controller.submitRunJudgement(targetRun, judgementRecord, runResultFiles);
                  return(true);

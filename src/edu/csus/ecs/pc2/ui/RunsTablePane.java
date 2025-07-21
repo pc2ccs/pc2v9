@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountNameCaseComparator;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.core.list.StringToDoubleComparator;
 import edu.csus.ecs.pc2.core.list.StringToNumberComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -238,6 +239,22 @@ public class RunsTablePane extends JPanePlugin {
 
             int cols = runTableModel.getColumnCount();
             Object[] s = new Object[cols];
+            ContestInformation contestInformation = getContest().getContestInformation();
+            boolean isScoring = contestInformation.isScoreboardTypeScore();
+
+            // Figure out what goes in time "Time" / "Score" column
+            JudgementRecord jrec = run.getJudgementRecord();
+            String timeScore = "0";
+
+            if(isScoring) {
+                if(jrec != null) {
+                    timeScore = Double.toString(jrec.getScore());
+                } else {
+                    timeScore = "0";
+                }
+            } else {
+                timeScore = Long.toString(run.getElapsedMins());
+            }
 
             int idx = 0;
 
@@ -246,7 +263,7 @@ public class RunsTablePane extends JPanePlugin {
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = Integer.toString(run.getNumber());
-                s[idx++] = Long.toString(run.getElapsedMins());
+                s[idx++] = timeScore;
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = isJudgementSuppressed(run);
                 s[idx++] = getProblemTitle(run.getProblemId());
@@ -259,7 +276,7 @@ public class RunsTablePane extends JPanePlugin {
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = Integer.toString(run.getNumber());
-                s[idx++] = Long.toString(run.getElapsedMins());
+                s[idx++] = timeScore;
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = getProblemTitle(run.getProblemId());
                 s[idx++] = getBalloonColor(run);
@@ -271,7 +288,7 @@ public class RunsTablePane extends JPanePlugin {
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = Integer.toString(run.getNumber());
                 s[idx++] = getProblemTitle(run.getProblemId());
-                s[idx++] = Long.toString(run.getElapsedMins());
+                s[idx++] = timeScore;
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = getBalloonColor(run);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
@@ -797,6 +814,10 @@ public class RunsTablePane extends JPanePlugin {
         Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language", "ElementID" };
         Object[] columns;
 
+        boolean isPointScoring = getContest().getContestInformation().isScoreboardTypeScore();
+        // This is just a default since, as of this writing, "Time" is always in index 3 of headers
+        int scoreColumn = 3;
+
         usingTeamColumns = false;
         usingFullColumns = false;
 
@@ -809,6 +830,17 @@ public class RunsTablePane extends JPanePlugin {
         } else {
             usingFullColumns = true;
             columns = fullColumns;
+        }
+        // Figure out where the Time/Score goes
+        for(int iCol = 0; iCol < columns.length; iCol++) {
+            if(columns[iCol].toString().equals("Time")) {
+                scoreColumn = iCol;
+                // Change header for point scoring
+                if(isPointScoring) {
+                    columns[iCol] = "Score";
+                }
+                break;
+            }
         }
         runTableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -837,10 +869,19 @@ public class RunsTablePane extends JPanePlugin {
         ((DefaultTableCellRenderer)runTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
         runTable.setRowHeight(runTable.getRowHeight() + VERT_PAD);
 
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
+        runTable.getColumnModel().getColumn(scoreColumn).setCellRenderer(rightRenderer);
 
+        StringToDoubleComparator doubleStringSorter = new StringToDoubleComparator();
         StringToNumberComparator numericStringSorter = new StringToNumberComparator();
         AccountNameCaseComparator accountNameSorter = new AccountNameCaseComparator();
 
+        if(isPointScoring) {
+            trs.setComparator(scoreColumn, doubleStringSorter);
+        } else {
+            trs.setComparator(scoreColumn, numericStringSorter);
+        }
         int idx = 0;
 
         if (isTeam(getContest().getClientId())) {
@@ -850,7 +891,6 @@ public class RunsTablePane extends JPanePlugin {
             // These are in column order - omitted ones are straight string compare
             trs.setComparator(0, accountNameSorter);
             trs.setComparator(1, numericStringSorter);
-            trs.setComparator(3, numericStringSorter);
             // These are in sort order
             sortList.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
@@ -868,7 +908,6 @@ public class RunsTablePane extends JPanePlugin {
             trs.setComparator(0, accountNameSorter);
             trs.setComparator(1, accountNameSorter);
             trs.setComparator(2, numericStringSorter);
-            trs.setComparator(3, numericStringSorter);
             trs.setComparator(7, accountNameSorter);
             // These are in sort order
             sortList.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
@@ -891,7 +930,6 @@ public class RunsTablePane extends JPanePlugin {
             trs.setComparator(0, accountNameSorter);
             trs.setComparator(1, accountNameSorter);
             trs.setComparator(2, numericStringSorter);
-            trs.setComparator(3, numericStringSorter);
             // These are in sort order
             sortList.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
