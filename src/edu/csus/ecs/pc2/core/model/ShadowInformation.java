@@ -1,28 +1,34 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
 
 /**
  * This class encapsulates information related to shadowing a remote Contest Control System.
- * 
+ *
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
  */
 public class ShadowInformation {
-    
+
     private boolean shadowModeEnabled ;
     private String remoteCCSURL ;
     private String remoteCCSLogin ;
     private String remoteCCSPassword ;
     private String lastEventID ;
-    
-    
+    private boolean combineScoreboards;
     public boolean isShadowModeEnabled() {
         return shadowModeEnabled;
     }
     public void setShadowModeEnabled(boolean shadowModeEnabled) {
         this.shadowModeEnabled = shadowModeEnabled;
+    }
+
+    public boolean isCombineScoreboards() {
+        return combineScoreboards;
+    }
+    public void setCombineScoreboards(boolean combineScoreboards) {
+        this.combineScoreboards = combineScoreboards;
     }
     public String getRemoteCCSURL() {
         return remoteCCSURL;
@@ -48,13 +54,13 @@ public class ShadowInformation {
     public void setLastEventID(String lastEventID) {
         this.lastEventID = lastEventID;
     }
-    
+
     /**
      * Returns true if the fields of the specified {@link ShadowInformation} object are
      * the same as those in this ShadowInformation object; false otherwise.
-     * 
+     *
      * @param otherShadowInfo the ShadowInformation object to be compared with this one
-     * 
+     *
      * @return true if the other object is equivalent to this object
      */
     public boolean isSameAs(ShadowInformation otherShadowInfo) {
@@ -64,7 +70,7 @@ public class ShadowInformation {
             }
             if (! StringUtilities.stringSame(remoteCCSURL, otherShadowInfo.remoteCCSURL)) {
                 return false;
-            }            
+            }
             if (! StringUtilities.stringSame(remoteCCSLogin, otherShadowInfo.remoteCCSLogin)) {
                 return false;
             }
@@ -74,11 +80,11 @@ public class ShadowInformation {
             if (! StringUtilities.stringSame(lastEventID, otherShadowInfo.lastEventID)) {
                 return false;
             }
-             
+
             return true;
-            
+
         } catch (Exception e) {
-            e.printStackTrace(System.err); // TODO log this exception 
+            e.printStackTrace(System.err); // TODO log this exception
             return false;
         }
     }

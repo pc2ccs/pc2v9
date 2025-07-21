@@ -5029,6 +5029,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
             RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
             // If using remote's judgement as authoritative, put run in HOLD state
+            // We will wait for the judgment from the remote
             if(overrideSubmissionId < 0) {
                 overrideSubmissionId = -overrideSubmissionId;
                 // Waiting for remote judgement

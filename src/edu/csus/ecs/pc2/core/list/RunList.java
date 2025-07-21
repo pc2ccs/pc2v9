@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
@@ -21,9 +21,9 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Maintains a list of {@link edu.csus.ecs.pc2.core.model.Run}s.
- * 
+ *
  * This class maintains a list of runs, as well as load/save the runs to disk. <br>
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 
@@ -51,9 +51,9 @@ public class RunList implements Serializable {
     private IStorage storage;
 
     private LinkedList<String> backupList = new LinkedList<String>();
-    
+
     private RunListWriteThread runListWriteThread = null;
-    
+
     private Object runListWriteLock = new Object();
 
     private Object diskWriteLock = new Object();
@@ -67,11 +67,16 @@ public class RunList implements Serializable {
     private int getINIBaseRunNumber() {
         int retVal ;
         if (IniFile.isFilePresent()) {
-            new IniFile(); // JB todo fix right, runlist is initialized before start() is called.
+
+            // We need to load the INI file before looking at its settings.  By instantiating it, this
+            // forces it to load() the Ini file settings into the static members of IniFile().  This has to be
+            // fixed.  I'm not sure why it was done this way in IniFile.
+            // InternalController.start() does this, but too late.
+            IniFile iniDummy = new IniFile();
             try {
                 String baseNum = IniFile.getValue("server.baseRunNumber") ;
                 if (baseNum == null || baseNum.equals("")) {
-                    retVal = 1; 
+                    retVal = 1;
                 } else {
                     //SOMEDAY: remove the following line and log a message instead (note that the problem is lack of access to the controller/log)
                     System.out.println ("Found server.baseRunNumber in .ini file: '" + baseNum + "'");
@@ -93,7 +98,7 @@ public class RunList implements Serializable {
 
     /**
      * Create list and save list to disk on update/add.
-     * 
+     *
      * @param dirname
      */
     public RunList(IStorage storage) {
@@ -104,12 +109,12 @@ public class RunList implements Serializable {
 
     /**
      * Add new run, increment run number.
-     * 
+     *
      * @param run
      * @return the run now with the run number.
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public Run addNewRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         synchronized (runHashLock) {
@@ -122,9 +127,9 @@ public class RunList implements Serializable {
     /**
      * Add a run into the run list, no changes.
      * @param run
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public void add (Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         synchronized (runHashLock) {
@@ -160,9 +165,9 @@ public class RunList implements Serializable {
 
     /**
      * Get a key for an input run.
-     * 
+     *
      * This key is used to save a Run into the list.
-     * 
+     *
      * @param run
      * @return String which uniquely identifies a run.
      */
@@ -173,14 +178,14 @@ public class RunList implements Serializable {
 
     /**
      * Mark run as deleted.
-     * 
+     *
      * Does not remove from list simply marks run as deleted.
-     * 
+     *
      * @param run
      * @return true if deleted, false if not deleted or not found.
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public boolean delete(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -200,9 +205,9 @@ public class RunList implements Serializable {
 
     /**
      * Remove all items from list.
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public void clear() throws IOException, ClassNotFoundException, FileSecurityException {
         synchronized (runHashLock) {
@@ -215,12 +220,12 @@ public class RunList implements Serializable {
 
     /**
      * Update the run with a new run state.
-     * 
+     *
      * @param run
      * @param newState
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public void updateRunStatus(Run run, RunStates newState) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -236,24 +241,24 @@ public class RunList implements Serializable {
     /**
      * Replace run, increment version number.
      * @param run
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public void updateRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         synchronized (runHashLock) {
             run.getElementId().incrementVersionNumber();
             runHash.put(getRunKey(run), run);
         }
-        writeToDisk();        
+        writeToDisk();
     }
 
     /**
      * Update run, increment version number add judgement.
      * @param run
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public void updateRun(Run run, JudgementRecord judgement, boolean manualReview) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -298,19 +303,19 @@ public class RunList implements Serializable {
 
     /**
      * Write the run data to disk.
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
      * @throws IOException
-     * 
+     *
+     * @throws IOException
+     *
      */
     private boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (!isSaveToDisk()) {
             return false;
         }
-        
+
         synchronized (runListWriteLock) {
             runListWriteLock.notify();
         }
@@ -319,12 +324,12 @@ public class RunList implements Serializable {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @throws ClassNotFoundException
      * @throws IOException
-     * @throws FileSecurityException 
-     * 
+     * @throws FileSecurityException
+     *
      */
     @SuppressWarnings("unchecked")
     public boolean loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException, FileSecurityException  {
@@ -342,7 +347,7 @@ public class RunList implements Serializable {
 
     /**
      * Loop through list and determine the last run number for input site.
-     * 
+     *
      * @param siteNumber
      */
     private int lastRunNumber(int siteNumber) {
@@ -369,7 +374,7 @@ public class RunList implements Serializable {
                 return new Run[0];
             }
 
-            return (Run[]) runHash.values().toArray(new Run[size()]);
+            return runHash.values().toArray(new Run[size()]);
         }
     }
 
@@ -437,7 +442,7 @@ public class RunList implements Serializable {
 
                 copyofRunHash = new Hashtable<String, Run>(runHash);
             }
-            
+
             synchronized (diskWriteLock) {
                 stored = storage.store(fileName, copyofRunHash);
             }
@@ -458,21 +463,21 @@ public class RunList implements Serializable {
 
         return stored;
     }
-    
-    
+
+
     public RunListWriteThread createAndStartRunListWriteThread() {
         if (runListWriteThread == null) {
             runListWriteThread = new RunListWriteThread();
             runListWriteThread.start();
         }
-        
+
         return runListWriteThread;
     }
-    
-    
+
+
     /**
      * Thread that writes that backs up and writes run list file.
-     * 
+     *
      * @author Douglas A. Lane <pc2@ecs.csus.edu>
      *
      */
@@ -486,7 +491,7 @@ public class RunList implements Serializable {
                     while (true) {
                         runListWriteLock.wait();
                         backupAndWriteRunList();
-                        
+
                     }
                 }
 

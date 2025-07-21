@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -242,6 +242,8 @@ public interface IContestLoader {
     String SANDBOX_GRACE_TIME = "sandbox-grace-time-secs";
 
     String SANDBOX_INTERACTIVE_GRACE_MULTIPLIER = "sandbox-interactive-time-multiplier";
+
+    String REMOTE_CCS_SETTINGS_KEY = "remote-ccs-settings";
 
     /**
      *

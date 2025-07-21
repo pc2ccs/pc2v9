@@ -64,6 +64,7 @@ public class RemoteEventFeedMonitor implements Runnable {
     public static final int RECONNECT_RETRY_DELAY = 5000;
     public static final boolean ATTEMPT_RECONNECTS = true;
     public static final boolean ALLOW_PRESTART_ACTIVITY = false;
+    public static final boolean COMBINED_SCOREBOARDS = false;
 
     private static final int MAX_LOG_NOTIFICATION_LEN = 80;
 
@@ -120,7 +121,12 @@ public class RemoteEventFeedMonitor implements Runnable {
     // Should we allow submissions/judgements from remote prior to contest start
     private boolean allowPrestartActivity = ALLOW_PRESTART_ACTIVITY;
 
-   /**
+    // Are we operating in "combined" scoreboard mode where we do not judge submissions, but
+    // we accept judgments from the remote?
+    private boolean combinedScoreboardMode = COMBINED_SCOREBOARDS;
+    private int remoteTeamIdOffset= 0;
+
+    /**
     * A Map mapping remote judgement ids to corresponding submission ids and the judgement applied to that submission.
     */
     private static Map<String,String> remoteJudgements;
@@ -272,7 +278,7 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                         if ("submissions".equals(notifyType)) {
 
-                            if (isReadOnlyClient()) {
+                            if (isReadOnlyClient() && !isCombinedScoreboardClient()) {
                                 log.info("Skipping submission event due to being logged in as a read-only client (not Feeder1)");
                                 dataMap = getNextEvent(reader, log);
                                 continue;
@@ -342,7 +348,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     throw new Exception("Error parsing submission data " + dataMap.toString());
 
                                 } else {
-
+                                    runSubmission.adjustTeamId(getRemoteTeamIdOffset());
                                     logAndDebugPrint(log, Level.INFO, "Found run " + runSubmission.getId() + " from team " +
                                             runSubmission.getTeam_id() + ": event= " + dataMap.toString());
 
@@ -501,8 +507,15 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         + " time " + overrideTimeMS
                                         + " submissionID " + overrideSubmissionID);
                                     try {
+                                        long overrideSub = overrideSubmissionID;
+
+                                        // A negative submissions ID indicates that we are not judging the submission, rather we are
+                                        // waiting for a judgment from the primary.
+                                        if(isCombinedScoreboardClient()) {
+                                            overrideSub = -overrideSub;
+                                        }
                                         submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
-                                                runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, -overrideSubmissionID);
+                                                runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSub);
                                     } catch (Exception e) {
 
                                         // Send message, message will add to connectStatusTable
@@ -570,10 +583,21 @@ public class RemoteEventFeedMonitor implements Runnable {
                                            continue;
                                        }
 
-                                       if (updateRun(submissionID, judgement)) {
-                                           numRunsUpdated++;
+                                       // In combined scoreboard mode, we actually set the submission's judgment here
+                                       if(isCombinedScoreboardClient()) {
+                                           // test to be sure we have seen this submission ID
+                                           bFound = mapSubmissions.get(submissionID);
+                                           if(!bFound) {
+                                               logAndDebugPrint(log, Level.WARNING, "No submission " + submissionID + " found for judgementID" +
+                                                       judgementID + " (" + judgement + ") - maybe the judgment came before the submission");
+                                           } else {
+                                               if (updateRun(submissionID, judgement)) {
+                                                   numRunsUpdated++;
+                                               }
+                                               logAndDebugPrint(log, Level.INFO, "Updated judgement for submission " + submissionID + " to " + judgement);
+                                           }
                                        }
-                                       logAndDebugPrint(log, Level.INFO, "Updated judgement for submission " + submissionID + " to " + judgement);
+
                                        // Modify judgement as if we resolved it.
 
                                            //TODO: make sure this is a judgement for a submission we know about.
@@ -586,9 +610,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         // the judgement ID with value "submissionID:judgement"
 //                                                  System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");
                                           // We do not add to our remote judgement map if we are combining.
-//                                        synchronized (remoteJudgementsMapLock) {
-//                                            getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
-//                                        }
+                                        synchronized (remoteJudgementsMapLock) {
+                                            getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+                                        }
                                     }
                                 }
 
@@ -792,6 +816,30 @@ public class RemoteEventFeedMonitor implements Runnable {
     }
 
     /**
+     * A combined scoreboard client is allowed to submit runs and set judgments: it is NOT a shadow client
+     * TODO: A better distinction is needed between a shadow client (one that accepts submissions, runs them, and compares
+     * the judgment to that of the primary) vs. a combined scoreboard client which accepts submissions, waits for the judgment from
+     * the primary, and then updates the submission with that judgment.
+     *
+     * @return true if this is a combined scoreborad client
+     */
+    private boolean isCombinedScoreboardClient() {
+        return(combinedScoreboardMode);
+    }
+
+    public void setCombinedScoreboardClient(boolean bHow) {
+        combinedScoreboardMode = bHow;
+    }
+
+    private int getRemoteTeamIdOffset() {
+        return(remoteTeamIdOffset);
+    }
+
+    public void setRemoteTeamIdOffset(int nTeamOffset) {
+        remoteTeamIdOffset = nTeamOffset;
+    }
+
+    /**
      * Initializes the Map<String,String> which holds mappings of judgement id's to corresponding submissions and judgement
      * types (acronymns).
      *
@@ -893,6 +941,8 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                 Map<String, Object> eventDataMap = ( Map<String, Object> ) obj;
                 ShadowRunSubmission runSubmission = createRunSubmission(eventDataMap);
+                runSubmission.adjustTeamId(getRemoteTeamIdOffset());
+
                 return runSubmission;
             }
         }
