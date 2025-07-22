@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -848,8 +849,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             int teamRank = standingsRecord.getRankNumber();
             standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
             standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
-            standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
-            standingsRecordMemento.putDouble("score", standingsRecord.getScore());
+
+            if(contestInformation.isScoreboardTypeScore()) {
+                DecimalFormat df = new DecimalFormat("0.0###");
+                standingsRecordMemento.putString("score", df.format(standingsRecord.getScore()));
+            } else {
+                standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
+            }
+
             standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
             standingsRecordMemento.putInteger("rank", teamRank);
             standingsRecordMemento.putInteger("overallRank", teamRank);
