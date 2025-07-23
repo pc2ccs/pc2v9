@@ -4,11 +4,13 @@ package edu.csus.ecs.pc2.core.execute;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileAlreadyExistsException;
@@ -711,7 +713,14 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             //if the contest is "point-scoring", send the test case results to the "grader", which examines the scores 
             // for each test case and returns an overall score and judgement for the submission (Run)); 
             // save this score in a JudgementRecord in the Run.
+            // Also, write the grader results (testDataGroup name, score, and judgement) to a file in the "execute directory"
+            // to make it easier to see what was produced by the grader.
             if (contest.getContestInformation().isScoreboardTypeScore()) {
+                
+                //write the grader results to a file in the execute directory
+                String graderResultFileName = prefixExecuteDirname("graderResult.run." + run.getNumber());
+                writeGraderResultsToFile(run, graderResultFileName);
+                
                 
                 //declare the result values to be put into a JudgementRecord in the Run
                 String judgementAcronymString = null;
@@ -816,6 +825,40 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         return fileViewer;
     }
 
+    /**
+     * Writes a series of lines to the specified file, where each line contains the grader result
+     * for one test case.
+     * Each grader result line in the file contains the following values separated by a space:
+     * the name of the {@link TestDataGroup} with which the test case is associated;
+     * the "judgement acronym" assigned to the test case by the grader;
+     * the "point score" assigned to the test case by the grader.
+     * 
+     * @param run the Run containing the Test Cases which have just been executed.
+     * @param graderResultFileName the file to which the grader results are written; typically in the Execute Directory.
+     */
+    private void writeGraderResultsToFile(Run run, String graderResultFileName) {
+        
+        //"try with resources" ensures writer is closed when done
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(graderResultFileName))) {
+            //get the test cases out of the Run
+            RunTestCase [] testCases = run.getRunTestCases();
+            //process each test case
+            for (RunTestCase testCase : testCases) {
+                //get the result data out of the current test case
+                double score = testCase.getScore();
+                CLICS_JUDGEMENT_ACRONYM acronym = testCase.getJudgementAcronym();
+                String testDataGroupName = testCase.getTestDataGroup().getGroupName(); 
+                
+                //write a line containing the result data to the file
+                String line = testDataGroupName + " " + acronym + " " + score + NL;
+                writer.write(line);
+            }
+            log.log(Log.INFO, "Grader results successfully written to file '" + graderResultFileName + "' for Run " + run.getNumber());
+        } catch (IOException e) {
+            log.log(Log.WARNING, "Error writing Grader results to file '" + graderResultFileName + "' for Run " + run.getNumber()
+                                    + ":" + e.getMessage());
+        }     
+    }
 
     /**
      * Returns a String giving the "point-scoring result" for this Run (only relevant for "point-scoring" contests).
