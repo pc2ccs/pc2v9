@@ -258,11 +258,13 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private ProblemSummaryInfo calcProblemPointScoreData(TreeMap<Run,Run> treeMap, IInternalContest theContest) throws IllegalContestState {
         ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
         double score = 0.0;
+        double nextscore;
         int attempts = 0;
         ElementId problemId = null;
         long solutionTime = -1;
         boolean solved = false;
         boolean unJudgedRun = false;
+        boolean validJudgment;
         JudgementRecord judgmentRecord;
 
         if (treeMap.isEmpty()) {
@@ -280,21 +282,24 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
                 attempts++;
                 problemId = run.getProblemId();
+                validJudgment = isValidJudgement(run);
                 // added isValidJudgement to check and obey preliminary results
-                if (run.isSolved() && isValidJudgement(run)) {
+                if (run.isSolved() && validJudgment) {
                     // TODO: we might want some differing logic here if all
                     // yes's are counted
                     // and/or no's after yes's are counted
                     solved = true;
-                    solutionTime = run.getElapsedMins();
                     judgmentRecord = run.getJudgementRecord();
                     if(judgmentRecord != null) {
-                        score = judgmentRecord.getScore();
+                        nextscore = judgmentRecord.getScore();
+                        if(nextscore > score) {
+                            score = nextscore;
+                            solutionTime = run.getElapsedMins();
+                        }
                     }
-                    break;
                 } else {
                     // we should really only do this if it's been judged
-                    if (!isValidJudgement(run)) {
+                    if (!validJudgment) {
                         unJudgedRun = true;
                     }
                 }
@@ -1227,11 +1232,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
             standingsRecord.setSummaryRow(summaryRow);
             if(isPointScoreContest) {
-                // we just care about the biggest score for the problem.
+                // we just sum them up
                 dScore = problemSummaryInfo.getScore();
-                if(dScore > standingsRecord.getScore()) {
-                    standingsRecord.setScore(dScore);
-                }
+                standingsRecord.setScore(standingsRecord.getScore() + dScore);
             } else {
                 standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
             }

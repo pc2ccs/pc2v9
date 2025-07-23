@@ -100,6 +100,9 @@ public class CLICSJudgement {
 
                 // Fetch judgement_type_id from judgement acronym
                 judgement_type_id = model.getJudgement(judgementRecord.getJudgementId()).getAcronym();
+                if(model.getContestInformation().isScoreboardTypeScore()) {
+                    score = new Double(judgementRecord.getScore());
+                }
                 Date judgeDate = judgementRecord.getJudgeStartDate();
                 if(judgeDate == null) {
                     judgeDate = startJudgeDate;

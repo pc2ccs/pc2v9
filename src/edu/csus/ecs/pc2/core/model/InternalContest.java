@@ -51,6 +51,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation.ScoreboardType;
 import edu.csus.ecs.pc2.core.model.PasswordChangeEvent.Action;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -2087,23 +2088,23 @@ public class InternalContest implements IInternalContest {
     public ConnectionHandlerID[] getConnectionHandlerIDs() {
         return localConnectionHandlerList.getList();
     }
-    
+
     /**
-     * Examines the current list of all clarifications and returns an array containing the 
+     * Examines the current list of all clarifications and returns an array containing the
      * clarifications which are allowed to be seen by the specified clientId.
      * For example certain clarifications might be only directed towards certain groups/teams.
-     * Note that "Announcements" are a type of Clarification; the returned array will include 
+     * Note that "Announcements" are a type of Clarification; the returned array will include
      * any "Announcement Clarifications" that the client is allowed to see.
-     * 
-     * @return an array containing exactly (and only) the current clarifications (including 
-     *          "Announcement Clarifications") which the specified client is allowed to see.  
+     *
+     * @return an array containing exactly (and only) the current clarifications (including
+     *          "Announcement Clarifications") which the specified client is allowed to see.
      */
     @Override
     public Clarification[] getClarifications(ClientId clientId) {
 
         Vector<Clarification> clientClarifications = new Vector<Clarification>();
         Enumeration<Clarification> enumeration = clarificationList.getClarList();
-        
+
         Account account = getAccount(clientId);
         while (enumeration.hasMoreElements()) {
             Clarification clarification = enumeration.nextElement();
@@ -2245,14 +2246,20 @@ public class InternalContest implements IInternalContest {
 
     @Override
     public void addContestInformation(ContestInformation inContestInformation) {
+        // Remember scoreboard type since this can't be set once it's set
+        ScoreboardType stype = this.contestInformation.getScoreboardType();
         this.contestInformation = inContestInformation;
+        this.contestInformation.setScoreboardType("score" /*stype.getType()*/);
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.ADDED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
 
     @Override
     public void updateContestInformation(ContestInformation inContestInformation) {
+        // Remember scoreboard type since this can't be set once it's set
+        ScoreboardType stype = this.contestInformation.getScoreboardType();
         this.contestInformation = inContestInformation;
+        this.contestInformation.setScoreboardType("score" /*stype.getType()*/);
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.CHANGED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
@@ -2399,17 +2406,17 @@ public class InternalContest implements IInternalContest {
     public Group[] getGroups() {
         return groupDisplayList.getList();
     }
-    
+
     @Override
     public boolean doGroupsExist() {
         return groupDisplayList.getList().length != 0;
     }
-    
+
     @Override
     public int getNumberofGroups() {
         return groupDisplayList.getList().length;
     }
-    
+
     @Override
     public void addGroupListener(IGroupListener groupListener) {
         groupListenerList.addElement(groupListener);
