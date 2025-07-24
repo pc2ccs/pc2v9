@@ -53,9 +53,9 @@ public class TestDataGroup implements Serializable {
 
     private OnRejectTypes on_reject = OnRejectTypes.BREAK;
     private GradingTypes grading = GradingTypes.DEFAULT;
-    private String grader_flags = null;
-    private String input_validator_flags = null;
-    private String output_validator_flags = null;
+    private String grader_flags = "";
+    private String input_validator_flags = "";
+    private String output_validator_flags = "";
     private double accept_score = DEFAULT_ACCEPT_SCORE;
     private double reject_score = DEFAULT_REJECT_SCORE;
     private double range_min = DEFAULT_RANGE_MIN;
