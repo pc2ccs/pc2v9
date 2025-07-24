@@ -909,9 +909,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         // merged all "grader arguments" into a single string -- which is slightly inconsistent with the fact that Grader.parseArguments()
         // expects an ARRAY of strings... So as a result we do the following:
 
-        String [] graderFlags = new String[] {tdg.getGraderFlags()};
+        String [] graderFlags = tdg.getGraderFlags().split("\\s+");
+
         boolean argsOK = grader.parseArguments(graderFlags);
-        
+
         //make sure the Grader accepted our arguments
         if (!argsOK) {
             log.log(Log.WARNING, "Error parsing grader arguments: '" + tdg.getGraderFlags() + "'");
