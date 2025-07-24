@@ -732,15 +732,13 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 //make sure we got back a valid runResult
                 if (runResult == null) {
                     log.log(Log.SEVERE, "Error during execute(); got back null for point-scoring result");
-                    judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.toString();
-                    throw new RuntimeException("Got back null for point-scoring result");
+                    judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.name();
                 } else {
                     //try to pull two legit values out of the runResult
                     String[] values = runResult.trim().split("\\s+");
                     if (values.length != 2) {
                         log.log(Log.SEVERE, "Format error in point-scoring result: '" + runResult + "'");
-                        judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.toString();
-                        throw new RuntimeException("Format error in point-scoring result: '" + runResult + "'");
+                        judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.name();
                     } else {
                         //we have two fields; save them
                         judgementAcronymString = values[0].toUpperCase() ; //accept upper or lower case for judgment
@@ -748,69 +746,28 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                             score = Double.parseDouble(values[1]);
                         } catch (NumberFormatException e) {
                             log.log(Log.SEVERE, "Format error in point-scoring score: '" + values[1] + "'");
-                            judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.toString();
+                            judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.name();
                             throw new RuntimeException("Format error in point-scoring score: '" + values[1] + "'");
                         }
                     }
                 }
                 
 
-                //we have a score and a judgement acronym; add them to the Run in the form of a new JudgementRecord.
+                //we have a score and a judgement acronym; add them to the ExecutionData (they will subsequently be
+                // fetched from there by the AutoJudgingMonitor class, which will insert them into a JudgementRecord
+                // and then invoke controller.submitRunJudgement() passing the JudgementRecord to the Server which will
+                // add it to the judgementList for the Run).
                 
-                //TODO: it's not at all clear what the relationship is between the JudgementRecords which have already been inserted
-                //  into each RunTestCase (by each call to executeAndValidateDataSet(num), above) and the JudgementRecords
-                //  which appear in the Run object's "judgementList".  (It's not at all clear to the author where the JudgementRecords
-                //  in the Run's judgementList are getting added to that list.)
-                // In any case, what we do here (until someone comes up with a clearer/better plan) is to add into the Run's judgementList
-                //  a new JudgementRecord containing the judgement (acronym) and the point score.   
-                //  Note that doing this automatically makes this new JudgementRecord the "active" judgement for the Run.  (jlc)
+                executionData.setScore(score);
                 
-                
-                //find the internal type of the judgement by its acronym
-                Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, judgementAcronymString);
-                if (judgement == null) {
-                    //we don't recognize the judgement issued by the Grader as a valid judgement known to the system.
-                    judgement = JudgementUtilities.findJudgementByAcronym(contest, "JE");
-                }
-                
-                //fetch the parameters needed to construct a new JudgementRecord:
-                    //...the internal id of the judgement type
-                ElementId judgementId = judgement.getElementId();
-                    //...the id of the client which invoked this judgement process
-                ClientId judgerClient = contest.getClientId();
-                    //...a boolean indicating whether the grader believes the problem is "solved"
-                boolean solved;
-                CLICS_JUDGEMENT_ACRONYM judgementAcronym = CLICSJudgementType.getCLICSAcronymFromElementName(judgementAcronymString);
-                if (judgementAcronym != null && CLICSJudgementType.isYesAcronym(judgementAcronym)) {
-                    solved = true;
-                } else {
-                    solved = false;
-                }
-                    //...indicate that a validator was used (we only support point-scoring via validators -- no manual judging support
-                boolean usedValidator = true;
-                    //...indicate that computer judging was used (again, no manual judging is supported for point scoring)
-                boolean computerJudged = true;
-                
-                //construct a new judgement record reflecting the judgement result
-                
-                JudgementRecord newJudgementRecord = new JudgementRecord(judgementId, judgerClient, solved, usedValidator, computerJudged);
-                
-                //put the grader-determined score into the newJudgementRecord
-                newJudgementRecord.setScore(score);
-                
-                //try to put the grader-determined judgement acronym into the newJudgementRecord
-                boolean isValidAcronymString = newJudgementRecord.setJudgementAcronym(judgementAcronymString);
-                
-                //verify that the JudgementRecord accepted the judgementAcronymString as valid
-                if (!isValidAcronymString) {
+                //make sure the judgement acronym is one we know about
+                if (!isValidJudgementAcronymString(judgementAcronymString)) {
                     //the grader's acronym string isn't a valid acronym; log this as an error in the judging process
                     log.log(Log.SEVERE, "Unknown judgement acronym string returned by Grader: '" + judgementAcronymString + "'");
-                    newJudgementRecord.setJudgementAcronym(CLICS_JUDGEMENT_ACRONYM.JE);
+                    judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.name();
                 }
-
-                //make the newJudgementRecord the active judgement for the Run
-                run.addJudgement(newJudgementRecord);
-                
+                executionData.setJudgementAcronymString(judgementAcronymString);
+                                                
             } //end if(isScoreboardTypeScore())
 
         } catch (Exception e) {
@@ -823,6 +780,35 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         }
 
         return fileViewer;
+    }
+
+    /**
+     * Compares the specified judgementAcronymString with each of the enum elements defined in {@link CLICS_JUDGEMENT_ACRONYM}
+     * and returns true if the judgementAcronymString matches the declared name of any enum element, false if not.
+     * 
+     * The comparison is done in a case-insensitive manner; that is it actually compares the name().toUpperCase() version of
+     * the enum element value with the upper-case version of the specified judgementAcronymString.
+     * 
+     * Note:  the {@link CLICS_JUDGEMENT_ACRONYM} enum defines a private field called "name" associated with each enum element, 
+     * and this value is returned by calling the enum function "getValue()". This private field called "name" 
+     * should not be confused with the value returned by the enum name() function; in fact, what getValue() 
+     * returns is the String which was passed into the enum constructor as each enum element was
+     * defined (for example, AC.getValue() returns "Accepted" for the enum element whose name() is "AC").
+     * It's unfortunate that the enum defines a field called "name" when name() is an implicit enum function which 
+     * returns something different from the data in the "name" field.
+     * 
+     * @param judgementAcronymString a String defining a possible {@link CLICS_JUDGEMENT_ACRONYM} element name.
+     * 
+     * @return true if the specified judgementAcronymString matches (case-insensitively) the name() of a {@link CLICS_JUDGEMENT_ACRONYM};
+     *          false if not.
+     */
+    private boolean isValidJudgementAcronymString(String judgementAcronymString) {
+        for (CLICS_JUDGEMENT_ACRONYM clicsAcronym : CLICS_JUDGEMENT_ACRONYM.values()) {
+            if (clicsAcronym.name().toUpperCase().equals(judgementAcronymString.toUpperCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1130,9 +1116,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             TestDataGroup testGroup = probDataFiles.getJudgesDataGroups()[testCaseNumber-1];  //testCaseNumber is 1-based but the array is 0-based
             
             if (submissionIsCorrect) {
-                return testGroup.getRangeMax();
+                return testGroup.getAcceptScore();
             } else {
-                return testGroup.getRangeMin(); 
+                return testGroup.getRejectScore(); 
             }
         }
     }
