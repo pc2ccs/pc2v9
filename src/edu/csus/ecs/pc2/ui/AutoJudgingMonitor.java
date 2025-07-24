@@ -589,6 +589,11 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), solved, true, true);
                 judgementRecord.setValidatorResultString(results);
+                
+                if (contest.getContestInformation().isScoreboardTypeScore()) {
+                    judgementRecord.setJudgementAcronym(executionData.getJudgementAcronymString());
+                    judgementRecord.setScore(executionData.getScore());
+                }
 
             } else {
                 // Something went wrong either during validation or execution
