@@ -909,11 +909,26 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         // merged all "grader arguments" into a single string -- which is slightly inconsistent with the fact that Grader.parseArguments()
         // expects an ARRAY of strings... So as a result we do the following:
 
+        //get any grader flags specified in the TestDataGroup, split them into separate lines (strings)
         String [] graderFlags = tdg.getGraderFlags().split("\\s+");
+        
+        //check whether there are non-empty grader flags (the flags will be empty strings by default unless there
+        // was a testdata.yaml file which specified grader_flags)
+        boolean weHaveGraderFlags = false;
+        for (String arg : graderFlags) {
+            if (arg.length()>0) {
+                weHaveGraderFlags = true;
+                break;
+            }
+        }
 
-        boolean argsOK = grader.parseArguments(graderFlags);
+        //if there are non-empty grader flags, send them to the grader for parsing
+        boolean argsOK = true;
+        if (weHaveGraderFlags) {
+            argsOK = grader.parseArguments(graderFlags);
+        }
 
-        //make sure the Grader accepted our arguments
+        //make sure the Grader accepted our arguments (if any)
         if (!argsOK) {
             log.log(Log.WARNING, "Error parsing grader arguments: '" + tdg.getGraderFlags() + "'");
             grader = null; //dispose the grader object
