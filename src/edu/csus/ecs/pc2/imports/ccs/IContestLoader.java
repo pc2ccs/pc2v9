@@ -251,6 +251,8 @@ public interface IContestLoader {
      */
     String TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING  = "team-scoreboard-display-format-string";
 
+    String SUBMISSION_THROTTLING_KEY = "submission-throttling";
+
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 
     void dumpSerialzedFileList(Problem problem, String logPrefixId, SerializedFile[] sfList);
