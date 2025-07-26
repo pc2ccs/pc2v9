@@ -37,7 +37,6 @@ import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -319,11 +318,11 @@ public class ClarificationService implements Feature {
                 if(clarificationAnswer != null) {
                     clar.setId(clarificationAnswer.getElementId().toString());
                     clar.setTime(Utilities.getIso8601formatterWithMS().format(clarificationAnswer.getDate()));
-                    clar.setContest_time(ContestTime.formatTimeMS(clarificationAnswer.getElapsedMS()));
+                    clar.setContest_time(Utilities.formatDuration(clarificationAnswer.getElapsedMS()));
                 } else {
                     clar.setId(clarResponse.getElementId().toString());
                     clar.setTime(Utilities.getIso8601formatterWithMS().format(clarResponse.getCreateDate()));
-                    clar.setContest_time(ContestTime.formatTimeMS(clarResponse.getElapsedMS()));
+                    clar.setContest_time(Utilities.formatDuration(clarResponse.getElapsedMS()));
                 }
                 try {
                     ObjectMapper mapper = JSONUtilities.getObjectMapper();
