@@ -84,7 +84,14 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
     this._contestService.getClarifications()
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((data: Clarification[]) => {
-        this.clarifications = data.sort((x: Clarification, y: Clarification) => y.time - x.time);
+        this.clarifications = data.sort((x: Clarification, y: Clarification) => 
+        {
+	      if (y.time !== x.time) {
+        	return y.time - x.time;//sort by descending order of time
+	      } else {
+	        return y.id.localeCompare(x.id); //if times are same sort by the id in descending order
+	      }
+    });
         this.filterClarifications();
       }, (error: any) => {
         console.error('error loading clarifications!');
