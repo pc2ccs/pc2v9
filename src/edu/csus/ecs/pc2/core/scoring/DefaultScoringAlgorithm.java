@@ -77,6 +77,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     public static final String POINTS_PER_NO_SECURITY_VIOLATION = "Points per Security Violation";
 
+    public static final String IGNORE_COMPILATION_ERROR = "Ignore Compilation Error";
+
+    public static final String IGNORE_SECURITY_VIOLATION = "Ignore Security Violation";
+
     /**
      * Non-frozen scoreboard output directory key
      */
@@ -93,8 +97,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * key=name, value=default_value, type, min, max (colon delimited)
      */
     private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" },
-            { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" }, { JUDGE_OUTPUT_DIR, "html:String" },
-            { PUBLIC_OUTPUT_DIR, "public_html:String" } };
+            { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { IGNORE_COMPILATION_ERROR, "true:Boolean" },
+            { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" }, { IGNORE_SECURITY_VIOLATION, "false:Boolean" },
+            { JUDGE_OUTPUT_DIR, "html:String" }, { PUBLIC_OUTPUT_DIR, "public_html:String" } };
 
     private Properties props = new Properties();
 
@@ -156,6 +161,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             String value = propList[i][1];
             int colon = value.indexOf(":");
             String defaultValue = value.substring(0, colon);
+            // apparently, the "type" portion of the string is ignored (stuff after the colon) - JB
             props.put(key, defaultValue);
         }
         // props.put(POINTS_PER_NO, "20");
@@ -185,10 +191,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
         int score = 0;
         int attempts = 0;
+        int penalty = 0;
         ElementId problemId = null;
         long solutionTime = -1;
         boolean solved = false;
         boolean unJudgedRun = false;
+        boolean ignoreSub = false;
 
         if (treeMap.isEmpty()) {
             problemSummaryInfo = null; // ProblemScoreData must have ProblemId to be valid
@@ -203,7 +211,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 if (run.isDeleted()) {
                     continue;
                 }
-                attempts++;
                 problemId = run.getProblemId();
                 // added isValidJudgement to check and obey preliminary results
                 if (run.isSolved() && isValidJudgement(run)) {
@@ -213,20 +220,30 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     solved = true;
                     solutionTime = run.getElapsedMins();
                     score += solutionTime * getPenaltyPointsPerYesMinute() + getBasePointsPerYes();
+                    attempts++;
                     break;
                 } else {
+                    ignoreSub = false;
                     // we should really only do this if it's been judged
                     if (isValidJudgement(run)) {
                         String response = theContest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
                         if(response.equals(Judgement.ACRONYM_COMPILATION_ERROR)) {
-                            score += getPenaltyPointsPerNoCompilationError();
+                            penalty = getPenaltyPointsPerNoCompilationError();
+                            ignoreSub = (penalty == 0 && ignoreCompilationError());
                         } else if(response.equals(Judgement.ACRONYM_SECURITY_VIOLATION)) {
-                            score += getPenaltyPointsPerNoSecurityViolation();
+                            penalty = getPenaltyPointsPerNoSecurityViolation();
+                            ignoreSub = (penalty == 0 && ignoreSecurityViolation());
                         } else {
-                            score += getPenaltyPointsPerNo();
+                            penalty = getPenaltyPointsPerNo();
                         }
                     } else {
                         unJudgedRun = true;
+                    }
+                    // only count it if we're not ignoring it. Optionally some types of
+                    // non-yes submissions may be ignored if the penalty is 0.
+                    if(!ignoreSub) {
+                        attempts++;
+                        score += penalty;
                     }
                 }
             }
@@ -246,14 +263,25 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     }
 
     /**
-     * @param key
-     *            property to lookup
-     * @return
+     * Look up a property's integer value
+     * @param key property to look up
+     * @return property integer value
      */
     private int getPropIntValue(String key) {
         String s = props.getProperty(key);
         Integer i = Integer.parseInt(s);
         return (i.intValue());
+    }
+
+    /**
+     * Look up a property's boolean value
+     * @param key property to look up
+     * @return property boolean value
+     */
+    private boolean getPropBooleanValue(String key) {
+        String s = props.getProperty(key);
+        Boolean b = Boolean.parseBoolean(s);
+        return (b.booleanValue());
     }
 
     /**
@@ -274,8 +302,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         return (getPropIntValue(POINTS_PER_NO_COMPILATION_ERROR));
     }
 
+    private boolean ignoreCompilationError() {
+        return(getPropBooleanValue(IGNORE_COMPILATION_ERROR));
+    }
+
     private int getPenaltyPointsPerNoSecurityViolation() {
         return (getPropIntValue(POINTS_PER_NO_SECURITY_VIOLATION));
+    }
+
+    private boolean ignoreSecurityViolation() {
+        return(getPropBooleanValue(IGNORE_SECURITY_VIOLATION));
     }
 
     /**
