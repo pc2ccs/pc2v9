@@ -16,6 +16,8 @@ import edu.csus.ecs.pc2.graders.LegacyGrader;
 public class LegacyGraderTest  extends AbstractTestCase {
     private static final String AllACFile = "allAC.txt";
     private static final String ACTLEWARTEFile = "acRTEWATLE.txt";
+    private static final String IGNORESAMPLEFile = "ignoresample.txt";
+    private static final String IGNORESAMPLENOSECRETFile = "ignoresamplenosecret.txt";
 
     private String loadDir = "testdata" + File.separator;
 
@@ -103,5 +105,21 @@ public class LegacyGraderTest  extends AbstractTestCase {
                 runTest(this.getName(), testDataFile, testOutputFile, "accept_if_any_accepted sum", "AC 654.0"));
         assertEquals("Expected ACTLEWARTE with always_accept/avg to be 0 ", 0,
                 runTest(this.getName(), testDataFile, testOutputFile, "accept_if_any_accepted avg", "AC 59.45454545454545"));
+
+        // Test ignore_sample
+        testDataFile = inputTestDirectory + IGNORESAMPLEFile;
+        assertEquals("Expected ignore_sample to be 0 ", 0,
+                runTest(this.getName(), testDataFile, testOutputFile, "ignore_sample", "AC 20.0"));
+
+        // This file has exactly one line in it
+        testDataFile = inputTestDirectory + IGNORESAMPLENOSECRETFile;
+        assertEquals("Expected too few ignore_sample to be 8 ", LegacyGrader.GRADER_ERROR_IGNORE_SAMPLE,
+                runTest(this.getName(), testDataFile, testOutputFile, "ignore_sample", "NOT USED"));
+
+        // This file has too many lines in it if ignore_sample is used; there should be only 2 results in the file.
+        testDataFile = inputTestDirectory + ACTLEWARTEFile;
+        assertEquals("Expected too many ignore_sample to be 8 ", LegacyGrader.GRADER_ERROR_IGNORE_SAMPLE,
+                runTest(this.getName(), testDataFile, testOutputFile, "ignore_sample", "NOT USED"));
+
     }
 }
