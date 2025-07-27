@@ -33,9 +33,8 @@ public class CLICSProblemScore {
     @JsonProperty
     private boolean solved;
 
-// Not needed for pass-fail contest
-//  @JsonProperty
-//  private double score;
+    @JsonProperty
+    private Double score;
 
     @JsonProperty
     private int time;

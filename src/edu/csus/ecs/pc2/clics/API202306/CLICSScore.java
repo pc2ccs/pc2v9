@@ -23,9 +23,8 @@ public class CLICSScore {
     @JsonProperty
     private int total_time;
 
-// Not used for pass/fail contest and we don't want it appearing in the json
-//    @JsonProperty
-//    private int score;
+    @JsonProperty
+    private Double score;
 
     @JsonProperty
     private int time;
@@ -50,8 +49,10 @@ public class CLICSScore {
         if(num_solved > 0) {
             // Problem solution time is in minutes.
             time = Integer.parseInt(teamStanding.getLastSolved());
+            score = Double.parseDouble(teamStanding.getScore());
         }
     }
+
 
     public int getNum_solved() {
         return num_solved;
@@ -63,6 +64,20 @@ public class CLICSScore {
 
     public int getTime() {
         return time;
+    }
+
+    /**
+     * @return the score
+     */
+    public double getScore() {
+        return score.doubleValue();
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setScore(double score) {
+        this.score = score;
     }
 
 }

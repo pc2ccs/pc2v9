@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.Set;
 import java.util.logging.Level;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -26,7 +25,6 @@ import edu.csus.ecs.pc2.core.util.IJSONTool;
  *
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonFilter("rtFilter")
 public class CLICSJudgement {
 
     @JsonProperty
@@ -38,9 +36,8 @@ public class CLICSJudgement {
     @JsonProperty
     private String judgement_type_id;
 
-//    Only for "score" type contests, N/A for ICPC pass/fail
-//    @JsonProperty
-//    private String score;
+    @JsonProperty
+    private Double score;
 
     @JsonProperty
     private String start_time;

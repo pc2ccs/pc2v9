@@ -8,7 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
+import edu.csus.ecs.pc2.imports.ccs.TestDataGroup;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
@@ -48,9 +50,8 @@ public class CLICSProblem {
     @JsonProperty
     private int test_data_count;
 
-// only for "score" type contests, N/A for pc2/wf pass-fail type contests
-//    @JsonProperty
-//    private int max_score;
+    @JsonProperty
+    private Double max_score;
 
     // The next two will be 'null' for now until we implement the new json CPF
     @JsonProperty("package")
@@ -58,6 +59,8 @@ public class CLICSProblem {
 
     @JsonProperty
     private CLICSFileReference [] statement;
+
+    private boolean isPointScoring = false;
 
     /**
      * Fill in properties for a Problem description.
@@ -82,15 +85,25 @@ public class CLICSProblem {
         }
         test_data_count = problem.getNumberTestCases();
         time_limit = problem.getTimeOutInSeconds();
+        if(model.getContestInformation().isScoreboardTypeScore()) {
+            isPointScoring = true;
+            ProblemDataFiles problemDataFiles = model.getProblemDataFile(problem);
+            if(problemDataFiles != null) {
+                TestDataGroup [] testDataGroups = problemDataFiles.getJudgesDataGroups();
+                // Really, there's only 1 top level TestDataGroup
+                if(testDataGroups != null && testDataGroups.length > 0) {
+                    max_score = testDataGroups[0].getRangeMax();
+                }
+            }
+        }
     }
 
     public String toJSON() {
-
         try {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for CLICS problem info " + e.getMessage();
+            return "Error creating JSON for CLICSProblem " + e.getMessage();
         }
     }
 }

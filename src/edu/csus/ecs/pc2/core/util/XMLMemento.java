@@ -1,11 +1,11 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /*******************************************************************************
  * Copyright (c) 2003, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - Initial API and implementation
  *******************************************************************************/
@@ -49,9 +49,9 @@ import org.xml.sax.InputSource;
  * 3) The class for an object may change. If so the new class should be able to read the old persistence info.
  * <P>
  * We could ask the objects to serialize themselves into an ObjectOutputStream, DataOutputStream, or Hashtable. However all of these approaches fail to meet the second requirement.
- * 
+ *
  * Memento supports binary persistance with a version ID.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -73,6 +73,7 @@ public final class XMLMemento implements IMemento {
     /**
      * @see IMemento#createChild(String)
      */
+    @Override
     public IMemento createChild(String type) {
         Element child = factory.createElement(type);
         element.appendChild(child);
@@ -82,6 +83,7 @@ public final class XMLMemento implements IMemento {
     /**
      * @see IMemento#createChildNode(java.lang.String, java.lang.String)
      */
+    @Override
     public IMemento createChildNode(String type, String value) {
 
         Element child = factory.createElement(type);
@@ -93,6 +95,7 @@ public final class XMLMemento implements IMemento {
     /**
      * @see IMemento#createChild(String, String)
      */
+    @Override
     public IMemento createChild(String type, String id) {
         Element child = factory.createElement(type);
         child.setAttribute(TAG_ID, id);
@@ -131,7 +134,7 @@ public final class XMLMemento implements IMemento {
 
     /**
      * Answer a root memento for writing a document.
-     * 
+     *
      * @param type
      *            a type
      * @return a memento
@@ -151,6 +154,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public IMemento getChild(String type) {
         // Get the nodes.
         NodeList nodes = element.getChildNodes();
@@ -177,6 +181,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public IMemento[] getChildren(String type) {
         // Get the nodes.
         NodeList nodes = element.getChildNodes();
@@ -201,14 +206,14 @@ public final class XMLMemento implements IMemento {
         size = list.size();
         IMemento[] results = new IMemento[size];
         for (int x = 0; x < size; x++) {
-            results[x] = new XMLMemento(factory, (Element) list.get(x));
+            results[x] = new XMLMemento(factory, list.get(x));
         }
         return results;
     }
 
     /**
      * Return the contents of this memento as a byte array.
-     * 
+     *
      * @return byte[]
      * @throws IOException
      *             if anything goes wrong
@@ -221,7 +226,7 @@ public final class XMLMemento implements IMemento {
 
     /**
      * Returns an input stream for writing to the disk with a local locale.
-     * 
+     *
      * @return java.io.InputStream
      * @throws IOException
      *             if anything goes wrong
@@ -235,6 +240,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public Float getFloat(String key) {
         Attr attr = element.getAttributeNode(key);
         if (attr == null) {
@@ -251,6 +257,24 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
+    public Double getDouble(String key) {
+        Attr attr = element.getAttributeNode(key);
+        if (attr == null) {
+            return null;
+        }
+        String strValue = attr.getValue();
+        try {
+            return new Double(strValue);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /*
+     * @see IMemento
+     */
+    @Override
     public String getId() {
         return element.getAttribute(TAG_ID);
     }
@@ -258,6 +282,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public String getName() {
         return element.getNodeName();
     }
@@ -265,6 +290,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public Integer getInteger(String key) {
         Attr attr = element.getAttributeNode(key);
         if (attr == null) {
@@ -281,6 +307,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public Long getLong(String key) {
         Attr attr = element.getAttributeNode(key);
         if (attr == null) {
@@ -297,6 +324,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public String getString(String key) {
         Attr attr = element.getAttributeNode(key);
         if (attr == null) {
@@ -305,6 +333,7 @@ public final class XMLMemento implements IMemento {
         return attr.getValue();
     }
 
+    @Override
     public List<String> getNames() {
         NamedNodeMap map = element.getAttributes();
         int size = map.getLength();
@@ -319,7 +348,7 @@ public final class XMLMemento implements IMemento {
 
     /**
      * Loads a memento from the given filename.
-     * 
+     *
      * @param filename
      *            java.lang.String
      * @exception java.io.IOException
@@ -369,6 +398,15 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
+    public void putDouble(String key, double d) {
+        element.setAttribute(key, String.valueOf(d));
+    }
+
+    /*
+     * @see IMemento
+     */
+    @Override
     public void putFloat(String key, float f) {
         element.setAttribute(key, String.valueOf(f));
     }
@@ -376,6 +414,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public void putInteger(String key, int n) {
         element.setAttribute(key, String.valueOf(n));
     }
@@ -383,6 +422,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public void putLong(String key, long n) {
         element.setAttribute(key, Long.toString(n));
     }
@@ -390,6 +430,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public void putMemento(IMemento memento) {
         XMLMemento xmlMemento = (XMLMemento) memento;
         putElement(xmlMemento.element);
@@ -398,6 +439,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento
      */
+    @Override
     public void putString(String key, String value) {
         if (value == null) {
             return;
@@ -407,7 +449,7 @@ public final class XMLMemento implements IMemento {
 
     /**
      * Save this Memento to a Writer.
-     * 
+     *
      * @param os
      *            an output stream
      * @throws IOException
@@ -416,10 +458,10 @@ public final class XMLMemento implements IMemento {
     public void save(OutputStream os) throws IOException {
         save(os, false);
     }
-    
+
     /**
      * Save this Memento to a Writer.
-     * 
+     *
      * @param os
      *            an output stream
      * @param omitXMLDeclaration
@@ -446,10 +488,10 @@ public final class XMLMemento implements IMemento {
             throw (IOException) (new IOException().initCause(e));
         }
     }
-    
+
     /**
      * Saves the memento to a String.
-     * 
+     *
      * @exception java.io.IOException
      */
     public String saveToString(boolean omitXMLDeclaration) throws IOException {
@@ -460,7 +502,7 @@ public final class XMLMemento implements IMemento {
 
     /**
      * Saves the memento to a String.
-     * 
+     *
      * @exception java.io.IOException
      */
     public String saveToString() throws IOException {
@@ -469,7 +511,7 @@ public final class XMLMemento implements IMemento {
 
     /**
      * Saves the memento to the given file.
-     * 
+     *
      * @param filename
      *            java.lang.String
      * @exception java.io.IOException
@@ -500,6 +542,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento#getBoolean(String)
      */
+    @Override
     public Boolean getBoolean(String key) {
         Attr attr = element.getAttributeNode(key);
         if (attr == null) {
@@ -515,6 +558,7 @@ public final class XMLMemento implements IMemento {
     /*
      * @see IMemento#putBoolean(String, boolean)
      */
+    @Override
     public void putBoolean(String key, boolean value) {
         element.setAttribute(key, Boolean.toString(value));
     }
@@ -522,10 +566,11 @@ public final class XMLMemento implements IMemento {
     /**
      * @see edu.csus.ecs.pc2.core.util.IMemento#getValue()
      */
+    @Override
     public String getValue() {
 
         NodeList list = element.getChildNodes();
-        Node node = (Node) list.item(0);
+        Node node = list.item(0);
         return node.getNodeValue();
     }
 }

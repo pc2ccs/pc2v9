@@ -1,6 +1,7 @@
 // Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.graders;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -12,11 +13,18 @@ import java.util.Scanner;
  */
 public class LegacyGrader {
 
-    // I'm not sure why this is a flag to the grader -- JB
     public static final String IGNORE_SAMPLE_FLAG = "ignore_sample";
 
     public static final String ACCEPT_IF_ANY_ACCEPTED_FLAG = "accept_if_any_accepted";
 
+    public static final int GRADER_ERROR_BAD_FORMAT = 1;
+    public static final int GRADER_ERROR_BAD_SCORE = 2;
+    public static final int GRADER_ERROR_BAD_JUDGMENT = 3;
+    public static final int GRADER_ERROR_NO_TEST_CASES = 4;
+    public static final int GRADER_ERROR_BAD_WORST_CODE = 5;
+    public static final int GRADER_ERROR_BAD_FIRST_CODE = 6;
+    public static final int GRADER_ERROR_BAD_VERDICT_MODE = 7;
+    public static final int GRADER_ERROR_IGNORE_SAMPLE = 8;
 
     enum VerdictMode {
         worst_error,
@@ -41,6 +49,8 @@ public class LegacyGrader {
     private VerdictMode verdictMode = VerdictMode.worst_error;
     private ScoringMode scoringMode = ScoringMode.sum;
     private boolean acceptIfAnyAccepted = false;
+    private boolean ignoreSample = false;
+    private int graderError = 0;
 
     /**
      * See if the supplied string argument is a valid verdict mode.
@@ -93,6 +103,9 @@ public class LegacyGrader {
         if(arg.equals(ACCEPT_IF_ANY_ACCEPTED_FLAG)) {
             acceptIfAnyAccepted = true;
             result = true;
+        } else if(arg.equals(IGNORE_SAMPLE_FLAG)) {
+            ignoreSample = true;
+            result = true;
         }
         return(result);
     }
@@ -117,13 +130,33 @@ public class LegacyGrader {
     }
 
     /**
-     * Read the stdin input for lines of test case judgments and evaluate according the specification.
+     * Read the stdin input for lines of test case judgments, create a list of them,
+     * and evaluate according the specification.
      *
      * @return 0 on success (this is the exit code for the program), non-zero indicates a judging error
      */
     public int processResults() {
-        int result = 0;
         Scanner scanner = new Scanner(System.in);
+        ArrayList<String> testCaseResults = new ArrayList<String>();
+
+        while(scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            if(!line.isEmpty()) {
+                testCaseResults.add(line);
+            }
+        }
+        graderError = 0;
+        String result = gradeTestCases(testCaseResults);
+
+        if(result != null) {
+            System.out.println(result);
+        } else {
+            System.out.println("JE 0");
+        }
+        return(graderError);
+    }
+
+    public String gradeTestCases(ArrayList<String> testCaseResults) {
         int nLine = 0;
         int idx;
         boolean found;
@@ -133,15 +166,39 @@ public class LegacyGrader {
         double scoreMax = Double.NEGATIVE_INFINITY;
         boolean [] sawJudgment = new boolean[JudgmentCodes.values().length];
         boolean anyFailures = false;
+        boolean ignoreSampleGroup = ignoreSample;
         String firstError = null;
+        String graderResult = null;
 
-        while(scanner.hasNextLine()) {
+        graderError = 0;
+        for(String line : testCaseResults) {
             nLine++;
-            String line = scanner.nextLine().trim();
-            String [] values = line.split("\\s+");
+            /*
+             * A little explanation here about ignoring samples.
+             * The Legacy Grader specification says:
+             *     "Must only be used on the root level. The first sub-result (sample)
+             *      will be ignored, the second sub-result (secret) will be used,
+             *      both verdict and score.
+             * If the ignore_sample command line flag was supplied, it implies the group
+             * being graded is the root level, as such, there will be exactly 2 sub-groups
+             * at the level, sample and secret (in that order - lexicographically).  Therefore,
+             * the first group (sample) will simply be ignored (skipped).  Grading will procede
+             * with the next line, which will be secret.
+             */
+            if(ignoreSampleGroup) {
+                // Ignore sample group which is the first one.  There better be exactly one more
+                // group in the list, or it's a judging error.
+                if(testCaseResults.size() != 2) {
+                    graderError = GRADER_ERROR_IGNORE_SAMPLE;
+                    break;
+                }
+                ignoreSampleGroup = false;
+                continue;
+            }
+            String [] values = line.trim().split("\\s+");
             if(values.length != 2) {
-                System.err.println("LegacyGrader: invalid input on line " + nLine);
-               result = 1;
+                System.err.println("LegacyGrader: invalid input test case " + nLine);
+               graderError = GRADER_ERROR_BAD_FORMAT;
                break;
             }
             // be generous and accept upper or lower case for judgment
@@ -150,8 +207,8 @@ public class LegacyGrader {
             try {
                 score = Double.parseDouble(values[1]);
             } catch(NumberFormatException e) {
-                System.err.println("LegacyGrader: invalid score value on line " + nLine);
-                result = 2;
+                System.err.println("LegacyGrader: invalid score for test case " + nLine);
+                graderError = GRADER_ERROR_BAD_SCORE;
                 break;
             }
             found = false;
@@ -184,22 +241,22 @@ public class LegacyGrader {
                 }
             }
             if(!found) {
-                System.err.println("LegacyGrader: Unknown judgment code " + code + " at line " + nLine);
-                result = 3;
+                System.err.println("LegacyGrader: Unknown judgment code " + code + " for test case " + nLine);
+                graderError = GRADER_ERROR_BAD_JUDGMENT;
                 break;
             }
-            if(result != 0) {
+            if(graderError != 0) {
                 break;
             }
         }
         // Only calculate judgment if there were no errors
-        if(result == 0) {
+        if(graderError == 0) {
             // Check for no failures or always accept mode or optional flag "any" accepted case
             if(!anyFailures || verdictMode == VerdictMode.always_accept || (acceptIfAnyAccepted && scoreCount > 0)) {
                 if(scoreCount == 0) {
                     // this there were no judgments in the input
                     System.err.println("LegacyGrader: No judgments in the input.");
-                    result = 4;
+                    graderError = GRADER_ERROR_NO_TEST_CASES;
                 } else {
                     double score = 0;
                     // In this case, we return a score
@@ -217,12 +274,12 @@ public class LegacyGrader {
                             score = scoreMax;
                             break;
                     }
-                    System.out.println(JudgmentCodes.AC.toString() + " " + score);
+                    graderResult = JudgmentCodes.AC.toString() + " " + score;
                 }
             } else {
                 // determine non-accepted judgment
                 // All cases should either print the correct output to stdout, or print
-                // an error to stderr and set result to a non-zero value.
+                // an error to stderr and set graderError to a non-zero value.
                 switch(verdictMode) {
                     case worst_error:
                         found = false;
@@ -237,15 +294,15 @@ public class LegacyGrader {
                         if(!found) {
                             // Uhm.  This is extremely bad, Tammy, since we KNOW anyFailures must be true
                             System.err.println("LegacyGrader: FATAL error - can not find judgment code for worst_error mode.");
-                            result = 5;
+                            graderError = GRADER_ERROR_BAD_WORST_CODE;
                         }
                         break;
 
                     case first_error:
                         if(firstError == null) {
                             // Uhm.  This is extremely bad took Tammy, since we know anyFailures must be true
-                            System.err.println("LegacyGrader: FATAL error - can not find judgment code for worst_error mode.");
-                            result = 6;
+                            System.err.println("LegacyGrader: FATAL error - can not find judgment code for first_error mode.");
+                            graderError = GRADER_ERROR_BAD_FIRST_CODE;
                         } else {
                             System.out.println(firstError + " 0");
                         }
@@ -254,12 +311,24 @@ public class LegacyGrader {
                     default:
                         // Very bad, Tammy.  This can't happen because alwaysAccept was handled above
                         System.err.println("LegacyGrader: FATAL error - invalid verdict mode " + verdictMode.toString());
-                        result = 7;
+                        graderError = GRADER_ERROR_BAD_VERDICT_MODE;
                         break;
                 }
             }
         }
-        return result;
+        // this will be null in the case of an error, in which case graderError will have the error code
+        // in the case of success, this will be the "judgment_acronym <space> score", eg. "AC 50"
+        return graderResult;
+    }
+
+    /**
+     * Returns the last error the grader saw, or 0 if no errors.
+     * This may be useful if the getTestCases() method returns null.
+     *
+     * @return the last grader error
+     */
+    int getGraderError() {
+        return graderError;
     }
 
     /**
@@ -267,13 +336,15 @@ public class LegacyGrader {
      */
     public static void main(String[] args) {
        LegacyGrader grader = new LegacyGrader();
+       int exitCode = 0;
 
        if(!grader.parseArguments(args)) {
            System.err.println("LegacyGrader: Unrecognized option supplied.");
-           System.exit(1);
+           exitCode = 1;
+       } else {
+           exitCode = grader.processResults();
        }
-
-       System.exit(grader.processResults());
+       System.exit(exitCode);
     }
 
 }
