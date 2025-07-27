@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -57,7 +57,7 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 public final class Utilities {
 
     private static boolean debugMode = false;
-    
+
     private static boolean showStandingsPanes = true;
 
     /**
@@ -81,12 +81,12 @@ public final class Utilities {
 
     /**
      * CLICS path where judge's (secret) data file are stored
-     * 
+     *
      * @see #getSecretDataPath(String, Problem)
      * @see #getSecretDataPath(String, String)
      */
     public static final String SECRET_DATA_PATH = "data" + File.separator + ExportYAML.SECRET_DIRECTORY_NAME;
-    
+
     /**
      * CLICS directory where judge's sample data file are stored
      */
@@ -120,7 +120,7 @@ public final class Utilities {
 
     /**
      * File Types.
-     * 
+     *
      */
     public enum DataFileType {
         /**
@@ -164,7 +164,7 @@ public final class Utilities {
     public static String getSecretDataPath(String baseCDPPath, Problem problem) {
         return getSecretDataPath(baseCDPPath, problem.getShortName());
     }
-    
+
     /**
      * Return CLICS path for sample data and answer file names.
      */
@@ -257,7 +257,7 @@ public final class Utilities {
 
     /**
      * Compares 2 char arrays for equality.
-     * 
+     *
      * @param oldBuffer
      * @param newBuffer
      * @return true if oldBuffer is the same size and has the same contents of newBuffer
@@ -283,7 +283,7 @@ public final class Utilities {
 
     /**
      * Returns lines from file.
-     * 
+     *
      * @param filename
      *            String file to load
      * @return lines from file
@@ -322,11 +322,11 @@ public final class Utilities {
         return out;
 
     }
-    
+
 
     /**
      * Load string array with file contents.
-     * 
+     *
      * @param filename
      * @param maximumLinesReturned minimum value is 1.
      * @return lines from file
@@ -341,9 +341,9 @@ public final class Utilities {
 
         if (new File(filename).exists()) {
             BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
-            
+
             long lineCount = 0;
-            
+
             String line = in.readLine();
             while (lineCount < maximumLinesReturned && line != null) {
                 lines.add(line);
@@ -354,12 +354,12 @@ public final class Utilities {
             in = null;
         }
 
-        return (String[]) lines.toArray(new String[lines.size()]);
+        return lines.toArray(new String[lines.size()]);
     }
 
     /**
      * Get Current Working Directory.
-     * 
+     *
      * @return current working directory.
      */
     public static String getCurrentDirectory() {
@@ -399,7 +399,7 @@ public final class Utilities {
 
     /**
      * Returns a date-time String as defined by RFC 2822 section 3.3 Useful for mail messages.
-     * 
+     *
      * @return the date in rfc2822 format
      */
     public static String getRFC2822DateTime() {
@@ -436,7 +436,7 @@ public final class Utilities {
 
     /**
      * Returns Yes if true, No if false.
-     * 
+     *
      * @param b
      * @return Yes or No
      */
@@ -458,11 +458,11 @@ public final class Utilities {
 
     /**
      * Load INI file.
-     * 
+     *
      * This will read a text file and strip out blank/empty lines and lines that start with a hash mark.
      * <P>
      * This will also trim the input lines.
-     * 
+     *
      * @param filename
      *            file to be read
      * @return String [] null if can't read/find file, else lines infile
@@ -490,7 +490,7 @@ public final class Utilities {
             return null;
         }
 
-        return (String[]) v.toArray(new String[v.size()]);
+        return v.toArray(new String[v.size()]);
     }
 
     public static String forHTML(String aText) {
@@ -610,10 +610,10 @@ public final class Utilities {
 
     }
 
-    
+
     /**
-     * Create/Write a report to file in {@value Constants#REPORT_DIRECTORY_NAME} 
-     * 
+     * Create/Write a report to file in {@value Constants#REPORT_DIRECTORY_NAME}
+     *
      * @param report
      *            IReport to write
      * @param contest
@@ -624,11 +624,11 @@ public final class Utilities {
     public static String createReport(IReport report, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) throws FileNotFoundException {
         return createReport(Constants.REPORT_DIRECTORY_NAME, report, contest, controller, printHeaderAndFooter);
     }
-    
+
     /**
-     * Create/Write a report to file in outputDirectoryName, creates outputDirectoryName if dir doesnot exist. 
-     * 
-     * 
+     * Create/Write a report to file in outputDirectoryName, creates outputDirectoryName if dir doesnot exist.
+     *
+     *
      * @param outputDirectoryName output directory name
      * @param report
      *            IReport to write
@@ -640,7 +640,7 @@ public final class Utilities {
     public static String createReport(String outputDirectoryName, IReport report, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) throws FileNotFoundException {
 
         String filename = getReportFilename(report);
-        
+
         if (outputDirectoryName != null && outputDirectoryName.trim().length() > 0) {
             ExecuteUtilities.ensureDirectory(outputDirectoryName);
             filename = outputDirectoryName + File.separator + filename;
@@ -716,7 +716,7 @@ public final class Utilities {
 
     /**
      * Create and view report.
-     * 
+     *
      * @param report
      * @param title
      *            title for tab in pane for this report
@@ -726,7 +726,7 @@ public final class Utilities {
     public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) {
 
         try {
-            
+
             String filename = createReport(report, contest, controller, printHeaderAndFooter);
 
             MultipleFileViewer multipleFileViewer = new MultipleFileViewer(controller.getLog());
@@ -745,7 +745,7 @@ public final class Utilities {
 
     /**
      * Dump String array.
-     * 
+     *
      * @param out
      *            stream to output to
      * @param prefix
@@ -785,7 +785,7 @@ public final class Utilities {
 
     /**
      * View report
-     * 
+     *
      * @see #viewReport(IReport, String, IInternalContest, IInternalController, boolean)
      * @param report
      * @param title
@@ -798,9 +798,9 @@ public final class Utilities {
 
     /**
      * Create disk file for input SerializedFile.
-     * 
+     *
      * Returns true if file is written to disk and is not null.
-     * 
+     *
      * @param file
      * @param outputFileName
      * @return true if file written to disk.
@@ -841,7 +841,7 @@ public final class Utilities {
 
     /**
      * return full path for input relative path/filename.
-     * 
+     *
      * @param relativePath
      */
     public static String getFullPath(String relativePath) {
@@ -855,7 +855,7 @@ public final class Utilities {
 
     /**
      * Convert String to second.
-     * 
+     *
      * @param s
      *            string in form hh:mm:ss, ss or mm:ss
      * @return -1 if invalid time string, else returns number of seconds
@@ -913,7 +913,7 @@ public final class Utilities {
 
     /**
      * Parse and return positive long.
-     * 
+     *
      * @param s1
      * @return -1 if non-long string, else long value
      */
@@ -930,7 +930,7 @@ public final class Utilities {
 
     /**
      * return date/time string.
-     * 
+     *
      * @return curernt date using format {@value Utilities#DATE_TIME_FORMAT_STRING}.
      */
     public static String getDateTime() {
@@ -939,7 +939,7 @@ public final class Utilities {
 
     /**
      * Convert String to second. Expects input in form: ss or mm:ss or hh:mm:ss
-     * 
+     *
      * @param s
      *            string to be converted to seconds
      * @return -1 if invalid time string, 0 or >0 if valid
@@ -997,7 +997,7 @@ public final class Utilities {
 
     /**
      * Locate judges data file on disk.
-     * 
+     *
      * @param problem
      * @param serializedFile
      * @param alternateCDPPath
@@ -1007,11 +1007,11 @@ public final class Utilities {
     public static String locateJudgesDataFile(Problem problem, SerializedFile serializedFile, String alternateCDPPath, DataFileType judgeDataFile) {
 
         String testFileName = locateJudgesDataFile(problem, serializedFile.getName(), alternateCDPPath);
-        
+
         if (testFileName != null && fileExists(testFileName)) {
             return testFileName;
         }
-        
+
         testFileName = serializedFile.getAbsolutePath();
 
         if (fileExists(testFileName)) {
@@ -1020,13 +1020,13 @@ public final class Utilities {
 
         return null;
     }
-    
+
     public static String locateJudgesDataFile(Problem problem,  String baseFileName, String alternateCDPPath) {
 
         String testFileName = null;
 
         if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
-            
+
             // Try to find data file under secret directory
 
             testFileName = getSecretDataPath(alternateCDPPath, problem) + File.separator + baseFileName;
@@ -1034,9 +1034,9 @@ public final class Utilities {
                 return testFileName;
             }
         }
-        
+
         if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
-            
+
             // Try to find data file under sample directory
 
             testFileName = getSampleDataPath(alternateCDPPath, problem) + File.separator + baseFileName;
@@ -1066,7 +1066,7 @@ public final class Utilities {
 
     /**
      * Write file to output printWriter.
-     * 
+     *
      * @param printWriter
      * @param outputfilename
      */
@@ -1123,7 +1123,7 @@ public final class Utilities {
      * For external files (aka CDP files) on the JUDGE the path is from {@link ContestInformation#getJudgeCDPBasePath()} where ContestInformation is in {@link IInternalContest#getContestInformation()}
      * . <br>
      * For external files (aka CDP files) on the ADMIN (or JUDGE without the CDP path set) the path is stored in the {@link Problem#getExternalDataFileLocation()}
-     * 
+     *
      * @param contest
      * @param problem
      * @param serializedFiles
@@ -1136,7 +1136,7 @@ public final class Utilities {
         ArrayList<String> output = new ArrayList<String>();
 
         String originalJudgeDataPath = getJudgeCDPLocation(contest);
-        
+
         if (problem.isUsingExternalDataFiles()) {
             ClientId id = contest.getClientId();
             if (id == null) {
@@ -1148,7 +1148,7 @@ public final class Utilities {
             if (!"".equals(judgeDataFilesPath)) {
                 judgeDataFilesPath = Utilities.getSecretDataPath(judgeDataFilesPath, problem) + File.separator;
                 File judgeDir = new File(judgeDataFilesPath);
-                
+
                 if (!judgeDir.isDirectory()) {
                     judgeDataFilesPath = judgeDataFilesPath.replaceFirst(".data.secret", "");
                 }
@@ -1190,12 +1190,12 @@ public final class Utilities {
                 }
             }
         }
-        return (String[]) output.toArray(new String[output.size()]);
+        return output.toArray(new String[output.size()]);
     }
 
     /**
      * Start Windows Explorer.
-     * 
+     *
      * @param dir
      *            directory to display
      * @throws IOException
@@ -1219,14 +1219,14 @@ public final class Utilities {
 
     /**
      * Dump contents of ProblemDataFiles using ProblemReport
-     * 
+     *
      * <pre>
      * PrintWriter printWriter = new PrintWriter(System.out);
      * dump(problemDataFiles, &quot;dump this&quot;);
      * printWriter.close();
      * printWriter = null;
      * </pre>
-     * 
+     *
      * @param printWriter
      * @param dataFiles
      * @param message
@@ -1248,7 +1248,7 @@ public final class Utilities {
 
     /**
      * Dump problem data files to System.out.
-     * 
+     *
      * @param dataFiles
      * @param message
      */
@@ -1260,7 +1260,7 @@ public final class Utilities {
 
     /**
      * Return list of directory entries matching with extension.
-     * 
+     *
      * @param directoryName
      * @param extension
      * @return list of basename filenames in directory directoryName
@@ -1283,12 +1283,12 @@ public final class Utilities {
             }
         }
 
-        return (String[]) list.toArray(new String[list.size()]);
+        return list.toArray(new String[list.size()]);
     }
 
     /**
      * If there is a freezeTime set, return the contestLength - freezeTime, else the contestLength.
-     * 
+     *
      * @param model
      *            - contest to get info from
      * @return The freeze time in seconds (counting up from contest Start)
@@ -1315,14 +1315,14 @@ public final class Utilities {
             outfiles.add(new SerializedFile(filename, externalFilesFlag));
         }
 
-        return (SerializedFile[]) outfiles.toArray(new SerializedFile[outfiles.size()]);
+        return outfiles.toArray(new SerializedFile[outfiles.size()]);
     }
 
     /**
      * Find base data path for problems.
-     * 
+     *
      * If {@value #SECRET_DATA_DIR} in filePath will strop off anything including and after {@value #SECRET_DATA_DIR}.
-     * 
+     *
      * @param filePath
      * @return directory name up to {@value #SECRET_DATA_DIR}
      */
@@ -1334,8 +1334,8 @@ public final class Utilities {
         }
         return filePath;
     }
-    
-    
+
+
     /**
      * If file has extension replaces with replacement.
      * @param fullName
@@ -1349,22 +1349,22 @@ public final class Utilities {
 
     /**
      * Validate problem files.
-     * 
+     *
      * Only checks for files on disk if {@link Problem#isUsingExternalDataFiles()} is true.
-     * 
+     *
      * Will throw a MultipleIssuesException if any directories or files are missing, use {@link MultipleIssuesException#getIssueList()) for list of missing files or errors.
-     * 
+     *
      * @param contest
      * @param cdpPath
      *            - base path for CDP config directory
      * @param problem
      *            problem to validate
-     * @param allProblemDCPFiles
+     * @param allProblemCDPFiles
      *            include problem.tex and problem.yaml files.
      * @return true if all files present
      * @throws MultipleIssuesException
      */
-    public static boolean validateCDP(IInternalContest contest, String cdpPath, Problem problem, boolean allProblemDCPFiles) throws MultipleIssuesException {
+    public static boolean validateCDP(IInternalContest contest, String cdpPath, Problem problem, boolean allProblemCDPFiles) throws MultipleIssuesException {
         List<String> messages = new ArrayList<>();
 
         if (problem == null) {
@@ -1403,44 +1403,22 @@ public final class Utilities {
                         // If no secret directory - done, show Missing data directory message
                         messages.add(problemTitle + "\tMissing data directory, expected at: " + dataPath + " or (" + dataPath + File.separator + "data" + File.separator + "secret)");
                     } else {
-                        
-                        int missingData = 0;
-                        int missingAnswer = 0;
 
-                        for (int i = 0; i < problem.getNumberTestCases(); i++) {
-                            
-                            String dataFile = problem.getDataFileName(i + 1);
-                            String ansFile = problem.getAnswerFileName(i + 1);
+                        ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
+                        SerializedFile[] inFiles = dataFiles.getJudgesDataFiles();
+                        SerializedFile[] ansFiles = dataFiles.getJudgesAnswerFiles();
 
-                            String judgeFileName = dataPath + File.separator + dataFile;
-                            String answerFilename = dataPath + File.separator + ansFile;
-                            
-                            if (dataFile != null && !isFileThere(judgeFileName)) {
-                                // Try to find file under samples
-                                String testFile = locateJudgesDataFile(problem, dataFile, cdpPath);
-                                if (isFileThere(testFile)) {
-                                    judgeFileName = testFile;
-                                    answerFilename = replaceExtension(testFile, "in", "ans");  
-                                }
-                            }
+                        checkSerializedFileList(inFiles, problemTitle, "input", messages);
+                        checkSerializedFileList(ansFiles, problemTitle, "answer", messages);
 
-                            if (dataFile != null && !isFileThere(judgeFileName)) {
-                                messages.add(problemTitle + "\tMissing judge file '" + dataFile + "' in " + dataPath);
-                                missingData++;
-                            }
-
-                            if (ansFile != null && !isFileThere(answerFilename)) {
-                                messages.add(problemTitle + "\tMissing answer file '" + ansFile + "' in " + dataPath);
-                                missingAnswer++;
-                            }
-
-                        }
-                        if ((missingData + missingAnswer) > 0) {
-                            messages.add(problemTitle + "\ttotal files missing = " + (missingData + missingAnswer));
+                        int nTestCases = inFiles.length;
+                        int nAnsCases = ansFiles.length;
+                        if(inFiles.length != ansFiles.length) {
+                            messages.add(problemTitle + "\tDifferent numbers of judge's input (" + nTestCases + ") and answer (" +
+                                nAnsCases + ") test cases in " + problemDir);
                         }
                     }
-
-                    if (allProblemDCPFiles) {
+                    if (allProblemCDPFiles) {
 
                         // check for problem.tex
                         String laTextProblemFilename = problemDir + IContestLoader.DEFAULT_PROBLEM_LATEX_FILENAME;
@@ -1467,10 +1445,34 @@ public final class Utilities {
     }
 
     /**
+     * Validates that all the files in the supplied list exist
+     *
+     * @param files the list of files
+     * @param problem name of problem for messages
+     * @param fileType the type of file, eg. input, answer - used for messages
+     * @param messages list of error messages to add to in the event of errors
+     *
+     * @return true of the list is OK, false if there were errors
+     */
+    private static boolean checkSerializedFileList(SerializedFile[] files, String problemTitle, String fileType, List<String> messages) {
+        String file;
+        boolean result = true;
+
+        for(SerializedFile f : files) {
+            file = f.getAbsolutePath();
+            if(!isFileThere(file)) {
+                messages.add(problemTitle + "\tMissing judge " + fileType + " file '" + file + "'");
+                result = false;
+            }
+        }
+        return(false);
+    }
+
+    /**
      * Validate all problem data files.
-     * 
+     *
      * Only checks for files on disk if {@link Problem#isUsingExternalDataFiles()} is true.
-     * 
+     *
      * @see #validateCDP(IInternalContest, String, Problem, boolean)
      */
     public static boolean validateCDP(IInternalContest contest, String cdpPath) throws MultipleIssuesException {
@@ -1503,9 +1505,9 @@ public final class Utilities {
 
     /**
      * For the input number, returns an upper-case letters.
-     * 
+     *
      * 1 = A, 2 = B, ..., 27 = AA, ... 702 = ZZ
-     * 
+     *
      * @param id
      *            problem number, base one (not zero), range 1 (A) through 702 (ZZ)
      * @return uppercase letters
@@ -1529,9 +1531,9 @@ public final class Utilities {
 
     /**
      * The problem number, base 1.
-     * 
+     *
      * A = 1, B = 2, etc.
-     * 
+     *
      * @param contest
      * @param problem
      * @return the problem number, base 1. Returns 0 if not found.
@@ -1549,9 +1551,9 @@ public final class Utilities {
 
     /**
      * Return date/time string for now.
-     * 
+     *
      * Uses format {@value #FORMAT_YYYY_MM_DD_HH_MM_SS}.
-     * 
+     *
      * @return
      */
     public static String getDateTimeString() {
@@ -1560,9 +1562,9 @@ public final class Utilities {
 
     /**
      * Convert DOS file seperator with unix.
-     * 
+     *
      * replace all \ with /.
-     * 
+     *
      * @param filename
      * @return
      */
@@ -1572,7 +1574,7 @@ public final class Utilities {
 
     /**
      * Write lines to file.
-     * 
+     *
      * @param filename
      * @param lines
      * @throws FileNotFoundException
@@ -1588,18 +1590,18 @@ public final class Utilities {
     }
 
     /**
-     * Checks the specified {@link SerializedFile} for error messages and/or exceptions. 
-     * This method is provided because the SerializedFile class does not throw exceptions when errors occur 
-     * (such as its constructor encountering a "File Not Found" condition). Rather, the SerializedFile class simply 
-     * sets an "error message" and records the "exception" within the SerializedFile object. 
-     * This method throws any exception found in the specified SerializedFile, or returns true if there is an error message (but no exception). 
+     * Checks the specified {@link SerializedFile} for error messages and/or exceptions.
+     * This method is provided because the SerializedFile class does not throw exceptions when errors occur
+     * (such as its constructor encountering a "File Not Found" condition). Rather, the SerializedFile class simply
+     * sets an "error message" and records the "exception" within the SerializedFile object.
+     * This method throws any exception found in the specified SerializedFile, or returns true if there is an error message (but no exception).
      * It returns false if the specified SerializedFile contains no error message or is null.
-     * 
+     *
      * @param serFile
      *            the SerializedFile to be checked
-     * 
+     *
      * @return true if the SerializedFile contains an error message or exceptions; false if the SerializedFile contains no error message or is null
-     * 
+     *
      * @throws Exception
      *             if any exception is found in the SerializedFile object
      */
@@ -1627,9 +1629,9 @@ public final class Utilities {
 
     /**
      * Return OS type.
-     * 
+     *
      * Attempts to identify {@link OSType}.
-     * 
+     *
      * @return {@link OSType#UNCLASSIFIED} if cannot be determined else returns {@link OSType}
      */
     public static OSType getOSType() {
@@ -1673,9 +1675,9 @@ public final class Utilities {
 
     /**
      * Return true if considered an executable.
-     * 
+     *
      * If not extension found or extension in #VALID_PROGRAM_EXTENSIONS
-     * 
+     *
      * @param baseFileName
      * @return
      */
@@ -1697,7 +1699,7 @@ public final class Utilities {
 
     /**
      * Convert from int array to list.
-     * 
+     *
      * @param proxySites
      * @return
      */
@@ -1713,7 +1715,7 @@ public final class Utilities {
 
     /**
      * return base name, strip path and extension.
-     * 
+     *
      * @param filename
      * @return
      */
@@ -1732,7 +1734,7 @@ public final class Utilities {
 
         return baseFileName;
     }
-    
+
     /**
      * Print stack trace with only elements with csus in them.
      * @param printStream
@@ -1740,19 +1742,19 @@ public final class Utilities {
      */
     public static void printStackTrace(PrintStream printStream, Exception e) {
         printStackTrace(printStream, e, "csus");
-        
+
     }
 
     /**
      * Prints a stack trace, prints stack elements which only matches pattern.
-     * 
+     *
      * Example to only print stack trace elements with csus:
-     * 
+     *
      * <pre>
      *    Utilities.printStackTrace(System.err,e,"csus");
-     * 
+     *
      * prints:
-     * 
+     *
      * java.sql.SQLException: No value specified for parameter 7
      *    Matching: csus
      *      at edu.csus.ecs.pc2.db.adapters.MySqlDatabaseAdapter(MySqlDatabaseAdapter.java:274)
@@ -1760,7 +1762,7 @@ public final class Utilities {
      *      at edu.csus.ecs.pc2.db.adapters.MySqlDatabaseAdapter(MySqlDatabaseAdapter.java:2442)
      *      at edu.csus.ecs.pc2.db.adapters.DatabaseAdapterTest(DatabaseAdapterTest.java:237)
      * </pre>
-     * 
+     *
      * @param printStream
      * @param e
      * @param pattern
@@ -1800,7 +1802,7 @@ public final class Utilities {
 
     /**
      * If object is empty/null throw InvalidParameterException
-     * 
+     *
      * @param obj
      * @param message
      */
@@ -1812,7 +1814,7 @@ public final class Utilities {
 
     /**
      * If string is empty/null throw InvalidParameterException
-     * 
+     *
      * @param s
      * @param message
      */
@@ -1824,7 +1826,7 @@ public final class Utilities {
 
     /**
      * Convert String to int.
-     * 
+     *
      * @param string
      * @param defaultNumber
      *            used if invalid or null string
@@ -1847,63 +1849,63 @@ public final class Utilities {
 
     /**
      * Converts a CLICS Contest API "RELTIME" (contest time) string to milliseconds.
-     * 
+     *
      * The format for CLICS RELTIME values is:  (-)?(h)*h:mm:ss(.uuu)?
      * Note that this differs from standard ISO 8601 times in that it allows more than two hour
      * digits and in that the optional fractional seconds (.uuu), if specified, MUST have exactly
      * three digits (the ISO 8601 spec doesn't require/restrict the number of digits in the fraction).
-     * 
+     *
      * @param time a time string in CLICS Contest API format
      * @return the number of milliseconds corresponding to the specified time string, or the most
      *     negative long value possible (Long.MIN_VALUE) if the string could not be parsed correctly
      */
     public static long convertCLICSContestTimeToMS(String time) {
-        
+
         final long MSECS_PER_HOUR = 1000 * 60 * 60 ;
         final long MSECS_PER_MIN = 1000 * 60 ;
         final long MSECS_PER_SEC = 1000 ;
-        
+
         boolean isNegative = false ;
-        
+
         long hoursMS;
         long minsMS;
         long secondsMS;
         long msecs;
-        
+
         try {
             //strip off any optional minus sign
             if (time.startsWith("-")) {
                 time = new String(time.substring(1,time.length()));
                 isNegative = true;
             }
-            
+
             String [] fields = time.split(":");
             if (fields.length!=3) {
                 //missing one or more required fields
                 return Long.MIN_VALUE;
             }
-            
+
             //verify there are the required number of chars in each field (>=1 for hours, =2 for mins, either 2 or 6 secs)
             if (fields[0].length()<1 || fields[1].length()!=2 || (fields[2].length()!=2 && fields[2].length()!=6) ) {
                 return Long.MIN_VALUE;
             }
-            
+
             //verify the minutes digits are legitmate time values
             int mins = Integer.parseInt(fields[1]) ;
             if (mins<0 || mins>59) {
                 return Long.MIN_VALUE;
             }
-            
+
             //split out any option fractional part in the seconds field
             String [] secondsFields = fields[2].split("\\.");
-            
+
             //verify the seconds digits are legitmate time values
             int secs = Integer.parseInt(secondsFields[0]) ;
             if (secs<0 || secs > 59) {
                 return Long.MIN_VALUE;
             }
-            
-            
+
+
             //process any optional fraction on the input
             msecs = 0;
             if (secondsFields.length>1) {
@@ -1921,9 +1923,9 @@ public final class Utilities {
             hoursMS = Long.parseLong(fields[0]) * MSECS_PER_HOUR;
             minsMS = Long.parseLong(fields[1]) * MSECS_PER_MIN;
             secondsMS = Long.parseLong(secondsFields[0]) * MSECS_PER_SEC;
-        
+
             long retVal = hoursMS + minsMS + secondsMS + msecs ;
-        
+
             if (isNegative) {
                 retVal = -retVal ;
             }
@@ -1935,10 +1937,10 @@ public final class Utilities {
             return Long.MIN_VALUE;
         }
     }
-    
+
     /**
      * Fetch directories names (full path).
-     * 
+     *
      * @param directory
      * @return list of directories (prepended by directory)
      */
@@ -1957,7 +1959,7 @@ public final class Utilities {
 
         for (String name : entries) {
             String entry = directory + File.separator + name;
-            
+
             if (new File(entry).isDirectory()) {
                 list.add(entry);
             }
@@ -1965,10 +1967,10 @@ public final class Utilities {
 
         return list;
     }
-    
+
     /**
      * Fetch all CDP data directories for all problems under cdpConfigDirectory directory.
-     * 
+     *
      * @param cdpConfigDirectory
      * @return a list of data directories (full path)
      */
@@ -1994,25 +1996,25 @@ public final class Utilities {
 
         return list;
 
-    }    
-  
+    }
+
     /**
      * Accepts a "duration" (an amount of time) in milliseconds and returns that duration in formatted form.
      * The general form of the returned format is HHHH:MM:SS.sss, where the number of hour digits will always be
-     * at least two, but may be more depending on the input value 
+     * at least two, but may be more depending on the input value
      * (in other words, this is not a "time of day" which is restricted to just two hour-digits).
-     * Note however that the minutes and seconds fields will always be two digits, and the msec field will 
+     * Note however that the minutes and seconds fields will always be two digits, and the msec field will
      * always be three digits.
      * If the input value is negative then it is converted to a positive value and the returned value is
      * the positive value preceded by a minus sign.
-     * 
+     *
      * @param milliseconds the duration to be formatted, in msec.
      * @return the formatted value of the input duration.
      */
     public static String formatDuration (long milliseconds) {
-        
+
         String result = "";
-        
+
         //ensure calculations are based on positive milliseconds
         long posMsec = milliseconds;
         if (milliseconds<0) {
@@ -2022,8 +2024,8 @@ public final class Utilities {
 
         long msecPerSecond = Constants.MS_PER_SECOND;
         long msecPerMinute = Constants.MS_PER_MINUTE;
-        long msecPerHour = msecPerMinute*60 ;           
-        
+        long msecPerHour = msecPerMinute*60 ;
+
         long hours = posMsec / msecPerHour ;   //whole hours (fractional portion is truncated
         if (hours<10) {
             //prepend a zero to insure at least two hour digits
@@ -2031,21 +2033,21 @@ public final class Utilities {
         }
         String hourString = Long.toString(hours);
         result += hourString + ":";
-        
+
         long minutes = (posMsec - (hours*msecPerHour)) / (60*1000);  //whole minutes (truncated)
         if (minutes<10) {
             result += "0";
         }
         String minuteString = Long.toString(minutes);
         result += minuteString + ":";
-        
+
         long seconds = (posMsec - (hours*msecPerHour) - (minutes*msecPerMinute)) / 1000;   //whole seconds (truncated)
         if (seconds<10) {
             result += "0";
         }
         String secondsString = Long.toString(seconds);
         result += secondsString + ".";
-        
+
         long millis = posMsec - (hours*msecPerHour) - (minutes*msecPerMinute) - (seconds*msecPerSecond);   //fractional seconds (truncated)
         if (millis<100) {
             result += "0";
@@ -2055,24 +2057,24 @@ public final class Utilities {
         }
         String fractionString = Long.toString(millis);
         result += fractionString;
-        
+
         return result;
     }
 
     public static void setShowStandingsPanes(boolean showStandingsPanes) {
         Utilities.showStandingsPanes = showStandingsPanes;
     }
-    
+
     public static boolean isShowStandingsPanes() {
         return showStandingsPanes;
     }
-    
+
     /**
      * Concatenate Arrays.
-     * 
-     * This is null-safe, arrays can be null and will return 
+     *
+     * This is null-safe, arrays can be null and will return
      * an array.
-     * 
+     *
      * @param one first array
      * @param two secodn array
      * @return a new array which contains contents of one and two arrays
@@ -2094,14 +2096,14 @@ public final class Utilities {
 
         return newArray;
     }
-    
-    
+
+
     /**
      * Concatenate Arrays.
-     * 
-     * This is null-safe, arrays can be null and will return 
+     *
+     * This is null-safe, arrays can be null and will return
      * an array.
-     * 
+     *
      * @param one first array
      * @param two secodn array
      * @return a new array which contains contents of one and two arrays
