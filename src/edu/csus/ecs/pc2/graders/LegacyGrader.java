@@ -13,7 +13,6 @@ import java.util.Scanner;
  */
 public class LegacyGrader {
 
-    // I'm not sure why this is a flag to the grader -- JB
     public static final String IGNORE_SAMPLE_FLAG = "ignore_sample";
 
     public static final String ACCEPT_IF_ANY_ACCEPTED_FLAG = "accept_if_any_accepted";
@@ -25,6 +24,7 @@ public class LegacyGrader {
     public static final int GRADER_ERROR_BAD_WORST_CODE = 5;
     public static final int GRADER_ERROR_BAD_FIRST_CODE = 6;
     public static final int GRADER_ERROR_BAD_VERDICT_MODE = 7;
+    public static final int GRADER_ERROR_IGNORE_SAMPLE = 8;
 
     enum VerdictMode {
         worst_error,
@@ -49,6 +49,7 @@ public class LegacyGrader {
     private VerdictMode verdictMode = VerdictMode.worst_error;
     private ScoringMode scoringMode = ScoringMode.sum;
     private boolean acceptIfAnyAccepted = false;
+    private boolean ignoreSample = false;
     private int graderError = 0;
 
     /**
@@ -102,6 +103,9 @@ public class LegacyGrader {
         if(arg.equals(ACCEPT_IF_ANY_ACCEPTED_FLAG)) {
             acceptIfAnyAccepted = true;
             result = true;
+        } else if(arg.equals(IGNORE_SAMPLE_FLAG)) {
+            ignoreSample = true;
+            result = true;
         }
         return(result);
     }
@@ -146,6 +150,8 @@ public class LegacyGrader {
 
         if(result != null) {
             System.out.println(result);
+        } else {
+            System.out.println("JE 0");
         }
         return(graderError);
     }
@@ -160,12 +166,35 @@ public class LegacyGrader {
         double scoreMax = Double.NEGATIVE_INFINITY;
         boolean [] sawJudgment = new boolean[JudgmentCodes.values().length];
         boolean anyFailures = false;
+        boolean ignoreSampleGroup = ignoreSample;
         String firstError = null;
         String graderResult = null;
 
         graderError = 0;
         for(String line : testCaseResults) {
             nLine++;
+            /*
+             * A little explanation here about ignoring samples.
+             * The Legacy Grader specification says:
+             *     "Must only be used on the root level. The first sub-result (sample)
+             *      will be ignored, the second sub-result (secret) will be used,
+             *      both verdict and score.
+             * If the ignore_sample command line flag was supplied, it implies the group
+             * being graded is the root level, as such, there will be exactly 2 sub-groups
+             * at the level, sample and secret (in that order - lexicographically).  Therefore,
+             * the first group (sample) will simply be ignored (skipped).  Grading will procede
+             * with the next line, which will be secret.
+             */
+            if(ignoreSampleGroup) {
+                // Ignore sample group which is the first one.  There better be exactly one more
+                // group in the list, or it's a judging error.
+                if(testCaseResults.size() != 2) {
+                    graderError = GRADER_ERROR_IGNORE_SAMPLE;
+                    break;
+                }
+                ignoreSampleGroup = false;
+                continue;
+            }
             String [] values = line.trim().split("\\s+");
             if(values.length != 2) {
                 System.err.println("LegacyGrader: invalid input test case " + nLine);
@@ -307,13 +336,15 @@ public class LegacyGrader {
      */
     public static void main(String[] args) {
        LegacyGrader grader = new LegacyGrader();
+       int exitCode = 0;
 
        if(!grader.parseArguments(args)) {
            System.err.println("LegacyGrader: Unrecognized option supplied.");
-           System.exit(1);
+           exitCode = 1;
+       } else {
+           exitCode = grader.processResults();
        }
-
-       System.exit(grader.processResults());
+       System.exit(exitCode);
     }
 
 }
