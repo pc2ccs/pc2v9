@@ -98,9 +98,23 @@ public class CLICSProblem {
             ProblemDataFiles problemDataFiles = model.getProblemDataFile(problem);
             if(problemDataFiles != null) {
                 TestDataGroup [] testDataGroups = problemDataFiles.getJudgesDataGroups();
-                // Really, there's only 1 top level TestDataGruop
+                // Really, there's only 1 top (root) level TestDataGroup which we have to find.  Start at the
+                // first group and walk up the tree to the root (parent being null)
                 if(testDataGroups != null && testDataGroups.length > 0) {
-                    max_score = testDataGroups[0].getRangeMax();
+                    TestDataGroup tdg = testDataGroups[0];
+                    // Paranoia: this had better not be null.
+                    if(tdg != null) {
+                        TestDataGroup parentTdg = tdg.getParent();
+                        while(parentTdg != null) {
+                            tdg = parentTdg;
+                            parentTdg = tdg.getParent();
+                        }
+                        // Departure from spec: if upper range is infinity, just leave it out (max_score will be null).
+                        // Primarily for the Resolver as it doesn't want to see "infinity" as a value.
+                        if(tdg.getRangeMax() != Double.POSITIVE_INFINITY) {
+                            max_score = tdg.getRangeMax();
+                        }
+                    }
                 }
             }
         }
