@@ -485,9 +485,9 @@ public class SubmissionService implements Feature {
                 return Response.status(Status.BAD_REQUEST).entity("invalid json supplied").build();
             }
 
-            // These next three are for admin users only
+            // These next two are for admin users only
             long overrideTimeMS = -1;
-            long overrideSubmissionID = -1;
+            long overrideSubmissionID = 0;
 
             Log log = controller.getLog();
             String user = sc.getUserPrincipal().getName();
@@ -570,7 +570,7 @@ public class SubmissionService implements Feature {
                 }
                 overrideSubmissionID = Utilities.stringToLong(sub.getId());
                 if(overrideSubmissionID < 0) {
-                    overrideSubmissionID = -1;
+                    overrideSubmissionID = 0;
                 }
             }
 
