@@ -642,7 +642,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                 + "            font-size: 1.1em;" + "        }" + "    </style>" + "    </head>" + "    <body>"
                 + "    <div style = \"padding-bottom: 8px\">Do you wish to submit an announcement clarification for </div>" + "    <table style=\"width:100%; max-width: 700px\">" + "        <tr>"
                 + "            <td style=\"width:20%\">Problem:</td>" + "            <td style = \"width:50%\"><font color=\"blue\">" + Utilities.forHTML(problem.toString()) + "</font></td>"
-                + "        </tr>" + "        <tr>" + "            <td>Announcement:</td>" + "            <td><font color=\"blue\">" + Utilities.forHTML(announcement) + "</font></td>"
+                + "        </tr>" + "        <tr>" + "            <td>Announcement:</td>" + "            <td><font color=\"blue\">" +Utilities.forHTML(announcement) + "</font></td>"
                 + "        </tr>" + "        <tr>");
         if (destinationCategories.equals(ALL_TEAMS)) {
             stringBuilder.append("            <td  class=\"no-padding\">Destination:</td>" + "            <td class=\"no-padding\"><font color=\"blue\">" + Utilities.forHTML(ALL_TEAMS)
