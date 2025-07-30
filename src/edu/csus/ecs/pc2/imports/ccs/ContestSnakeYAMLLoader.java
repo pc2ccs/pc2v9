@@ -423,7 +423,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
 
         // control submission throttling
-        boolean submissionThrottling = fetchBooleanValue(content, SUBMISSION_THROTTLING_KEY, contestInformation.isSubmissionThrottling());
+        boolean submissionThrottling = ContestImportUtilities.fetchBooleanValue(content, SUBMISSION_THROTTLING_KEY, contestInformation.isSubmissionThrottling());
         contestInformation.setSubmissionThrottling(submissionThrottling);
 
         // enable shadow mode
