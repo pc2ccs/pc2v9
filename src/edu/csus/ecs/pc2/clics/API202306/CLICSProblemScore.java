@@ -4,10 +4,7 @@ package edu.csus.ecs.pc2.clics.API202306;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-<<<<<<< HEAD
 import com.fasterxml.jackson.annotation.JsonInclude;
-=======
->>>>>>> dc2ae230a (i_1006 Fix event feed for point scoring)
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
