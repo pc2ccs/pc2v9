@@ -1,6 +1,7 @@
 // Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.graders;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -52,6 +53,22 @@ public class LegacyGrader {
     private boolean ignoreSample = false;
     private int graderError = 0;
 
+    private String logFile = null;
+    private PrintWriter debugStream = null;
+    
+    public LegacyGrader() {
+        
+    }
+    
+    public LegacyGrader(String logFile) {
+        this.logFile = logFile;
+        try {
+            debugStream = new PrintWriter(logFile, "UTF-8");
+        } catch(Exception e) {
+            System.err.println("LegacyGrader: Can not crete debug log file " + logFile + ": " + e);
+        }
+    }
+    
     /**
      * See if the supplied string argument is a valid verdict mode.
      *
@@ -170,9 +187,22 @@ public class LegacyGrader {
         String firstError = null;
         String graderResult = null;
 
+        if(debugStream != null) {
+            debugStream.println("Grader Settings:");
+            debugStream.println("  verdictMode = " + verdictMode);
+            debugStream.println("  scoringMode = " + scoringMode);
+            debugStream.println("  acceptIfAnyAccepted = " + acceptIfAnyAccepted);
+            debugStream.println("  ignoreSample = " + ignoreSample);
+            debugStream.println("TestCases:");
+        }
+        
         graderError = 0;
         for(String line : testCaseResults) {
             nLine++;
+            if(debugStream != null) {
+                debugStream.printf("%3d:%s", nLine, line);
+                debugStream.println();
+            }
             /*
              * A little explanation here about ignoring samples.
              * The Legacy Grader specification says:
@@ -193,6 +223,9 @@ public class LegacyGrader {
                     break;
                 }
                 ignoreSampleGroup = false;
+                if(debugStream != null) {
+                    debugStream.println("Ignored previous line due to ignore_sample");
+                }
                 continue;
             }
             String [] values = line.trim().split("\\s+");
@@ -278,7 +311,7 @@ public class LegacyGrader {
                 }
             } else {
                 // determine non-accepted judgment
-                // All cases should either print the correct output to stdout, or print
+                // All cases should either save the correct output to graderResult, or print
                 // an error to stderr and set graderError to a non-zero value.
                 switch(verdictMode) {
                     case worst_error:
@@ -286,7 +319,7 @@ public class LegacyGrader {
                         for(JudgmentCodes jcode : JudgmentCodes.values()) {
                             idx = jcode.ordinal();
                             if(idx > 0 && sawJudgment[idx]) {
-                                System.out.println(jcode.toString() + " 0");
+                                graderResult = jcode.toString() + " 0";
                                 found = true;
                                 break;
                             }
@@ -304,7 +337,7 @@ public class LegacyGrader {
                             System.err.println("LegacyGrader: FATAL error - can not find judgment code for first_error mode.");
                             graderError = GRADER_ERROR_BAD_FIRST_CODE;
                         } else {
-                            System.out.println(firstError + " 0");
+                            graderResult = firstError + " 0";
                         }
                         break;
 
@@ -315,6 +348,15 @@ public class LegacyGrader {
                         break;
                 }
             }
+        }
+        if(debugStream != null) {
+            debugStream.println();
+            if(graderResult != null) {
+                debugStream.println("RESULT:" + graderResult);
+            } else {
+                debugStream.println("ERROR: Grader error " + graderError);
+            }
+            debugStream.flush();
         }
         // this will be null in the case of an error, in which case graderError will have the error code
         // in the case of success, this will be the "judgment_acronym <space> score", eg. "AC 50"
