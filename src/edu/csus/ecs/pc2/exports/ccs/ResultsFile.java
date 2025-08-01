@@ -1,6 +1,7 @@
 // Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.CitationRankInformation;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.scoring.FinalsStandingsPointScoringRecordComparator;
 import edu.csus.ecs.pc2.core.scoring.FinalsStandingsRecordComparator;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
@@ -55,8 +57,6 @@ public class ResultsFile {
     private static final String RANKED = "Ranked";
 
     private FinalizeData finalizeData = null;
-
-    private FinalsStandingsRecordComparator comparator;
 
     public void setFinalizeData(FinalizeData finalizeData) {
         this.finalizeData = finalizeData;
@@ -134,6 +134,9 @@ public class ResultsFile {
     public String[] createFileLines(IInternalContest contest, Group group, String resultFileTitleFieldName, boolean isTSV)  {
 
         Vector<String> lines = new Vector<String>();
+        boolean isPointScoring = contest.getContestInformation().isScoreboardTypeScore();
+
+        DecimalFormat dblFormatter = null;
 
         finalizeData = contest.getFinalizeData();
 
@@ -149,7 +152,11 @@ public class ResultsFile {
         if (isTSV) {
             lines.addElement(resultFileTitleFieldName + TAB + "1");
         } else {
-            lines.addElement("teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation");
+            if(isPointScoring) {
+                lines.addElement("teamId,rank,medalCitation,problemsSolved,score,time,siteCitation,citation");
+            } else {
+                lines.addElement("teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation");
+            }
         }
 
         // return ranked teams
@@ -197,12 +204,19 @@ public class ResultsFile {
         for (Account account : accounts) {
             accountList.add(account);
         }
-        comparator = new FinalsStandingsRecordComparator();
-        comparator.setCachedAccountList(accountList);
-        comparator.setLastRank(lastMedalRank);
-        comparator.setMedian(median);
-        comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
-        Arrays.sort(standingsRecords, comparator);
+        if(isPointScoring) {
+            FinalsStandingsPointScoringRecordComparator comparator = new FinalsStandingsPointScoringRecordComparator();
+            comparator.setCachedAccountList(accountList);
+            Arrays.sort(standingsRecords, comparator);
+            dblFormatter = new DecimalFormat("0.00##");
+        } else {
+            FinalsStandingsRecordComparator comparator = new FinalsStandingsRecordComparator();
+            comparator.setCachedAccountList(accountList);
+            comparator.setLastRank(lastMedalRank);
+            comparator.setMedian(median);
+            comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
+            Arrays.sort(standingsRecords, comparator);
+        }
 
         int realRank = 0;
         if (highestHonorSolvedCount == 0) {
@@ -231,15 +245,21 @@ public class ResultsFile {
             boolean isHighHonor = false;
             boolean isHonor = false;
 
-            if (finalizeData.isUseWFGroupRanking()) {
-                if (record.getNumberSolved() >= highestHonorSolvedCount) {
-                    isHighestHonor = true;
-                } else if (record.getNumberSolved() >= highHonorSolvedCount) {
-                    isHighHonor = true;
+            // Sorry, no "Bill" rules for point scoring contests as it doesnt make sense the way its defined.
+            if(!isPointScoring) {
+                if (finalizeData.isUseWFGroupRanking()) {
+                    if (record.getNumberSolved() >= highestHonorSolvedCount) {
+                        isHighestHonor = true;
+                    } else if (record.getNumberSolved() >= highHonorSolvedCount) {
+                        isHighHonor = true;
+                    } else if (record.getNumberSolved() >= median) {
+                        isHonor = true;
+                    }
                 } else if (record.getNumberSolved() >= median) {
                     isHonor = true;
                 }
-            } else if (record.getNumberSolved() >= median) {
+            } else {
+                // This will force "RANKED" in a kludgy way
                 isHonor = true;
             }
 
@@ -250,7 +270,7 @@ public class ResultsFile {
 
             String rank = "";
             if (!HONORABLE.equalsIgnoreCase(award)) {
-                if (finalizeData.isUseWFGroupRanking() && realRank > lastMedalRank) {
+                if (!isPointScoring && finalizeData.isUseWFGroupRanking() && realRank > lastMedalRank) {
                     if (record.getNumberSolved() != lastSolvedNum) {
                         lastSolvedNum = record.getNumberSolved();
                         rankNumber = realRank;
@@ -260,23 +280,33 @@ public class ResultsFile {
                 rank = Integer.toString(record.getRankNumber());
             }
 
+            String awardLine;
             if (isTSV) {
-                lines.addElement(reservationId + TAB //
+                awardLine = reservationId + TAB //
                         + rank + TAB //
                         + award + TAB  //
-                        + record.getNumberSolved() + TAB //
-                        + record.getPenaltyPoints() + TAB //
-                        + record.getLastSolved());
+                        + record.getNumberSolved() + TAB;
+                if(isPointScoring) {
+                    awardLine += dblFormatter.format(record.getScore());
+                } else {
+                    awardLine += record.getPenaltyPoints();
+                }
+                awardLine += TAB + record.getLastSolved();
             } else {
-                // teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation
-                lines.addElement(reservationId + COMMA //
+                // teamId,rank,medalCitation,problemsSolved,totalTime|score,lastProblemTime,siteCitation,citation
+                awardLine = reservationId + COMMA //
                         + rank + COMMA //
                         + award + COMMA //
-                        + record.getNumberSolved() + COMMA //
-                        + record.getPenaltyPoints() + COMMA //
-                        + record.getLastSolved() + COMMA // then siteCitation
-                        + COMMA);  // then citation
+                        + record.getNumberSolved() + COMMA;
+                if(isPointScoring) {
+                    awardLine += dblFormatter.format(record.getScore());
+                } else {
+                    awardLine += record.getPenaltyPoints();
+                }
+                awardLine += COMMA + record.getLastSolved() + COMMA // then siteCitation
+                        + COMMA;  // then citation
             }
+            lines.addElement(awardLine);
         }
 
         return lines.toArray(new String[lines.size()]);
@@ -297,6 +327,8 @@ public class ResultsFile {
         int highestHonorSolvedCount = 0;
         int highHonorSolvedCount = 0;
         CitationRankInformation ri = new CitationRankInformation();
+        boolean isPointScoring = contest.getContestInformation().isScoreboardTypeScore();
+        DecimalFormat dblFormatter;
 
         finalizeData = contest.getFinalizeData();
         if (finalizeData == null) {
@@ -320,7 +352,7 @@ public class ResultsFile {
             return(ri);
         }
 
-        if (finalizeData.isUseWFGroupRanking() && finalizeData.isCustomizeHonorsSolvedCount()) {
+        if (!isPointScoring && finalizeData.isUseWFGroupRanking() && finalizeData.isCustomizeHonorsSolvedCount()) {
             if (finalizeData.getHighestHonorSolvedCount() != 0) {
                 highestHonorSolvedCount = finalizeData.getHighestHonorSolvedCount();
             }
@@ -339,12 +371,19 @@ public class ResultsFile {
         for (Account account : accounts) {
             accountList.add(account);
         }
-        comparator = new FinalsStandingsRecordComparator();
-        comparator.setCachedAccountList(accountList);
-        comparator.setLastRank(lastMedalRank);
-        comparator.setMedian(median);
-        comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
-        Arrays.sort(standingsRecords, comparator);
+        if(isPointScoring) {
+            FinalsStandingsPointScoringRecordComparator comparator = new FinalsStandingsPointScoringRecordComparator();
+            comparator.setCachedAccountList(accountList);
+            Arrays.sort(standingsRecords, comparator);
+            dblFormatter = new DecimalFormat("0.00##");
+        } else {
+            FinalsStandingsRecordComparator comparator = new FinalsStandingsRecordComparator();
+            comparator.setCachedAccountList(accountList);
+            comparator.setLastRank(lastMedalRank);
+            comparator.setMedian(median);
+            comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
+            Arrays.sort(standingsRecords, comparator);
+        }
 
         int rank;
         if (highestHonorSolvedCount == 0) {
@@ -360,7 +399,7 @@ public class ResultsFile {
             boolean isHighHonor = false;
             boolean isHonor = false;
 
-            if (finalizeData.isUseWFGroupRanking()) {
+            if (!isPointScoring && finalizeData.isUseWFGroupRanking()) {
                 if (record.getNumberSolved() >= highestHonorSolvedCount) {
                     isHighestHonor = true;
                 } else if (record.getNumberSolved() >= highHonorSolvedCount) {
@@ -377,7 +416,7 @@ public class ResultsFile {
             rank = record.getRankNumber();
 
             if (record.getNumberSolved() > 0 && !HONORABLE.equalsIgnoreCase(getMedalCitation(rank, finalizeData, isHighestHonor, isHighHonor, isHonor))) {
-                if (finalizeData.isUseWFGroupRanking()) {
+                if (!isPointScoring && finalizeData.isUseWFGroupRanking()) {
                     if(isHighestHonor) {
                         ri.updateLastHighestHonorsRank(rank);
                     } else if(isHighHonor) {

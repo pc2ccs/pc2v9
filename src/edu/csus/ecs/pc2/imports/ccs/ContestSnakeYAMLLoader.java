@@ -422,6 +422,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String teamScoreboadDisplayString = ContestImportUtilities.fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
 
+        // control submission throttling
+        boolean submissionThrottling = ContestImportUtilities.fetchBooleanValue(content, SUBMISSION_THROTTLING_KEY, contestInformation.isSubmissionThrottling());
+        contestInformation.setSubmissionThrottling(submissionThrottling);
+
         // enable shadow mode
         boolean shadowMode = ContestImportUtilities.fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
         contestInformation.setShadowMode(shadowMode);
@@ -624,15 +628,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         // If the contest type is present in contest.yaml, verify it
         String scoreType = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_SCOREBOARD_TYPE);
-        if(scoreType != null && !scoreType.equals(CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL)
+        if(scoreType != null) {
+            if(!scoreType.equals(CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL)
                 && !scoreType.equals(CLICS_CONTEST_SCOREBOARD_TYPE_SCORE)) {
-            throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": "
-                + scoreType + ", expected "
-                + CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL
-                + " or "
-                + CLICS_CONTEST_SCOREBOARD_TYPE_SCORE);
+                throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": "
+                    + scoreType + ", expected "
+                    + CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL
+                    + " or "
+                    + CLICS_CONTEST_SCOREBOARD_TYPE_SCORE);
+            }
+            setContestScoreboardType(contest, scoreType);
         }
-        setContestScoreboardType(contest, scoreType);
 
         Object privatehtmlOutputDirectory = ContestImportUtilities.fetchObjectValue(content, OUTPUT_PRIVATE_SCORE_DIR_KEY);
         if (privatehtmlOutputDirectory != null) {

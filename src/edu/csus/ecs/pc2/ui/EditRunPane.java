@@ -1,8 +1,10 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.io.File;
 import java.io.IOException;
@@ -41,12 +43,10 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.ExtractRuns;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
-import java.awt.Point;
-import java.awt.Dimension;
 
 /**
  * Add/Edit Run Pane
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -55,7 +55,7 @@ import java.awt.Dimension;
 public class EditRunPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 8747938709622932819L;
 
@@ -98,7 +98,7 @@ public class EditRunPane extends JPanePlugin {
     private JLabel statusTitleLabel = null;
 
     private JComboBox<Problem> problemComboBox = null;
-    
+
     private JComboBox<Run.RunStates> runStatusComboBox = null;
 
     private JComboBox<Language> languageComboBox = null;
@@ -109,7 +109,11 @@ public class EditRunPane extends JPanePlugin {
 
     private JLabel jLabel = null;
 
+    private JLabel scoreLabel = null;
+
     private JTextField elapsedTimeTextField = null;
+
+    private JTextField scoreTextField = null;
 
     private IFileViewer sourceViewer;
 
@@ -121,7 +125,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public EditRunPane() {
         super();
@@ -130,7 +134,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -142,35 +146,39 @@ public class EditRunPane extends JPanePlugin {
         this.add(getGeneralPane(), java.awt.BorderLayout.CENTER);
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
         addWindowCloserListener();
         extractRuns = new ExtractRuns(inContest);
     }
-    
+
     private void addWindowCloserListener() {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (getParentFrame() != null) {
                     getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
                         public void windowClosing(java.awt.event.WindowEvent e) {
                             handleCancelButton();
                         }
                     });
-                } 
+                }
             }
         });
     }
 
 
+    @Override
     public String getPluginTitle() {
         return "Edit Run Pane";
     }
 
     /**
      * This method initializes messagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePane() {
@@ -189,7 +197,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -214,7 +222,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes updateButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getUpdateButton() {
@@ -224,6 +232,7 @@ public class EditRunPane extends JPanePlugin {
             updateButton.setEnabled(false);
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateRun();
                 }
@@ -249,11 +258,13 @@ public class EditRunPane extends JPanePlugin {
             Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
 
             judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
+            double score = getDoubleValue(getScoreTextField().getText());
+            judgementRecord.setScore(score);
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
         }
 
         newRun.setDeleted(deleteCheckBox.isSelected());
-        
+
         int elapsed = getIntegerValue(getElapsedTimeTextField().getText());
         newRun.setElapsedMins(elapsed);
 
@@ -271,7 +282,7 @@ public class EditRunPane extends JPanePlugin {
             RunStates prevState = run.getStatus();
             RunStates newRunState = (Run.RunStates) runStatusComboBox.getSelectedItem();
             String errMsg = null;
-            
+
             // Make sure it's safe to change the runstate
             switch(newRunState) {
             case JUDGED:
@@ -283,7 +294,7 @@ public class EditRunPane extends JPanePlugin {
                     errMsg = "The run does not have any judgment records";
                 }
                 break;
-                
+
             case BEING_RE_JUDGED:
                 // It is completely unreasonable to set a run's status to being re-judged
                 errMsg = "You are not allowed to set the Run Status to BEING_RE_JUDGED";
@@ -297,7 +308,7 @@ public class EditRunPane extends JPanePlugin {
             if(errMsg != null) {
                 FrameUtilities.showMessage(this, "Can not set Run Status", errMsg);
                 enableUpdateButton();
-                return;                
+                return;
             }
             int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to change status from " + //
                     prevState.toString() + " to " + newRunState.toString() + "?", "Update/Change run status?");
@@ -314,19 +325,19 @@ public class EditRunPane extends JPanePlugin {
         if (executable != null) {
             executionData = executable.getExecutionData();
         }
- 
+
         runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
         getController().updateRun(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
-        
+
     }
 
     /**
      * This method initializes cancelButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCancelButton() {
@@ -335,6 +346,7 @@ public class EditRunPane extends JPanePlugin {
             cancelButton.setText("Cancel");
             cancelButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     handleCancelButton();
                 }
@@ -382,6 +394,7 @@ public class EditRunPane extends JPanePlugin {
         FrameUtilities.waitCursor(this);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateGUI(run);
                 enableUpdateButtons(false);
@@ -390,7 +403,7 @@ public class EditRunPane extends JPanePlugin {
     }
 
     private void populateGUI(Run run2) {
-        
+
         populatingGUI = true;
 
         if (run2 != null) {
@@ -402,7 +415,13 @@ public class EditRunPane extends JPanePlugin {
             runInfoLabel.setText("Run " + run2.getNumber() + " (Site " + run2.getSiteNumber() + ") from " + teamName);
             deleteCheckBox.setSelected(run2.isDeleted());
             elapsedTimeTextField.setText(new Long(run.getElapsedMins()).toString());
-            
+            JudgementRecord judgementRecord = run2.getJudgementRecord();
+            double score = 0;
+            if(judgementRecord != null) {
+                score = judgementRecord.getScore();
+            }
+            getScoreTextField().setText(new Double(score).toString());
+
             getNotifyTeamCheckBox().setSelected(notifyTeam());
 
         } else {
@@ -411,11 +430,12 @@ public class EditRunPane extends JPanePlugin {
             runInfoLabel.setText("Could not get run");
             deleteCheckBox.setSelected(false);
             elapsedTimeTextField.setText("");
+            getScoreTextField().setText("0");
 
             getNotifyTeamCheckBox().setSelected(false);
         }
         populateComboBoxes();
-        
+
         populatingGUI = false;
 
     }
@@ -428,7 +448,7 @@ public class EditRunPane extends JPanePlugin {
         getProblemComboBox().removeAllItems();
         getLanguageComboBox().removeAllItems();
         getJudgementComboBox().removeAllItems();
-        
+
         runStatusComboBox.removeAllItems();
 
         if (run == null) {
@@ -482,7 +502,7 @@ public class EditRunPane extends JPanePlugin {
             log.info("Edit Run " + run.getNumber() + " judgement is " + judgementDescription);
             judgementLabel.setToolTipText(judgementDescription);
         }
-        
+
         for (Judgement judgement : getContest().getJudgements()) {
             getJudgementComboBox().addItem(judgement);
             if (judgement.getElementId().equals(judgementId)) {
@@ -490,15 +510,15 @@ public class EditRunPane extends JPanePlugin {
             }
             index++;
         }
-        
+
         // Select judgement in combo box
         judgementComboBox.setSelectedIndex(selectedIndex);
-        
+
         selectedIndex = -1;
         index = 0;
 
         runStatusComboBox.setSelectedIndex(selectedIndex);
-        
+
         RunStates[] states = Run.RunStates.values();
         for (RunStates runStates : states) {
             runStatusComboBox.addItem(runStates);
@@ -507,7 +527,7 @@ public class EditRunPane extends JPanePlugin {
             }
             index++;
         }
-        
+
         runStatusComboBox.setSelectedIndex(selectedIndex);
 
     }
@@ -535,9 +555,17 @@ public class EditRunPane extends JPanePlugin {
         }
     }
 
+    private double getDoubleValue(String s) {
+        try {
+            return Double.parseDouble(s);
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
     /**
      * Enable or disable Update button based on comparison of run to fields.
-     * 
+     *
      */
     public void enableUpdateButton() {
 
@@ -560,11 +588,11 @@ public class EditRunPane extends JPanePlugin {
             enableButton |= (run.isDeleted() != getDeleteCheckBox().isSelected());
 
             enableButton |= judgementChanged();
-            
+
             enableButton |= isStatusChanged();
-            
+
             enableButton |= notifyTeamChanged();
-            
+
         }
 
         getUpdateButton().setEnabled(enableButton);
@@ -573,7 +601,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * return if status changed by user.
-     * 
+     *
      * @return true if input run status different than combobox status
      */
     private boolean isStatusChanged() {
@@ -586,8 +614,11 @@ public class EditRunPane extends JPanePlugin {
 
     private boolean judgementChanged() {
         if (run.isJudged()) {
-            
+
             if (notifyTeamChanged()){
+                return true;
+            }
+            if (scoreChanged()) {
                 return true;
             }
 
@@ -603,9 +634,20 @@ public class EditRunPane extends JPanePlugin {
         return false;
     }
 
+    private boolean scoreChanged() {
+        if (run.isJudged()) {
+            JudgementRecord judgementRecord = run.getJudgementRecord();
+            if(judgementRecord != null) {
+                return(judgementRecord.getScore() != getDoubleValue(getScoreTextField().getText()));
+            }
+        }
+
+        return false;
+    }
+
     /**
      * For this run, send notification to team?
-     * @return 
+     * @return
      */
     private boolean notifyTeam(){
         if (run.isJudged()) {
@@ -618,7 +660,7 @@ public class EditRunPane extends JPanePlugin {
         }
         return false;
     }
-    
+
     /**
      * Has the notify team status changed ?
      * @return true if changed, false otherwise.
@@ -629,7 +671,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes mainTabbedPane
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getMainTabbedPane() {
@@ -641,7 +683,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes generalPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getGeneralPane() {
@@ -650,6 +692,10 @@ public class EditRunPane extends JPanePlugin {
             jLabel.setBounds(new java.awt.Rectangle(73, 67, 142, 16));
             jLabel.setText("Elapsed");
             jLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            scoreLabel = new JLabel();
+            scoreLabel.setBounds(new java.awt.Rectangle(300, 67, 65, 16));
+            scoreLabel.setText("Score");
+            scoreLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             languageLabel = new JLabel();
             languageLabel.setBounds(new java.awt.Rectangle(73, 166, 142, 16));
             languageLabel.setText("Language");
@@ -684,12 +730,16 @@ public class EditRunPane extends JPanePlugin {
             generalPane.add(languageLabel, null);
             generalPane.add(jLabel, null);
             generalPane.add(getElapsedTimeTextField(), null);
+            generalPane.add(scoreLabel, null);
+            generalPane.add(getScoreTextField(), null);
             generalPane.add(getNotifyTeamCheckBox(), null);
-            
+
             runStatusComboBox = new JComboBox<Run.RunStates>();
             runStatusComboBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     new Thread(new Runnable() {
+                        @Override
                         public void run() {
                             enableUpdateButton();
                         }
@@ -707,6 +757,7 @@ public class EditRunPane extends JPanePlugin {
 
     public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(message);
             }
@@ -715,7 +766,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes executeButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExecuteButton() {
@@ -724,8 +775,10 @@ public class EditRunPane extends JPanePlugin {
             executeButton.setText("Execute");
             executeButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             executeButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     new Thread(new Runnable() {
+                        @Override
                         public void run() {
                             executeRun();
                         }
@@ -738,7 +791,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes viewSourceButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getViewSourceButton() {
@@ -747,6 +800,7 @@ public class EditRunPane extends JPanePlugin {
             viewSourceButton.setText("View Source");
             viewSourceButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
             viewSourceButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     viewSourceFile();
                 }
@@ -763,7 +817,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes extractButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExtractButton() {
@@ -773,6 +827,7 @@ public class EditRunPane extends JPanePlugin {
             extractButton.setToolTipText("Extract Run contents");
             extractButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             extractButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     extractRun();
                 }
@@ -804,20 +859,20 @@ public class EditRunPane extends JPanePlugin {
     protected void executeRun() {
 
         System.gc();
-        
+
         ExecuteTimerFrame executeFrame = new ExecuteTimerFrame();
-        
+
         executable = new Executable(getContest(), getController(), run, runFiles, executeFrame);
 
         IFileViewer fileViewer = executable.execute();
-        
+
         // Dump execution results files to log
         String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
         Problem problem = getContest().getProblem(run.getProblemId());
         ClientId clientId = getContest().getClientId();
         List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(getContest(), run);
         JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
-        
+
         fileViewer.setVisible(true);
     }
 
@@ -831,6 +886,7 @@ public class EditRunPane extends JPanePlugin {
         run = run2;
         runFiles = runFiles2;
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateGUI(run);
                 enableUpdateButtons(false);
@@ -841,7 +897,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes judgementComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Judgement> getJudgementComboBox() {
@@ -850,6 +906,7 @@ public class EditRunPane extends JPanePlugin {
             judgementComboBox.setLocation(new java.awt.Point(224, 97));
             judgementComboBox.setSize(new java.awt.Dimension(263, 22));
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -860,7 +917,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes deleteCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getDeleteCheckBox() {
@@ -869,6 +926,7 @@ public class EditRunPane extends JPanePlugin {
             deleteCheckBox.setBounds(new java.awt.Rectangle(224, 196, 114, 21));
             deleteCheckBox.setText("Delete Run");
             deleteCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -879,7 +937,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes problemComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Problem> getProblemComboBox() {
@@ -887,6 +945,7 @@ public class EditRunPane extends JPanePlugin {
             problemComboBox = new JComboBox<Problem>();
             problemComboBox.setBounds(new java.awt.Rectangle(224, 130, 263, 22));
             problemComboBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -897,7 +956,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes languageComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Language> getLanguageComboBox() {
@@ -905,6 +964,7 @@ public class EditRunPane extends JPanePlugin {
             languageComboBox = new JComboBox<Language>();
             languageComboBox.setBounds(new java.awt.Rectangle(224, 163, 263, 22));
             languageComboBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -915,7 +975,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes elapsedTimeTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getElapsedTimeTextField() {
@@ -926,12 +986,35 @@ public class EditRunPane extends JPanePlugin {
 
             elapsedTimeTextField.addKeyListener(new KeyAdapter() {
                 // public void keyPressed(java.awt.event.KeyEvent e) {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
         }
         return elapsedTimeTextField;
+    }
+
+    /**
+     * This method initializes scoreTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getScoreTextField() {
+        if (scoreTextField == null) {
+            scoreTextField = new JTextField();
+            scoreTextField.setBounds(new java.awt.Rectangle(380, 65, 65, 21));
+            scoreTextField.setDocument(new DoubleDocument());
+
+            scoreTextField.addKeyListener(new KeyAdapter() {
+                // public void keyPressed(java.awt.event.KeyEvent e) {
+                @Override
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return scoreTextField;
     }
 
     private void createAndViewFile(SerializedFile file, String title) {
@@ -963,7 +1046,7 @@ public class EditRunPane extends JPanePlugin {
 
     /**
      * This method initializes notifyTeamCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getNotifyTeamCheckBox() {
@@ -973,6 +1056,7 @@ public class EditRunPane extends JPanePlugin {
             notifyTeamCheckBox.setSelected(false);
             notifyTeamCheckBox.setText("Notify Team");
             notifyTeamCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }

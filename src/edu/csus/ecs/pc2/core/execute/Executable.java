@@ -862,6 +862,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private String getPointScoringRunResult(Run run) {
         
         //"getTestDataGroupResult()" == "recurse(tdg)"
+        //  This may not be sufficient.  We want to be sure we start at the root.  testcases[0] should be
+        //  "sample" and its parent should be root.  We should probably put a loop here to walk back up until
+        //  getParent() == null, then use that TDG.  But, I think this SHOULD be ok? -- JB
         String runResult = getTestDataGroupResults(run.getRunTestCases()[0].getTestDataGroup().getParent());
         return runResult;
     }
@@ -882,6 +885,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
         //a list of the test case results associated with the specified test data group
         ArrayList<String> testCaseResultList = new ArrayList<String>() ;
+        boolean breakOnReject = tdg.isOnRejectBreak();
         
         //get the results for the test cases directly declared in the test data group and add them to the list
         ArrayList<String> groupTestCaseResults = getGroupTestCaseResults(tdg);
@@ -889,14 +893,30 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             testCaseResultList.add(testCaseResult);
         }
 
-        //recursively get the results for test cases declared as children of the specified test data group and add them to the list
-        for (TestDataGroup child : tdg.getTestDataGroups()) {
-            String childResult = getTestDataGroupResults(child);
-            testCaseResultList.add(childResult);
+        // if we are not breaking on reject, or there are no test cases in this groups level, or, the last case on the list
+        // is accepted, then, we have to get the results of each sub group and add to the list.
+        // Note that getGroupTestCaseResults() will return on the first failed case if on_reject = break, and, the last
+        // result in the list will be the failed result (non-AC)
+        if(!breakOnReject || testCaseResultList.isEmpty() ||
+            testCaseResultList.get(testCaseResultList.size()-1).split("\\s+")[0].equalsIgnoreCase(CLICS_JUDGEMENT_ACRONYM.AC.toString())){
+        
+            //recursively get the results for test cases declared as children of the specified test data group and add them to the list
+            for (TestDataGroup child : tdg.getTestDataGroups()) {
+                String childResult = getTestDataGroupResults(child);
+                if(childResult == null) {
+                    log.log(Log.WARNING, "Grader childResult was null for test data group: '" + child.getGroupName() + "' in group '" + tdg.getGroupName() + "'");
+                    return(null);
+                }
+                testCaseResultList.add(childResult);
+                // If we are supposed to break on reject, and any of the sub groups return a non-AC then stop adding subgroups and proceed to grading.
+                if(breakOnReject && !childResult.split("\\s+")[0].equalsIgnoreCase(CLICS_JUDGEMENT_ACRONYM.AC.toString())) {
+                    break;
+                }
+            }
         }
         
         //we've recursed to the lowest level in the test case tree; create a Grader to get a Result (acronym and score) for this level
-        LegacyGrader grader = new LegacyGrader();
+        LegacyGrader grader = new LegacyGrader(prefixExecuteDirname("graderLog-" + tdg.getGroupName().replace(File.separator, "_") + ".txt"));
         
         //set the arguments for the grader based on the grader flags in the currently specified TestDataGroup.
         //TODO:  it seems like there SHOULD be separate "scoringMode" and "verdictMode" attributes defined in a TestDataGroup -- ,
@@ -956,6 +976,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private ArrayList<String> getGroupTestCaseResults(TestDataGroup tdg) {
         //a list of test cases declared directly in the specfied TestDataGroup
         ArrayList<String> tdgTestCaseResults = new ArrayList<String>();
+        boolean breakOnReject = tdg.isOnRejectBreak();
         
         //check every test case in the run
         for (RunTestCase testCase : run.getRunTestCases()) {
@@ -964,6 +985,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 //yes, the test case belongs to the test data group; add its result to the list
                 String testCaseResult = testCase.getJudgementAcronym().toString() + " " + testCase.getScore();
                 tdgTestCaseResults.add(testCaseResult);
+                // Stop adding to list on first failed case, if that's what is wanted.
+                if(breakOnReject && !testCase.isPassed()) {
+                    break;
+                }
             }
         }
         return tdgTestCaseResults;

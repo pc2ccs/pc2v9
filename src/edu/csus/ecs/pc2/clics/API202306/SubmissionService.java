@@ -485,9 +485,9 @@ public class SubmissionService implements Feature {
                 return Response.status(Status.BAD_REQUEST).entity("invalid json supplied").build();
             }
 
-            // These next three are for admin users only
+            // These next two are for admin users only
             long overrideTimeMS = -1;
-            long overrideSubmissionID = -1;
+            long overrideSubmissionID = 0;
 
             Log log = controller.getLog();
             String user = sc.getUserPrincipal().getName();
@@ -570,7 +570,7 @@ public class SubmissionService implements Feature {
                 }
                 overrideSubmissionID = Utilities.stringToLong(sub.getId());
                 if(overrideSubmissionID < 0) {
-                    overrideSubmissionID = -1;
+                    overrideSubmissionID = 0;
                 }
             }
 
@@ -606,9 +606,15 @@ public class SubmissionService implements Feature {
                 if("".equals(fileName)) {
                     return Response.status(Response.Status.BAD_REQUEST).entity("no file name specified").build();
                 }
+                // allow contestant submission of a zero length file.  This will generate a CE (hopefully).
+                // if the following code is uncommented, the submission is not made and a 400 is returned to the submitter.
+                // it appears that other CCS's allow zero length submissions.  *sigh* -- JB
                 String fileData = file.getData();
                 if(fileData == null || fileData.length() == 0) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity("no file data specified for " + fileName).build();
+                    // nice to put it in the log in case any questions come up.
+                    log.info(user + " POSTing empty source submission on behalf of team " + team_id);
+
+//                    return Response.status(Response.Status.BAD_REQUEST).entity("no file data specified for " + fileName).build();
                 }
                 IFile iFile = new IFileImpl(file.getFilename(), fileData);
                 srcFiles.add(iFile);

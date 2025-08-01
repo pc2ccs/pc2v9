@@ -610,20 +610,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         //determine whether to apply the "current throttling strategy" to this submission
         // (i.e., whether to accept the run for submission to the PC2 Server)
         boolean accept = true;
-        Account submitterAccount = contest.getAccount(contest.getClientId());
 
-        if (submitterAccount.isTeam()) {
-            //Determine the throttling strategy to be applied to team submissions.
-            //The following shows several alternative strategy selections, with only one being enabled.
-            //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
-            // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
-            // GUI (such as the PC2 Admin)
-//            IThrottleStrategy strategy = new AcceptAllStrategy();
-//            IThrottleStrategy strategy = new RejectAllStrategy();
-            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,6);
-//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
-//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest); //uses DEFAULT_MAX_SUBMISSIONS_PER_MINUTE; same as prev line
-            accept = strategy.accept(run);
+        if(contest.getContestInformation().isSubmissionThrottling()) {
+            Account submitterAccount = contest.getAccount(contest.getClientId());
+
+            if (submitterAccount.isTeam()) {
+                //Determine the throttling strategy to be applied to team submissions.
+                //The following shows several alternative strategy selections, with only one being enabled.
+                //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
+                // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
+                // GUI (such as the PC2 Admin)
+    //            IThrottleStrategy strategy = new AcceptAllStrategy();
+    //            IThrottleStrategy strategy = new RejectAllStrategy();
+                IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,6);
+    //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+    //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest); //uses DEFAULT_MAX_SUBMISSIONS_PER_MINUTE; same as prev line
+                accept = strategy.accept(run);
+            }
         }
 
         Packet packet ;
@@ -5008,21 +5011,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         //       There should probably be a "bypass" flag that can be set via config file, or
         //       a separate user created for receiving CLICS API requests.
         boolean accept = true;
-        // use the submitter account, not this client.  This client is doing a proxy submit for a team.
-        Account submitterAccount = contest.getAccount(submitter);
 
-        if (submitterAccount.isTeam()) {
-            //Determine the throttling strategy to be applied to team submissions.
-            //The following shows several alternative strategy selections, with only one being enabled.
-            //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
-            // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
-            // GUI (such as the PC2 Admin)
-//            IThrottleStrategy strategy = new AcceptAllStrategy();
-//            IThrottleStrategy strategy = new RejectAllStrategy();
-            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest, 6);
-//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+        if(contest.getContestInformation().isSubmissionThrottling()) {
+            // use the submitter account, not this client.  This client is doing a proxy submit for a team.
+            Account submitterAccount = contest.getAccount(submitter);
 
-            accept = strategy.accept(run);
+            if (submitterAccount.isTeam()) {
+                //Determine the throttling strategy to be applied to team submissions.
+                //The following shows several alternative strategy selections, with only one being enabled.
+                //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
+                // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
+                // GUI (such as the PC2 Admin)
+    //            IThrottleStrategy strategy = new AcceptAllStrategy();
+    //            IThrottleStrategy strategy = new RejectAllStrategy();
+                IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest, 6);
+    //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+
+                accept = strategy.accept(run);
+            }
         }
 
         if (accept) {
