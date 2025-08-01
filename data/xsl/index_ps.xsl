@@ -139,6 +139,7 @@
 			<td>Submitted/1st Yes/Total Yes</td>
 			<td></td>
 			<td></td>
+			<td></td>
 			<xsl:call-template name="problemsummary"/>
 			<td><xsl:value-of select="@totalAttempts"/>/<xsl:value-of select="@totalSolved"/></td>
         </tr>
