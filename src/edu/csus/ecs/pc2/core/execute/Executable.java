@@ -31,7 +31,6 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
-import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -43,7 +42,6 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -54,6 +52,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.graders.LegacyGrader;
 import edu.csus.ecs.pc2.imports.ccs.TestDataGroup;
@@ -712,7 +711,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             
             //if the contest is "point-scoring", send the test case results to the "grader", which examines the scores 
             // for each test case and returns an overall score and judgement for the submission (Run)); 
-            // save this score in a JudgementRecord in the Run.
+            // save this result in the ExecutionData object so that it can later be put into a JudgementRecord in the Run.
             // Also, write the grader results (testDataGroup name, score, and judgement) to a file in the "execute directory"
             // to make it easier to see what was produced by the grader.
             if (contest.getContestInformation().isScoreboardTypeScore()) {
@@ -720,53 +719,62 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 //write the grader results to a file in the execute directory
                 String graderResultFileName = prefixExecuteDirname("graderResult.run." + run.getNumber());
                 writeGraderResultsToFile(run, graderResultFileName);
-                
-                
-                //declare the result values to be put into a JudgementRecord in the Run
-                String judgementAcronymString = null;
+               
+                //declare the result values to be put into the ExecutionData for the Run
+                CLICS_JUDGEMENT_ACRONYM judgementAcronym = null;
                 double score = 0;
                 
                 //invoke the grader and get back a "score result" (the grader-based merger of the results of all test cases)
                 String runResult = getPointScoringRunResult(run);
-                
-                //make sure we got back a valid runResult
+               
+                //The returned String ("runResult") should have two fields:  a string representing the judgement (e.g. "AC" or "WA"),
+                //followed by whitespace, followed by a string representing the score.
+                //Make sure we got back a valid runResult
                 if (runResult == null) {
                     log.log(Log.SEVERE, "Error during execute(); got back null for point-scoring result");
-                    judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.name();
+                    judgementAcronym = CLICS_JUDGEMENT_ACRONYM.JE;
                 } else {
                     //try to pull two legit values out of the runResult
                     String[] values = runResult.trim().split("\\s+");
                     if (values.length != 2) {
                         log.log(Log.SEVERE, "Format error in point-scoring result: '" + runResult + "'");
-                        judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.name();
+                        judgementAcronym = CLICS_JUDGEMENT_ACRONYM.JE;
                     } else {
-                        //we have two fields; save them
-                        judgementAcronymString = values[0].toUpperCase() ; //accept upper or lower case for judgment
+                    	//get the judgement string returned by the grader
+                        String graderJudgementAcronymString = values[0].toUpperCase().trim();
+                        
+                        //convert the grader judgement string into the corresponding CLICS_JUDGEMENT_ACRONYM enum element 
+                        try {
+                            judgementAcronym = Enum.valueOf(CLICS_JUDGEMENT_ACRONYM.class, graderJudgementAcronymString);
+                        } catch (IllegalArgumentException e1) {
+                            log.log(Log.SEVERE, "Unknown judgement acronym string from grader: '" + graderJudgementAcronymString + "'");
+                            judgementAcronym = CLICS_JUDGEMENT_ACRONYM.JE;
+                        }
+                    
+                        //parse the String score returned by the grader into a numeric object
                         try {
                             score = Double.parseDouble(values[1]);
                         } catch (NumberFormatException e) {
                             log.log(Log.SEVERE, "Format error in point-scoring score: '" + values[1] + "'");
-                            judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.name();
-                            throw new RuntimeException("Format error in point-scoring score: '" + values[1] + "'");
+                            judgementAcronym = CLICS_JUDGEMENT_ACRONYM.JE;
                         }
                     }
                 }
-                
 
-                //we have a score and a judgement acronym; add them to the ExecutionData (they will subsequently be
-                // fetched from there by the AutoJudgingMonitor class, which will insert them into a JudgementRecord
-                // and then invoke controller.submitRunJudgement() passing the JudgementRecord to the Server which will
-                // add it to the judgementList for the Run).
+                //we have a score and a judgement acronym; add them to the ExecutionData 
+                //(they will subsequently be fetched from there by the AutoJudgingMonitor class, 
+                // which will insert them into a JudgementRecord and then invoke controller.submitRunJudgement() passing the 
+                // JudgementRecord to the Server which will add it to the judgementList for the Run).
                 
                 executionData.setScore(score);
+                executionData.setJudgementAcronym(judgementAcronym);
                 
-                //make sure the judgement acronym is one we know about
-                if (!isValidJudgementAcronymString(judgementAcronymString)) {
-                    //the grader's acronym string isn't a valid acronym; log this as an error in the judging process
-                    log.log(Log.SEVERE, "Unknown judgement acronym string returned by Grader: '" + judgementAcronymString + "'");
-                    judgementAcronymString = CLICS_JUDGEMENT_ACRONYM.JE.name();
-                }
-                executionData.setJudgementAcronymString(judgementAcronymString);
+                //update the validation result with the judgement "description" (for pass-fail contests this has already been done
+                // by the code above which calls executionData.setValidationResults() (in method executeAndValidateDataSet()).
+                //However, for point-scoring we need set the ValidationResults based on the runResult returned by the grader
+                // (via the call to getPointScoringRunResult(), above).
+                String judgementDescription = judgementAcronym.getValue();  //getValue() returns the "description", e.g. "Accepted"
+                executionData.setValidationResults(judgementDescription);
                                                 
             } //end if(isScoreboardTypeScore())
 
@@ -783,35 +791,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     }
 
     /**
-     * Compares the specified judgementAcronymString with each of the enum elements defined in {@link CLICS_JUDGEMENT_ACRONYM}
-     * and returns true if the judgementAcronymString matches the declared name of any enum element, false if not.
-     * 
-     * The comparison is done in a case-insensitive manner; that is it actually compares the name().toUpperCase() version of
-     * the enum element value with the upper-case version of the specified judgementAcronymString.
-     * 
-     * Note:  the {@link CLICS_JUDGEMENT_ACRONYM} enum defines a private field called "name" associated with each enum element, 
-     * and this value is returned by calling the enum function "getValue()". This private field called "name" 
-     * should not be confused with the value returned by the enum name() function; in fact, what getValue() 
-     * returns is the String which was passed into the enum constructor as each enum element was
-     * defined (for example, AC.getValue() returns "Accepted" for the enum element whose name() is "AC").
-     * It's unfortunate that the enum defines a field called "name" when name() is an implicit enum function which 
-     * returns something different from the data in the "name" field.
-     * 
-     * @param judgementAcronymString a String defining a possible {@link CLICS_JUDGEMENT_ACRONYM} element name.
-     * 
-     * @return true if the specified judgementAcronymString matches (case-insensitively) the name() of a {@link CLICS_JUDGEMENT_ACRONYM};
-     *          false if not.
-     */
-    private boolean isValidJudgementAcronymString(String judgementAcronymString) {
-        for (CLICS_JUDGEMENT_ACRONYM clicsAcronym : CLICS_JUDGEMENT_ACRONYM.values()) {
-            if (clicsAcronym.name().toUpperCase().equals(judgementAcronymString.toUpperCase())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Writes a series of lines to the specified file, where each line contains the grader result
      * for one test case.
      * Each grader result line in the file contains the following values separated by a space:
@@ -824,12 +803,16 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      */
     private void writeGraderResultsToFile(Run run, String graderResultFileName) {
         
-        //"try with resources" ensures writer is closed when done
+        //"try with resources" ensures writer is closed when done. 
+        //"new FileWriter(String)" will overwrite the file if it already exists.
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(graderResultFileName))) {
-            //get the test cases out of the Run
-            RunTestCase [] testCases = run.getRunTestCases();
+            
+            //get the test cases for the most recent Run execution out of the Run
+            RunTestCase [] testCases = RunUtilities.getMostRecentTestCaseResults(run);
+            
             //process each test case
             for (RunTestCase testCase : testCases) {
+                
                 //get the result data out of the current test case
                 double score = testCase.getScore();
                 CLICS_JUDGEMENT_ACRONYM acronym = testCase.getJudgementAcronym();
@@ -849,23 +832,31 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     /**
      * Returns a String giving the "point-scoring result" for this Run (only relevant for "point-scoring" contests).
      * The returned string contains two space-separated fields:  a Judgement Acronym and a "points scored" double value. 
-     * The "points scored" value is determined by recursively examining all the {@link RunTestCase}s 
-     * in the Run using a "Grader" to determine a score for each test case and subsequently
+     * The "points scored" value is determined by recursively examining all the {@link RunTestCase}s for the most recent
+     * execution of the Run, using a "Grader" to determine a score for each test case and subsequently
      * to merge the resulting scores together based on the "scoring attributes" associated
      * with the problem data files.
      * 
      * @param run the Run whose point-scoring result is to be calculated.
      * 
-     * @return a String containing two space-separated fields: judgement acronym and score, or
+     * @return a String containing two white-space separated fields: judgement acronym and score, or
      * null if an error occurred during the grading process.
      */
     private String getPointScoringRunResult(Run run) {
+
+        //we only want to look at the results for the most recent execution of the run
+        RunTestCase [] testCases = RunUtilities.getMostRecentTestCaseResults(run);
         
-        //"getTestDataGroupResult()" == "recurse(tdg)"
-        //  This may not be sufficient.  We want to be sure we start at the root.  testcases[0] should be
-        //  "sample" and its parent should be root.  We should probably put a loop here to walk back up until
-        //  getParent() == null, then use that TDG.  But, I think this SHOULD be ok? -- JB
-        String runResult = getTestDataGroupResults(run.getRunTestCases()[0].getTestDataGroup().getParent());
+        //find the root of the testDataGroup tree
+        TestDataGroup root = testCases[0].getTestDataGroup();
+        while (root.getParent() != null) {
+            root = root.getParent();
+        }
+        
+        //recursively walk the TestDataGroup tree, invoking the grader (bottom-up) at each level
+        // to get back a combined result for the entire test data group
+        String runResult = getTestDataGroupResults(root);
+        
         return runResult;
     }
 
@@ -974,15 +965,16 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * @return an ArrayList containing the test case results for test cases at the level of the specified {@link TestDataGroup}.
      */
     private ArrayList<String> getGroupTestCaseResults(TestDataGroup tdg) {
-        //a list of test cases declared directly in the specfied TestDataGroup
+        
+        //start a list of test cases declared directly in the specfied TestDataGroup
         ArrayList<String> tdgTestCaseResults = new ArrayList<String>();
         boolean breakOnReject = tdg.isOnRejectBreak();
         
-        //check every test case in the run
-        for (RunTestCase testCase : run.getRunTestCases()) {
+        //check every test case in the run (that is, every test case for the most recent execution of the Run)
+        for (RunTestCase testCase : RunUtilities.getMostRecentTestCaseResults(run)) {
             //check if the current test case belongs to the specified TestDataGroup
             if (testCase.getTestDataGroup()==tdg) {
-                //yes, the test case belongs to the test data group; add its result to the list
+                //yes, the test case belongs to the test data group; add its result acronym string and score to the list
                 String testCaseResult = testCase.getJudgementAcronym().toString() + " " + testCase.getScore();
                 tdgTestCaseResults.add(testCaseResult);
                 // Stop adding to list on first failed case, if that's what is wanted.
@@ -2641,7 +2633,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             log.info("team process returned exit code " + exitCode);
 
-            //TODO: comment-out this debug statement
             //System.out.println ("team process returned exit code " + exitCode);
 
             //get rid of the TLE timer (whether the TLE-kill task has been fired or not)
