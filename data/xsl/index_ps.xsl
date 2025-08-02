@@ -429,6 +429,7 @@
 				<xsl:attribute name="href">problems/<xsl:number format="A" value="@id"/>.pdf</xsl:attribute>
 				<xsl:attribute name="target">_blank</xsl:attribute>
 				<xsl:number format="A" value="@id"/>
+				<xsl:if test="@maxScore"> (<xsl:value-of select="@maxScore"/>)</xsl:if>
 			</a>
 			&#160;&#160;&#160;&#160;<br/>
         </th>
