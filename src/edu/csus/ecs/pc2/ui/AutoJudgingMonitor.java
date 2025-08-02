@@ -11,6 +11,7 @@ import java.util.TimeZone;
 
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
@@ -590,9 +591,22 @@ public class AutoJudgingMonitor implements UIPlugin {
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), solved, true, true);
                 judgementRecord.setValidatorResultString(results);
                 
+                //if it's a point-scoring contest, put the score and the judgement into the JudgementRecord
                 if (contest.getContestInformation().isScoreboardTypeScore()) {
-                    judgementRecord.setJudgementAcronym(executionData.getJudgementAcronymString());
+                    
                     judgementRecord.setScore(executionData.getScore());
+                    
+                    CLICS_JUDGEMENT_ACRONYM acronym = executionData.getJudgementAcronym();
+                    String judgementDescription ;
+                    if (acronym != null) {
+                        judgementDescription = acronym.getValue();
+                    } else {
+                        judgementDescription = "Undefined";
+                    }
+                    boolean acronymRecognized = judgementRecord.setJudgementAcronym(judgementDescription);
+                    if (!acronymRecognized) {
+                        warn("Unrecognized judgement acronym description string: '" + judgementDescription + "'");
+                    }
                 }
 
             } else {
