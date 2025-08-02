@@ -485,15 +485,19 @@ public class JudgementRecord implements Serializable, IGetDate {
     }
 
     /**
-     * Sets the {@link CLICS_JUDGEMENT_ACRONYM} based on the received judgement acronym string.
+     * Sets the {@link CLICS_JUDGEMENT_ACRONYM} based on the received judgement acronym description string,
+     * which is expected to be the description returned by {@link CLICS_JUDGEMENT_ACRONYM#getValue()}.
+     * For example, the description string associated with {@link CLICS_JUDGEMENT_ACRONYM.AC} is "Accepted".
      * 
-     * @param a String representing the {@link CLICS_JUDGEMENT_ACRONYM} to be saved in this JudgementRecord.
+     * @param judgementDescription - a String containing the "Description" associated with the 
+     *              {@link CLICS_JUDGEMENT_ACRONYM} to be saved in this JudgementRecord (for example,
+     *              "Accepted" for {@link CLICS_JUDGEMENT_ACRONYM.AC}).
      * 
-     * @return true if the specified judgementAcronymString is a valid representation of a {@link CLICS_JUDGEMENT_ACRONYM};
-     *          false if not.
+     * @return true if the specified judgementDescription is a valid description associated with a 
+     *                  {@link CLICS_JUDGEMENT_ACRONYM}; false if not.
      */
-    public boolean setJudgementAcronym(String judgementAcronymString) {
-        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementAcronymString);
+    public boolean setJudgementAcronym(String judgementDescription) {
+        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementDescription);
         if (acronym != null) {
             this.judgementAcronym = acronym;
             return true;
