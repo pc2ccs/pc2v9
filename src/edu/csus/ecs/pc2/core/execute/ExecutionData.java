@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.execute;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -68,7 +69,7 @@ public class ExecutionData implements Serializable {
     
     //fields associated with "point-scoring" contests
     private double score ;
-    private String judgementAcronymString ;
+    private CLICS_JUDGEMENT_ACRONYM judgementAcronym ;
 
     /**
      * @return Returns the validationReturnCode.
@@ -378,12 +379,12 @@ public class ExecutionData implements Serializable {
         this.score = score;
     }
 
-    public String getJudgementAcronymString() {
-        return judgementAcronymString;
+    public CLICS_JUDGEMENT_ACRONYM getJudgementAcronym() {
+        return judgementAcronym;
     }
 
-    public void setJudgementAcronymString(String judgementAcronymString) {
-        this.judgementAcronymString = judgementAcronymString;
+    public void setJudgementAcronym(CLICS_JUDGEMENT_ACRONYM judgementAcronym) {
+        this.judgementAcronym = judgementAcronym;
     }
 
     @Override
