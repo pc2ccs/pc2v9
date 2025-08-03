@@ -94,15 +94,6 @@
 					<tr class="even">
 						<td><xsl:attribute name="class">bronze</xsl:attribute>Bronze Medalists</td>
 					</tr>
-					<tr class="even">
-						<td><xsl:attribute name="class">highest</xsl:attribute>Highest Honors</td>
-					</tr>
-					<tr class="even">
-						<td><xsl:attribute name="class">high</xsl:attribute>High Honors</td>
-					</tr>
-					<tr class="even">
-						<td><xsl:attribute name="class">honors</xsl:attribute>Honors</td>
-					</tr>
 				</xsl:if>
 				<tr>
 					<td><xsl:attribute name="class">yes</xsl:attribute>Solved</td>
