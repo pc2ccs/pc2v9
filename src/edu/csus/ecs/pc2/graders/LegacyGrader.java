@@ -285,9 +285,9 @@ public class LegacyGrader {
         // Only calculate judgment if there were no errors
         if(graderError == 0) {
             // Check for no failures or always accept mode or optional flag "any" accepted case
-            if(!anyFailures || verdictMode == VerdictMode.always_accept || (acceptIfAnyAccepted && scoreCount > 0)) {
+            if(!anyFailures || verdictMode == VerdictMode.always_accept || (acceptIfAnyAccepted && sawJudgment[0])) {
                 if(scoreCount == 0) {
-                    // this there were no judgments in the input
+                    // this means there were no judgments in the input
                     System.err.println("LegacyGrader: No judgments in the input.");
                     graderError = GRADER_ERROR_NO_TEST_CASES;
                 } else {
