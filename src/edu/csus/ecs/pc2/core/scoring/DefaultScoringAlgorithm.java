@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
