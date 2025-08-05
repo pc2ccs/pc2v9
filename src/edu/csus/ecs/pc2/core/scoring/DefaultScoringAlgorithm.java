@@ -1098,7 +1098,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problemMemento.putString("title", problems[i].getDisplayName());
             problemMemento.putString("color", problems[i].getColorName());
             problemMemento.putString("rgb", problems[i].getColorRGB());
-            problemMemento.putString("url", "problems/" + problems[i].getLetter() + ".pdf");           
             problemMemento.putLong("attempts", problemAttempts[id]);
             if (problemAttempts[id] > 0) {
                 grandTotalProblemAttempts++;
