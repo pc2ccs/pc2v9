@@ -3,9 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -390,7 +388,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         countPreliminaryJudgements = theContest.getContestInformation().isPreliminaryJudgementsUsedByBoard();
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
-        IMemento summaryMememento = createSummaryMomento (theContest, mementoRoot);
+        IMemento summaryMemento = createSummaryMemento (theContest, mementoRoot);
 
         AccountList accountList = getAccountList(theContest);
         Problem[] allProblems = theContest.getProblems();
@@ -411,69 +409,22 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problems[p-1] = theContest.getProblem(type);
         }
 
-        summaryMememento.putLong("problemCount", problems.length);
+        summaryMemento.putLong("problemCount", problems.length);
         
         Site[] sites = theContest.getSites();
-        summaryMememento.putInteger("siteCount", sites.length);
+        summaryMemento.putInteger("siteCount", sites.length);
         
         Group[] groups = theContest.getGroups();
         boolean bGroupsExcluded = false;
         if (groups != null) {
-            bGroupsExcluded = dumpGroupList(groups, summaryMememento, wantedGroups, accountList);
+            bGroupsExcluded = dumpGroupList(groups, summaryMemento, wantedGroups, accountList);
         }
-        
-        //The following block of (commented-out) code sets the "colors" in the "colorlist" property of the "standingsHeader".
-        //However, it gets them from the "BalloonSettings" object in the contest object -- but there does 
-        // not appear to be any place that SETS those colors.  The "BalloonSettings" class was created as
-        // part of the Scoreboard Client's support for different colors of balloons for different sites.
-        // Since the Scoreboard Client balloon support has been pretty much superseded by using the ICPCTools
-        // "Balloon Manager", and also balloon colors are now almost always loaded via YAML problemset files,
-        // it probably makes more sense to deprecate PC2 BalloonSettings and instead
-        // to extract balloon colors directly from the problems.
-        // NB: there does remain a question as to what effect this has on PC2 multi-site support for different
-        // balloon colors at different sites (for the same problem).  However, that too seems to be a no-longer
-        // used concept.
-        // Accordingly, the following was commented out and replaced by the code (below) which inserts balloon
-        // colors into the XML directly from the Problem descriptions.   jlc 5/25
-//        BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
-//        if (balloonSettings != null) {
-//            Arrays.sort(balloonSettings, new BalloonSettingsComparatorbySite());
-//            IMemento listMemento = summaryMememento.createChild("colorList");
-//            for (int i = 0; i < balloonSettings.length; i++) {
-//                int id = i + 1;
-//                IMemento balloonSettingsMemento = listMemento.createChild("colors");
-//                balloonSettingsMemento.putInteger("id", id);
-//                dumpBalloonSettings(balloonSettings[i], problems, balloonSettingsMemento);
-//            }
-//        }
-        
-        //create the "colorList" element in the "standingsHeader" element
-        IMemento colorListMemento = summaryMememento.createChild("colorList");
-        
-        //add a "colors" element for each site
-        for (Site site : sites) {
-            // create the "colors" element for the current site
-            IMemento colorsMemento = colorListMemento.createChild("colors");
-            
-            // use the site number for this site as the id for this set of colors
-            int id = site.getSiteNumber();
-            colorsMemento.putInteger("id", id);
-            //add the site number explicitly (legacy; allows later changing the "id" to something other than site number)
-            colorsMemento.putInteger("siteNum",id);
-            
-            // add a "problem" element for each problem for the current site.  
-            // (Note that this is using the "problems" array for THIS site, so all site colors will be set 
-            // in the XML to the color of THIS site (not "the current site" mentioned in the outer for-loop)).
-            // TODO: pull the problems from each separate site and insert that site's colors into the XML.
-            for (Problem prob : problems) {
-                IMemento problemMemento = colorsMemento.createChild("problem");
-                problemMemento.putString("id", prob.getElementId().toString());
-                problemMemento.putString("colorName", prob.getColorName());
-                problemMemento.putString("rgb", prob.getColorRGB());
-                problemMemento.putString("letter", prob.getLetter());
-                problemMemento.putString("url", "problems/" + prob.getLetter() + ".pdf");
-           }
-        }
+
+        //Note:  "problem" info, such as color, rgb, letter, etc. which used to be put into the summaryMemento here
+        // as part of a "colorList" attribute, are now inserted as separate <problem> blocks by method generateSummaryTotalsForProblem().
+        //Note also that generateSummaryTotalsForProblem() already existed and was inserting MOST of that information in the output already;
+        // the "colorList" processing code which used to be here was simply added to that method instead (adding internalId, letter, and
+        // url to the <problem> elements), avoiding duplication of problem description data in the output XML.
         
         if (runs == null) {
             // Note: we do not deal with divisionNumber here since
@@ -570,7 +521,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 treeMap.put(record, record);
             }
 
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMememento, bGroupsExcluded);
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMemento, bGroupsExcluded);
 
         } // mutex
 
@@ -578,7 +529,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         try {
             xmlString = mementoRoot.saveToString();
         } catch (IOException e) {
-            log.log(Log.WARNING,"Trouble saving momentoRoot to String ", e);
+            log.log(Log.WARNING,"Trouble saving mementoRoot to String ", e);
             xmlString = "";
         }
 //        System.out.println(xmlString);
@@ -638,19 +589,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         initializePermissions(theContest, clientId);
         return permissionList.isAllowed(type);
     }
-
-    //the following method was removed during upgrading of the colors output; see comments in method getStandings()   jlc 5/25
-//    private void dumpBalloonSettings(BalloonSettings balloonSettings, Problem[] problems, IMemento memento) {
-//        memento.putInteger("siteNum", balloonSettings.getSiteNumber());
-//        if (problems != null) {
-//            for (int i = 0; i < problems.length; i++) {
-//                int id = i + 1;
-//                IMemento problemMemento = memento.createChild("problem");
-//                problemMemento.putInteger("id", id);
-//                problemMemento.putString("color", balloonSettings.getColor(problems[i]));
-//            }
-//        }
-//    }
 
     /**
      * dumpGroupList - Creates XML mementos for each group.  If any groups are not included in the scoreboard
@@ -1085,19 +1023,23 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      *
      * @param problems
      * @param problemsIndexHash
-     * @param summaryMememento
+     * @param summaryMemento
      */
 
-    private void generateSummaryTotalsForProblem(Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, IMemento summaryMememento) {
+    private void generateSummaryTotalsForProblem(Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, IMemento summaryMemento) {
 
+        //TODO: should we be excluding problems marked as "not active"?
         for (int i = 0; i < problems.length; i++) {
             int id = i + 1;
             problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
-            IMemento problemMemento = summaryMememento.createChild("problem");
-            problemMemento.putInteger("id", id);
+            IMemento problemMemento = summaryMemento.createChild("problem");
+            problemMemento.putInteger("id", id);                                            //ordinal starting at 1
+            problemMemento.putString("internalId", problems[i].getElementId().toString());  //internal id, e.g. "a-899904259810471363"
             problemMemento.putString("title", problems[i].getDisplayName());
             problemMemento.putString("color", problems[i].getColorName());
+            problemMemento.putString("letter", problems[i].getLetter());
             problemMemento.putString("rgb", problems[i].getColorRGB());
+            problemMemento.putString("url", "problems/" + problems[i].getLetter() + ".pdf");
             problemMemento.putLong("attempts", problemAttempts[id]);
             if (problemAttempts[id] > 0) {
                 grandTotalProblemAttempts++;
@@ -1108,10 +1050,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 problemMemento.putLong("lastSolutionTime",problemLastTime[id]);
             }
         }
-        summaryMememento.putInteger("totalAttempts", grandTotalAttempts);
-        summaryMememento.putInteger("totalSolved", grandTotalSolutions);
-        summaryMememento.putInteger("problemsAttempted", grandTotalProblemAttempts);
-        summaryMememento.putInteger("totalTeams", grandTotalTeams);
+        summaryMemento.putInteger("totalAttempts", grandTotalAttempts);
+        summaryMemento.putInteger("totalSolved", grandTotalSolutions);
+        summaryMemento.putInteger("problemsAttempted", grandTotalProblemAttempts);
+        summaryMemento.putInteger("totalTeams", grandTotalTeams);
 
 
     }
@@ -1249,14 +1191,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     }
 
     /**
-     * Create Summary Momento.
+     * Create Summary Memento.
      *
      * This creates the standingsHeader block.  Later other
      * methods add problem summaries ("problem" blocks) to this block.
      *
      * @param mementoRoot
      */
-    private IMemento createSummaryMomento(IInternalContest contest, XMLMemento mementoRoot) {
+    private IMemento createSummaryMemento(IInternalContest contest, XMLMemento mementoRoot) {
         ContestInformation contestInformation = contest.getContestInformation();
         IMemento memento = mementoRoot.createChild("standingsHeader");
         String title = contestInformation.getContestTitle();
@@ -1267,9 +1209,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         VersionInfo versionInfo = new VersionInfo();
         memento.putString("systemName", versionInfo.getSystemName());
         memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
-        memento.putString("systemURL", versionInfo.getSystemURL());
+        memento.putString("systemURL", versionInfo.getSystemURL());  //TODO: fix this to return the proper URL (not a CSUS URL)
         memento.putString("currentDate", new Date().toString());
-        memento.putString("generatorId", "$Id$");
         // bug 1540
         String value = "Live (unfrozen) scoreboard";
         ContestTime contestTime = contest.getContestTime();
