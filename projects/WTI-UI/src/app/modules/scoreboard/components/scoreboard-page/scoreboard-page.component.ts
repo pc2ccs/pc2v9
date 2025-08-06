@@ -8,6 +8,13 @@ import * as Constants from 'src/constants';
 import { DEBUG_MODE } from 'src/constants';
 import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
 
+interface ProblemHeader {
+    label: string;
+    color: [number, number, number];
+    textColor: 'black' | 'white';
+    url: string;
+}
+  
 @Component({
 	templateUrl: './scoreboard-page.component.html',
 	styleUrls: ['./scoreboard-page.component.scss', '../../../../../styles/filter_table.scss']
@@ -18,7 +25,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	teamStandings: any = [];
 	numProblems: number = 0;
 	firstToSolveTimes: number[] = [];
-	problemDetailHeaders: [any] [] = [];
+	problemDetailHeaders: ProblemHeader[] = [];
 	
 	//TODO: provide support for more than 26 problems
 	//TODO: provide support for the possibility that problems are not listed in alphabetical order
@@ -176,26 +183,44 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	}
 	
 	/* Returns an array of elements, one for each problem, containing text label (problem letter),
-	 * RGB color value (for use as a background), and the optimum text color for the problem label.
+	 * RGB color value (for use as a background), the optimum text color for the problem label and a URL
+	 * for accessing the corresponding problem writeup.
 	 */
-	private getProblemDetailHeaders(standings:any) : [any] [] {
+	private getProblemDetailHeaders(standings:any) : ProblemHeader [] {
 		
 		const contestStandings = standings.contestStandings ;
 		//console.log("ContestStandings element:");
-		//console.log(contest);
+		//console.log(contestStandings);
 		
 		const standingsHeader = contestStandings.standingsHeader ;
 		//console.log("ContestStandings header element:");
-		//console.log(header);
-
-		const problemColors = standingsHeader.colorList.colors ;
+		//console.log(standingsHeader);
 		
-		const headers = problemColors.problem.map (problem => {
-				const color = this.hexToRgb(problem.rgb);
-				return {label: problem.letter, color:color, textColor: this.getBestTextColor(color), url: problem.url};
-			});
-			
-		return headers;
+		//get the "problem" array out of standingsHeader, or use an empty array ("[]"] if the problem array is null
+		const problems = standingsHeader.problem ?? [];
+		
+		//Build an array of problem detail headers by looking at every problem in the "problem" array
+  		const headers: ProblemHeader[] = problems
+  			//sanity check -- filter out any problems that don't have 'rbg' and 'url' and 'letter' fields.
+  			.filter((p: any) => p.rgb && p.url && p.letter)
+  			
+  			//map each selected problem into a ProblemHeader array element
+  			.map((p: any) => {
+  			    
+  			    //convert the hex color (e.g. "#00FF00") to an RGB array (like [R, G, B])
+      			const color = this.hexToRgb(p.rgb);
+  			    
+  			    //construct and return an object representing this problem, with letter, color (background color), textColor, and URL fields.
+      			return {
+        			label: p.letter,
+        			color,
+        			textColor: this.getBestTextColor(color),
+        			url: p.url
+      			};
+    		});
+		
+			//return an array where each element contains a {label,color,textColor,url} for one problem.
+			return headers;
 	}
 	
 		
@@ -246,6 +271,6 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
   	/** Return problem detail headers if contest is started, otherwise return an empty array.
   	 */
   	get visibleProblemDetailHeaders() {
-  		return this.isContestStarted() ? this.problemDetailHeaders : [];
+  		return this.isContestStarted() ? this.problemDetailHeaders as ProblemHeader[] : [];
 	}
 }
