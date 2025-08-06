@@ -15,7 +15,8 @@
                 	}">
                 	<a [href]="isContestStarted() ? item.url : null" 
                 			(click)="onLinkClick($event, item.url)" 
-                			target="_blank" style="color: inherit; text-decoration: none; display: block;">
+                			target="_blank" 
+                			class="problem-writeup-link" >
     					{{ item.label }}
   					</a>
 
