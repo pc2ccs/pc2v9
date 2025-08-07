@@ -24,7 +24,6 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private _unsubscribe = new Subject<void>();
 	teamStandings: any = [];
 	numProblems: number = 0;
-	firstToSolveTimes: number[] = [];
 	problemDetailHeaders: ProblemHeader[] = [];
 	
 	//TODO: provide support for more than 26 problems
@@ -87,7 +86,6 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 				//console.log(standings);
 				this.teamStandings = this.getTeamStandingsArray(standings);
 				this.numProblems = this.getNumProblems(standings);
-				this.firstToSolveTimes = this.getFirstToSolveTimes(standings);
 				this.problemDetailHeaders = this.getProblemDetailHeaders(standings);
 			});
 	}
@@ -137,52 +135,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		return problemCount;
 	}
 	
-	/**
-	 * Pull the first-to-solve times (aka "best solution times") out of the received JSON, load them into an array
-	 * (assigning -1 for unsolved problems) and return the array of best solution times.
-	 */
-	private getFirstToSolveTimes(standings: any) : number[] {
-
-		const contestStandings = standings.contestStandings ;
-		//console.log("ContestStandings element:");
-		//console.log(contest);
 		
-		const header = contestStandings.standingsHeader ;
-		//console.log("ContestStandings header element:");
-		//console.log(header);
-		
-		let bestSolutionTimes: number[] = [] ;
-
-		//get each problem out of the header array of problems (which is named 'problem', i.e. singular)
-		for (let problem of header.problem) {
-			//for this problem, check to see if it has a "best solution time"
-			if (problem.bestSolutionTime != null) {
-				//yes, it has been solved; save the best solution time
-				bestSolutionTimes.push(problem.bestSolutionTime);
-			} else {
-				//no, it hasn't been solved; record -1 as the "solution time"
-				bestSolutionTimes.push(-1);
-			}
-		}
-		
-		return bestSolutionTimes;
-	}
-	
-	/*  Returns the best solution time for the problem whose given "id string" starts with the
-	 *  problem letter.  Note that the problem solution time will be -1 if the problem has not
- 	 *  been solved.
-	*/
-	private getBestSolutionTime(problemIdString: string) : number {
-		
-		//get the upper-case of the first char of the problemIdString, WHICH IS ASSUMED TO BE THE PROBLEM LETTER (!!)
-		const problemLetter : string = problemIdString.charAt(0).toUpperCase();
-		//map problem letters A,B... to indexes 0,1,...
-		const problemNumber = problemLetter.charCodeAt(0) - 65 ;  //'A'.charCodeAt(0) === 65
-		//return the solution time for the specified problem (-1 if not solved)
-		return this.firstToSolveTimes[problemNumber] ;
-	}
-	
-	/* Returns an array of elements, one for each problem, containing text label (problem letter),
+	/** Returns an array of elements, one for each problem, containing text label (problem letter),
 	 * RGB color value (for use as a background), the optimum text color for the problem label and a URL
 	 * for accessing the corresponding problem writeup.
 	 */
