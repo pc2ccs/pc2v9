@@ -5,3 +5,23 @@
   flex-direction: column;
   flex: 1;
 }
+
+%submission-common-style {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.yes {
+	@extend %submission-common-style;
+	background-color: #7fFF7f;
+}
+
+.no {
+	@extend %submission-common-style;
+	background-color: #FF6060;
+}
+
+.pending {
+	@extend %submission-common-style;
+	background-color: #3E9AE9;
+}

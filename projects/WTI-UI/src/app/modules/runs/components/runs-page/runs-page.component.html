@@ -63,7 +63,12 @@
                 <td>{{ run.id }}</td>
                 <td>{{ run.language }}</td>
                 <td>{{ run.problem }}</td>
-                <td>
+
+                <td [ngClass]="{'yes' : problem.isSolved, 
+ 								'no' : !problem.isSolved && problem.attempts>0 && !problem.isPending,
+ 								'pending' : !problem.isSolved && problem.isPending
+ 								}">
+                
                     {{ run.judgement }}
                     <ng-container *ngIf='run.isPreliminary'>
                         (Preliminary)
