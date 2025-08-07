@@ -34,7 +34,7 @@
     				<td *ngFor="let problem of team.problemSummaryInfo"
         				style="text-align: center; white-space: nowrap;"
         				[ngClass]="{
-          					'fts': problem.isSolved && (problem.solutionTime <= getBestSolutionTime(problem.problemId)),
+           					'fts': problem.isSolved && problem.fts,
           					'yes': problem.isSolved,
           					'no': !problem.isSolved && problem.attempts > 0 && !problem.isPending,
           					'pending': !problem.isSolved && problem.isPending
