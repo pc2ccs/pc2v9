@@ -11,6 +11,36 @@
 				<xsl:value-of select="/contestStandings/standingsHeader/@title"/>
 			</TITLE>
 			<link rel="stylesheet" type="text/css" href="standings.css"/>
+			<script type="text/javascript">
+				<![CDATA[
+					function rgbStringToArray(str) {
+						// Remove 'rgb(' and ')' and split by comma
+						return str
+							.replace(/[^\d,]/g, '') // Remove non-digits and non-commas
+							.split(',')
+							.map(Number);           // Convert each to a number
+					}
+					function getLuminance(rgb) {
+						function channel(c) {
+							var v = c / 255;
+							return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+						}
+						return 0.2126 * channel(rgb[0]) + 0.7152 * channel(rgb[1]) + 0.0722 * channel(rgb[2]);
+					}
+					function getBestTextColor(rgb) {
+						return getLuminance(rgb) > 0.179 ? 'black' : 'white';
+					}
+					window.addEventListener('DOMContentLoaded', function() {
+						document.querySelectorAll('th[style] a.problem-link-auto').forEach(function(a) {
+							var th = a.closest('th');
+							if (th && th.style.background) {
+								var rgb = rgbStringToArray(th.style.background);
+								a.style.color = getBestTextColor(rgb);
+							}
+						});
+					});
+				]]>
+			</script>
 			<META HTTP-EQUIV="REFRESH" CONTENT="60;"/>
 			<META HTTP-EQUIV="EXPIRES" CONTENT="0"/>
 			<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"/>
@@ -415,6 +445,7 @@
 			<a>
 				<xsl:attribute name="href">problems/<xsl:number format="A" value="@id"/>.pdf</xsl:attribute>
 				<xsl:attribute name="target">_blank</xsl:attribute>
+				<xsl:attribute name="class">problem-link-auto</xsl:attribute>
 				<xsl:number format="A" value="@id"/>
 			</a>
 			&#160;&#160;&#160;&#160;<br/>
