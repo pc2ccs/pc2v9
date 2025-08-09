@@ -445,7 +445,6 @@
 		<xsl:variable name="i" select="position()" />
 		<th>
 			<xsl:attribute name="style">background: <xsl:value-of select="@rgb"/></xsl:attribute>
-			&#160;&#160;&#160;&#160;
 			<a>
 				<xsl:attribute name="href">problems/<xsl:number format="A" value="@id"/>.pdf</xsl:attribute>
 				<xsl:attribute name="target">_blank</xsl:attribute>
@@ -453,7 +452,6 @@
 				<xsl:number format="A" value="@id"/>
 				<xsl:if test="@maxScore"> (<xsl:value-of select="@maxScore"/>)</xsl:if>
 			</a>
-			&#160;&#160;&#160;&#160;<br/>
         </th>
     </xsl:for-each>
 </xsl:template>
