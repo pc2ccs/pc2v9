@@ -1535,8 +1535,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     // get the judgment out of the feedback file
                     String judgement = readFileAsString(judgementFileName);
 
-                    // Make sure the judgment is in our list of judgments and adjust if necessary
-                    judgement = mapCLICSValidatorJudgmentToDefinedJudgments(judgement, exitCode);
                     //put the judgement from the validator into the executionData object
                     executionData.setValidationResults(judgement);
                     log.info("Saving CLICS Validator judgement '" + judgement + "'");
@@ -1569,70 +1567,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             log.warning("No CLICS validator feedback directory named '" + feedbackDirPath + "' found");
             saveDefaultClicsValidatorResult(exitCode);
         }
-    }
-
-    /**
-     * Maps a clics judgment string returned by a clics validator into a configured judgment display name.
-     * We first look for an exact match in the configure list of judgments.  If we find it, we return the original string.
-     * Otherwise, we'll see if we found a case insensitive match (eg, Wrong Answer == wrong answer).  If so, use that.
-     * If no match is found using either of the above techniques, then use the configured display names for AC
-     * or WA as to whether the validator exit code was success (42) or failure (43).  If it's an unknown exitCode,
-     * we return the original judgment string.
-     *
-     * @param judgment string return by the CLICS validator
-     * @param exitCode system exit code from the CLICS validator (42 or 43, hopefully)
-     * @return closest match to configured judgments
-     */
-    private String mapCLICSValidatorJudgmentToDefinedJudgments(String judgment, int exitCode) {
-        Judgement[] judgements = getContest().getJudgements();
-        String judgmentDisplay;
-        String caseInsensitiveMatch = null;
-        String acJudgment = null;
-        String waJudgment = null;
-
-        // Go through all configured judgments and see if the supplied judgment matches any of them.
-        // If so, we found it and it's good as is (just return it).
-        // While we go through the loop, remember if a case insensitive compare of the judgment string
-        // matches, if so, remember that, because if nothing else matches, we'll use that.
-        // Also, remember the judgment strings for "AC" and "WA", as we may need though if no match
-        // at all is found.
-        for(Judgement j : judgements) {
-            judgmentDisplay = j.getDisplayName();
-            // Exact match found?
-            if(judgmentDisplay.equals(judgment)) {
-                return(judgment);
-            }
-            // Remember if a case insensitive compare worked
-            if(judgmentDisplay.equalsIgnoreCase(judgment)) {
-                caseInsensitiveMatch = judgmentDisplay;
-            }
-            if(j.getAcronym().equals(Judgement.ACRONYM_ACCEPTED)) {
-                acJudgment = j.getDisplayName();
-            } else if(j.getAcronym().equals(Judgement.ACRONYM_WRONG_ANSWER)) {
-                waJudgment = j.getDisplayName();
-            }
-        }
-        // If not match at all, use exit code
-        if(caseInsensitiveMatch == null) {
-            if(exitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_SUCCESS_EXIT_CODE) {
-                if(acJudgment != null) {
-                    judgment = acJudgment;
-                } else {
-                    // This is very bad, Tammy.  Best guess.
-                    judgment = "accepted";
-                }
-            } else if(exitCode == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE) {
-                if(waJudgment != null) {
-                    judgment = waJudgment;
-                } else {
-                    // This is very bad, Tammy.  Best guess.
-                    judgment = "wrong answer";
-                }
-            }
-        } else {
-            judgment = caseInsensitiveMatch;
-        }
-        return(judgment);
     }
 
     /**
