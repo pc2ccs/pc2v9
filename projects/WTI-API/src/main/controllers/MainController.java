@@ -14,7 +14,6 @@ import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.implementation.Contest;
-import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
 import edu.csus.ecs.pc2.core.log.Log;
 import emptyObjs.EmptyLanguage;
 import emptyObjs.EmptyProblem;
