@@ -1033,8 +1033,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             int id = i + 1;
             problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
             IMemento problemMemento = summaryMemento.createChild("problem");
-            problemMemento.putInteger("id", id);                                            //ordinal starting at 1
-            problemMemento.putString("internalId", problems[i].getElementId().toString());  //internal id, e.g. "a-899904259810471363"
+            problemMemento.putInteger("id", id);  //ordinal starting at 1
+            
+            //the following was (probably) added when BalloonSettings were removed; BalloonSettings was creating
+            // a variable named "id" and this was probably an attempt at renaming that variable.
+            // It's likely that no other code is actually using "internalId", although it MIGHT be used
+            // somewhere in the WTI...it's likely not needed any more
+            //problemMemento.putString("internalId", problems[i].getElementId().toString());  //internal id, e.g. "a-899904259810471363"
+
             problemMemento.putString("title", problems[i].getDisplayName());
             problemMemento.putString("color", problems[i].getColorName());
             problemMemento.putString("letter", problems[i].getLetter());
