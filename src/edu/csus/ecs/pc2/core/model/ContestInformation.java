@@ -74,6 +74,12 @@ public class ContestInformation implements Serializable{
     private long maxOutputSizeInBytes = Constants.DEFAULT_MAX_OUTPUT_SIZE_K * 1024;
 
     /**
+     * Global setting for maximum source size allowed for a submission.
+     * TODO: allow this value to be overridden on a per-problem basis.
+     */
+    private long maxSourceSizeInBytes = Constants.DEFAULT_MAX_SOURCE_SIZE_K * 1024;
+
+    /**
      * This is a list of the judgement notification end of contest control settings.
      *
      */
@@ -353,6 +359,9 @@ public class ContestInformation implements Serializable{
             if (maxOutputSizeInBytes != contestInformation.getMaxOutputSizeInBytes()){
                 return false;
             }
+            if (maxSourceSizeInBytes != contestInformation.getMaxSourceSizeInBytes()){
+                return false;
+            }
             if (!teamScoreboardDisplayFormat.equals(contestInformation.getTeamScoreboardDisplayFormat())) {
                 return false;
             }
@@ -534,6 +543,25 @@ public class ContestInformation implements Serializable{
      */
     public void setMaxOutputSizeInBytes(long maxOutputSizeInBytes) {
         this.maxOutputSizeInBytes = maxOutputSizeInBytes;
+    }
+
+    /**
+     * This method returns the global maximum file size for source submission files, in BYTES.
+     *
+     * @return maximum source file size in bytes.
+     */
+    public long getMaxSourceSizeInBytes() {
+        return maxSourceSizeInBytes;
+    }
+
+    /**
+     * This method sets the global maximum size for a source submission, in BYTES.
+     *
+     * @param maxSourceSizeInBytes
+     *
+     */
+    public void setMaxSourceSizeInBytes(long maxSourceSizeInBytes) {
+        this.maxSourceSizeInBytes = maxSourceSizeInBytes;
     }
 
     /**

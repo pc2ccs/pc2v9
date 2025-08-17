@@ -27,6 +27,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 
+import edu.csus.ecs.pc2.clics.API202306.SubmitPostSizeLimitFilter;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.JudgementLoader;
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -717,6 +718,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
+        Object maxSourceSize = fetchObjectValue(content, MAX_SOURCE_SIZE_K_KEY);
+        if (maxSourceSize != null) {
+
+            if (maxSourceSize instanceof Integer) {
+                int maxSizeInK = ((Integer) maxSourceSize).intValue();
+                if (maxSizeInK > 0) {
+                    setMaxSourceSize(contest, maxSizeInK * Constants.BYTES_PER_KIBIBYTE);
+                } else {
+                    throw new YamlLoadException("Invalid max-source-size-K value '" + maxSourceSize + " size must be > 0 ", null, contestFileName);
+                }
+            } else {
+                throw new YamlLoadException("Invalid maxSourceSize value '" + maxSourceSize + " size must an integer", null, contestFileName);
+            }
+        }
+
         Language[] languages = getLanguages(yamlLines);
         for (Language language : languages) {
             contest.addLanguage(language);
@@ -1049,6 +1065,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setMaxOutputSizeInBytes(maxOutputBytes);
         contest.updateContestInformation(contestInformation);
+    }
+
+    private void setMaxSourceSize(IInternalContest contest, int maxSourceBytes) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setMaxSourceSizeInBytes(maxSourceBytes);
+        contest.updateContestInformation(contestInformation);
+        // update Jersey filter used for submissions
+        SubmitPostSizeLimitFilter.setMaxSubmitPostSizeBytes(maxSourceBytes);
     }
 
     public Date parseISO8601Date(String startTime) {
