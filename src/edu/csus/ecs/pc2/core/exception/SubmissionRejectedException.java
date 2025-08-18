@@ -24,19 +24,20 @@ public class SubmissionRejectedException extends Exception {
     private SubmissionRejectionReason rejectReason = SubmissionRejectionReason.UNKNOWN;
 
     /**
-     * Constructs a SubmissionRejectedException which contains no textual information about the reason for the Exception.
+     * Constructs an empty SubmissionRejectedException which contains no textual information about the reason for the Exception.
      */
     public SubmissionRejectedException() {
     }
 
     /**
-     * Constructs a SubmissionRejectedException containing text message.
+     * Constructs a THROTTLE_EXCEEDED SubmissionRejectedException containing the supplied text message.
+     * This is for backward compatibility.
+     * TODO: eventually change any code that calls this to specify the reason Enum explicitly.
      *
-     * @param message A text message associated with the Exception using the default reason
+     * @param message A text message associated with the Exception using the reason THROTTLE_EXCEEDED.
      */
     public SubmissionRejectedException(String message) {
-        super(message);
-        rejectReason = SubmissionRejectionReason.THROTTLE_EXCEEDED;
+        this(message, SubmissionRejectionReason.THROTTLE_EXCEEDED);
     }
 
     /**

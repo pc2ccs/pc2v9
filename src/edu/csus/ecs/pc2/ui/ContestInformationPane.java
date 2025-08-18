@@ -240,6 +240,8 @@ public class ContestInformationPane extends JPanePlugin {
 
     private Component rigidArea2;
 
+    private Component rigidArea3;
+
     private JPanel teamScoreboardDisplayFormatPane;
 
     private JTextField teamScoreboardDisplayFormatTextfield;
@@ -670,7 +672,7 @@ public class ContestInformationPane extends JPanePlugin {
             teamSettingsPane.add(getMaxSourceSizeLabel(), null);
             teamSettingsPane.add(getMaxSourceSizeInKTextField(), null);
             teamSettingsPane.add(getMaxSourceSizeWhatsThisButton(), null);
-            teamSettingsPane.add(getRigidArea1());
+            teamSettingsPane.add(getRigidArea3());
             teamSettingsPane.add(getAllowMultipleTeamLoginsCheckbox(), null);
             teamSettingsPane.add(getRigidArea2());
             teamSettingsPane.add(getTeamScoreboardDisplayFormatPane(), null);
@@ -789,7 +791,7 @@ public class ContestInformationPane extends JPanePlugin {
            labelMaxSourceSize = new JLabel();
            labelMaxSourceSize.setHorizontalAlignment(SwingConstants.RIGHT);
            labelMaxSourceSize.setBorder(new EmptyBorder(0,10,5,5));
-           labelMaxSourceSize.setText("Default max source size (in KB): ");
+           labelMaxSourceSize.setText("Maximum source size (in KiB): ");
        }
         return labelMaxSourceSize ;
     }
@@ -1755,9 +1757,9 @@ public class ContestInformationPane extends JPanePlugin {
             return maxSourceSizeWhatsThisButton;
         }
 
-    // the string which will be displayed when the "What's This" icon in the Judge Settings panel is clicked
+    // the string which will be displayed when the "What's This" icon in the Team Settings (Maxium Source Size) panel is clicked
     private String maxSourceSizeWhatsThisMessage = //
-            "\nThe Default max source size field allows you to specify the number of KiB that " //
+            "\nThe Maximum source size field allows you to specify the number of KiB that " //
             + "\na contestant's submission may use.  This includes all files that are submitted " //
             + "\nby the team for a submission.  A value of 0 indicates \"unlimited\".  The default " //
             + "\nvalue, specified by the World Finals rules, is " + Constants.DEFAULT_MAX_SOURCE_SIZE_K + "KiB." //
@@ -1962,5 +1964,11 @@ public class ContestInformationPane extends JPanePlugin {
             rigidArea2 = Box.createRigidArea(new Dimension(20,20));
         }
         return rigidArea2;
+    }
+    private Component getRigidArea3( ) {
+        if (rigidArea3==null) {
+            rigidArea3 = Box.createRigidArea(new Dimension(20,20));
+        }
+        return rigidArea3;
     }
 }

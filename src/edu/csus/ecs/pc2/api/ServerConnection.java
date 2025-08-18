@@ -450,7 +450,7 @@ public class ServerConnection {
             String sizeMsg = "Source file(s) are too large (" + sourceSize + " bytes) - maximum is " + sourceSizeByteLimit + " bytes.";
 //            I wondered why no logging is ever done is this module, so I won't enable this -- JTB
 //            LogUtilities.ensureStaticLog();
-//            StaticLog.getLog().log(Level.WARNING, sourceSizeByteLimit);
+//            StaticLog.getLog().log(Level.WARNING, sizeMsg);
             throw new SubmissionRejectedException(sizeMsg, SubmissionRejectedException.SubmissionRejectionReason.SOURCE_TOO_BIG);
         }
         ProblemImplementation problemImplementation = (ProblemImplementation) problem;
@@ -582,7 +582,7 @@ public class ServerConnection {
             String sizeMsg = "Source file(s) are too large (" + sourceSize + " bytes) - maximum is " + sourceSizeByteLimit + " bytes.";
 //            I wondered why no logging is ever done is this module, so I won't enable this -- JTB
 //            LogUtilities.ensureStaticLog();
-//            StaticLog.getLog().log(Level.WARNING, sourceSizeByteLimit);
+//            StaticLog.getLog().log(Level.WARNING, sizeMsg);
             throw new SubmissionRejectedException(sizeMsg, SubmissionRejectedException.SubmissionRejectionReason.SOURCE_TOO_BIG);
         }
 
