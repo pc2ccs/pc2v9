@@ -436,6 +436,7 @@ public class TeamsController extends MainController {
 							false, //run.isTestRun(),
 							run.isPreliminaryJudged(),
 							run.isFinalJudged(),
+							run.isSolved(),
 							String.format("%s-%s", run.getSiteNumber(), run.getNumber())));
 				}
 				
