@@ -56,7 +56,7 @@
                 <th>Time</th>
                 <th></th>
             </tr>
-            <tr *ngFor='let run of filteredRuns' [class.pending]='!run.judgement || run.isPreliminary'>
+            <tr *ngFor='let run of filteredRuns'>
             	<!-- Omit Run Type until Test Run capability is implemented -- see Issue #1031
                 <td>{{ run.isTestRun ? 'Test' : 'Judged' }}</td>
                 -->
@@ -64,12 +64,15 @@
                 <td>{{ run.language }}</td>
                 <td>{{ run.problem }}</td>
 
-                <td [ngClass]="{'yes' : problem.isSolved, 
- 								'no' : !problem.isSolved && problem.attempts>0 && !problem.isPending,
- 								'pending' : !problem.isSolved && problem.isPending
+                <td class="judgement-cell" 
+                	[attr.title]="run.judgement || 'Pending'"
+                	[ngClass]="{'yes' : run.isSolved, 
+ 								'no' : !run.isSolved && run.judgement,
+ 								'pending' : !run.isSolved && !run.judgement
  								}">
                 
-                    {{ run.judgement }}
+					{{ run.judgement ? run.judgement : 'Pending' }}
+
                     <ng-container *ngIf='run.isPreliminary'>
                         (Preliminary)
                     </ng-container>
