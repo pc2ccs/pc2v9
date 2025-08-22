@@ -4,7 +4,6 @@ package edu.csus.ecs.pc2.core.scoring;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -24,12 +23,10 @@ import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
-import edu.csus.ecs.pc2.core.list.BalloonSettingsComparatorbySite;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -391,7 +388,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         countPreliminaryJudgements = theContest.getContestInformation().isPreliminaryJudgementsUsedByBoard();
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
-        IMemento summaryMememento = createSummaryMomento (theContest, mementoRoot);
+        IMemento summaryMemento = createSummaryMemento (theContest, mementoRoot);
 
         AccountList accountList = getAccountList(theContest);
         Problem[] allProblems = theContest.getProblems();
@@ -412,25 +409,23 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problems[p-1] = theContest.getProblem(type);
         }
 
-        summaryMememento.putLong("problemCount", problems.length);
+        summaryMemento.putLong("problemCount", problems.length);
+        
         Site[] sites = theContest.getSites();
-        summaryMememento.putInteger("siteCount", sites.length);
+        summaryMemento.putInteger("siteCount", sites.length);
+        
         Group[] groups = theContest.getGroups();
         boolean bGroupsExcluded = false;
         if (groups != null) {
-            bGroupsExcluded = dumpGroupList(groups, summaryMememento, wantedGroups, accountList);
+            bGroupsExcluded = dumpGroupList(groups, summaryMemento, wantedGroups, accountList);
         }
-        BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
-        if (balloonSettings != null) {
-            Arrays.sort(balloonSettings, new BalloonSettingsComparatorbySite());
-            IMemento listMemento = summaryMememento.createChild("colorList");
-            for (int i = 0; i < balloonSettings.length; i++) {
-                int id = i + 1;
-                IMemento balloonSettingsMemento = listMemento.createChild("colors");
-                balloonSettingsMemento.putInteger("id", id);
-                dumpBalloonSettings(balloonSettings[i], problems, balloonSettingsMemento);
-            }
-        }
+
+        //Note:  "problem" info, such as color, rgb, letter, etc. which used to be put into the summaryMemento here
+        // as part of a "colorList" attribute, are now inserted as separate <problem> blocks by method generateSummaryTotalsForProblem().
+        //Note also that generateSummaryTotalsForProblem() already existed and was inserting MOST of that information in the output already;
+        // the "colorList" processing code which used to be here was simply added to that method instead (adding internalId, letter, and
+        // url to the <problem> elements), avoiding duplication of problem description data in the output XML.
+        
         if (runs == null) {
             // Note: we do not deal with divisionNumber here since
             //   1) it is being deprecated
@@ -526,7 +521,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 treeMap.put(record, record);
             }
 
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMememento, bGroupsExcluded);
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMemento, bGroupsExcluded);
 
         } // mutex
 
@@ -534,7 +529,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         try {
             xmlString = mementoRoot.saveToString();
         } catch (IOException e) {
-            log.log(Log.WARNING,"Trouble saving momentoRoot to String ", e);
+            log.log(Log.WARNING,"Trouble saving mementoRoot to String ", e);
             xmlString = "";
         }
 //        System.out.println(xmlString);
@@ -593,18 +588,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private boolean isAllowed(IInternalContest theContest, ClientId clientId, Type type) {
         initializePermissions(theContest, clientId);
         return permissionList.isAllowed(type);
-    }
-
-    private void dumpBalloonSettings(BalloonSettings balloonSettings, Problem[] problems, IMemento memento) {
-        memento.putInteger("siteNum", balloonSettings.getSiteNumber());
-        if (problems != null) {
-            for (int i = 0; i < problems.length; i++) {
-                int id = i + 1;
-                IMemento problemMemento = memento.createChild("problem");
-                problemMemento.putInteger("id", id);
-                problemMemento.putString("color", balloonSettings.getColor(problems[i]));
-            }
-        }
     }
 
     /**
@@ -1040,19 +1023,29 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      *
      * @param problems
      * @param problemsIndexHash
-     * @param summaryMememento
+     * @param summaryMemento
      */
 
-    private void generateSummaryTotalsForProblem(Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, IMemento summaryMememento) {
+    private void generateSummaryTotalsForProblem(Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, IMemento summaryMemento) {
 
+        //TODO: should we be excluding problems marked as "not active"?
         for (int i = 0; i < problems.length; i++) {
             int id = i + 1;
             problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
-            IMemento problemMemento = summaryMememento.createChild("problem");
-            problemMemento.putInteger("id", id);
+            IMemento problemMemento = summaryMemento.createChild("problem");
+            problemMemento.putInteger("id", id);  //ordinal starting at 1
+            
+            //the following was (probably) added when BalloonSettings were removed; BalloonSettings was creating
+            // a variable named "id" and this was probably an attempt at renaming that variable.
+            // It's likely that no other code is actually using "internalId", although it MIGHT be used
+            // somewhere in the WTI...it's likely not needed any more
+            //problemMemento.putString("internalId", problems[i].getElementId().toString());  //internal id, e.g. "a-899904259810471363"
+
             problemMemento.putString("title", problems[i].getDisplayName());
             problemMemento.putString("color", problems[i].getColorName());
+            problemMemento.putString("letter", problems[i].getLetter());
             problemMemento.putString("rgb", problems[i].getColorRGB());
+            problemMemento.putString("url", "problems/" + problems[i].getLetter() + ".pdf");
             problemMemento.putLong("attempts", problemAttempts[id]);
             if (problemAttempts[id] > 0) {
                 grandTotalProblemAttempts++;
@@ -1063,10 +1056,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 problemMemento.putLong("lastSolutionTime",problemLastTime[id]);
             }
         }
-        summaryMememento.putInteger("totalAttempts", grandTotalAttempts);
-        summaryMememento.putInteger("totalSolved", grandTotalSolutions);
-        summaryMememento.putInteger("problemsAttempted", grandTotalProblemAttempts);
-        summaryMememento.putInteger("totalTeams", grandTotalTeams);
+        summaryMemento.putInteger("totalAttempts", grandTotalAttempts);
+        summaryMemento.putInteger("totalSolved", grandTotalSolutions);
+        summaryMemento.putInteger("problemsAttempted", grandTotalProblemAttempts);
+        summaryMemento.putInteger("totalTeams", grandTotalTeams);
 
 
     }
@@ -1204,14 +1197,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     }
 
     /**
-     * Create Summary Momento.
+     * Create Summary Memento.
      *
      * This creates the standingsHeader block.  Later other
      * methods add problem summaries ("problem" blocks) to this block.
      *
      * @param mementoRoot
      */
-    private IMemento createSummaryMomento(IInternalContest contest, XMLMemento mementoRoot) {
+    private IMemento createSummaryMemento(IInternalContest contest, XMLMemento mementoRoot) {
         ContestInformation contestInformation = contest.getContestInformation();
         IMemento memento = mementoRoot.createChild("standingsHeader");
         String title = contestInformation.getContestTitle();
@@ -1222,9 +1215,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         VersionInfo versionInfo = new VersionInfo();
         memento.putString("systemName", versionInfo.getSystemName());
         memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
-        memento.putString("systemURL", versionInfo.getSystemURL());
+        memento.putString("systemURL", versionInfo.getSystemURL());  //TODO: fix this to return the proper URL (not a CSUS URL)
         memento.putString("currentDate", new Date().toString());
-        memento.putString("generatorId", "$Id$");
         // bug 1540
         String value = "Live (unfrozen) scoreboard";
         ContestTime contestTime = contest.getContestTime();
