@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @XmlRootElement(name = "problem")
 @XmlAccessorType(XmlAccessType.FIELD)
-@JsonIgnoreProperties({ "color", "rgb" })
+@JsonIgnoreProperties({ "color", "rgb", "letter", "url" })
 public class ScoringProblem {
 
     // <problem attempts="78" bestSolutionTime="2" id="2" lastSolutionTime="83" numberSolved="53" title="Candle Box"/>

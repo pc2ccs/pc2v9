@@ -59,10 +59,35 @@ public abstract class MainController {
 		client = new WTIWebsocket(new URI(String.format("%s/%s", this.websocketUrl, "server")));
 	}
 
+	/**
+	 * Searches the given array of IProblems and returns the first problem whose name matches the specified 
+	 * nameOfProblem, or returns an {@link EmptyProblem} object if there was no match.
+	 * <P>
+	 * Note that this method is only invoked by the {@link TeamsController} class, and only from TeamsController 
+	 * methods submitClarification(), submitRun(), and submitTestRun().  This means that the received array
+	 * contains only actual contest problems (in the case of being invoked by submitting a Run), or may
+	 * also contain "Categories" (which are, somewhat illogically, defined as "class Category extends Problem") in
+	 * the case of being invoked by submitting a Clarification request.
+	 * <P>
+	 * Note also that all three invocations of this method construct the IProblems[] array which they send
+	 * to this method by invoking api.ServerConnection.getContest().getProblems() and/or
+	 * api.ServerConnection.getContest().getClarificationCategories, both of which return an array of
+	 * ProblemImplementation (NOT an array of Problems).  This works because both ProblemImplementation and
+	 * Problem implement IProblem.  Thus, while the declared ("Apparent") type of the elements in the received
+	 * array is "IProblem", the ACTUAL TYPE of the elements will in all cases be "ProblemImplementation".
+	 * 
+	 * @param problems an array of IProblems, which are actually ProblemImplementations.
+	 * @param nameOfProblem a String giving the name of the desired problem.
+	 * 
+	 * @return the named problem if it is found in the input array; otherwise, an {@link EmptyProblem} object.
+	 */
 	protected IProblem findProblem(IProblem[] problems, String nameOfProblem) {
-		for(IProblem prob : problems)
+		//check if the named problem is one of the problems in the received array.
+		for(IProblem prob : problems) {
 			if(prob.getName().equalsIgnoreCase(nameOfProblem))
 				return prob;
+		}
+		//we didn't find a problem (or category) whose name matches; return a dummy problem.
 		return new EmptyProblem();
 	}
 

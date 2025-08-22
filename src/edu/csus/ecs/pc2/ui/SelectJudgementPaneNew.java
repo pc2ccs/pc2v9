@@ -884,8 +884,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         executable = new Executable(getContest(), getController(), run, runFiles, executeFrame);
 
+        Problem problem = getContest().getProblem(run.getProblemId());
+
         // only if do not show output is not checked, clear the results pane
-        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+        if (!problem.isHideOutputWindow()) {
             getTestResultsFrame().clearData();
         }
 
@@ -900,10 +902,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         // Dump execution results files to log
         String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
-        Problem juProblem = getContest().getProblem(run.getProblemId());
         ClientId clientId = getContest().getClientId();
         List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(getContest(), run);
-        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, judgements, executable.getExecutionData(), "", new Properties());
+        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         if (executionData != null && executionData.getExecutionException() != null) {
@@ -940,9 +941,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
         // only if do not show output is not checked
-        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+        if (!problem.isHideOutputWindow()) {
             // the run gets modified in Executable to have testCases, so resend the data
-            Problem problem = getContest().getProblem(run.getProblemId());
             getTestResultsFrame().setData(run, runFiles, problem, getProblemDataFiles());
             getTestResultsFrame().setVisible(true);
         }
@@ -960,7 +960,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 if (results.equalsIgnoreCase("accepted") || results.equalsIgnoreCase("yes")) {
                     results = getContest().getJudgements()[0].getDisplayName();
                 }
-                validatorAnswer.setText(results);
+
 
                 boolean solved = false;
 
@@ -969,6 +969,26 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 if (yesJudgement.getElementId().equals(elementId)) {
                     solved = true;
                 }
+
+                if(!solved) {
+                    // Map results string to configured judgment display string
+                    if(problem.isUsingCLICSValidator()) {
+                        results = JudgementUtilities.mapCLICSValidatorJudgmentToDefinedJudgments(getContest(), results, executable.getExecutionData().getValidationReturnCode());
+                    } else if(elementId != null) {
+                        // Note: elementId has to be non-null here since getValidatorResultElementID() guarantees that
+                        // Use judgment display from configured judgment types.  Basically, this will make the
+                        // judgment display string consistent for all judgments (that is, whatever the display string is)
+                        Judgement judgment = getContest().getJudgement(elementId);
+                        // This had better be non-null by this point since we know elementId is valid.
+                        if(judgment != null) {
+                            results = judgment.getDisplayName();
+                        }
+                    }
+                }
+
+                // Update gui result
+                validatorAnswer.setText(results);
+
                 judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), solved, true);
                 judgementRecord.setValidatorResultString(results);
 
@@ -1421,21 +1441,27 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     /*
-     * Get the ElementId corresponding to the Validator Judgement. @returns 1st No if not found
+     * Get the ElementId corresponding to the Validator Judgement.
+     * @returns 1st No if not found (TODO: this is bad and has to be addressed.  JB)
      */
     private ElementId getValidatorResultElementID(String results) {
         // Try to find result text in judgement list
         // (start with a default of a non-variable-scoring "no" judgment)
+        // JB TODO: This is horrible.  There should be a "default" defined in the configuration.
+        // We should not blindy choose element[2] of judgments.
         ElementId elementId = getContest().getJudgements()[2].getElementId();
 
         for (Judgement judgement : getContest().getJudgements()) {
-            if (judgement.getDisplayName().equals(results)) {
+            if (judgement.getDisplayName().trim().equalsIgnoreCase(results)) {
                 elementId = judgement.getElementId();
+                break;
             }
         }
 
         // Or perhaps it is a yes? yes?
+        // JB TODO: This is horrible.  Should look up AC judgment, not assumes it's index 0
         Judgement yesJudgement = getContest().getJudgements()[0];
+
         if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
             elementId = yesJudgement.getElementId();
         }

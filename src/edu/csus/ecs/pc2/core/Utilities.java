@@ -524,6 +524,10 @@ public final class Utilities {
                 result.append("&#045;");
             } else if (character == '\n') {
                 result.append("<br>");
+            } else if (character == ' ') {
+                result.append("&nbsp;");
+            } else if (character == '\t') {
+                result.append("&nbsp;&nbsp;&nbsp;&nbsp;");
             } else {
                 // the char is not a special one
                 // add it to the result as is

@@ -270,9 +270,14 @@ public class ServerConnection {
 
     /**
      * Submit a clarification request to the PC2 Server.
-     *
-     * @param problem  the Problem for which the clarification request is being submitted
+     * 
+     * @param problem  the Problem for which the clarification request is being submitted.
+     *                  Note that while the "apparent type" of parameter "problem" is "IProblem", the 
+     *                  *actual type* is expected to be "ProblemImplementation"; that is,
+     *                  the method casts "problem" to "ProblemImplementation" and throws
+     *                  ClassCastException if this casting fails.
      * @param question text of question
+     * 
      * @throws NotLoggedInException if the client is not currently logged in to the server
      * @throws SecurityException if the user allowed to perform this action.
      * @throws Exception if the specified Problem is null or the clarification request could not be submitted to the server

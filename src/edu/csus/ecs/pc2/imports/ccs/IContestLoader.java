@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -247,6 +247,8 @@ public interface IContestLoader {
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)
      */
     String TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING  = "team-scoreboard-display-format-string";
+
+    String SUBMISSION_THROTTLING_KEY = "submission-throttling";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

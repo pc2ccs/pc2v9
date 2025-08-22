@@ -17,6 +17,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
 import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.api.IClient;
@@ -526,11 +527,39 @@ public class TeamsController extends MainController {
 	private Response submitClarification(ServerConnection teamsConn, SubmitClarificationRequestModel clar) {
 
 		try {
-			IProblem prob = this.findProblem(teamsConn.getContest().getProblems(), clar.getProbName());
+			//start with an empty list of all known problems
+			ArrayList<ProblemImplementation> problemList = new ArrayList<ProblemImplementation>();
+			
+			//get the real problems (except inactive ones) and add them to the list.
+			//Note that method Contest.getProblems() returns an array of objects whose "apparent type"
+			// is "IProblem" but whose ACTUAL type is "ProblemImplementation".
+			IProblem [] actualProblems = teamsConn.getContest().getProblems();
+			for (IProblem prob : actualProblems) {
+				problemList.add((ProblemImplementation) prob);
+			}
+			
+			//get the "Problem Categories".
+			//Note that, in a poorly-designed mixup, "class Category extends Problem" --
+			// meaning (quite illogically) that a Category IS-A Problem.  
+			// But it means we can treat categories interchangeably with problems.
+			//Note also that, as with the real problems (above), the ACTUAL type of the
+			// objects in the array returned by getClarificationCategories() is "ProblemImplementation".
+			IProblem [] categories = teamsConn.getContest().getClarificationCategories();
+			for (IProblem prob : categories) {
+				problemList.add((ProblemImplementation) prob);
+			}
+			
+			//construct the IProblem array expected by findProblem()
+	        IProblem [] iProbs = (ProblemImplementation[]) problemList.toArray(new ProblemImplementation[problemList.size()]);
+
+	        //find the IProblem whose name matches the problem name specified in the clar
+			IProblem prob = this.findProblem(iProbs, clar.getProbName());
+
+			//get the text of the clarification request
 			String message = clar.getMessage();
 
-			teamsConn.submitClarification(prob, message);;
-
+			//submit the clar request (problem and message) to the PC2 Server via the PC2 API
+			teamsConn.submitClarification(prob, message);
 		} 
 		catch(NullPointerException e) {
 			return Response.status(Response.Status.BAD_REQUEST)
