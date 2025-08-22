@@ -215,6 +215,11 @@ public class ContestInformation implements Serializable{
     private String overrideLoadAccountsFilename = null;
 
     /**
+     * Submission Throttling
+     */
+    private boolean submissionThrottling = true;
+
+    /**
      * Returns the date/time when the contest is scheduled (intended) to start.
      * This value is null if no scheduled start time has been set,
      * or if the contest has already started.
@@ -929,6 +934,14 @@ public class ContestInformation implements Serializable{
 
     public void setSandboxInteractiveGraceMultiplier(int nSecs) {
         sandboxInteractiveGraceMultiplier = nSecs;
+    }
+
+    public boolean isSubmissionThrottling() {
+        return submissionThrottling;
+    }
+
+    public void setSubmissionThrottling(boolean submissionThrottling) {
+        this.submissionThrottling = submissionThrottling;
     }
 
 }
