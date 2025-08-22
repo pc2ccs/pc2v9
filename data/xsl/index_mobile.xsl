@@ -82,13 +82,13 @@
 						</xsl:otherwise>
 					</xsl:choose>
 					<xsl:if test="$totalTeamCount != $totalTeams">
-						<a href="index.html">Full Contest Standings</a>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
+						<a href="index.html">Full Contest</a>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
 					</xsl:if>
 					<xsl:for-each select="/contestStandings/standingsHeader/groupList/group">
 						<xsl:if test="@teamCount &gt; '0'">
 							<xsl:if test="$totalTeamCount = $totalTeams or /contestStandings/teamStanding[1]/@teamGroupId != @id">
 								<a href="index_{@title}.html">
-									<xsl:value-of select="@title"/> Standings
+									<xsl:value-of select="@title"/>
 								</a>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
 							</xsl:if>
 						</xsl:if>

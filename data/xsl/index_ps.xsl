@@ -102,8 +102,9 @@
 					<tr>
 						<th><strong><u>Rank</u></strong></th>
 						<th><strong><u>Name</u></strong></th>
-						<th><strong><u>Solved</u></strong></th>
+						<th><strong><u>Score</u></strong></th>
 						<th><strong><u>Time</u></strong></th>
+						<th><strong><u>Solved</u></strong></th>
 						<xsl:call-template name="problemTitle"/>
 						<th>Total att/solv</th>
 					</tr>
@@ -122,15 +123,6 @@
 					</tr>
 					<tr class="even">
 						<td><xsl:attribute name="class">bronze</xsl:attribute>Bronze Medalists</td>
-					</tr>
-					<tr class="even">
-						<td><xsl:attribute name="class">highest</xsl:attribute>Highest Honors</td>
-					</tr>
-					<tr class="even">
-						<td><xsl:attribute name="class">high</xsl:attribute>High Honors</td>
-					</tr>
-					<tr class="even">
-						<td><xsl:attribute name="class">honors</xsl:attribute>Honors</td>
 					</tr>
 				</xsl:if>
 				<tr>
@@ -166,6 +158,7 @@
         <tr>
 			<td></td>
 			<td>Submitted/1st Yes/Total Yes</td>
+			<td></td>
 			<td></td>
 			<td></td>
 			<xsl:call-template name="problemsummary"/>
@@ -286,11 +279,15 @@
 					</td>
 					<td>
 						<xsl:attribute name="class">center</xsl:attribute>
-						<xsl:value-of select="@solved"/>
+						<xsl:value-of select="@score"/>
 					</td>
 					<td>
 						<xsl:attribute name="class">right</xsl:attribute>
-						<xsl:value-of select="@points"/>
+						<xsl:value-of select="@lastSolved"/>
+					</td>
+					<td>
+						<xsl:attribute name="class">center</xsl:attribute>
+						<xsl:value-of select="@solved"/>
 					</td>
 					<xsl:call-template name="problemSummaryInfo"/>
 					<!-- <teamStanding firstSolved="24" groupRank="1" index="0" isGold="true" lastSolved="294" overallRank="1" points="1471" problemsAttempted="13" rank="1" scoringAdjustment="0" shortSchoolName="U Illinois U-C" solved="12" teamAlias="University of Illinois Urbana-Champaign (not aliasesd)" teamExternalId="1041938" teamGroupExternalId="39415" teamGroupId="8" teamGroupName="ICPC NAC Central Division" teamId="41" teamKey="1TEAM41" teamName="41 University of Illinois Urbana-Champaign" teamSiteId="1" totalAttempts="17"> -->
@@ -394,11 +391,15 @@
 					</td>
 					<td>
 						<xsl:attribute name="class">center</xsl:attribute>
-						<xsl:value-of select="@solved"/>
+						<xsl:value-of select="@score"/>
 					</td>
 					<td>
 						<xsl:attribute name="class">right</xsl:attribute>
-						<xsl:value-of select="@points"/>
+						<xsl:value-of select="@lastSolved"/>
+					</td>
+					<td>
+						<xsl:attribute name="class">center</xsl:attribute>
+						<xsl:value-of select="@solved"/>
 					</td>
 					<xsl:call-template name="problemSummaryInfo"/>
 					<!-- <teamStanding index="1" solved="8" problemsattempted="8" rank="1" score="1405" teamName="Warsaw University" timefirstsolved="13" timelastsolved="272" totalAttempts="19" userid="84" usersiteid="1"> -->
@@ -430,8 +431,11 @@
 			<xsl:if test="@isSolved = 'false' and @attempts = '0' and @isPending = 'false'">
 				<xsl:attribute name="class">center</xsl:attribute>
 			</xsl:if>
-			<xsl:value-of select="@attempts"/>/<xsl:if test="@isSolved = 'false'">--</xsl:if>
-			<xsl:if test="@isSolved = 'true'"><xsl:value-of select="@solutionTime"/></xsl:if>
+			<xsl:value-of select="@attempts"/>/
+			<xsl:choose>
+				<xsl:when test="@attempts &gt; '0' and @score = '0.0'">0</xsl:when>
+				<xsl:otherwise><xsl:value-of select="@score"/></xsl:otherwise>
+			</xsl:choose>
 		</td>
     </xsl:for-each>
 </xsl:template>
@@ -446,6 +450,7 @@
 				<xsl:attribute name="target">_blank</xsl:attribute>
 				<xsl:attribute name="class">problem-link-auto</xsl:attribute>
 				<xsl:number format="A" value="@id"/>
+				<xsl:if test="@maxScore"> (<xsl:value-of select="@maxScore"/>)</xsl:if>
 			</a>
         </th>
     </xsl:for-each>
