@@ -85,6 +85,11 @@ public final class Constants {
     public static final int DEFAULT_MAX_OUTPUT_SIZE_K = 512;
 
     /**
+     * As per WF rules the max is 256K by default.
+     */
+    public static final int DEFAULT_MAX_SOURCE_SIZE_K = 256;
+
+    /**
      * PC<sup>2</sup> Validator Program Name.
      */
     public static final String PC2_VALIDATOR_NAME = "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator";

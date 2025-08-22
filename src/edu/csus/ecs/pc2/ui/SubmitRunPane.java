@@ -40,13 +40,13 @@ import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * A submit run pane.
- * 
+ *
  * @see edu.csus.ecs.pc2.Starter
  */
 public class SubmitRunPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 5700304771581849261L;
 
@@ -88,7 +88,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * Nevermind this constructor, needed for VE and other reasons.
-     * 
+     *
      */
     public SubmitRunPane() {
         super();
@@ -97,7 +97,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -116,7 +116,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * Reloads the Problem Combo Box.
-     * 
+     *
      * Invoker is responsible for ensuring this is run on the AWT thread.
      */
     private void reloadProblems() {
@@ -133,7 +133,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * Reloads the Language Combo Box.
-     * 
+     *
      * Invoker is responsible for ensuring this is run on the AWT thread.
      */
     private void reloadLanguages() {
@@ -172,12 +172,13 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * Enable or disable submission buttons and all drop-down lists.
-     * 
+     *
      * @param turnButtonsOn
      *            if true, buttons enabled.
      */
     private void setButtonsActive(final boolean turnButtonsOn) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (isTeam()) {
                     // Only turn buttons on and off if a Team
@@ -195,42 +196,48 @@ public class SubmitRunPane extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
     private class ContestTimeListenerImplementation implements IContestTimeListener {
 
+        @Override
         public void contestTimeAdded(ContestTimeEvent event) {
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
 
+        @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
         }
 
+        @Override
         public void contestTimeChanged(ContestTimeEvent event) {
         }
 
+        @Override
         public void contestStarted(ContestTimeEvent event) {
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
 
+        @Override
         public void contestStopped(ContestTimeEvent event) {
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
 
+        @Override
         public void refreshAll(ContestTimeEvent event) {
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
-        
+
         /** This method exists to support differentiation between manual and automatic starts,
          * in the event this is desired in the future.
          * Currently it just delegates the handling to the contestStarted() method.
@@ -243,22 +250,26 @@ public class SubmitRunPane extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
     private class ProblemListenerImplementation implements IProblemListener {
 
+        @Override
         public void problemAdded(final ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     getProblemComboBox().addItem(event.getProblem());
                 }
             });
         }
 
+        @Override
         public void problemChanged(final ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     int selectedIndex = getProblemComboBox().getSelectedIndex();
                     reloadProblems();
@@ -269,16 +280,20 @@ public class SubmitRunPane extends JPanePlugin {
             });
         }
 
+        @Override
         public void problemRemoved(ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadProblems();
                 }
             });
         }
 
+        @Override
         public void problemRefreshAll(ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadProblems();
                 }
@@ -288,24 +303,28 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * Language Listener for SubmtitRunPane.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     private class LanguageListenerImplementation implements ILanguageListener {
 
+        @Override
         public void languageAdded(final LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     getLanguageComboBox().addItem(event.getLanguage());
                 }
             });
         }
 
+        @Override
         public void languageChanged(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     int selectedIndex = getLanguageComboBox().getSelectedIndex();
                     reloadLanguages();
@@ -316,16 +335,20 @@ public class SubmitRunPane extends JPanePlugin {
             });
         }
 
+        @Override
         public void languageRemoved(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadLanguages();
                 }
             });
         }
 
+        @Override
         public void languageRefreshAll(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadLanguages();
                 }
@@ -335,6 +358,7 @@ public class SubmitRunPane extends JPanePlugin {
         @Override
         public void languagesAdded(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadLanguages();
                 }
@@ -344,6 +368,7 @@ public class SubmitRunPane extends JPanePlugin {
         @Override
         public void languagesChanged(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadLanguages();
                 }
@@ -359,7 +384,7 @@ public class SubmitRunPane extends JPanePlugin {
 
         String matchProblemString = "umit";
         for (int i = 0; i < problemComboBox.getItemCount(); i++) {
-            Problem problem = (Problem) problemComboBox.getItemAt(i);
+            Problem problem = problemComboBox.getItemAt(i);
             int idx = problem.toString().indexOf(matchProblemString);
             if (idx > -1) {
                 problemComboBox.setSelectedIndex(i);
@@ -368,17 +393,17 @@ public class SubmitRunPane extends JPanePlugin {
 
         String matchLanguageString = "Java";
         for (int i = 0; i < languageComboBox.getItemCount(); i++) {
-            Language language = (Language) languageComboBox.getItemAt(i);
+            Language language = languageComboBox.getItemAt(i);
             int idx = language.toString().indexOf(matchLanguageString);
             if (idx > -1) {
                 languageComboBox.setSelectedIndex(i);
             }
         }
-        
+
         String [] paths = {"", "samps", "samps/src", "/usr/pc2/samps/src" };
-        
+
         for (String dirname : paths) {
-            String fullpath = dirname + "/" + "Sumit.java"; 
+            String fullpath = dirname + "/" + "Sumit.java";
             if ("".equals(dirname)) {
                 fullpath = "Sumit.java";
             }
@@ -388,10 +413,10 @@ public class SubmitRunPane extends JPanePlugin {
             }
         }
     }
-        
+
     /**
      * This method initializes mainViewPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainViewPane() {
@@ -411,7 +436,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes submitRunButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getSubmitRunButton() {
@@ -425,6 +450,7 @@ public class SubmitRunPane extends JPanePlugin {
             submitRunButton.setToolTipText("Submit run to judges");
             submitRunButton.setText("Submit");
             submitRunButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     testOrSubmitRun(true);
                 }
@@ -440,9 +466,9 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * Submit run or test run.
-     * 
+     *
      * Validates that the user has selected problem, language, a valid filename and there are no files with duplicate name.
-     * 
+     *
      * @param submitTheRun
      *            if true, submits the run.
      */
@@ -451,6 +477,7 @@ public class SubmitRunPane extends JPanePlugin {
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
         Language language = ((Language) getLanguageComboBox().getSelectedItem());
         SerializedFile [] otherFiles = null;
+        long sourceSize = 0;
 
         if (getProblemComboBox().getSelectedIndex() < 1) {
             showMessage( "Please select problem");
@@ -482,7 +509,10 @@ public class SubmitRunPane extends JPanePlugin {
             showMessage( message);
             return;
         }
-        
+
+        File fSrc = new File(filename);
+        sourceSize += fSrc.length();
+
         if (additionalFilesMCLB.getRowCount() > 0) {
 
             String mainfilename = filename;
@@ -502,7 +532,7 @@ public class SubmitRunPane extends JPanePlugin {
                     log.warning("Found multiple files with same filename");
                     return;
                 }
-                
+
                 for (int j = i + 1; j < additionalFilesMCLB.getRowCount(); j++) {
                     String otherfilename2 = (String) additionalFilesMCLB.getRow(j)[0];
                     l = otherfilename2.lastIndexOf(File.separatorChar);
@@ -519,10 +549,21 @@ public class SubmitRunPane extends JPanePlugin {
 
             try {
                 otherFiles = getAdditionalSerializedFiles();
+                for(SerializedFile f : otherFiles) {
+                    sourceSize += f.getFile().length();
+                }
             } catch (Exception e) {
                 showMessage( e.getMessage());
                 log.log(Log.WARNING, "Exception logged ", e);
             }
+        }
+
+        long sourceSizeByteLimit = getContest().getContestInformation().getMaxSourceSizeInBytes();
+        if(sourceSizeByteLimit > 0 && sourceSize > sourceSizeByteLimit) {
+            String sizeMsg = "Source file(s) are too large (" + sourceSize + " bytes) - maximum is " + sourceSizeByteLimit + " bytes.";
+            showMessage(sizeMsg);
+            log.warning(sizeMsg);
+            return;
         }
 
         if (submitTheRun) {
@@ -536,7 +577,7 @@ public class SubmitRunPane extends JPanePlugin {
                     String otherfilename = (String) additionalFilesMCLB.getRow(0)[0];
                     confirmQuestion += "<TR><TD><FONT SIZE=+1>Additional File(s):</FONT></TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(otherfilename) + "</FONT></TD></TR>";
                     for (int i = 1; i < additionalFilesMCLB.getRowCount(); i++) {
-                        otherfilename = (String) additionalFilesMCLB.getRow(i)[0]; 
+                        otherfilename = (String) additionalFilesMCLB.getRow(i)[0];
                         confirmQuestion += "<TR><TD> </TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(otherfilename) + "</FONT></TD></TR>";
                     }
                     confirmQuestion += "</TBODY></TABLE>";
@@ -550,12 +591,12 @@ public class SubmitRunPane extends JPanePlugin {
                 int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), confirmQuestion, "Confirm Submission");
 
                 if (result == JOptionPane.YES_OPTION) {
-                    
+
                     String logInfo = "submitRun for " + problem + " " + language + " main file: " + filename;
                     if (additionalFilesMCLB.getRowCount() > 0) {
                         logInfo += " additional file(s): [";
                         for (int i = 0; i < additionalFilesMCLB.getRowCount(); i++) {
-                            String otherfilename = (String) additionalFilesMCLB.getRow(i)[0]; 
+                            String otherfilename = (String) additionalFilesMCLB.getRow(i)[0];
                             logInfo += otherfilename;
                             if (i == additionalFilesMCLB.getRowCount() - 1) {
                                 logInfo += "]";
@@ -581,16 +622,16 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * Get AdditionalFiles from the MCLB.
-     * 
-     * @return 
-     * @throws Exception 
+     *
+     * @return
+     * @throws Exception
      */
     private SerializedFile[] getAdditionalSerializedFiles() throws Exception {
-        
+
         SerializedFile [] files = new SerializedFile[additionalFilesMCLB.getRowCount()];
-        
+
         for (int i = 0; i < additionalFilesMCLB.getRowCount(); i ++){
-            
+
             String filename = (String) additionalFilesMCLB.getRow(i)[0];
             SerializedFile file = new SerializedFile(filename);
             if (file.getBuffer() == null) {
@@ -598,13 +639,13 @@ public class SubmitRunPane extends JPanePlugin {
             }
             files[i] = file;
         }
-        
+
         return files;
     }
 
     /**
      * Execute a test run, show results to user.
-     * 
+     *
      * @param problem
      * @param language
      * @param filename
@@ -659,6 +700,7 @@ public class SubmitRunPane extends JPanePlugin {
             final IFileViewer finalViewer = fileViewer;
 
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     finalViewer.setTitle("Test Program Output");
                     finalViewer.setVisible(true);
@@ -674,7 +716,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes problemComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Problem> getProblemComboBox() {
@@ -688,7 +730,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes jComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Language> getLanguageComboBox() {
@@ -702,7 +744,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes jButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getPickFileButton() {
@@ -713,6 +755,7 @@ public class SubmitRunPane extends JPanePlugin {
             pickFileButton.setToolTipText("Select main file");
             pickFileButton.setText("Select...");
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     selectMainFile();
                 }
@@ -759,6 +802,7 @@ public class SubmitRunPane extends JPanePlugin {
         submitRunButton.setVisible(isAllowed(Permission.Type.SUBMIT_RUN));
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
@@ -777,10 +821,11 @@ public class SubmitRunPane extends JPanePlugin {
         initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateGUI();
                 updateGUIperPermissions();
-                
+
 //                setVisible(true);
             }
         });
@@ -788,13 +833,14 @@ public class SubmitRunPane extends JPanePlugin {
 
     }
 
+    @Override
     public String getPluginTitle() {
         return "Submit Run Pane ";
     }
 
     /**
      * This method initializes filenamePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getFilenamePane() {
@@ -802,6 +848,7 @@ public class SubmitRunPane extends JPanePlugin {
             fileNameLabel = new JLabel();
             fileNameLabel.setText("");
             fileNameLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.getClickCount() > 1 && e.isShiftDown()) {
                         autoPopulate();
@@ -822,7 +869,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes problemPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getProblemPane() {
@@ -840,7 +887,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes languagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getLanguagePane() {
@@ -858,7 +905,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes testButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getTestButton() {
@@ -873,8 +920,10 @@ public class SubmitRunPane extends JPanePlugin {
             testButton.setToolTipText("Test run");
             testButton.setVisible(true);
             testButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     new Thread(new Runnable() {
+                        @Override
                         public void run() {
                             testOrSubmitRun(false);
                         }
@@ -887,16 +936,18 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * Account Listener for SubmitRunPane.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     protected class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             // ignore doesn't affect this pane
         }
 
+        @Override
         public void accountModified(AccountEvent event) {
             // check if is this account
             Account account = event.getAccount();
@@ -907,6 +958,7 @@ public class SubmitRunPane extends JPanePlugin {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         updateGUIperPermissions();
                     }
@@ -916,16 +968,19 @@ public class SubmitRunPane extends JPanePlugin {
 
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             // Will not apply to this pane, account already added for this user
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
                 if (getContest().getClientId().equals(account.getClientId())) {
                     initializePermissions();
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             updateGUIperPermissions();
                         }
@@ -934,6 +989,7 @@ public class SubmitRunPane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             accountsModified (accountEvent);
         }
@@ -941,7 +997,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes additionalFilesPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getAdditionalFilesPane() {
@@ -958,7 +1014,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes additonalFilesButtonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getAdditonalFilesButtonPane() {
@@ -975,7 +1031,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes addAdditionalFilesButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAddAdditionalFilesButton() {
@@ -985,6 +1041,7 @@ public class SubmitRunPane extends JPanePlugin {
             addAdditionalFilesButton.setPreferredSize(new Dimension(100, 26));
             addAdditionalFilesButton.setToolTipText("Add an additional file");
             addAdditionalFilesButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addAuxillaryFiles();
                 }
@@ -1022,7 +1079,7 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes removeAdditionalFilesButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getRemoveAdditionalFilesButton() {
@@ -1032,6 +1089,7 @@ public class SubmitRunPane extends JPanePlugin {
             removeAdditionalFilesButton.setPreferredSize(new Dimension(100, 26));
             removeAdditionalFilesButton.setToolTipText("remove selected additional file");
             removeAdditionalFilesButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     removeSelectedAdditionalFile();
                 }
@@ -1047,18 +1105,19 @@ public class SubmitRunPane extends JPanePlugin {
             showMessage("No files to remove");
             return;
         }
-        
+
         if (selectedIndex < 0){
             showMessage("Select a file to remove");
             return;
         }
-        
+
         additionalFilesMCLB.removeRow(selectedIndex);
     }
 
     private void showMessage(final String string) {
-        
+
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 JOptionPane.showMessageDialog(getParentFrame(), string);
             }
@@ -1067,20 +1126,20 @@ public class SubmitRunPane extends JPanePlugin {
 
     /**
      * This method initializes additionalFilesMCLB
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.MCLB
      */
     private MCLB getAdditionalFilesMCLB() {
         if (additionalFilesMCLB == null) {
             additionalFilesMCLB = new MCLB();
-            
+
             String [] cols ={"Additional Files" };
-            
+
             additionalFilesMCLB.addColumns(cols);
-            
+
             cols = null;
             additionalFilesMCLB.getColumnInfo(0).setWidth(400);
-            
+
         }
         return additionalFilesMCLB;
     }

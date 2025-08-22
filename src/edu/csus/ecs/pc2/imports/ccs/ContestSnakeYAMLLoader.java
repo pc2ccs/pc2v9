@@ -714,10 +714,26 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (maxSizeInK > 0) {
                     setMaxOutputSize(contest, maxSizeInK * Constants.BYTES_PER_KIBIBYTE);
                 } else {
-                    throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
+                    throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + "' size must be > 0 ", null, contestFileName);
                 }
             } else {
-                throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must an integer", null, contestFileName);
+                throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + "' size must an integer", null, contestFileName);
+            }
+        }
+
+        Object maxSourceSize = fetchObjectValue(content, MAX_SOURCE_SIZE_K_KEY);
+        if (maxSourceSize != null) {
+
+            if (maxSourceSize instanceof Integer) {
+                // Convert value in KiB to long here since object mapper converted it to Integer
+                long maxSizeInK = ((Integer) maxSourceSize).intValue();
+                if (maxSizeInK > 0) {
+                    setMaxSourceSize(contest, maxSizeInK * Constants.BYTES_PER_KIBIBYTE);
+                } else {
+                    throw new YamlLoadException("Invalid max-source-size-K value '" + maxSourceSize + "' size must be > 0 ", null, contestFileName);
+                }
+            } else {
+                throw new YamlLoadException("Invalid maxSourceSize value '" + maxSourceSize + "' size must an integer", null, contestFileName);
             }
         }
 
@@ -1058,6 +1074,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private void setMaxOutputSize(IInternalContest contest, int maxOutputBytes) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setMaxOutputSizeInBytes(maxOutputBytes);
+        contest.updateContestInformation(contestInformation);
+    }
+
+    private void setMaxSourceSize(IInternalContest contest, long maxSourceBytes) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setMaxSourceSizeInBytes(maxSourceBytes);
         contest.updateContestInformation(contestInformation);
     }
 

@@ -141,8 +141,14 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	        this._teamService.runsUpdated.next();
 	    },
 	    error: (error: any) => {
-	      this._uiHelper.alertError('Not accepting submissions at this time');
-	        console.error(error);
+          let msg = 'Not accepting submissions at this time';
+          // 429 = too many requests, 413 = request entity too large, in these cases
+          // we'll use whatever msg was supplied by the PC2 API
+          if (error.status == 429 || error.status == 413){
+              msg = error.error.entity.message;
+          }
+	      this._uiHelper.alertError(msg);
+	      console.error(msg);
 	    },
 	    complete: () => {
 	    // Called when the observable completes

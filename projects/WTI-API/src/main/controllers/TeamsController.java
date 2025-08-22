@@ -277,8 +277,18 @@ public class TeamsController extends MainController {
 		}
 		catch (SubmissionRejectedException e) {
 			String msg = e.getMessage();
-			return Response.status(Response.Status.TOO_MANY_REQUESTS)
-					.entity(Entity.json(new ServerErrorResponseModel(Response.Status.TOO_MANY_REQUESTS, msg)))
+			Response.Status stat = Response.Status.BAD_REQUEST;
+			// set appropriate HTML status code depending on why the submission was rejected
+			switch(e.getRejectionReason()) {
+			    case THROTTLE_EXCEEDED:
+			        stat = Response.Status.TOO_MANY_REQUESTS;
+			        break;
+			    case SOURCE_TOO_BIG:
+			        stat = Response.Status.REQUEST_ENTITY_TOO_LARGE;
+			        break;
+			}
+			return Response.status(stat)
+					.entity(Entity.json(new ServerErrorResponseModel(stat, msg)))
 					.type(MediaType.APPLICATION_JSON)
 					.build();
 		}

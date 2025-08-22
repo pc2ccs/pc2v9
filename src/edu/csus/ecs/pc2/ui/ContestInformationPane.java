@@ -48,6 +48,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.csus.ecs.pc2.core.CommandVariableReplacer;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -153,7 +154,13 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JLabel labelMaxOutputSize = null;
 
+    private JLabel labelMaxSourceSize = null;
+
     private JTextField textfieldMaxOutputSizeInK = null;
+
+    private JTextField textfieldMaxSourceSizeInK = null;
+
+    private JLabel maxSourceSizeWhatsThisButton = null;
 
     private Properties savedScoringProperties = null; // @jve:decl-index=0:
 
@@ -232,6 +239,8 @@ public class ContestInformationPane extends JPanePlugin {
     private Component rigidArea1;
 
     private Component rigidArea2;
+
+    private Component rigidArea3;
 
     private JPanel teamScoreboardDisplayFormatPane;
 
@@ -660,6 +669,10 @@ public class ContestInformationPane extends JPanePlugin {
             teamSettingsPane.add(getMaxOutputSizeLabel(), null);
             teamSettingsPane.add(getMaxOutputSizeInKTextField(), null);
             teamSettingsPane.add(getRigidArea1());
+            teamSettingsPane.add(getMaxSourceSizeLabel(), null);
+            teamSettingsPane.add(getMaxSourceSizeInKTextField(), null);
+            teamSettingsPane.add(getMaxSourceSizeWhatsThisButton(), null);
+            teamSettingsPane.add(getRigidArea3());
             teamSettingsPane.add(getAllowMultipleTeamLoginsCheckbox(), null);
             teamSettingsPane.add(getRigidArea2());
             teamSettingsPane.add(getTeamScoreboardDisplayFormatPane(), null);
@@ -770,6 +783,17 @@ public class ContestInformationPane extends JPanePlugin {
            labelMaxOutputSize.setText("Default max output size (in KB): ");
        }
         return labelMaxOutputSize ;
+    }
+
+    private JLabel getMaxSourceSizeLabel() {
+       if (labelMaxSourceSize == null) {
+
+           labelMaxSourceSize = new JLabel();
+           labelMaxSourceSize.setHorizontalAlignment(SwingConstants.RIGHT);
+           labelMaxSourceSize.setBorder(new EmptyBorder(0,10,5,5));
+           labelMaxSourceSize.setText("Maximum source size (in KiB): ");
+       }
+        return labelMaxSourceSize ;
     }
 
     /**
@@ -1117,6 +1141,9 @@ public class ContestInformationPane extends JPanePlugin {
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
         newContestInformation.setMaxOutputSizeInBytes(maximumFileSize * 1024);
+        maxFileSizeString = "0" + getMaxSourceSizeInKTextField().getText();
+        maximumFileSize = Long.parseLong(maxFileSizeString);
+        newContestInformation.setMaxSourceSizeInBytes(maximumFileSize * 1024);
         newContestInformation.setAllowMultipleLoginsPerTeam(getAllowMultipleTeamLoginsCheckbox().isSelected());
         newContestInformation.setTeamScoreboardDisplayFormat(getTeamScoreboardDisplayFormatTextfield().getText());
 
@@ -1201,6 +1228,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
 
                 getMaxOutputSizeInKTextField().setText((contestInformation.getMaxOutputSizeInBytes() / 1024) + "");
+                getMaxSourceSizeInKTextField().setText((contestInformation.getMaxSourceSizeInBytes() / 1024) + "");
                 getAllowMultipleTeamLoginsCheckbox().setSelected(contestInformation.isAllowMultipleLoginsPerTeam());
                 getTeamScoreboardDisplayFormatTextfield().setText(contestInformation.getTeamScoreboardDisplayFormat());
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
@@ -1542,7 +1570,7 @@ public class ContestInformationPane extends JPanePlugin {
             return judgesExecuteFolderWhatsThisButton;
         }
 
-    // the string which will be displayed when the "What's This" icon in the Team Settings panel is clicked
+    // the string which will be displayed when the "What's This" icon in the Judge Settings panel is clicked
     private String judgesExecuteFolderWhatsThisMessage = //
             "\nThe Judges Execute Folder field allows you to specify a string which gets used as the judge's execute folder " //
             + "\neg. \"executesite1judge1\"" //
@@ -1681,6 +1709,62 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return textfieldMaxOutputSizeInK;
     }
+
+    /**
+     * This method initializes maxFieldSizeInKTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getMaxSourceSizeInKTextField() {
+        if (textfieldMaxSourceSizeInK == null) {
+
+            textfieldMaxSourceSizeInK = new JTextField(6);
+
+            textfieldMaxSourceSizeInK.setDocument(new IntegerDocument());
+
+            textfieldMaxSourceSizeInK.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return textfieldMaxSourceSizeInK;
+    }
+
+    private JLabel getMaxSourceSizeWhatsThisButton() {
+
+            if (maxSourceSizeWhatsThisButton == null) {
+                Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+                if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                    // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                    maxSourceSizeWhatsThisButton = new JLabel("<What's This?>");
+                    maxSourceSizeWhatsThisButton.setForeground(Color.blue);
+                } else {
+                    Image image = ((ImageIcon) questionIcon).getImage();
+                    maxSourceSizeWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+                }
+
+                maxSourceSizeWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+                maxSourceSizeWhatsThisButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        JOptionPane.showMessageDialog(null, maxSourceSizeWhatsThisMessage, "About Maximum Source Size", JOptionPane.INFORMATION_MESSAGE, null);
+                    }
+                });
+                maxSourceSizeWhatsThisButton.setBorder(new EmptyBorder(0, 15, 0, 0));
+            }
+            return maxSourceSizeWhatsThisButton;
+        }
+
+    // the string which will be displayed when the "What's This" icon in the Team Settings (Maxium Source Size) panel is clicked
+    private String maxSourceSizeWhatsThisMessage = //
+            "\nThe Maximum source size field allows you to specify the number of KiB that " //
+            + "\na contestant's submission may use.  This includes all files that are submitted " //
+            + "\nby the team for a submission.  A value of 0 indicates \"unlimited\".  The default " //
+            + "\nvalue, specified by the World Finals rules, is " + Constants.DEFAULT_MAX_SOURCE_SIZE_K + "KiB." //
+            + "\n\nThis is also configurable at contest load time by the \"max-source-size-K\" value " //
+            + "\nin the system.pc2.yaml file.";
 
     private JCheckBox getAllowMultipleTeamLoginsCheckbox() {
         if (allowMultipleTeamLoginsCheckbox==null) {
@@ -1880,5 +1964,11 @@ public class ContestInformationPane extends JPanePlugin {
             rigidArea2 = Box.createRigidArea(new Dimension(20,20));
         }
         return rigidArea2;
+    }
+    private Component getRigidArea3( ) {
+        if (rigidArea3==null) {
+            rigidArea3 = Box.createRigidArea(new Dimension(20,20));
+        }
+        return rigidArea3;
     }
 }
