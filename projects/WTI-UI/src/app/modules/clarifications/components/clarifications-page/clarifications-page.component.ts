@@ -66,7 +66,12 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
     if (filterParams.recipient === 'all') { filtered = filtered.filter(x => (x.recipient === 'All' || x.recipient === "No Answer Yet")); }
     if (filterParams.recipient === 'some') { filtered = filtered.filter(x => (x.recipient === 'Some' || x.recipient === "No Answer Yet")); }
     if (filterParams.recipient === 'team') { filtered = filtered.filter(x => (x.recipient === 'My Team' || x.recipient === "No Answer Yet")); }
-    if (filterParams.problem) { filtered = filtered.filter(x => x.problem?.toLowerCase() === filterParams.problem.toLowerCase()); }
+
+	//filter out clars for any not-selected problem
+	const selectedProblems = filterParams.problem;
+	if (Array.isArray(selectedProblems) && selectedProblems.length > 0) {
+  		filtered = filtered.filter(x => selectedProblems.includes(x.problem));
+	}
 
     this.filteredClarifications = filtered;
   }
