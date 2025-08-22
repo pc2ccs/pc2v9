@@ -29,11 +29,13 @@ providers: [
 })
 export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValueAccessor {
 	private _unsubscribe = new Subject<void>();
-	@Input() allowGeneral = false;
+	@Input() allowGeneral = false;	//default is don't include "general" as a problem choice
+	@Input() allowMultiSelect = false;  // default to single-select unless the parent component overrides
+	
 	problems: ContestProblem[] = [];
 	
 	//fields required to implement "ControlValueAccessor"
-	value: string;
+	value: string | string[];  // depending on single-select or multiSelect mode
 	onChange = (event: any) => { };
 	onTouched = (event: any) => { };
 
@@ -75,8 +77,12 @@ export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValue
 		this.onTouched = fn;
 	}
 
-	writeValue(value: string) {
-		this.value = (value === null) ? undefined : value;
+	writeValue(value: string | string[] | null) {
+  		if (this.allowMultiSelect) {
+    		this.value = Array.isArray(value) ? value : (value ? [value] : []);
+  		} else {
+    		this.value = typeof value === 'string' ? value : (Array.isArray(value) && value.length > 0 ? value[0] : '');
+  		}
 	}
 
 	/**
@@ -136,4 +142,21 @@ export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValue
 			return false;
 		}
 	}
+	
+	/**
+	 * If we are in multi-select mode, returns a tooltip string which is a comma-separated list
+	 * of all the currently selected problems.
+	 * In single-select mode, returns a string containing the (single) currently selected problem.
+     * In either mode, if no problem has been selected, returns the string "No problem selected".
+	 */
+	public getTooltip(): string {
+  		if (this.allowMultiSelect && Array.isArray(this.value)) {
+    		return this.value.length > 0 ? this.value.join(', ') : 'No problems selected';
+  		} else if (typeof this.value === 'string' && this.value) {
+    		return this.value;
+  		} else {
+    		return 'No problem selected';
+  		}
+	}
+
 }
