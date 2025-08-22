@@ -207,24 +207,27 @@ public class RunFiles implements Serializable {
             if(mainFile != null) {
                 catlog.newLine();
                 catlog.write(" {\"mainfile\":");
-                catlog.write(serializedFileToJSON(mainFile));
-                catlog.write(" }");
+                catlog.write(serializedFileInfoToJSON(mainFile));
+                catlog.write("}");
                 needComma = true;
             }
             if(otherFiles != null && otherFiles.length > 0) {
-                boolean needComma2 = false;
                 if(needComma) {
                     catlog.write(',');
                 }
                 catlog.newLine();
                 catlog.write(" {\"otherfiles\": {");
+                boolean needComma2 = false;
                 for(SerializedFile f : otherFiles) {
-                    if(needComma) {
+                    // one per line
+                    if(needComma2) {
                         catlog.write(',');
                         catlog.newLine();
                     }
+                    // indent
                     catlog.write("  ");
-                    catlog.write(serializedFileToJSON(f));
+                    catlog.write(serializedFileInfoToJSON(f));
+                    needComma2 = true;
                 }
                 catlog.newLine();
                 catlog.write(" }");
@@ -249,7 +252,7 @@ public class RunFiles implements Serializable {
      * @param f the serialized file
      * @return JSON string representation of the detailed info
      */
-    private String serializedFileToJSON(SerializedFile f) {
+    private String serializedFileInfoToJSON(SerializedFile f) {
         StringBuilder str = new StringBuilder();
 
         str.append('{');

@@ -2768,10 +2768,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
             // create submission catalog file
-            BufferedWriter catlog = new BufferedWriter(new FileWriter(prefixExecuteDirname(SOURCE_CATALOG_FILENAME)));
             if(runFiles != null) {
+                BufferedWriter catlog = new BufferedWriter(new FileWriter(prefixExecuteDirname(SOURCE_CATALOG_FILENAME)));
                 runFiles.createCatalogJSON(catlog, log);
-                catlog.flush();
+                catlog.close();
             }
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false));
             BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false));
