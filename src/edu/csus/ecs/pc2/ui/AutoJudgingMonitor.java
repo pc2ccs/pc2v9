@@ -565,19 +565,27 @@ public class AutoJudgingMonitor implements UIPlugin {
                 }
 
                 boolean solved = false;
+                String savedJudgmentDisplayName = null;
 
                 // Try to find result text in judgement list
-                //  (start with a default of a non-variable-scoring "no" judgment)
+                //  (start with a default of a non-variable-scoring "no" judgment, eg. RTE)
+                // JB TODO: This is horrible.  There should be a "default" defined in the configuration.
+                // We should not blindy choose element[2] of judgments.
                 ElementId elementId = contest.getJudgements()[2].getElementId();
 
                 for (Judgement judgement : contest.getJudgements()) {
                     if (judgement.getDisplayName().trim().equalsIgnoreCase(results)) {
                         elementId = judgement.getElementId();
+                        // Remember this for later when we map to allowed judgment results
+                        savedJudgmentDisplayName = judgement.getDisplayName();
+                        break;
                     }
                 }
 
                 // Or perhaps it is a yes? yes?
+                // JB TODO: This is horrible.  Should look up AC judgment, not assumes it's index 0
                 Judgement yesJudgement = contest.getJudgements()[0];
+
                 // bug 280 ICPC Validator Interface Standard calls for "accepted" in any case.
                 if (results.equalsIgnoreCase("accepted")) {
                     results = yesJudgement.getDisplayName();
@@ -585,6 +593,18 @@ public class AutoJudgingMonitor implements UIPlugin {
                 if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
                     elementId = yesJudgement.getElementId();
                     solved = true;
+                }
+                // If it's not solved, we will try to map the judgment result string to one that
+                // is configured.
+                if(!solved) {
+                    // Map to defined judgments
+                    if(problem.isUsingCLICSValidator()) {
+                        results = JudgementUtilities.mapCLICSValidatorJudgmentToDefinedJudgments(contest, results, executable.getExecutionData().getValidationReturnCode());
+                    } else if(savedJudgmentDisplayName != null) {
+                        // Use judgment display from configured judgment types.  Basically, this will make the
+                        // judgment display string uniform case
+                        results = savedJudgmentDisplayName;
+                    }
                 }
 
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), solved, true, true);

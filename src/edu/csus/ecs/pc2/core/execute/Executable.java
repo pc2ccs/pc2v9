@@ -1539,21 +1539,21 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 File judgementFile = new File(judgementFileName);
                 if (judgementFile.exists()) {
 
-                    // get the judgement out of the feedback file
+                    // get the judgment out of the feedback file
                     String judgement = readFileAsString(judgementFileName);
 
-                //put the judgement from the validator into the executionData object
+                    //put the judgement from the validator into the executionData object
                     executionData.setValidationResults(judgement);
                     log.info("Saving CLICS Validator judgement '" + judgement + "'");
 
                 } else {
-                //we found no judgement file in the feedback dir -- that's a problem (the Validator implementation should ALWAYS create one)!
-                log.warning ("No Clics Validator judgement file '" + judgementFileName + "' found in feedback directory '" + feedbackDirPath + "'");
-                saveDefaultClicsValidatorResult(exitCode);
+                    //we found no judgement file in the feedback dir -- that's a problem (the Validator implementation should ALWAYS create one)!
+                    log.warning ("No Clics Validator judgement file '" + judgementFileName + "' found in feedback directory '" + feedbackDirPath + "'");
+                    saveDefaultClicsValidatorResult(exitCode);
                 }
 
-            // check for a judgement details file
-            String detailsFileName = feedbackDirPath + ClicsValidator.CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME ;
+                // check for a judgement details file
+                String detailsFileName = feedbackDirPath + ClicsValidator.CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME ;
                 File detailsFile = new File(detailsFileName);
                 if (detailsFile.exists()) {
 
@@ -1574,7 +1574,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             log.warning("No CLICS validator feedback directory named '" + feedbackDirPath + "' found");
             saveDefaultClicsValidatorResult(exitCode);
         }
-            }
+    }
 
     /**
      * Saves into the current executionData object a Clics Validator result string based on the specified exitCode.
@@ -2398,6 +2398,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             proceedToValidation = false;
         } else if(executionData.isMemoryLimitExceeded()) {
             Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_MEMORY_LIMIT_EXCEEDED);
+            // If MLE is not a configured judgment type, use RTE
+            if(judgement == null) {
+                judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_RUN_TIME_ERROR);
+            }
             String judgementString = "No - Memory Limit Exceeded"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
