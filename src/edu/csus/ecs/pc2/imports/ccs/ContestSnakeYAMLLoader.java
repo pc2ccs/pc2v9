@@ -864,6 +864,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         contest.addAccounts(accounts);
 
+        // Apply YAML permissions to ALL accounts, not just those that were added
+        // in the ACCOUNTS_KEY section.
+        PermissionYamlLoader loader = new PermissionYamlLoader(yamlLines, contest.getAccounts());
+        // This will replace all accounts if they exist, which, of course, they will.
+        contest.addAccounts(loader.getAccountsArray());
+
         AutoJudgeSetting[] autoJudgeSettings = null;
         if (problems.length == 0) {
             /**
@@ -1215,11 +1221,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         }
 
-        // Load permissions from yaml into accounts
-        Account[] fullAccountList = accountVector.toArray(new Account[accountVector.size()]);
-        PermissionYamlLoader loader = new PermissionYamlLoader(yamlLines, fullAccountList);
-        return loader.getAccountsArray();
-
+        return(accountVector.toArray(new Account[accountVector.size()]));
     }
 
     private Object fetchObjectValue(Map<String, Object> content, String key) {
@@ -1581,7 +1583,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setMaxOutputSizeKB(maxOutputPC2);
         }
 
-        Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
+        Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, contest.getContestInformation().getMemoryLimitInMeg());
         problem.setMemoryLimitMB(memoryLimit);
 
         String sandboxCommandLine = fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");
@@ -1651,7 +1653,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setMaxOutputSizeKB(clicsMaxOutput * Constants.KIBIBYTE_PER_MEBIBYTE);
             }
 
-            Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
+            Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, memoryLimit.intValue());
             problem.setMemoryLimitMB(clicsMemoryLimit);
         }
 
