@@ -186,8 +186,47 @@ public class QuickSubmitter implements UIPlugin {
      * @return
      */
     private Problem guessProblem(IInternalContest contest2, String absolutePath) {
+
         Problem[] problems = contest.getProblems();
+        // The problem short name will come before the submissions/ folder
+        String submissionsBase = File.separator + IContestLoader.SUBMISSIONS_DIRNAME + File.separator;
+
+        // First heuristic is to isolate the problem shortname in the path.  A path looks like this:
+        // .../probshortname/submissions/accepted/xxx.cpp and we want to get probshortname
+        int iSub = absolutePath.indexOf(submissionsBase);
+        if(iSub != -1) {
+            String beforeSubmissionBase = absolutePath.substring(0, iSub);
+            // find previous File.separator
+            int iPrev = beforeSubmissionBase.lastIndexOf(File.separator);
+            // as long as it found one, we're good.
+            if(iPrev != -1) {
+                // starting index of problem short name
+                iPrev += File.separator.length();
+                // Get problem short name
+                String problemShortName = beforeSubmissionBase.substring(iPrev);
+                if(problemShortName.isEmpty() == false) {
+                    // scan problem list looking for it
+                    for (Problem problem : problems) {
+                        if (problemShortName.equals(problem.getShortName())) {
+                            return problem;
+                        }
+                    }
+                }
+                // If we can't find it, revert to the old method.
+            }
+        }
+
+        // 2nd heuristic Look for "/probshortname/"
         for (Problem problem : problems) {
+
+            if (absolutePath.indexOf(File.separator + problem.getShortName() + File.separator) != -1) {
+                return problem;
+            }
+        }
+
+        // Finally, just look for the problem short name anywhere in the path
+        for (Problem problem : problems) {
+
             if (absolutePath.indexOf(problem.getShortName()) != -1) {
                 return problem;
             }
