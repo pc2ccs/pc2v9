@@ -6,10 +6,9 @@
     	[(ngModel)]='value' 
     	(ngModelChange)='onChange($event)'
     	[multiple]='allowMultiSelect'>
-		<mat-option *ngIf="!allowMultiSelect" [value]="undefined">Select Problem</mat-option>
-        <mat-option *ngIf='allowGeneral' value='general'>
-            General
-        </mat-option>
+    	<!-- Add "General" to drop-down problem list if allowed (i.e. if specified by parent component) -->
+        <mat-option *ngIf='allowGeneral' value='general'>General</mat-option>
+        <!-- Add each problem name to  drop-down problem list -->
         <mat-option *ngFor='let problem of problems' [value]='problem.name'>{{ problem.name }}</mat-option>
     </mat-select>
 </mat-form-field>
