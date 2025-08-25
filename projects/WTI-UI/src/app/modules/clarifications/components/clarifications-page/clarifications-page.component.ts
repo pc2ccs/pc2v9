@@ -70,7 +70,8 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
 	//filter out clars for any not-selected problem
 	const selectedProblems = filterParams.problem;
 	if (Array.isArray(selectedProblems) && selectedProblems.length > 0) {
-  		filtered = filtered.filter(x => selectedProblems.includes(x.problem));
+		//ignore case (necessary so "General" matches "general")
+		filtered = filtered.filter(x => selectedProblems.some(p => p.toLowerCase() === x.problem.toLowerCase()));
 	}
 
     this.filteredClarifications = filtered;
