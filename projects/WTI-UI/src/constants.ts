@@ -48,6 +48,11 @@ export const RUNS_ENABLED_OPTIONS_KEY = 'runsNotificationsEnabled';
 export const CLARIFICATIONS_PAGE = 'clarifications';
 
 /**
+ * The storageSession key indicating what filter settings (recipient and problems) have been selected on the CLARIFICATIONS page filter.
+ */
+export const CLARS_PAGE_FILTER_KEY = 'clarificationsFilterForm';
+
+/**
   * The storageSession value indicating the SCOREBOARD page is "current".
  */
 export const SCOREBOARD_PAGE = 'scoreboard';
