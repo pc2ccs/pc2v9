@@ -323,6 +323,17 @@ export class AppComponent implements OnInit {
       return value ? JSON.parse(value) : null;
   }
   
+  //save the current clarification page filter values in sessionStorage so a subsequent F5 (refresh) can restore them
+  export function saveClarPageFilterValues(clarFilterValues: Object) {
+      return (sessionStorage.setItem(Constants.CLARS_PAGE_FILTER_KEY, JSON.stringify(clarFilterValues)));
+  }
+  
+  //return the most recently saved clarification page filter values from sessionStorage
+  export function getClarPageFilterValues() {
+      const value = sessionStorage.getItem(Constants.CLARS_PAGE_FILTER_KEY);
+      return value ? JSON.parse(value) : null;
+  }
+  
   //clear all data in sessionStorage
   export function clearSessionStorage() {
       sessionStorage.clear();
