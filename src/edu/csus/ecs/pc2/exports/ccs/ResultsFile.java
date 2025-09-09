@@ -172,7 +172,8 @@ public class ResultsFile {
         if (finalizeData == null) {
             finalizeData = GenDefaultFinalizeData();
         }
-        // Do not use Bill honors WF ranking rules for groups
+        // Only use Bill honors WF ranking rules if not for a specific group and we're doing WF ranks
+        // Calculating the Bill honors rules doesn't make sense for sub-groups
         boolean useHonorsRules = (group == null && finalizeData.isUseWFGroupRanking());
 
         if (useHonorsRules && finalizeData.isCustomizeHonorsSolvedCount()) {
