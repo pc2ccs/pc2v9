@@ -141,12 +141,14 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	        this._teamService.runsUpdated.next();
 	    },
 	    error: (error: any) => {
-          let msg = 'Not accepting submissions at this time';
-          // 429 = too many requests, 413 = request entity too large, in these cases
-          // we'll use whatever msg was supplied by the PC2 API
-          if (error.status == 429 || error.status == 413){
-              msg = error.error.entity.message;
+	      //get the error message supplied by the PC2 API (if any)
+          let msg = error.error.entity.message;
+	      
+	      // if the error msg wasn't a valid string (or was empty) we'll use a generic default message.
+          if (!(typeof msg === 'string' && msg.trim().length > 0)){
+              msg = 'Error in submission';
           }
+	      
 	      this._uiHelper.alertError(msg);
 	      console.error(msg);
 	    },
