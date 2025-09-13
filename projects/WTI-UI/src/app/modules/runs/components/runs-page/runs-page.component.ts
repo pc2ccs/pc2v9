@@ -73,13 +73,13 @@ export class RunsPageComponent implements OnInit, OnDestroy {
   }
 
   filterData(): void {
-    const fitlerParams = this.filterForm.value;
+    const filterParams = this.filterForm.value;
     let filtered = this.runs;
-    if (fitlerParams.runType === 'test') { filtered = filtered.filter(x => x.isTestRun); }
-    else if (fitlerParams.runType === 'judged') { filtered = filtered.filter(x => !x.isTestRun); }
-    if (fitlerParams.language) { filtered = filtered.filter(x => fitlerParams.language === x.language); }
-    if (fitlerParams.problem) { filtered = filtered.filter(x => fitlerParams.problem === x.problem); }
-    if (fitlerParams.judgement) { filtered = filtered.filter(x => fitlerParams.judgement === x.judgement); }
+    if (filterParams.runType === 'test') { filtered = filtered.filter(x => x.isTestRun); }
+    else if (filterParams.runType === 'judged') { filtered = filtered.filter(x => !x.isTestRun); }
+    if (filterParams.language) { filtered = filtered.filter(x => filterParams.language === x.language); }
+    if (filterParams.problem) { filtered = filtered.filter(x => filterParams.problem === x.problem); }
+    if (filterParams.judgement) { filtered = filtered.filter(x => filterParams.judgement === x.judgement); }
     this.filteredRuns = filtered;
   }
 
