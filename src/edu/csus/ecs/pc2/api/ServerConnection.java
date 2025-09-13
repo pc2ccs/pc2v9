@@ -571,12 +571,21 @@ public class ServerConnection {
 
         // we keep track of the total submission size of all the source files
         long sourceSize = mainFile.getByteData().length;
+        
+        if (sourceSize <= 0) {
+            throw new SubmissionRejectedException("Zero-length file not allowed", SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);            
+        }
 
         // validate additionalSourceFiles param
         if (additionalFiles != null && additionalFiles.length > 0) {
             for (IFile nextFile : additionalFiles) {
                 if (!validIFile(nextFile)) {
-                    throw new Exception("Invalid IFile in additionalFiles array");
+                    if (nextFile.getByteData().length <= 0) {
+                        throw new SubmissionRejectedException("Zero-length file (in 'additional files') not allowed", 
+                                                                SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
+                    } else {
+                        throw new Exception("Invalid IFile in additionalFiles array");
+                    }
                 }
                 sourceSize += nextFile.getByteData().length;
             }
@@ -636,8 +645,7 @@ public class ServerConnection {
                                         overrideSubmissionTimeMS, overrideRunId);
         }
         catch (SubmissionRejectedException e) {
-            //the submission was rejected, presumably because of the submitJudgeRun() method's ThrottleStrategy;
-            //forward the exception to the caller
+            //the submission was rejected; forward the exception to the caller
             throw e ;
         }
         catch (Exception e) {
