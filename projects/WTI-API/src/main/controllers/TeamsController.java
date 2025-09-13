@@ -286,6 +286,10 @@ public class TeamsController extends MainController {
 			    case SOURCE_TOO_BIG:
 			        stat = Response.Status.REQUEST_ENTITY_TOO_LARGE;
 			        break;
+			    case ZERO_LENGTH_FILE:
+			        //not strictly necessary since BAD_REQUEST is the default (assigned above), but added here for clarity/completeness
+                    stat = Response.Status.BAD_REQUEST;
+                    break;
 			}
 			return Response.status(stat)
 					.entity(Entity.json(new ServerErrorResponseModel(stat, msg)))
