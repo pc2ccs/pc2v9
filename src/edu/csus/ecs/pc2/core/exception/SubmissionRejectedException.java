@@ -18,7 +18,8 @@ public class SubmissionRejectedException extends Exception {
     public enum SubmissionRejectionReason {
         UNKNOWN,
         THROTTLE_EXCEEDED,
-        SOURCE_TOO_BIG
+        SOURCE_TOO_BIG,
+        ZERO_LENGTH_FILE
     }
 
     private SubmissionRejectionReason rejectReason = SubmissionRejectionReason.UNKNOWN;
@@ -27,17 +28,6 @@ public class SubmissionRejectedException extends Exception {
      * Constructs an empty SubmissionRejectedException which contains no textual information about the reason for the Exception.
      */
     public SubmissionRejectedException() {
-    }
-
-    /**
-     * Constructs a THROTTLE_EXCEEDED SubmissionRejectedException containing the supplied text message.
-     * This is for backward compatibility.
-     * TODO: eventually change any code that calls this to specify the reason Enum explicitly.
-     *
-     * @param message A text message associated with the Exception using the reason THROTTLE_EXCEEDED.
-     */
-    public SubmissionRejectedException(String message) {
-        this(message, SubmissionRejectionReason.THROTTLE_EXCEEDED);
     }
 
     /**
@@ -71,7 +61,7 @@ public class SubmissionRejectedException extends Exception {
     }
 
     /**
-     * Return the enum of why the submission was rejected
+     * Return the enum of why the submission was rejected.
      *
      * @return SubmissionRejectionReason
      */
