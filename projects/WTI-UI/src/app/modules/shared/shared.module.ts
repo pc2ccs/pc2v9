@@ -12,6 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AboutWtiComponent } from './components/about-wti/about-wti.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { DisplayTimePipe } from 'src/app/modules/core/services/displayTimePipe.service';
@@ -42,6 +43,7 @@ import { HttpClient } from '@angular/common/http';
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
+	MatTooltipModule,
     BrowserModule,
     DisplayTimePipe
   ],

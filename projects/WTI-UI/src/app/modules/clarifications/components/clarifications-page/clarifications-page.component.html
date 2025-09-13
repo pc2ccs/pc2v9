@@ -28,7 +28,7 @@
                 </label>
             </div>
             <div>
-    			<app-problem-selector [allowGeneral]='true' formControlName='problem'></app-problem-selector>
+				<app-problem-selector formControlName='problem' [allowMultiSelect]="true" [allowGeneral]='true'></app-problem-selector>
             </div>
             <div>
                 <button class='outline' type='button' (click)='reset()'>Clear Filters</button>
