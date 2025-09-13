@@ -52,6 +52,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
+import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException.SubmissionRejectionReason;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -679,9 +680,21 @@ public class SubmissionService implements Feature {
                 // No run entered, this is really really bad
                 log.log(Level.WARNING, "No Run added after submitting CLICS API run for team " + team_id + " by " + user);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to add submission").build();
-            } catch (SubmissionRejectedException sje) {
-                log.log(Level.WARNING, "SubmissionRejectedException submitting CLICS API run for team " + team_id + " by " + user);
-                return Response.status(Response.Status.TOO_MANY_REQUESTS).entity("Unable to submit run: " + sje.getLocalizedMessage()).build();
+            } catch (SubmissionRejectedException sre) {
+            	switch (sre.getRejectionReason()) {
+            	    case THROTTLE_EXCEEDED :
+            	        log.log(Level.WARNING, "SubmissionRejectedException (Throttling) submitting CLICS API run for team " + team_id + " by " + user);
+            	        return Response.status(Response.Status.TOO_MANY_REQUESTS).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+                    case SOURCE_TOO_BIG :
+                        log.log(Level.WARNING, "SubmissionRejectedException (Source too large) submitting CLICS API run for team " + team_id + " by " + user);
+                        return Response.status(Response.Status.REQUEST_ENTITY_TOO_LARGE).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+                    case ZERO_LENGTH_FILE :
+                        log.log(Level.WARNING, "SubmissionRejectedException (Zero-length file) submitting CLICS API run for team " + team_id + " by " + user);
+                        return Response.status(Response.Status.BAD_REQUEST).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+            	    default:
+                        log.log(Level.WARNING, "SubmissionRejectedException (Reason: Unknown) submitting CLICS API run for team " + team_id + " by " + user);
+                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+            	}
             } catch (Exception e) {
                 log.log(Level.WARNING, "Exception submitting CLICS API run for team " + team_id + " by " + user, e);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to submit run: " + e.getLocalizedMessage()).build();
