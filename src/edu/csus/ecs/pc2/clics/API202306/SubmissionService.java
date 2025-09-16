@@ -685,12 +685,17 @@ public class SubmissionService implements Feature {
             	    case THROTTLE_EXCEEDED :
             	        log.log(Level.WARNING, "SubmissionRejectedException (Throttling) submitting CLICS API run for team " + team_id + " by " + user);
             	        return Response.status(Response.Status.TOO_MANY_REQUESTS).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
-                    case SOURCE_TOO_BIG :
+
+            	    //the following case should never happen since the webserver has a filter which rejects submissions which are too large before
+            	    //they ever get to this method (see SubmitPostSizeLimitFilter and ResourceConfig202306.getResourceConfig()).  But... Tammy...
+            	    case SOURCE_TOO_BIG :
                         log.log(Level.WARNING, "SubmissionRejectedException (Source too large) submitting CLICS API run for team " + team_id + " by " + user);
                         return Response.status(Response.Status.REQUEST_ENTITY_TOO_LARGE).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
-                    case ZERO_LENGTH_FILE :
+
+            	    case ZERO_LENGTH_FILE :
                         log.log(Level.WARNING, "SubmissionRejectedException (Zero-length file) submitting CLICS API run for team " + team_id + " by " + user);
                         return Response.status(Response.Status.BAD_REQUEST).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+
             	    default:
                         log.log(Level.WARNING, "SubmissionRejectedException (Reason: Unknown) submitting CLICS API run for team " + team_id + " by " + user);
                         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
