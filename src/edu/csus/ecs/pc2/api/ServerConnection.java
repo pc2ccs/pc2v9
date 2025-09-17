@@ -434,19 +434,33 @@ public class ServerConnection {
 
         File mainFile = new File(mainFileName);
         if (! mainFile.isFile()){
-            throw new Exception("File '"+mainFileName+"' no such file (not found)");
+            throw new Exception("File '" + mainFileName + "': no such file (not found)");
+        }
+        
+        long sourceSize = mainFile.length();
+        
+        // make sure we don't accept a zero-length main file if that's not allowed
+        if (sourceSize <= 0) {
+            throw new SubmissionRejectedException("Zero-length file not allowed", SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);            
         }
 
         // we are keeping track of the total submission size in sourceSize
-        long sourceSize = mainFile.length();
         SerializedFile[] list = new SerializedFile[additionalFileNames.length];
         for (int i = 0; i < additionalFileNames.length; i++) {
             File addFile = new File(additionalFileNames[i]);
+            //make sure the named item really is a file...
             if (addFile.isFile()) {
-                list[i] = new SerializedFile(additionalFileNames[i]);
-                sourceSize += addFile.length();
+                // make sure we don't accept a zero-length additional file if that's not allowed
+                if (addFile.length() <= 0) {
+                    throw new SubmissionRejectedException("Zero-length file (in 'additional files') not allowed", 
+                            SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
+                } else {
+                    //file is ok; add to list and update total source size
+                    list[i] = new SerializedFile(additionalFileNames[i]);
+                    sourceSize += addFile.length();
+                } 
             } else {
-                throw new Exception("File '" + additionalFileNames[i] + "' no such file (not found)");
+                throw new Exception("File '" + additionalFileNames[i] + "': no such file (not found)");
             }
         }
 
@@ -572,6 +586,7 @@ public class ServerConnection {
         // we keep track of the total submission size of all the source files
         long sourceSize = mainFile.getByteData().length;
         
+        // make sure we don't accept a zero-length main file if that's not allowed
         if (sourceSize <= 0) {
             throw new SubmissionRejectedException("Zero-length file not allowed", SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);            
         }
@@ -579,7 +594,9 @@ public class ServerConnection {
         // validate additionalSourceFiles param
         if (additionalFiles != null && additionalFiles.length > 0) {
             for (IFile nextFile : additionalFiles) {
+                //check IFile validity (includes checking for length > 0)
                 if (!validIFile(nextFile)) {
+                    // check whether the "invalid IFile" reason is a zero-length file if that's not allowed
                     if (nextFile.getByteData().length <= 0) {
                         throw new SubmissionRejectedException("Zero-length file (in 'additional files') not allowed", 
                                                                 SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
