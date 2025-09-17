@@ -224,6 +224,11 @@ public class ContestInformation implements Serializable{
      * Submission Throttling
      */
     private boolean submissionThrottling = true;
+    
+    /**
+     * Whether or not zero-length files are allowed in submissions.
+     */
+    private boolean allowZeroLengthSubmissionFiles = false;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -463,7 +468,11 @@ public class ContestInformation implements Serializable{
                 return false;
             }
 
-            return true;
+            if (allowZeroLengthSubmissionFiles != contestInformation.isAllowZeroLengthSubmissionFiles()) {
+                return false;
+            }
+
+           return true;
         } catch (Exception e) {
             e.printStackTrace(System.err); // TODO log this exception
             return false;
@@ -970,6 +979,14 @@ public class ContestInformation implements Serializable{
 
     public void setSubmissionThrottling(boolean submissionThrottling) {
         this.submissionThrottling = submissionThrottling;
+    }
+
+    public boolean isAllowZeroLengthSubmissionFiles() {
+        return allowZeroLengthSubmissionFiles;
+    }
+
+    public void setAllowZeroLengthSubmissionFiles(boolean allowZeroLengthSubmissionFiles) {
+        this.allowZeroLengthSubmissionFiles = allowZeroLengthSubmissionFiles;
     }
 
 }
