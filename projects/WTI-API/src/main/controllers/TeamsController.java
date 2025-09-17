@@ -237,7 +237,7 @@ public class TeamsController extends MainController {
 
 			IFile main = new PC2APIFile(run.getMainFile().getFileName(), run.getMainFile().getByteData());
 
-			if(run.getExtraFiles() != null) {			
+			if(run.getExtraFiles() != null  &&  run.getExtraFiles().length > 0) {			
 				IFile[] extraFiles = FileService.createFileArray(run.getExtraFiles());
 				teamsConn.submitJudgeRun(prob, lang, main, extraFiles);
 			}
