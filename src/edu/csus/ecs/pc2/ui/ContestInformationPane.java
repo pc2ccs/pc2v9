@@ -236,11 +236,15 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JCheckBox allowMultipleTeamLoginsCheckbox;
 
+    private JCheckBox allowZeroLengthSubmissionFilesCheckbox;
+
     private Component rigidArea1;
 
     private Component rigidArea2;
 
     private Component rigidArea3;
+
+    private Component rigidArea4;
 
     private JPanel teamScoreboardDisplayFormatPane;
 
@@ -676,8 +680,25 @@ public class ContestInformationPane extends JPanePlugin {
             teamSettingsPane.add(getAllowMultipleTeamLoginsCheckbox(), null);
             teamSettingsPane.add(getRigidArea2());
             teamSettingsPane.add(getTeamScoreboardDisplayFormatPane(), null);
+            teamSettingsPane.add(getRigidArea4());
+            teamSettingsPane.add(getAllowZeroLengthSubmissionFilesCheckbox(), null);
         }
         return teamSettingsPane;
+    }
+
+    private JCheckBox getAllowZeroLengthSubmissionFilesCheckbox() {
+        if (allowZeroLengthSubmissionFilesCheckbox==null) {
+            allowZeroLengthSubmissionFilesCheckbox = new JCheckBox("Allow zero-length submission files", false);
+            allowZeroLengthSubmissionFilesCheckbox.addActionListener (new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
+        }
+        return allowZeroLengthSubmissionFilesCheckbox ;
     }
 
     private JPanel getTeamScoreboardDisplayFormatPane() {
@@ -1145,6 +1166,7 @@ public class ContestInformationPane extends JPanePlugin {
         maximumFileSize = Long.parseLong(maxFileSizeString);
         newContestInformation.setMaxSourceSizeInBytes(maximumFileSize * 1024);
         newContestInformation.setAllowMultipleLoginsPerTeam(getAllowMultipleTeamLoginsCheckbox().isSelected());
+        newContestInformation.setAllowZeroLengthSubmissionFiles(getAllowZeroLengthSubmissionFilesCheckbox().isSelected());
         newContestInformation.setTeamScoreboardDisplayFormat(getTeamScoreboardDisplayFormatTextfield().getText());
 
         //fill in values already saved, if any
@@ -1971,4 +1993,11 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return rigidArea3;
     }
+    
+    private Component getRigidArea4() {
+        if (rigidArea4==null) {
+            rigidArea4 = Box.createRigidArea(new Dimension(20,20));
+        }
+        return rigidArea4;    }
+
 }
