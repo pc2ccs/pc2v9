@@ -277,7 +277,7 @@ public class TeamsController extends MainController {
 		}
 		catch (SubmissionRejectedException e) {
 			String msg = e.getMessage();
-			Response.Status stat = Response.Status.BAD_REQUEST;
+			Response.Status stat ;
 			// set appropriate HTML status code depending on why the submission was rejected
 			switch(e.getRejectionReason()) {
 			    case THROTTLE_EXCEEDED:
@@ -287,9 +287,11 @@ public class TeamsController extends MainController {
 			        stat = Response.Status.REQUEST_ENTITY_TOO_LARGE;
 			        break;
 			    case ZERO_LENGTH_FILE:
-			        //not strictly necessary since BAD_REQUEST is the default (assigned above), but added here for clarity/completeness
                     stat = Response.Status.BAD_REQUEST;
                     break;
+			    default:
+			    	stat = Response.Status.BAD_REQUEST;
+			    	break;
 			}
 			return Response.status(stat)
 					.entity(Entity.json(new ServerErrorResponseModel(stat, msg)))
