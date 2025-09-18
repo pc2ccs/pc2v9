@@ -1252,6 +1252,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getMaxOutputSizeInKTextField().setText((contestInformation.getMaxOutputSizeInBytes() / 1024) + "");
                 getMaxSourceSizeInKTextField().setText((contestInformation.getMaxSourceSizeInBytes() / 1024) + "");
                 getAllowMultipleTeamLoginsCheckbox().setSelected(contestInformation.isAllowMultipleLoginsPerTeam());
+                getAllowZeroLengthSubmissionFilesCheckbox().setSelected(contestInformation.isAllowZeroLengthSubmissionFiles());
                 getTeamScoreboardDisplayFormatTextfield().setText(contestInformation.getTeamScoreboardDisplayFormat());
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
 
