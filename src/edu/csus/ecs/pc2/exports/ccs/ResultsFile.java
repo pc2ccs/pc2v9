@@ -172,8 +172,11 @@ public class ResultsFile {
         if (finalizeData == null) {
             finalizeData = GenDefaultFinalizeData();
         }
+        // Only use Bill honors WF ranking rules if not for a specific group and we're doing WF ranks
+        // Calculating the Bill honors rules doesn't make sense for sub-groups
+        boolean useHonorsRules = (group == null && finalizeData.isUseWFGroupRanking());
 
-        if (finalizeData.isUseWFGroupRanking() && finalizeData.isCustomizeHonorsSolvedCount()) {
+        if (useHonorsRules && finalizeData.isCustomizeHonorsSolvedCount()) {
             if (finalizeData.getHighestHonorSolvedCount() != 0) {
                 highestHonorSolvedCount = finalizeData.getHighestHonorSolvedCount();
             }
@@ -205,11 +208,13 @@ public class ResultsFile {
         Arrays.sort(standingsRecords, comparator);
 
         int realRank = 0;
-        if (highestHonorSolvedCount == 0) {
-            highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
-        }
-        if (highHonorSolvedCount == 0) {
-            highHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved() - 1;
+        if(useHonorsRules) {
+            if (highestHonorSolvedCount == 0) {
+                highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
+            }
+            if (highHonorSolvedCount == 0) {
+                highHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved() - 1;
+            }
         }
 
         for (StandingsRecord record : standingsRecords) {
@@ -231,7 +236,7 @@ public class ResultsFile {
             boolean isHighHonor = false;
             boolean isHonor = false;
 
-            if (finalizeData.isUseWFGroupRanking()) {
+            if (useHonorsRules) {
                 if (record.getNumberSolved() >= highestHonorSolvedCount) {
                     isHighestHonor = true;
                 } else if (record.getNumberSolved() >= highHonorSolvedCount) {
