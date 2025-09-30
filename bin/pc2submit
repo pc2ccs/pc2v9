@@ -522,12 +522,15 @@ def do_api_submit():
         
     if team_id :
         jsonSub['team_id'] = team_id
+        
+    zip = io.BytesIO()
+    
+    with zipfile.ZipFile(zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for filename in filenames:
+            arcname = os.path.basename(filename)
+            zipf.write(filename, arcname)
 
-    jsonSub['files'] = []
-    for filename in filenames :
-        with open(filename, 'rb') as file:
-            data = base64.b64encode(file.read()).decode("utf-8")
-        jsonSub['files'].append({ 'data' : data, 'filename' : filename })
+    jsonSub['files'] = [{ 'data' : base64.b64encode(zip.getvalue()).decode("utf-8"), 'mime' : 'application/zip' }]
 
     logging.debug(f"API Post info: jsonSub: {jsonSub}")
 

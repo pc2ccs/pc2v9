@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
+import edu.csus.ecs.pc2.convert.EventFeedUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
@@ -607,24 +608,44 @@ public class SubmissionService implements Feature {
                 return Response.status(Response.Status.BAD_REQUEST).entity("no file specified").build();
             }
 
-            List<IFile> srcFiles = new ArrayList<IFile>();
-            for(CLICSFileReference file : files) {
-                String fileName = file.getFilename();
-                if("".equals(fileName)) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity("no file name specified").build();
-                }
-                // allow contestant submission of a zero length file.  This will generate a CE (hopefully).
-                // if the following code is uncommented, the submission is not made and a 400 is returned to the submitter.
-                // it appears that other CCS's allow zero length submissions.  *sigh* -- JB
-                String fileData = file.getData();
-                if(fileData == null || fileData.length() == 0) {
-                    // nice to put it in the log in case any questions come up.
-                    log.info(user + " POSTing empty source submission on behalf of team " + team_id);
+            List<IFile> srcFiles;
 
-//                    return Response.status(Response.Status.BAD_REQUEST).entity("no file data specified for " + fileName).build();
+            // Backward compatability test: If no mime property specified on the first file, then the CLICSFileReference's are
+            // actual files and not a zip file.  This is in here because initially, due to a misinterpretation of the CLICS
+            // 2023-06 specification, the command line submit utility (a.k.a. pc2submit) did not put the files in a zip file,
+            // rather, it created an array of base64 encoded file contents.  The CLICS spec has since been clarified but for now,
+            // we will still support the incorrect implementation as well as the correct one.
+            CLICSFileReference firstFile = files[0];
+            String mimeType = firstFile.getMime();
+
+            // TODO: deprecate this "if" part and leave the "else" part.  JB
+            if(mimeType == null || "".equals(mimeType)) {
+                srcFiles = new ArrayList<IFile>();
+                for(CLICSFileReference file : files) {
+                    String fileName = file.getFilename();
+                    if("".equals(fileName)) {
+                        return Response.status(Response.Status.BAD_REQUEST).entity("no file name specified").build();
+                    }
+                    // allow contestant submission of a zero length file.  This will generate a CE (hopefully).
+                    // if the following code is uncommented, the submission is not made and a 400 is returned to the submitter.
+                    // it appears that other CCS's allow zero length submissions.  *sigh* -- JB
+                    String fileData = file.getData();
+                    if(fileData == null || fileData.length() == 0) {
+                        // nice to put it in the log in case any questions come up.
+                        log.info(user + " POSTing empty source submission on behalf of team " + team_id);
+
+    //                    return Response.status(Response.Status.BAD_REQUEST).entity("no file data specified for " + fileName).build();
+                    }
+                    IFile iFile = new IFileImpl(file.getFilename(), fileData);
+                    srcFiles.add(iFile);
                 }
-                IFile iFile = new IFileImpl(file.getFilename(), fileData);
-                srcFiles.add(iFile);
+            } else {
+                // There should be precisely one file in the files[] array, which is a zip archive of the source file(s)
+                if(files.length > 1) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("only one zip archive is allowed").build();
+                }
+
+                srcFiles = EventFeedUtilities.getIFiles(firstFile.getData());
             }
             String entry = sub.getEntry_point();
             IFile mainFile = srcFiles.get(0);
