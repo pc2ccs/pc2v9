@@ -25,12 +25,6 @@ public class SubmissionRejectedException extends Exception {
     private SubmissionRejectionReason rejectReason = SubmissionRejectionReason.UNKNOWN;
 
     /**
-     * Constructs an empty SubmissionRejectedException which contains no textual information about the reason for the Exception.
-     */
-    public SubmissionRejectedException() {
-    }
-
-    /**
      * Constructs a SubmissionRejectedException containing text message and reason.
      *
      * @param message A text message associated with the Exception

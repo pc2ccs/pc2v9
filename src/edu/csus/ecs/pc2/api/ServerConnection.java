@@ -578,6 +578,13 @@ public class ServerConnection {
 
         checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit run");
 
+        //reject zero-length file if such is not allowed
+        if (mainFile!=null && mainFile.getByteData().length<=0 && 
+                !internalContest.getContestInformation().isAllowZeroLengthSubmissionFiles()) {
+            throw new SubmissionRejectedException("Zero-length file not allowed", 
+                        SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
+        }
+        
         //validate mainFile param
         if (!validIFile(mainFile)) {
             throw new Exception("Invalid mainFile parameter");
@@ -586,15 +593,18 @@ public class ServerConnection {
         // we keep track of the total submission size of all the source files
         long sourceSize = mainFile.getByteData().length;
         
-        // make sure we don't accept a zero-length main file if that's not allowed
-        if (sourceSize <= 0) {
-            throw new SubmissionRejectedException("Zero-length file not allowed", SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);            
-        }
-
         // validate additionalSourceFiles param
         if (additionalFiles != null && additionalFiles.length > 0) {
             for (IFile nextFile : additionalFiles) {
-                //check IFile validity (includes checking for length > 0)
+                
+                //reject zero-length additional file if such is not allowed
+                if (nextFile!=null && nextFile.getByteData().length<=0 && 
+                        !internalContest.getContestInformation().isAllowZeroLengthSubmissionFiles()) {
+                    throw new SubmissionRejectedException("Zero-length file (in 'additional files') not allowed", 
+                                SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
+                }
+                
+                //check IFile validity
                 if (!validIFile(nextFile)) {
                     // check whether the "invalid IFile" reason is a zero-length file if that's not allowed
                     if (nextFile.getByteData().length <= 0) {
@@ -604,6 +614,7 @@ public class ServerConnection {
                         throw new Exception("Invalid IFile in additionalFiles array");
                     }
                 }
+                
                 sourceSize += nextFile.getByteData().length;
             }
         }
@@ -731,19 +742,42 @@ public class ServerConnection {
 
         checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit test run");
 
+        //reject zero-length file if such is not allowed
+        if (mainFile!=null && mainFile.getByteData().length<=0 && 
+                !internalContest.getContestInformation().isAllowZeroLengthSubmissionFiles()) {
+            throw new SubmissionRejectedException("Zero-length file not allowed", 
+                        SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
+        }
+        
         //validate mainFile param
         if (!validIFile(mainFile)) {
             throw new Exception("Invalid mainFile parameter");
         }
+        
         // validate additionalSourceFiles param
         if (additionalSourceFiles != null && additionalSourceFiles.length > 0) {
             for (IFile nextFile : additionalSourceFiles) {
+
+                //reject zero-length additional file if such is not allowed
+                if (nextFile!=null && nextFile.getByteData().length<=0 && 
+                        !internalContest.getContestInformation().isAllowZeroLengthSubmissionFiles()) {
+                    throw new SubmissionRejectedException("Zero-length file (in 'additional files') not allowed", 
+                                SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
+                }
+                
                 if (!validIFile(nextFile)) {
                     throw new Exception("Invalid IFile in additionalSourceFiles array");
                 }
             }
         }
 
+        //reject zero-length testDataFile if such is not allowed
+        if (testDataFile!=null && testDataFile.getByteData().length<=0 && 
+                !internalContest.getContestInformation().isAllowZeroLengthSubmissionFiles()) {
+            throw new SubmissionRejectedException("Zero-length file not allowed", 
+                        SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
+        }
+        
         // validate testDataFile param
         if (!validIFile(testDataFile)) {
             throw new Exception("Invalid testDataFile parameter");
@@ -752,6 +786,15 @@ public class ServerConnection {
         // validate additionalTestDataFiles param
         if (additionalTestDataFiles != null && additionalTestDataFiles.length > 0) {
             for (IFile nextFile : additionalTestDataFiles) {
+
+                //reject zero-length additionalTestDataFile if such is not allowed
+                if (nextFile!=null && nextFile.getByteData().length<=0 && 
+                        !internalContest.getContestInformation().isAllowZeroLengthSubmissionFiles()) {
+                    throw new SubmissionRejectedException("Zero-length file not allowed", 
+                                SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
+                }
+                
+                
                 if (!validIFile(nextFile)) {
                     throw new Exception("Invalid IFile in additionalTestDataFiles array");
                 }
@@ -1635,19 +1678,24 @@ public class ServerConnection {
 
     /**
      * Returns an indication of whether the specified {@link IFile} is valid or not.
-     * An IFile is considered "valid" if it is not null, has a non-null, non-zero-length name,
-     * and has more than zero bytes of data.
+     * An IFile is considered "valid" if it is not null and has a non-null, non-zero-length name.
+     * 
+     * Note that a PREVIOUS version of this method also required the file to have more than 
+     * zero bytes of data to be valid. However, that check was incompatible with newly-added features which
+     * allow the Admin to allow (or disallow) zero-length files.  Checks for zero-length files
+     * now need to be done external to this method, in order to allow separate detection of the
+     * zero-file-length condition so that the appropriate {@link SubmissionRejectedException} can
+     * be thrown.
      *
-     * @param file the IFile to be checked for validity
+     * @param file the IFile to be checked for validity.
      *
-     * @return true if the IFile is not null, has a file name that is not null and not empty,
-     *          and has greater than zero data bytes; false otherwise
+     * @return true if the IFile is not null and has a file name that is not null and not empty;
+     *         false otherwise.
+     *         
+     * @see SubmissionRejectedException
      */
     private boolean validIFile(IFile file) {
         if (file==null || file.getFileName()==null || file.getFileName().equals("")) {
-            return false;
-        }
-        if (file.getByteData().length<=0) {
             return false;
         }
         return true;
