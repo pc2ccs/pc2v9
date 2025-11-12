@@ -26,10 +26,6 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	numProblems: number = 0;
 	problemDetailHeaders: ProblemHeader[] = [];
 	
-	//TODO: provide support for more than 26 problems
-	//TODO: provide support for the possibility that problems are not listed in alphabetical order
-	problemLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-
 	constructor(
 		private _contestService: IContestService,
 		private _appTitleService: AppTitleService,
@@ -43,8 +39,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		
 		this._appTitleService.setTitleWithTeamId("Scoreboard");
 		
-        	//indicate that this Scoreboard page is the most recently accessed page
-        	saveCurrentPage(Constants.SCOREBOARD_PAGE);
+        //indicate that this Scoreboard page is the most recently accessed page
+        saveCurrentPage(Constants.SCOREBOARD_PAGE);
 
 		this.loadStandings();
 
