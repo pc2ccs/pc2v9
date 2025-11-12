@@ -1045,7 +1045,15 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problemMemento.putString("color", problems[i].getColorName());
             problemMemento.putString("letter", problems[i].getLetter());
             problemMemento.putString("rgb", problems[i].getColorRGB());
-            problemMemento.putString("url", "problems/" + problems[i].getLetter() + ".pdf");
+            problemMemento.putString("shortName", problems[i].getShortName());
+            
+            //construct a string pointing to the place where the Contest Admin is expected to put the problem writeup.
+            //Problem writeups are expected to be placed under the web-content folder in a problem-specific subfolder
+            // named like <letter>-capitalizeFirstLetter(shortname), in a PDF file named the same but with ".pdf" added.
+            String basename = problems[i].getLetter().toUpperCase() + "-" + capitalizeFirstLetter(problems[i].getShortName());
+            String filename = basename + ".pdf";
+            problemMemento.putString("url", "problems/" + basename + "/" + filename);
+            
             problemMemento.putLong("attempts", problemAttempts[id]);
             if (problemAttempts[id] > 0) {
                 grandTotalProblemAttempts++;
@@ -1062,6 +1070,25 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMemento.putInteger("totalTeams", grandTotalTeams);
 
 
+    }
+
+    /**
+     * Returns a string which is identical to the input string except that the first character, if it
+     * is a letter, is guaranteed to be upper-case.
+     * @param input the string to be processed.
+     * @return an equivalent string with the first character capitalized if it is a letter.
+     */
+    private String capitalizeFirstLetter(String input) {
+        if (input == null || input.isEmpty()) {
+            return input; // Return as-is if null or empty
+        }
+        
+        char firstChar = input.charAt(0);
+        if (!Character.isLetter(firstChar)) {
+            return input; // Return unchanged if first char is not a letter
+        }
+        
+        return Character.toUpperCase(firstChar) + input.substring(1);
     }
 
     /**
