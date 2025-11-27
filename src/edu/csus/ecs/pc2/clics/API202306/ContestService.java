@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
@@ -420,11 +421,22 @@ public class ContestService implements Feature {
         // thaw time present, validate now
         GregorianCalendar thawTime = getDate(contestId, thawTimeValue);
         if (thawTime != null) {
-            // Set thaw time to this time.
-            // TODO: tell PC2 to thaw the contest at the given time.
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": setting of contest thaw time is not implemented");
-            return Response.status(Status.NOT_MODIFIED).entity("Unable to set contest thaw time to " + thawTime.toString()).build();
+            Date thawDate = thawTime.getTime();
+            String thawStr = Utilities.getIso8601formatterWithMS().format(thawDate);
+            // get the local model's ContestInformation sincd we are modifying the thaw time
+            ContestInformation ci = model.getContestInformation();
+            if (ci != null) {
+                // set the new start date/time into the ContestInformation
+                ci.setThawed(thawDate);
+                // tell the Controller to update the ContestInformation, eg the thaw time in this case
+                controller.updateContestInformation(ci);
+                controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setting contest thaw time to " + thawStr);
+                return Response.ok().entity("Contest thaw time set to " + thawStr).build();
+            }
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": can not get contest information to set thaw time");
+            return Response.status(Status.NOT_MODIFIED).entity("Unable to set contest thaw time to " + thawStr).build();
         }
+        controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": bad value for contest thaw time: " + thawTimeValue);
         return Response.status(Status.BAD_REQUEST).entity("Bad value for contest thaw time request").build();
 
     }
