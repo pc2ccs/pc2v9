@@ -39,7 +39,7 @@ import edu.csus.ecs.pc2.ui.cellRenderer.MCLBInputValidationStatusCellRenderer;
 
 /**
  * View Problems.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -48,7 +48,7 @@ import edu.csus.ecs.pc2.ui.cellRenderer.MCLBInputValidationStatusCellRenderer;
 public class ProblemsPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -7483784815760107250L;
 
@@ -84,7 +84,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public ProblemsPane() {
         super();
@@ -93,7 +93,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -113,7 +113,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * This method initializes problemButtonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getProblemButtonPane() {
@@ -135,7 +135,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * This method initializes problemListBox
-     * 
+     *
      * @return edu.csus.ecs.pc2.core.log.MCLB
      */
     private MCLB getProblemListBox() {
@@ -185,6 +185,7 @@ public class ProblemsPane extends JPanePlugin {
 
     public void updateProblemRow(final Problem problem) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 Object[] objects = buildProblemRow(problem);
                 int rowNumber = problemListBox.getIndexByKey(problem.getElementId());
@@ -201,6 +202,7 @@ public class ProblemsPane extends JPanePlugin {
 
     public void updateRunInputValidatorsProblemRow(final Problem problem) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 // build a row of InputValidatorResults for the specified problem
@@ -254,6 +256,8 @@ public class ProblemsPane extends JPanePlugin {
         String inputMethod = "";
         if (problem.isInteractive()) {
             inputMethod = "Interactive";
+        } else if (problem.isMultipass()) {
+            inputMethod = "Multipass";
         } else if (problem.isReadInputDataFromSTDIN()) {
             inputMethod = "STDIN";
         } else if (problem.getDataFileName() != null) {
@@ -298,13 +302,13 @@ public class ProblemsPane extends JPanePlugin {
         }
         c[i++] = Long.toString(outputLimit);
 
-        
+
         // problem memory limit
         c[i++] = Integer.toString(problem.getMemoryLimitMB());
 
         //input validator type (NONE/VIVA/CUSTOM)
         c[i++] = problem.getCurrentInputValidatorType();
-        
+
         // input validation status
         INPUT_VALIDATOR_TYPE currentIV = problem.getCurrentInputValidatorType();
         switch (currentIV) {
@@ -344,7 +348,7 @@ public class ProblemsPane extends JPanePlugin {
             validatorCommandLine = problem.getOutputValidatorCommandLine();
         }
         c[i++] = validatorCommandLine;
-        
+
         String groupsSelectedText = "All";
         if (!problem.isAllView()) {
             groupsSelectedText = problem.getGroups().size() + " groups";
@@ -403,14 +407,14 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     /**
-     * This method returns a String of the form "passCount/failCount" indicating the number of input test data files which passed 
+     * This method returns a String of the form "passCount/failCount" indicating the number of input test data files which passed
      * Input Validation, versus the number of input test data files which failed Input Validation, for the specified problem.
-     * The pass/fail count is based on the currently selected Input Validator for the Problem; if the problem has no Input Validator 
+     * The pass/fail count is based on the currently selected Input Validator for the Problem; if the problem has no Input Validator
      * currently associated with it then the empty string ("") is returned. If the problem has an associated Input Validator but
      * the Input Validator has not been run, or if an error was generated when it was run, the String "N/A" is returned.
-     * 
+     *
      * @param problem the Problem whose Pass/Fail count is to be returned.
-     * 
+     *
      * @return a String of the form "passCount/failCount" for the specified problem.
      */
     private String getPassFailCount(Problem problem) {
@@ -503,6 +507,7 @@ public class ProblemsPane extends JPanePlugin {
         problemListBox.autoSizeAllColumns();
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
@@ -518,6 +523,7 @@ public class ProblemsPane extends JPanePlugin {
         initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 updateGUIperPermissions();
                 populateGUI();
@@ -541,7 +547,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * This method initializes addButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAddButton() {
@@ -551,6 +557,7 @@ public class ProblemsPane extends JPanePlugin {
             addButton.setMnemonic(KeyEvent.VK_A);
             addButton.setToolTipText("Add new Problem definition");
             addButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     try {
                         addProblem();
@@ -584,6 +591,7 @@ public class ProblemsPane extends JPanePlugin {
             copyButton.setToolTipText("Copy settings from an existing problem to a new problem");
             copyButton.setActionCommand("Copy");
             copyButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     copySelectedProblem();
                 }
@@ -594,7 +602,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * This method initializes editButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getEditButton() {
@@ -604,6 +612,7 @@ public class ProblemsPane extends JPanePlugin {
             editButton.setMnemonic(KeyEvent.VK_E);
             editButton.setToolTipText("Edit existing Problem definition");
             editButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     editSelectedProblem();
                 }
@@ -651,7 +660,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * This method initializes messagePanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePanel() {
@@ -672,7 +681,7 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      * @author ICPC
      *
      */
@@ -717,14 +726,16 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
     private class ProblemListenerImplementation implements IProblemListener {
 
+        @Override
         public void problemAdded(final ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     updateProblemRow(event.getProblem());
                     updateRunInputValidatorsProblemRow(event.getProblem());
@@ -733,24 +744,30 @@ public class ProblemsPane extends JPanePlugin {
             });
         }
 
+        @Override
         public void problemChanged(final ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     updateProblemRow(event.getProblem());
                 }
             });
         }
 
+        @Override
         public void problemRemoved(ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     populateGUI();
                 }
             });
         }
 
+        @Override
         public void problemRefreshAll(ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     populateGUI();
                 }
@@ -795,16 +812,18 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * Account Listener Implementation.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             // ignored
         }
 
+        @Override
         public void accountModified(AccountEvent accountEvent) {
             // check if is this account
             Account account = accountEvent.getAccount();
@@ -815,6 +834,7 @@ public class ProblemsPane extends JPanePlugin {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         updateGUIperPermissions();
                     }
@@ -823,10 +843,12 @@ public class ProblemsPane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             // ignore
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
@@ -838,6 +860,7 @@ public class ProblemsPane extends JPanePlugin {
                     // They modified us!!
                     initializePermissions();
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             updateGUIperPermissions();
                         }
@@ -846,11 +869,13 @@ public class ProblemsPane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
 
             initializePermissions();
 
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     updateGUIperPermissions();
                 }
@@ -860,7 +885,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * This method initializes reportButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getReportButton() {
@@ -870,6 +895,7 @@ public class ProblemsPane extends JPanePlugin {
             reportButton.setMnemonic(KeyEvent.VK_R);
             reportButton.setToolTipText("View Problems Report");
             reportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     viewReports();
                 }
@@ -907,6 +933,7 @@ public class ProblemsPane extends JPanePlugin {
             setJudgesDataPathButton = new JButton("Set Judge's Data Path");
             setJudgesDataPathButton.setMnemonic(KeyEvent.VK_S);
             setJudgesDataPathButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     editJudgesDataFilePath();
                 }
@@ -927,7 +954,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * Returns a singleton instance of the Frame used to edit the CDP path(s).
-     * 
+     *
      * @return the EditCDPPathFrame
      */
     private EditJudgesDataFilePathFrame getEditCDPFrame() {
@@ -939,7 +966,7 @@ public class ProblemsPane extends JPanePlugin {
 
     /**
      * Returns a singleton instance of the Frame used to display the results of running the input validators.
-     * 
+     *
      * @return a RunInputValidatorFrame
      */
     private RunInputValidatorsFrame getRunInputValidatorsFrame() {
@@ -972,6 +999,7 @@ public class ProblemsPane extends JPanePlugin {
         if (runInputValidatorsButton == null) {
             runInputValidatorsButton = new JButton("Run Input Validators...");
             runInputValidatorsButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     runInputValidators();
                 }
