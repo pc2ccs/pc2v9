@@ -3,9 +3,16 @@ package edu.csus.ecs.pc2.core;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.CopyOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,14 +24,14 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * File Utilities.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class FileUtilities {
 
     /**
      * Write array to PrintWriter.
-     * 
+     *
      * @param writer a PrintWriter to which the specified array of Strings should be written
      * @param datalines a String array containing the lines of data to be written to the specified PrintWriter
      */
@@ -40,12 +47,12 @@ public class FileUtilities {
         writer.close();
         writer = null;
     }
-    
+
     /**
      * Search for CDP config/ path.
-     * 
+     *
      * See {@link #findCDPConfigDirectory(File)}.
-     * 
+     *
      * @param entry
      * @return null if not found
      * @throws MalformedURLException
@@ -61,14 +68,14 @@ public class FileUtilities {
 
     /**
      * Search for a CDP config/ directory.
-     * 
+     *
      * The entry can be:
      * <li> a contest.yaml filename
      * <li> a config/ directory
      * <li> a CDP directory (that contains a config/ subdirectory)
      * <li> a pc2 samps contest/CDP location, ex sumithello or sumitMTC
-     * 
-     * @param entry a location 
+     *
+     * @param entry a location
      * @return null if no config directory found, else the CDP config/ directory.
      */
     public static File findCDPConfigDirectory(File entry) {
@@ -116,7 +123,7 @@ public class FileUtilities {
     }
 
     /**
-     * 
+     *
      * @param name CDP sample directory name
      * @return null if dirname has no contest.yaml file.
      */
@@ -132,7 +139,7 @@ public class FileUtilities {
     }
 
     /**
-     * 
+     *
      * @param dirname
      * @return CDP directory under samps/contests
      */
@@ -152,7 +159,7 @@ public class FileUtilities {
     }
 
     /**
-     * 
+     *
      * @return sample contests directory.
      */
     public static String getSampleContestsDirectory() {
@@ -160,7 +167,7 @@ public class FileUtilities {
     }
 
     /**
-     * 
+     *
      * @param dirname
      * @return
      */
@@ -170,9 +177,9 @@ public class FileUtilities {
 
     /**
      * Returns all filenames for the input directory, recurses by default
-     * 
+     *
      * Read dir entries in directory, strip off relativeDirectory from any directory entry.
-     * 
+     *
      * @param directory
      * @param relativeDirectory
      * @return all files names with relative paths.
@@ -207,7 +214,7 @@ public class FileUtilities {
 
     /**
      * Get file directory entries (files only) with path.
-     * 
+     *
      * @param directory
      *            - directory to search and to prepend onto the matching filenames
      * @return a list of file entries with path
@@ -226,7 +233,7 @@ public class FileUtilities {
 
     /**
      * Get file directory entries (directories only) with path.
-     * 
+     *
      * @param directory
      *            - directory to search and to prepend onto the matching filenames
      * @return a list of directory entries with path
@@ -249,7 +256,7 @@ public class FileUtilities {
 
     /**
      * Get Current Working Directory.
-     * 
+     *
      * @return current working directory.
      */
     public static String getCurrentDirectory() {
@@ -265,7 +272,7 @@ public class FileUtilities {
 
     /**
      * get all directories and child directories (recurses).
-     * 
+     *
      * @param directory
      * @return list of directory names
      */
@@ -274,9 +281,9 @@ public class FileUtilities {
         ArrayList<String> list = new ArrayList<>();
 
         File[] files = new File(directory).listFiles();
-        
+
         if (files != null) {
-            
+
             for (File entry : files) {
                 if (entry.isDirectory()) {
                     list.add(directory + File.separator + entry.getName());
@@ -289,11 +296,11 @@ public class FileUtilities {
 
         return list;
     }
-    
-    
+
+
     /**
      * get all file names under directory (recurses).
-     * 
+     *
      * @param directory
      * @param matchString if not null returns filenames with matchString in file name.
      * @return
@@ -333,11 +340,11 @@ public class FileUtilities {
         return getAllFileEntries(directory, null);
     }
 
-    
-    
+
+
     /**
      * Select file and update text file, jlabel with selected file name.
-     * 
+     *
      * @return null if no file selected, else retrn File and update textfield and jlabel
      * @throws Exception
      */
@@ -362,10 +369,10 @@ public class FileUtilities {
         chooser = null;
         return file;
     }
-    
+
     /**
      * Select directory, update text field and jlabel.
-     * 
+     *
      * @param initDirectory
      * @param textField
      * @param label
@@ -395,7 +402,7 @@ public class FileUtilities {
         chooser = null;
         return file;
     }
-    
+
     /**
      * Is dirname an existing directory?
      * @param dirname
@@ -405,9 +412,35 @@ public class FileUtilities {
         if (StringUtilities.isEmpty(dirname)){
             return false;
         }
-        
+
         return new File(dirname).isDirectory();
     }
 
-    
+    /**
+     * Recursively copy one folder to another
+     * @param source
+     * @param target
+     * @param options
+     * @throws IOException
+     */
+    public static void copyFolder(Path source, Path target, CopyOption... options)
+            throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                    throws IOException {
+                Files.createDirectories(target.resolve(source.relativize(dir).toString()));
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                    throws IOException {
+                Files.copy(file, target.resolve(source.relativize(file).toString()), options);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
 }

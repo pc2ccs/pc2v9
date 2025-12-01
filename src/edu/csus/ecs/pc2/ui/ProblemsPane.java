@@ -257,7 +257,7 @@ public class ProblemsPane extends JPanePlugin {
         if (problem.isInteractive()) {
             inputMethod = "Interactive";
         } else if (problem.isMultipass()) {
-            inputMethod = "Multipass";
+            inputMethod = "Multi-pass/" + problem.getCustomOutputValidatorSettings().getMaxMultipassValidationPasses();
         } else if (problem.isReadInputDataFromSTDIN()) {
             inputMethod = "STDIN";
         } else if (problem.getDataFileName() != null) {

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -778,18 +779,33 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 // We know the first succeeded.  Now we have to keep looping checking the feedbackdir/nextpass.in (Constants.NEXT_PASS_FILE).
                 CustomValidatorSettings cvSettings = problem.getCustomOutputValidatorSettings();
                 String feedbackDirPath = getExecuteDirectoryName() + File.separator + clicsInterfaceFeedbackDirName;
-                // This is the path to the next pass file relative to PC2
+                // This is the path to the next pass file relative to PC2, eg. executeSite1/123XRSAM.1/nextpass.in
                 String nextPassName = feedbackDirPath + Constants.NEXT_PASS_FILE;
-                // This is the path to the next pass file relative to the execute folder
+                // This is the path to the next pass file relative to the execute folder, eg.  123XRSAM.1/nextpass.in
                 String nextPassRunName = clicsInterfaceFeedbackDirName + Constants.NEXT_PASS_FILE;
-                String nextPassCopyName = feedbackDirPath + testNumber + "_pass";
+                String nextSuffix = "";
 
-                for(int nPass = 1; nPass <= cvSettings.getMaxMultipassValidationPasses(); ) {
+                log.info("This is a multi-pass problem with a maximum of " + cvSettings.getMaxMultipassValidationPasses() + " passes.");
+                for(int nPass = 1; nPass <= cvSettings.getMaxMultipassValidationPasses(); nPass++) {
                     log.info(" "); //space for readability in the log
-                    log.info("  Test case " + testNumber + " validate, run " + run.getNumber() + ", pass " + nPass);
+                    log.info("  Test case " + testNumber + " validate, run " + run.getNumber() + ", pass " + nPass +
+                            ", executeInputFile " + nextPassName + nextSuffix +
+                            ", validateInputFile " + nextPassRunName + nextSuffix);
 
+                    // Recall we did the first pass above, so don't re-execute the first time through, just
+                    // validate the result from above.
+                    if(nPass > 1) {
+                        proceedToValidation = executeProgram(dataSetNumber, nPass, nextPassName + nextSuffix);
+                        if(!proceedToValidation) {
+                            log.info("Not proceeding to validation since executeProgram(dataSetNumber=" + dataSetNumber
+                                    + ", nPass=" + nPass + ", nextInputName=" + nextPassName + nextSuffix + ") returned false");
+                            submissionIsCorrect = false;
+                            break;
+                        }
+
+                    }
                     // Test if validator finished normally.
-                    submissionIsCorrect = validateProgram(dataSetNumber, nPass, nextPassRunName);
+                    submissionIsCorrect = validateProgram(dataSetNumber, nPass, nextPassRunName + nextSuffix);
 
                     // Still need to check if they got it right.
                     if (!ExecuteUtilities.didTeamSolveProblem(executionData)) {
@@ -803,16 +819,25 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     if(!nextPassFile.exists()) {
                         break;
                     }
-                    nPass++;
-                    // Copy the next pass input file so we have a copy for later review
-                    // File name we create is like:  clicsInterfaceFeedbackDirName/5_pass2.in
-                    String nextInputName = nextPassCopyName + nPass + ".in";
+//                    // We may want to copy feedback directory for the pass we just finished
+//                    String feedbackCopyDirectoryName = feedbackDirPath + "_" + nPass;
+//                    try {
+//                        FileUtilities.copyFolder(new File(feedbackDirPath).toPath(),
+//                                new File(feedbackCopyDirectoryName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+//                    } catch(Exception e) {
+//
+//                    }
+                    // rename the next pass input file so we have a copy for later review and we have to delete
+                    // it anyway as per the spec.
+                    // File name we create is like:  clicsInterfaceFeedbackDirName/nextpass.in.pass3
+                    nextSuffix = ".pass" + nPass;
+                    String nextPassFileName = nextPassName + nextSuffix;
                     try {
-                        Files.copy(nextPassFile.toPath(), new File(nextInputName).toPath());
+                        log.info("Renaming " + nextPassName + " to " + nextPassFileName);
+                        Files.move(nextPassFile.toPath(), new File(nextPassFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
                     } catch(Exception e) {
-                        log.log(log.WARNING, "Could not copy " + nextPassName + " to " + nextInputName + " " + e);
+                        log.log(log.WARNING, "Could not move " + nextPassName + " to " + nextPassFileName + " " + e);
                     }
-                    proceedToValidation = executeProgram(dataSetNumber, nPass, nextPassName);
                 }
             } else {
                 log.info(" "); //space for readability in the log
@@ -1202,7 +1227,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     }
 
                     in.close();
-                    out.close();
+                    try {
+                        out.close();
+                    } catch (java.io.IOException e) {
+                        log.info("Caught a " + e.getMessage() + " while closing team output to validator; do not be alarmed - the validator just sucks.");
+                    }
                 }
             }
 

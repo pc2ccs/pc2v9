@@ -1727,6 +1727,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setMemoryLimitMB(clicsMemoryLimit);
 
             Integer clicsValidationPasses = fetchIntValue(limitsContent, CLICS_VALIDATION_PASSES, DEFAULT_VALIDATION_PASSES);
+            problem.getCustomOutputValidatorSettings().setMaxMultipassValidationPasses(clicsValidationPasses);
         }
 
         if (!usingCustomValidator) {
