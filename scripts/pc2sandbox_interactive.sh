@@ -543,6 +543,10 @@ MAXPROCS=$((MAXPROCS+`ps -T -u $USER | wc -l`))
 REPORT_DEBUG Setting maximum user processes to $MAXPROCS 
 ulimit -u $MAXPROCS
 
+
+REPORT_DEBUG Setting stack size to unlimited
+ulimit -s unlimited
+
 # Keep track of details for reports
 REPORT_BRIEF ${JUDGEIN}
 REPORT_BRIEF ${JUDGEANS}
