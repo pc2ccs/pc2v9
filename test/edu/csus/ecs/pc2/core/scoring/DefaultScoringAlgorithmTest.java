@@ -157,6 +157,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
         // Add Problem
         Problem problem = new Problem("Problem One");
+        problem.setLetter("A");
         contest.addProblem(problem);
 
         // Add Language
