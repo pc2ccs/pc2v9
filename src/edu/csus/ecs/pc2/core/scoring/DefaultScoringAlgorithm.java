@@ -394,8 +394,30 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Problem[] allProblems = theContest.getProblems();
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
         int p2 = 0;
+        
+        //if divisionNumber!=null it means we're using Division filtering, in which case divisionNumber is 1 or 2.
+        //if wantedGroups!=null it means the caller has specified a set of groups it wants to filter on.
+        //if the caller HASN'T specified any groups, we need to add to the wantedGroups list the groups for the specified division.
+        if (wantedGroups==null && divisionNumber!=null) {
+            //the caller didn't request any group filtering via wantedGroups but we are doing division filtering so we need a collection
+            // (this is because if wantedGroups is null it causes method canView(wantedGroups) to always return "yes").
+            wantedGroups = new ArrayList<Group>();
+        }
+        
         for (int p=1; p <= allProblems.length ; p++) {
             Problem prob = allProblems[p-1];
+            
+            if (divisionNumber!=null) {
+                //we are filtering on divisions so we need to update "wantedGroups" with the "division" groups
+                // in the problem which match the desired division.
+                for (Group probGroup : prob.getGroups()) {
+                   //Note: getGroupId() returns the "CMS external id".
+                   if (probGroup.getGroupId()==divisionNumber) {
+                        wantedGroups.add(probGroup); 
+                    }
+                }
+            }
+            
             if (prob.isActive() && prob.canView(wantedGroups)) {
                 p2++;
                 problemsIndexHash.put(prob.getElementId(), new Integer(p2));
