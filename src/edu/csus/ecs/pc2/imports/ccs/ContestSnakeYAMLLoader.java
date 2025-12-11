@@ -1454,16 +1454,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // So, the value may be a double (IE contains a decimal pt), or an integer.
         Object oValue = map.get(key);
         Double value = null;
-        if(oValue instanceof Double) {
-            value = (Double) map.get(key);
-        } else {
-            value = new Double(((Integer)oValue).doubleValue());
-        }
-        if (value != null) {
+        if (oValue != null) {
             try {
+                if(oValue instanceof Double) {
+                    value = (Double) oValue;
+                } else {
+                    value = new Double(((Integer)oValue).doubleValue());
+                }
                 return value;
             } catch (Exception e) {
-                syntaxError("Expecting double number after " + key + ": field, found '" + value + "'");
+                syntaxError("Expecting double number after " + key + ": field, found '" + oValue + "'");
             }
         }
         return null;
