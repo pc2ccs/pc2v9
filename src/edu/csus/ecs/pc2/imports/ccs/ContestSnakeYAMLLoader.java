@@ -1446,6 +1446,29 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return null;
     }
 
+    private Double fetchDoubleValue(Map<String, Object> map, String key) {
+        if (map == null) {
+            // SOMEDAY figure out why map would every be null
+            return null;
+        }
+        // So, the value may be a double (IE contains a decimal pt), or an integer.
+        Object oValue = map.get(key);
+        Double value = null;
+        if(oValue instanceof Double) {
+            value = (Double) map.get(key);
+        } else {
+            value = new Double(((Integer)oValue).doubleValue());
+        }
+        if (value != null) {
+            try {
+                return value;
+            } catch (Exception e) {
+                syntaxError("Expecting double number after " + key + ": field, found '" + value + "'");
+            }
+        }
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> fetchMap(Map<String, Object> content, String key) {
         Object object = content.get(key);
@@ -1668,9 +1691,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             //check for a timeout limit within the CLICS "limits:" section.
             // Note that the presence of a "timeout:" entry within a CLICS
             // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
-            Integer clicsTimeout = fetchIntValue(limitsContent, TIMEOUT_KEY);
+            Double clicsTimeout = fetchDoubleValue(limitsContent, TIMEOUT_KEY);
             if (clicsTimeout != null) {
-                problem.setTimeOutInSeconds(clicsTimeout);
+                problem.setTimeOutInSeconds(clicsTimeout.intValue());
             }
 
             //check for a CLICS maxoutput limit - the value is in MiB
