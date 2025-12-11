@@ -1451,7 +1451,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             // SOMEDAY figure out why map would every be null
             return null;
         }
-        Double value = (Double) map.get(key);
+        // So, the value may be a double (IE contains a decimal pt), or an integer.
+        Object oValue = map.get(key);
+        Double value = null;
+        if(oValue instanceof Double) {
+            value = (Double) map.get(key);
+        } else {
+            value = new Double(((Integer)oValue).doubleValue());
+        }
         if (value != null) {
             try {
                 return value;
