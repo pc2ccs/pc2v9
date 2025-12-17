@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { ITeamsService } from '../abstract-services/i-teams.service';
 import { TeamsLoginResponse } from '../models/teams-login-response';
 import { environment } from 'src/environments/environment';
-import { saveCurrentToken, saveCurrentUserName, clearSessionStorage } from 'src/app/app.component';
+import { saveCurrentToken, saveCurrentUserName, clearSessionStorage } from 'src/app/modules/core/services/session-storage.utils';
 import { DEBUG_MODE } from 'src/constants';
 
 @Injectable({

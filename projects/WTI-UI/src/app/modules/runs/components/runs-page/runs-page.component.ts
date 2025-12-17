@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { NewRunComponent } from '../new-run/new-run.component';
 import { TestRunDetailComponent } from '../test-run-detail/test-run-detail.component';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
-import { saveCurrentPage } from 'src/app/app.component';
+import { saveCurrentPage } from 'src/app/modules/core/services/session-storage.utils';
 import * as Constants from 'src/constants';
 
 @Component({
