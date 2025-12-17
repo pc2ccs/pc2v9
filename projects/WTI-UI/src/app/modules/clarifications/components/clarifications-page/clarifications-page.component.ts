@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { NewClarificationComponent } from '../new-clarification/new-clarification.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
-import { saveCurrentPage } from 'src/app/app.component';
+import { saveCurrentPage } from 'src/app/modules/core/services/session-storage.utils';
 import * as Constants from 'src/constants';
 
 @Component({
