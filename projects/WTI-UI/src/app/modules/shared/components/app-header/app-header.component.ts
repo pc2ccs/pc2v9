@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { AuthService } from 'src/app/modules/core/auth/auth.service';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { environment } from 'src/environments/environment';
-import { DEBUG_MODE } from 'src/constants'
+import { DEBUG_MODE } from 'src/constants';
 
 /**
  * This class defines a component which acts as the "header" for all WTI-UI pages.  Together with the
@@ -14,46 +14,72 @@ import { DEBUG_MODE } from 'src/constants'
  * 
  */
 @Component({
-    selector: 'app-header',
-    templateUrl: './app-header.component.html',
-    styleUrls: ['./app-header.component.scss']
+	selector: 'app-header',
+	templateUrl: './app-header.component.html',
+	styleUrls: ['./app-header.component.scss']
 })
-export class AppHeaderComponent {
+export class AppHeaderComponent implements OnDestroy {
 
-  //Return a boolean indicating whether or not to show nav-bar links in the header
-  get showLinks(): boolean { return this._authService.isLoggedIn; }
-  
-  //Return a boolean indicating whether or not to show a teamId in the header
-  get showTeamId(): boolean { return this._authService.isLoggedIn; }
-  
-  //Return a boolean indicating whether or not to show the contest clock(s) in the header
-  get showClocks(): boolean { return this._authService.isLoggedIn; }
-  
-  /* Return a string containing the "team id" -- that is, the PC2 team account number with
-     the leading "team" removed */
-  get teamId(): string { 
-    const acctId = this._authService.username; 
-    const teamId = acctId.substr(4);
-    return teamId;
-  }
-  
-  constructor(private _authService: AuthService, private _contestService: IContestService) {
-	  if (DEBUG_MODE ) {
-		console.log ("Executing AppHeaderComponent constructor...")
-        console.log ("...environment:") ;
-		const environmentCopy = JSON.parse(JSON.stringify(environment));
-		console.log(environmentCopy);
-	  }
-  }
+	private timerId: any;
+	private lastElapsed = -1;
+	private lastRemaining = -1;
 
+	//Return a boolean indicating whether or not to show nav-bar links in the header
+	get showLinks(): boolean { return this._authService.isLoggedIn; }
 
-  getElapsedSecs(): number {
-	const secs = this._contestService.getElapsedSecs() ;
-    return secs;
-  }
+	//Return a boolean indicating whether or not to show a teamId in the header
+	get showTeamId(): boolean { return this._authService.isLoggedIn; }
 
-  getRemainingSecs(): number {
-	const secs = this._contestService.getRemainingSecs() ;
-	return secs;
-  }
+	//Return a boolean indicating whether or not to show the contest clock(s) in the header
+	get showClocks(): boolean { return this._authService.isLoggedIn; }
+
+	/* Return a string containing the "team id" -- that is, the PC2 team account number with
+	   the leading "team" removed */
+	get teamId(): string {
+		const acctId = this._authService.username;
+		const teamId = acctId.substr(4);
+		return teamId;
+	}
+
+	constructor(
+		private _authService: AuthService,
+		private _contestService: IContestService,
+		private cdr: ChangeDetectorRef) {
+			
+		if (DEBUG_MODE) {
+			console.log("Executing AppHeaderComponent constructor...")
+			console.log("...environment:");
+			const environmentCopy = JSON.parse(JSON.stringify(environment));
+			console.log(environmentCopy);
+		}
+
+		// Start interval to update clocks only if they change
+		this.timerId = setInterval(() => {
+			const elapsed = this._contestService.getElapsedSecs();
+			const remaining = this._contestService.getRemainingSecs();
+
+			// Only trigger change detection if values changed
+			if (elapsed !== this.lastElapsed || remaining !== this.lastRemaining) {
+				this.lastElapsed = elapsed;
+				this.lastRemaining = remaining;
+				this.cdr.markForCheck();
+			}
+		}, 1000);
+	}
+
+	ngOnDestroy(): void {
+		if (this.timerId) {
+			clearInterval(this.timerId);
+		}
+	}
+
+	getElapsedSecs(): number {
+		const secs = this._contestService.getElapsedSecs();
+		return secs;
+	}
+
+	getRemainingSecs(): number {
+		const secs = this._contestService.getRemainingSecs();
+		return secs;
+	}
 }
