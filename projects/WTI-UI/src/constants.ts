@@ -70,4 +70,4 @@ export const BASE_URL_KEY = 'baseURL';
 /**
  * The key under which the base URL for the server is stored in sessionStorage.
  */
-export const WEBSOCKET_URL_KEY = 'webocketURL';
+export const WEBSOCKET_URL_KEY = 'websocketURL';
