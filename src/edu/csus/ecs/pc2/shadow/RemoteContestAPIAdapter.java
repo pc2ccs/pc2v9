@@ -1,8 +1,7 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,29 +9,25 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
+import edu.csus.ecs.pc2.convert.EventFeedUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.model.IFile;
-import edu.csus.ecs.pc2.core.model.IFileImpl;
 import edu.csus.ecs.pc2.shadow.AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT;
 import edu.csus.ecs.pc2.util.HTTPSSecurity;
 
 public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
-    
+
     URL remoteURL;
     String login;
     String password;
-    
+
     /**
      * Constructs a RemoteRunMonitor with the specified values.
-     * 
+     *
      * @param remoteURL the URL to the remote CCS
      * @param login the login (account) on the remote CCS
      * @param password the password to the remote CCS account
@@ -56,13 +51,13 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
             }
         } catch (Exception e) {
             return false; // ignore exception, return false
-        } 
-        
-        //if we get here, either the createConnection() returned null or else we got an exception 
+        }
+
+        //if we get here, either the createConnection() returned null or else we got an exception
         // which fell through the catch block
         return false;
     }
-    
+
 
     protected URL getChildURL(String path) {
         if (path == null || path.isEmpty())
@@ -91,12 +86,12 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         }
     }
 
-    
+
     protected HttpURLConnection createConnection(String path) throws IOException {
         return createConnection(getChildURL(path));
     }
-    
-    
+
+
     protected  HttpURLConnection createConnection(URL url2) throws IOException {
         try {
             HttpURLConnection conn = HTTPSSecurity.createConnection(url2, login, password);
@@ -108,7 +103,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
             throw new IOException("Connection error", e);
         }
     }
-    
+
     //This method can be removed
     private InputStream connect(String path) throws IOException {
         try {
@@ -133,10 +128,10 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
             throw new IOException("Connection error", e);
         }
     }
-    
+
     /**
      * Open input stream for event feed.
-     * 
+     *
      * @param remoteURL2
      * @param user
      * @param password
@@ -151,7 +146,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
 
     @Override
     public RemoteContestConfiguration getRemoteContestConfiguration() {
-        
+
         Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> remoteConfigMap = new HashMap<AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>>();
 
         // TODO TODAY implement me - add mock data into RemoteContestConfiguration
@@ -162,7 +157,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
 
     @Override
     public String getRemoteJSON(String endpoint) {
-        
+
         String url = remoteURL.toString() + endpoint;
         try {
             HttpURLConnection conn = createConnection(url);
@@ -170,11 +165,11 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
+
     }
 
     private String toString(InputStream inputStream) throws IOException {
-        
+
         BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         int result = bufferedInputStream.read();
@@ -184,9 +179,9 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         }
         return byteArrayOutputStream.toString();
     }
-    
+
     private byte[] toByteArray(InputStream inputStream) throws IOException {
-        
+
         BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         int result = bufferedInputStream.read();
@@ -205,16 +200,16 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         // passing null here will start the feed from the beginning
         return(getRemoteEventFeedInputStream(null));
     }
-    
+
     @Override
     /**
      * {@inheritDoc}
      */
     public InputStream getRemoteEventFeedInputStream(String token) {
-        
+
         String eventFeedURLString = remoteURL.toString();
         eventFeedURLString = appendIfMissing(eventFeedURLString, "/") +"event-feed";
-        
+
         // Add on optional starting point token
         if(token != null && !token.isEmpty()) {
             eventFeedURLString += "?since_token=" + token;
@@ -244,31 +239,31 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
      * "/submissions/<submissionID>/files" and then invoking the method
      * {@link #getRemoteSubmissionFiles(URL)} with that URL, returning the result
      * of that method call.
-     * 
+     *
      * Note that if the "Primary CCS URL" ends with a "/" character then this method
      * avoids adding a duplicate "/" when concatenating the "submissions" endpoint to the URL;
      * see https://github.com/pc2ccs/pc2v9/issues/528.
-     * 
+     *
      * @param submissionID a String representation of the submission ID from the remote system
      * @return the result of calling {@link #getRemoteSubmissionFiles(URL)} with the constructed URL,
      *         or null if an exception is thrown during URL construction
      */
     @Override
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
-        
+
         //define the CLICS endpoint for fetching the files associated with a submission
         String endpoint = "/submissions/" + submissionID + "/files";
-        
+
         //get the configured Primary CCS URL
         String urlString = remoteURL.toString();
         //ensure the URL doesn't end with "/" (because we're going to add a "/" as part of the "endpoint")
         if (urlString.endsWith("/")){
             urlString = StringUtilities.removeLastChar(urlString);
         }
-        
+
         //build the full URL to the submissions/files endpoint
         urlString = urlString + endpoint;
-        
+
         URL url;
         try {
             url = new URL(urlString);
@@ -283,10 +278,10 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     /**
      * Fetches submission files from the specified URL.
      * The URL is expected to reference an endpoint which returns a zip file
-     * containing the files comprising a contest submission.  
-     * 
+     * containing the files comprising a contest submission.
+     *
      * @param submissionFilesURL a URL where a zip file containing submitted files may be found
-     * @return a List of {@link IFile}s  containing the contents of the submission files obtained 
+     * @return a List of {@link IFile}s  containing the contents of the submission files obtained
      *          from the specified URL
      * @throws {@link RuntimeException} if an {@link IOException} occurs while connecting to the
      *          remote system at the specified URL or while reading bytes from the input stream
@@ -299,90 +294,17 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
 
             //make a connection to the specified URL
             HttpURLConnection conn = createConnection(submissionFilesURL);
-            
+
             //get the bytes (comprising a zipfile) from the specified URL's input stream
             byte[] bytes = toByteArray(conn.getInputStream());
 
             // Unzip the bytes/zipfile into individual IFiles
-            List<IFile> files = getIFiles(bytes);
+            List<IFile> files = EventFeedUtilities.getIFiles(bytes);
             return files;
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    
-    /**
-     * Get files from a zipfile's bytes.
-     * 
-     * @param bytes bytes comprising a zip file.
-     * @return list of IFiles extracted from the input bytes 
-     */
-    private List<IFile> getIFiles(byte[] bytes) {
-        
-        List<IFile> files = new ArrayList<IFile>();
-        
-        ZipInputStream zipStream = null;
-        
-        try {
-            zipStream = new ZipInputStream(new ByteArrayInputStream(bytes));
-            ZipEntry entry = null;
-            /**
-             * Read each zip entry, add IFile.
-             */
-            while ((entry = zipStream.getNextEntry()) != null) {
-                
-                String entryName = entry.getName();
-                
-//                ByteOutputStream byteOutputStream = new ByteOutputStream();
-                ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-                
-                byte[] buffer = new byte[8096];
-                int bytesRead = 0;
-                while ((bytesRead = zipStream.read(buffer)) != -1)
-                {
-                    byteOutputStream.write(buffer, 0, bytesRead);
-                }
 
-//                String base64Data = getBase64Data(byteOutputStream.getBytes());
-                String base64Data = getBase64Data(byteOutputStream.toByteArray());
-                IFile iFile = new IFileImpl(entryName, base64Data);
-                files.add(iFile);
-                
-                byteOutputStream.close();
-                
-                zipStream.closeEntry();
-            }
-            zipStream.close(); 
-            
-        } catch (Exception e) {
-            if (zipStream != null){
-                try {
-                    zipStream.close();
-                } catch (Exception ze) {
-                    ; // problem closing stream, ignore.
-                }
-            }
-            throw new RuntimeException(e);
-        }
-        
-        return files;
-        
-    }
-    
-    /**
-     * Encode bytes into BASE64.
-     * @param data
-     * @return
-     */
-    public String getBase64Data( byte [] bytes) {
-        // TODO REFACTOR move to FileUtilities
-        Base64.Encoder encoder = Base64.getEncoder();
-        String base64String = encoder.encodeToString(bytes);
-        return base64String;
-    }
-
-
-
-    
 }
