@@ -237,7 +237,7 @@ public class TeamsController extends MainController {
 
 			IFile main = new PC2APIFile(run.getMainFile().getFileName(), run.getMainFile().getByteData());
 
-			if(run.getExtraFiles() != null) {			
+			if(run.getExtraFiles() != null  &&  run.getExtraFiles().length > 0) {			
 				IFile[] extraFiles = FileService.createFileArray(run.getExtraFiles());
 				teamsConn.submitJudgeRun(prob, lang, main, extraFiles);
 			}
@@ -277,7 +277,7 @@ public class TeamsController extends MainController {
 		}
 		catch (SubmissionRejectedException e) {
 			String msg = e.getMessage();
-			Response.Status stat = Response.Status.BAD_REQUEST;
+			Response.Status stat ;
 			// set appropriate HTML status code depending on why the submission was rejected
 			switch(e.getRejectionReason()) {
 			    case THROTTLE_EXCEEDED:
@@ -286,6 +286,12 @@ public class TeamsController extends MainController {
 			    case SOURCE_TOO_BIG:
 			        stat = Response.Status.REQUEST_ENTITY_TOO_LARGE;
 			        break;
+			    case ZERO_LENGTH_FILE:
+                    stat = Response.Status.BAD_REQUEST;
+                    break;
+			    default:
+			    	stat = Response.Status.BAD_REQUEST;
+			    	break;
 			}
 			return Response.status(stat)
 					.entity(Entity.json(new ServerErrorResponseModel(stat, msg)))

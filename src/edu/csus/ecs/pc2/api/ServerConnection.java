@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -431,23 +432,26 @@ public class ServerConnection {
         checkWhetherLoggedIn();
 
         checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit run");
-
-        File mainFile = new File(mainFileName);
-        if (! mainFile.isFile()){
-            throw new Exception("File '"+mainFileName+"' no such file (not found)");
-        }
+        
+        //throw an exception if the main file is not legal
+        checkLegalFile(mainFileName);
 
         // we are keeping track of the total submission size in sourceSize
+        File mainFile = new File(mainFileName);
         long sourceSize = mainFile.length();
+        
+        //check each "additional file" (if any) for validity and if valid, add file size to running total size
         SerializedFile[] list = new SerializedFile[additionalFileNames.length];
         for (int i = 0; i < additionalFileNames.length; i++) {
-            File addFile = new File(additionalFileNames[i]);
-            if (addFile.isFile()) {
-                list[i] = new SerializedFile(additionalFileNames[i]);
-                sourceSize += addFile.length();
-            } else {
-                throw new Exception("File '" + additionalFileNames[i] + "' no such file (not found)");
-            }
+            
+            //throw an exception if the current additional file is not legal
+            checkLegalFile(additionalFileNames[i]);
+            
+            //file is ok; add to list and update total source size
+            list[i] = new SerializedFile(additionalFileNames[i]);
+            File addlFile = new File(additionalFileNames[i]);
+            sourceSize += addlFile.length();
+
         }
 
         long sourceSizeByteLimit = internalContest.getContestInformation().getMaxSourceSizeInBytes();
@@ -458,6 +462,7 @@ public class ServerConnection {
 //            StaticLog.getLog().log(Level.WARNING, sizeMsg);
             throw new SubmissionRejectedException(sizeMsg, SubmissionRejectedException.SubmissionRejectionReason.SOURCE_TOO_BIG);
         }
+        
         ProblemImplementation problemImplementation = (ProblemImplementation) problem;
         Problem submittedProblem = internalContest.getProblem(problemImplementation.getElementId());
 
@@ -564,20 +569,20 @@ public class ServerConnection {
 
         checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit run");
 
-        //validate mainFile param
-        if (!validIFile(mainFile)) {
-            throw new Exception("Invalid mainFile parameter");
-        }
-
+        //throw an exception if the main file isn't legal
+        checkValidIFile(mainFile);
+        
         // we keep track of the total submission size of all the source files
         long sourceSize = mainFile.getByteData().length;
-
+        
         // validate additionalSourceFiles param
         if (additionalFiles != null && additionalFiles.length > 0) {
             for (IFile nextFile : additionalFiles) {
-                if (!validIFile(nextFile)) {
-                    throw new Exception("Invalid IFile in additionalFiles array");
-                }
+                
+                //throw an exception if the current "additional file" isn't legal
+                checkValidIFile(nextFile);
+                        
+                //nextFile is valid; add its size to the running total size
                 sourceSize += nextFile.getByteData().length;
             }
         }
@@ -636,8 +641,7 @@ public class ServerConnection {
                                         overrideSubmissionTimeMS, overrideRunId);
         }
         catch (SubmissionRejectedException e) {
-            //the submission was rejected, presumably because of the submitJudgeRun() method's ThrottleStrategy;
-            //forward the exception to the caller
+            //the submission was rejected; forward the exception to the caller
             throw e ;
         }
         catch (Exception e) {
@@ -706,30 +710,25 @@ public class ServerConnection {
 
         checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit test run");
 
-        //validate mainFile param
-        if (!validIFile(mainFile)) {
-            throw new Exception("Invalid mainFile parameter");
-        }
+        //TODO:  when (if) "test submissions" are eventually supported, need to add checks for exceeding submission file size limit
+        
+        //throw an exception if either the main file or the test data file isn't legal
+        checkValidIFile(mainFile);
+        checkValidIFile(testDataFile);
+        
         // validate additionalSourceFiles param
         if (additionalSourceFiles != null && additionalSourceFiles.length > 0) {
             for (IFile nextFile : additionalSourceFiles) {
-                if (!validIFile(nextFile)) {
-                    throw new Exception("Invalid IFile in additionalSourceFiles array");
-                }
+                //throw an exception if the next file isn't legal
+                checkValidIFile(nextFile);
             }
-        }
-
-        // validate testDataFile param
-        if (!validIFile(testDataFile)) {
-            throw new Exception("Invalid testDataFile parameter");
         }
 
         // validate additionalTestDataFiles param
         if (additionalTestDataFiles != null && additionalTestDataFiles.length > 0) {
             for (IFile nextFile : additionalTestDataFiles) {
-                if (!validIFile(nextFile)) {
-                    throw new Exception("Invalid IFile in additionalTestDataFiles array");
-                }
+                //throw an exception if the next file isn't legal
+                checkValidIFile(nextFile);
             }
         }
 
@@ -824,12 +823,26 @@ public class ServerConnection {
 
         checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit test run");
 
-        if (! new File(mainFileName).isFile()){
-            throw new Exception("File '"+mainFileName+"' no such file (not found)");
+        //TODO:  when (if) "test submissions" are eventually supported, need to add checks for exceeding submission file size limit
+        
+        //check for legal main file and test data file
+        checkLegalFile(mainFileName);
+        checkLegalFile(testDataFileName);
+        
+        // validate otherSourceFiles param
+        if (otherSourceFileNames != null && otherSourceFileNames.length > 0) {
+            for (String nextFileName : otherSourceFileNames) {
+                //throw an exception if the next file isn't legal
+                checkLegalFile(nextFileName);
+            }
         }
 
-        if (testDataFileName != null && ! new File(testDataFileName).isFile()){
-            throw new Exception("File '"+testDataFileName+"' no such file (not found)");
+        // validate additionalTestDataFiles param
+        if (otherDataFileNames != null && otherDataFileNames.length > 0) {
+            for (String nextFileName : otherDataFileNames) {
+                //throw an exception if the next file isn't legal
+                checkLegalFile(nextFileName);
+            }
         }
 
         ProblemImplementation problemImplementation = (ProblemImplementation) problem;
@@ -1609,24 +1622,67 @@ public class ServerConnection {
     }
 
     /**
-     * Returns an indication of whether the specified {@link IFile} is valid or not.
-     * An IFile is considered "valid" if it is not null, has a non-null, non-zero-length name,
-     * and has more than zero bytes of data.
+     * Throws an Exception if the specified {@link IFile} is invalid.
+     * An IFile is considered "invalid" if it is null, has a name which is null or empty,
+     * or is  zero length when zero-length files have been prohibited in the current {@link ContestInformation} configuration.
      *
-     * @param file the IFile to be checked for validity
+     * @param file the IFile to be checked for validity.
      *
-     * @return true if the IFile is not null, has a file name that is not null and not empty,
-     *          and has greater than zero data bytes; false otherwise
+     * @throws Exception if the file is null or has a name which is null or empty.
+     * @throws SubmissionRejectedException if the file has zero length but such files are not allowed in submissions.
+     * 
      */
-    private boolean validIFile(IFile file) {
+    private void checkValidIFile(IFile file) throws Exception {
         if (file==null || file.getFileName()==null || file.getFileName().equals("")) {
-            return false;
+            throw new Exception("Invalid file");
         }
-        if (file.getByteData().length<=0) {
-            return false;
+        
+        //reject zero-length file if such is not allowed
+        if (file.getByteData().length<=0 && !internalContest.getContestInformation().isAllowZeroLengthSubmissionFiles()) {
+            throw new SubmissionRejectedException("Zero-length file not allowed", 
+                        SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);
         }
-        return true;
     }
+    
+    /**
+     * Checks whether the specified File is zero length; throws {@link SubmissionRejectedException} if so AND if
+     * zero-length files have been configured as being disallowed.
+     * 
+     * @param aFile the File whose length is to be checked.
+     * @throws SubmissionRejectedException if the file is zero length AND zero-length files are not allowed in submissions.
+     */
+    private void checkFilePassesZeroLengthRestrictions(File aFile) throws SubmissionRejectedException {
+        
+        long fileSize = aFile.length();
+
+        if (fileSize <= 0 && !internalContest.getContestInformation().isAllowZeroLengthSubmissionFiles()) {
+            throw new SubmissionRejectedException("Zero-length file not allowed", SubmissionRejectedException.SubmissionRejectionReason.ZERO_LENGTH_FILE);            
+        }   
+    }
+
+
+    /**
+     * Throws an exception if the specified fileName string is not the name of a legitimate file,
+     * or if the file exists but is zero length when zero-length files are prohibited.
+     * 
+     * @param fileName the String name of the file to be checked.
+     * 
+     * @throws Exception if the specified file name String isn't actually a file.
+     * @throws SubmissionRejectedException if the file exists but has zero length when that is prohibited.
+     *          Note that this exception is thrown by being forwarded from method {@link #checkFilePassesZeroLengthRestrictions(File)}.
+     *          
+     */
+    private void checkLegalFile(String fileName) throws Exception {
+        
+        File theFile = new File(fileName);
+        if (fileName == null  || !theFile.isFile()){
+            throw new Exception("File '" + fileName + "': no such file (not found)");
+        } else {
+            // throw an exception if mainFile is zero-length but that's not allowed
+            checkFilePassesZeroLengthRestrictions(theFile);
+        }
+    }
+
 
     private static void fatalError(String string) {
         System.err.println(string);

@@ -236,6 +236,8 @@ public interface IContestLoader {
 
     String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
 
+    String ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY = "allow-zero-length-submission-files";
+
     String LOAD_ACCOUNTS_FILE_KEY = "load-accounts-file";
 
     String SANDBOX_GRACE_TIME = "sandbox-grace-time-secs";

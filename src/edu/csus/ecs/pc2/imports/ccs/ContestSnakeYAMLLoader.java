@@ -477,7 +477,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         //set allow-multiple-team-logins mode
         boolean allowMultipleTeamLogins = fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
-
+        
+        //set allow-zero-length-submission-files mode
+        boolean allowZeroLengthSubmissionFiles = fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
+        contestInformation.setAllowZeroLengthSubmissionFiles(allowZeroLengthSubmissionFiles);
+        
         // Load team scoreboard string (the one with variables)
         String teamScoreboadDisplayString = fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
