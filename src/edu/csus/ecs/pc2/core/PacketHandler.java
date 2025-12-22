@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -1178,6 +1178,9 @@ public class PacketHandler {
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getDescription());
         newProfile.setSiteNumber(contest.getSiteNumber());
+        if (!StringUtilities.isEmpty(packet.getContestIdentifier())) {
+            newProfile.setContestId(packet.getContestIdentifier());
+        }
 
         if (settings.getProfilePath() != null){
             newProfile.setProfilePath(settings.getProfilePath());
