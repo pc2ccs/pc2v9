@@ -412,7 +412,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
         
         //set allow-zero-length-submission-files mode
-        boolean allowZeroLengthSubmissionFiles = fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
+        boolean allowZeroLengthSubmissionFiles = ContestImportUtilities.fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
         contestInformation.setAllowZeroLengthSubmissionFiles(allowZeroLengthSubmissionFiles);
         
         // Load team scoreboard string (the one with variables)
@@ -420,7 +420,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
 
         // control submission throttling
-        boolean submissionThrottling = fetchBooleanValue(content, SUBMISSION_THROTTLING_KEY, contestInformation.isSubmissionThrottling());
+        boolean submissionThrottling = ContestImportUtilities.fetchBooleanValue(content, SUBMISSION_THROTTLING_KEY, contestInformation.isSubmissionThrottling());
         contestInformation.setSubmissionThrottling(submissionThrottling);
 
         // enable shadow mode
@@ -658,7 +658,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        Object maxSourceSize = fetchObjectValue(content, MAX_SOURCE_SIZE_K_KEY);
+        Object maxSourceSize = ContestImportUtilities.fetchObjectValue(content, MAX_SOURCE_SIZE_K_KEY);
         if (maxSourceSize != null) {
 
             if (maxSourceSize instanceof Integer) {
