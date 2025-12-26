@@ -13,21 +13,6 @@ export const DEBUG_MODE = true ;
  export const RESYNC_INTERVAL_IN_MINUTES = 5 ;
  
 /**
- * The key under which the currently-active WTI page is stored in sessionStorage.
- */
-export const CURRENT_PAGE_KEY = 'curPageKey';
-
-/**
- * The storageSession value indicating the RUNS page is "current".
- */
-export const RUNS_PAGE = 'runs';
-
-/**
- * The storageSession value indicating the OPTIONS page is "current".
- */
-export const OPTIONS_PAGE = 'options';
-
-/**
  * The key under which the OPTIONS page details (that is, current option values) are stored in sessionStorage.
  */
 export const OPTIONS_DETAILS_KEY = 'optionsDetails';
@@ -41,21 +26,11 @@ export const CLARS_ENABLED_OPTIONS_KEY = 'clarsNotificationsEnabled';
  * The optionsDetails key for the runs-notifications-enabled option
  */
 export const RUNS_ENABLED_OPTIONS_KEY = 'runsNotificationsEnabled';
-		 		 
-/**
- * The storageSession value indicating the CLARIFICATIONS page is "current".
- */
-export const CLARIFICATIONS_PAGE = 'clarifications';
 
 /**
  * The storageSession key indicating what filter settings (recipient and problems) have been selected on the CLARIFICATIONS page filter.
  */
 export const CLARS_PAGE_FILTER_KEY = 'clarificationsFilterForm';
-
-/**
-  * The storageSession value indicating the SCOREBOARD page is "current".
- */
-export const SCOREBOARD_PAGE = 'scoreboard';
 
 /**
  * The key under which the "connection token" for websocket messages is stored in sessionStorage.
@@ -76,3 +51,14 @@ export const BASE_URL_KEY = 'baseURL';
  * The key under which the base URL for the server is stored in sessionStorage.
  */
 export const WEBSOCKET_URL_KEY = 'websocketURL';
+
+/**
+ * Interface defining the structure of UI options, for robustness/generality in other modules.
+ */
+export interface UiOptions {
+  clarsNotificationsEnabled: boolean;
+  runsNotificationsEnabled: boolean;
+}
+
+export const DEFAULT_SHOW_RUNS_POPUP = true;
+export const DEFAULT_SHOW_CLARS_POPUP = true;
