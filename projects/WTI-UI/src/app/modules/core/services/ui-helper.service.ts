@@ -6,6 +6,11 @@ import { NewRunAlertComponent } from '../../runs/components/new-run-alert/new-ru
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DEBUG_MODE } from 'src/constants';
 
+/**
+  This class provides support for displaying popups when new run, clarification, or announcement
+  notifications are received, as well as displaying "alerts" (Ok or Error) when the user submits
+  a run or a clarification. Pop-ups are only displayed if enabled via the "Options" tab.
+ */
 @Injectable({
 	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
 })
