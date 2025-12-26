@@ -5,7 +5,10 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { IContestService } from '../abstract-services/i-contest.service';
 import { IWebsocketService } from '../abstract-services/i-websocket.service';
+import { UiHelperService } from '../services/ui-helper.service';
 import * as Constants from 'src/constants';
+import { getCurrentToken, getCurrentUserName, loadOptions } from './session-storage.utils';
+import { DEFAULT_SHOW_CLARS_POPUP, DEFAULT_SHOW_RUNS_POPUP } from 'src/constants';
 
 /**
 This service class houses initialization for the WTI-UI application.  
@@ -39,8 +42,10 @@ and a username).  If so, it is an indication that the application must be restar
 in that case it restores the login information into the AuthService class, starts a new WebSocket for 
 communication with the WTI Server (the old one having been destroyed when the F5 occurred), 
 checks the ContestService "isContestRunning" value (using it to trigger updates to things like 
-display of problem names). Lastly, it checks if there is a logged-in user and if so it starts
-(or restarts) the contest countup/down clocks.
+display of problem names). initializeApp() also checks SessionStorage for any previously-stored
+WTI options; if present in SessionStorage then those settings are restored; if not present then 
+Options are set to their default values.  Lastly, initalizeApp() checks if there is a logged-in 
+user and if so it starts (or restarts) the contest countup/down clocks.
 
 Subsequently, as part of the AppModule bootstrap process, module "AppRoutingModule" sets up a list of "available routes"
 (that is, pages which the SPA knows how to transfer to), with the first (default) route being the LoginPageComponent.
@@ -67,7 +72,8 @@ export class AppInitService {
 		private http: HttpClient,
 		private authService: AuthService,
 		private contestService: IContestService,
-		private websocketService: IWebsocketService
+		private websocketService: IWebsocketService,
+		private uiHelperService: UiHelperService
 	) { }
 
 	async initializeApp(): Promise<void> {
@@ -82,9 +88,11 @@ export class AppInitService {
 			console.warn('[AppInit] Failed to load environment, using defaults.');
 		}
 
-		// Restore session state if present
-		const token = sessionStorage.getItem(Constants.CONNECTION_TOKEN_KEY);
-		const username = sessionStorage.getItem(Constants.CONNECTION_USERNAME_KEY);
+		// Restore login state if present in sessionStorage (sessionStorage is a variable declared 
+		// by the browser and accessed via functions declared in session-storage.utils)
+
+		const token = getCurrentToken();
+		const username = getCurrentUserName();
 
 		if (token && username) {
 			this.authService.token = token;
@@ -104,10 +112,34 @@ export class AppInitService {
 			}
 		}
 
+		//force clocks to start running if user is logged in
 		if (this.authService.isLoggedIn) {
 			this.contestService.updateLocalContestClockFromServer();
 			console.log('[AppInit] Contest clock restore triggered');
 		}
 
-	}
+		//restore Options from sessionStorage if present; otherwise, set to defaults.
+		const storedOptions = loadOptions();
+
+		if (storedOptions) {
+			if (typeof storedOptions.clarsNotificationsEnabled === 'boolean') {
+				this.uiHelperService.enableClarificationNotifications =
+					storedOptions.clarsNotificationsEnabled;
+			}
+
+			if (typeof storedOptions.runsNotificationsEnabled === 'boolean') {
+				this.uiHelperService.enableRunsNotifications =
+					storedOptions.runsNotificationsEnabled;
+			}
+
+			console.log('[AppInit] UI options restored from sessionStorage:', storedOptions);
+		} else {
+			// Explicitly apply defaults
+			this.uiHelperService.enableClarificationNotifications = DEFAULT_SHOW_CLARS_POPUP;
+			this.uiHelperService.enableRunsNotifications = DEFAULT_SHOW_RUNS_POPUP;
+
+			console.log('[AppInit] No stored UI options found; defaults applied');
+		}
+		
+	}//end async initializeApp()
 }
