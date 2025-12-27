@@ -9,7 +9,7 @@ import { ContestClock } from '../models/contest-clock';
 import { ContestTimerService } from './contestTimer.service';
 import { Clarification } from '../models/clarification';
 import { RESYNC_INTERVAL_IN_MINUTES } from 'src/constants';
-import { DEBUG_MODE } from 'bin/constants';
+import { DEBUG_MODE } from 'src/constants';
 
 /**
  * This class provides a variety of "contest-related" services for clients.
