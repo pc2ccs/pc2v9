@@ -5,13 +5,15 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
+
 /**
  * A submission from a remote CCS via the REST event-feed API.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ShadowRunSubmission {
-    
+
     @JsonProperty
     private String id;
     @JsonProperty
@@ -30,7 +32,7 @@ public class ShadowRunSubmission {
     private List< Map<String,String>> files;
     @JsonProperty
     private String mime;
-    
+
     public String getId() {
         return id;
     }
@@ -52,12 +54,25 @@ public class ShadowRunSubmission {
     public String getEntry_point() {
         return entry_point;
     }
-    
+
     public List<Map<String, String>> getFiles() {
         return files;
     }
-    
+
     public String getMime() {
         return mime;
     }
-}
+
+    public void adjustTeamId(int nTeamOffset) {
+        if(nTeamOffset != 0) {
+            try {
+                int teamId = StringUtilities.getIntegerValue(team_id, -1);
+                if(teamId > 0) {
+                    teamId = teamId + nTeamOffset;
+                    team_id = "" + teamId;
+                }
+            } catch (NumberFormatException e) {
+                // ignore error
+            }
+        }
+    }}

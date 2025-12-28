@@ -23,12 +23,14 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -50,7 +52,10 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.graders.LegacyGrader;
+import edu.csus.ecs.pc2.imports.ccs.TestDataGroup;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 import edu.csus.ecs.pc2.ui.NullViewer;
@@ -281,6 +286,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     // for execute folder, and maybe in the future, for the other substitute vars
     CommandVariableReplacer variableReplacer = new CommandVariableReplacer();
+
+    //the directory where validators using the CLICS interface will place feedback info;
+    // this is also where "score.txt" files are placed by "point-scoring" validators
+    private String clicsFeedbackDirPath = null;
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecutableMonitor msgFrame) {
         super();
@@ -704,9 +713,78 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     }
                 }
             }
+            
+            //if the contest is "point-scoring", send the test case results to the "grader", which examines the scores 
+            // for each test case and returns an overall score and judgement for the submission (Run)); 
+            // save this result in the ExecutionData object so that it can later be put into a JudgementRecord in the Run.
+            // Also, write the grader results (testDataGroup name, score, and judgement) to a file in the "execute directory"
+            // to make it easier to see what was produced by the grader.
+            if (contest.getContestInformation().isScoreboardTypeScore()) {
+                
+                //write the grader results to a file in the execute directory
+                String graderResultFileName = prefixExecuteDirname("graderResult.run." + run.getNumber());
+                writeGraderResultsToFile(run, graderResultFileName);
+               
+                //declare the result values to be put into the ExecutionData for the Run
+                CLICS_JUDGEMENT_ACRONYM judgementAcronym = null;
+                double score = 0;
+                
+                //invoke the grader and get back a "score result" (the grader-based merger of the results of all test cases)
+                String runResult = getPointScoringRunResult(run);
+               
+                //The returned String ("runResult") should have two fields:  a string representing the judgement (e.g. "AC" or "WA"),
+                //followed by whitespace, followed by a string representing the score.
+                //Make sure we got back a valid runResult
+                if (runResult == null) {
+                    log.log(Log.SEVERE, "Error during execute(); got back null for point-scoring result");
+                    judgementAcronym = CLICS_JUDGEMENT_ACRONYM.JE;
+                } else {
+                    //try to pull two legit values out of the runResult
+                    String[] values = runResult.trim().split("\\s+");
+                    if (values.length != 2) {
+                        log.log(Log.SEVERE, "Format error in point-scoring result: '" + runResult + "'");
+                        judgementAcronym = CLICS_JUDGEMENT_ACRONYM.JE;
+                    } else {
+                    	//get the judgement string returned by the grader
+                        String graderJudgementAcronymString = values[0].toUpperCase().trim();
+                        
+                        //convert the grader judgement string into the corresponding CLICS_JUDGEMENT_ACRONYM enum element 
+                        try {
+                            judgementAcronym = Enum.valueOf(CLICS_JUDGEMENT_ACRONYM.class, graderJudgementAcronymString);
+                        } catch (IllegalArgumentException e1) {
+                            log.log(Log.SEVERE, "Unknown judgement acronym string from grader: '" + graderJudgementAcronymString + "'");
+                            judgementAcronym = CLICS_JUDGEMENT_ACRONYM.JE;
+                        }
+                    
+                        //parse the String score returned by the grader into a numeric object
+                        try {
+                            score = Double.parseDouble(values[1]);
+                        } catch (NumberFormatException e) {
+                            log.log(Log.SEVERE, "Format error in point-scoring score: '" + values[1] + "'");
+                            judgementAcronym = CLICS_JUDGEMENT_ACRONYM.JE;
+                        }
+                    }
+                }
+
+                //we have a score and a judgement acronym; add them to the ExecutionData 
+                //(they will subsequently be fetched from there by the AutoJudgingMonitor class, 
+                // which will insert them into a JudgementRecord and then invoke controller.submitRunJudgement() passing the 
+                // JudgementRecord to the Server which will add it to the judgementList for the Run).
+                
+                executionData.setScore(score);
+                executionData.setJudgementAcronym(judgementAcronym);
+                
+                //update the validation result with the judgement "description" (for pass-fail contests this has already been done
+                // by the code above which calls executionData.setValidationResults() (in method executeAndValidateDataSet()).
+                //However, for point-scoring we need set the ValidationResults based on the runResult returned by the grader
+                // (via the call to getPointScoringRunResult(), above).
+                String judgementDescription = judgementAcronym.getValue();  //getValue() returns the "description", e.g. "Accepted"
+                executionData.setValidationResults(judgementDescription);
+                                                
+            } //end if(isScoreboardTypeScore())
 
         } catch (Exception e) {
-            log.log(Log.INFO, "Exception during execute() ", e);
+            log.log(Log.WARNING, "Exception during execute() ", e);
             fileViewer.addTextPane("Error during execute", "Exception during execute, check log " + e.getMessage());
         }
         if(isUsingGUI()) {
@@ -715,6 +793,202 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         }
 
         return fileViewer;
+    }
+
+    /**
+     * Writes a series of lines to the specified file, where each line contains the grader result
+     * for one test case.
+     * Each grader result line in the file contains the following values separated by a space:
+     * the name of the {@link TestDataGroup} with which the test case is associated;
+     * the "judgement acronym" assigned to the test case by the grader;
+     * the "point score" assigned to the test case by the grader.
+     * 
+     * @param run the Run containing the Test Cases which have just been executed.
+     * @param graderResultFileName the file to which the grader results are written; typically in the Execute Directory.
+     */
+    private void writeGraderResultsToFile(Run run, String graderResultFileName) {
+        
+        //"try with resources" ensures writer is closed when done. 
+        //"new FileWriter(String)" will overwrite the file if it already exists.
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(graderResultFileName))) {
+            
+            //get the test cases for the most recent Run execution out of the Run
+            RunTestCase [] testCases = RunUtilities.getMostRecentTestCaseResults(run);
+            
+            //process each test case
+            for (RunTestCase testCase : testCases) {
+                
+                //get the result data out of the current test case
+                double score = testCase.getScore();
+                CLICS_JUDGEMENT_ACRONYM acronym = testCase.getJudgementAcronym();
+                String testDataGroupName = testCase.getTestDataGroup().getGroupName(); 
+                
+                //write a line containing the result data to the file
+                String line = testDataGroupName + " " + acronym + " " + score + NL;
+                writer.write(line);
+            }
+            log.log(Log.INFO, "Grader results successfully written to file '" + graderResultFileName + "' for Run " + run.getNumber());
+        } catch (IOException e) {
+            log.log(Log.WARNING, "Error writing Grader results to file '" + graderResultFileName + "' for Run " + run.getNumber()
+                                    + ":" + e.getMessage());
+        }     
+    }
+
+    /**
+     * Returns a String giving the "point-scoring result" for this Run (only relevant for "point-scoring" contests).
+     * The returned string contains two space-separated fields:  a Judgement Acronym and a "points scored" double value. 
+     * The "points scored" value is determined by recursively examining all the {@link RunTestCase}s for the most recent
+     * execution of the Run, using a "Grader" to determine a score for each test case and subsequently
+     * to merge the resulting scores together based on the "scoring attributes" associated
+     * with the problem data files.
+     * 
+     * @param run the Run whose point-scoring result is to be calculated.
+     * 
+     * @return a String containing two white-space separated fields: judgement acronym and score, or
+     * null if an error occurred during the grading process.
+     */
+    private String getPointScoringRunResult(Run run) {
+
+        //we only want to look at the results for the most recent execution of the run
+        RunTestCase [] testCases = RunUtilities.getMostRecentTestCaseResults(run);
+        
+        //find the root of the testDataGroup tree
+        TestDataGroup root = testCases[0].getTestDataGroup();
+        while (root.getParent() != null) {
+            root = root.getParent();
+        }
+        
+        //recursively walk the TestDataGroup tree, invoking the grader (bottom-up) at each level
+        // to get back a combined result for the entire test data group
+        String runResult = getTestDataGroupResults(root);
+        
+        return runResult;
+    }
+
+    /**
+     * Returns a String containing "Test Case Result" for the specified {@link TestDataGroup}.
+     * The returned Test Case Result string contains two space-separated fields: a judgement acronym and a double-value point score.
+     * The returned values are obtained by recursively calling the method on each child test group, using the
+     * {@link LegacyGrader} to compute the score for each child group.
+     * 
+     * @param tdg the Test Data Group for which a Test Case Result (i.e. a judgement acronym and score) is to be computed.
+     * 
+     * @return a String giving the "Test Case Result" (a judgement acronym and point score) for the specified Test Data Group,
+     *              or null if an error occurs in calculating a result for the specified TestDataGroup.
+     */
+    //this method is the implementation of "recurse(tdg)" in the original pseudo-code...
+    private String getTestDataGroupResults(TestDataGroup tdg) {
+
+        //a list of the test case results associated with the specified test data group
+        ArrayList<String> testCaseResultList = new ArrayList<String>() ;
+        boolean breakOnReject = tdg.isOnRejectBreak();
+        
+        //get the results for the test cases directly declared in the test data group and add them to the list
+        ArrayList<String> groupTestCaseResults = getGroupTestCaseResults(tdg);
+        for (String testCaseResult : groupTestCaseResults) {
+            testCaseResultList.add(testCaseResult);
+        }
+
+        // if we are not breaking on reject, or there are no test cases in this groups level, or, the last case on the list
+        // is accepted, then, we have to get the results of each sub group and add to the list.
+        // Note that getGroupTestCaseResults() will return on the first failed case if on_reject = break, and, the last
+        // result in the list will be the failed result (non-AC)
+        if(!breakOnReject || testCaseResultList.isEmpty() ||
+            testCaseResultList.get(testCaseResultList.size()-1).split("\\s+")[0].equalsIgnoreCase(CLICS_JUDGEMENT_ACRONYM.AC.toString())){
+        
+            //recursively get the results for test cases declared as children of the specified test data group and add them to the list
+            for (TestDataGroup child : tdg.getTestDataGroups()) {
+                String childResult = getTestDataGroupResults(child);
+                if(childResult == null) {
+                    log.log(Log.WARNING, "Grader childResult was null for test data group: '" + child.getGroupName() + "' in group '" + tdg.getGroupName() + "'");
+                    return(null);
+                }
+                testCaseResultList.add(childResult);
+                // If we are supposed to break on reject, and any of the sub groups return a non-AC then stop adding subgroups and proceed to grading.
+                if(breakOnReject && !childResult.split("\\s+")[0].equalsIgnoreCase(CLICS_JUDGEMENT_ACRONYM.AC.toString())) {
+                    break;
+                }
+            }
+        }
+        
+        //we've recursed to the lowest level in the test case tree; create a Grader to get a Result (acronym and score) for this level
+        LegacyGrader grader = new LegacyGrader(prefixExecuteDirname("graderLog-" + tdg.getGroupName().replace(File.separator, "_") + ".txt"));
+        
+        //set the arguments for the grader based on the grader flags in the currently specified TestDataGroup.
+        //TODO:  it seems like there SHOULD be separate "scoringMode" and "verdictMode" attributes defined in a TestDataGroup -- ,
+        // along with appropriate accessors, allowing code here like:
+        //
+        //    String [] graderArgs = {tdg.getScoringMode(), tdg.getVerdictMode(), tdg.getGraderFlags() } ;
+        //    boolean argsOK = grader.parseArguments(graderArgs) ;
+        //
+        //In fact however, there are no such attributes/accessors in a TestDataGroup; rather, the TestDataGroup class appears to have
+        // merged all "grader arguments" into a single string -- which is slightly inconsistent with the fact that Grader.parseArguments()
+        // expects an ARRAY of strings... So as a result we do the following:
+
+        //get any grader flags specified in the TestDataGroup, split them into separate lines (strings)
+        String [] graderFlags = tdg.getGraderFlags().split("\\s+");
+        
+        //check whether there are non-empty grader flags (the flags will be empty strings by default unless there
+        // was a testdata.yaml file which specified grader_flags)
+        boolean weHaveGraderFlags = false;
+        for (String arg : graderFlags) {
+            if (arg.length()>0) {
+                weHaveGraderFlags = true;
+                break;
+            }
+        }
+
+        //if there are non-empty grader flags, send them to the grader for parsing
+        boolean argsOK = true;
+        if (weHaveGraderFlags) {
+            argsOK = grader.parseArguments(graderFlags);
+        }
+
+        //make sure the Grader accepted our arguments (if any)
+        if (!argsOK) {
+            log.log(Log.WARNING, "Error parsing grader arguments: '" + tdg.getGraderFlags() + "'");
+            grader = null; //dispose the grader object
+            return null;
+        } else {
+            String result = grader.gradeTestCases(testCaseResultList);
+            if (result == null) {
+                //TODO: the Grader class should have a PUBLIC accessor getGraderError() so that we can log information about
+                // why the Grader failed.  Currently, there IS a method getGraderError() but it is defined with "default" (a.k.a. "package" access)
+                log.log(Log.WARNING, "Grader.gradeTestCases() returned null (error)");
+            }
+            grader = null; //dispose the grader object
+            return result;
+        }     
+    }
+
+    /**
+     * Returns an ArrayList of the test case results for tests declared directly at the level of the specified test data group
+     * (as opposed to being declared in sub-group folders).
+     * 
+     * @param tdg the {@link TestDataGroup} whose directly-declared test case results are to be returned.
+     * 
+     * @return an ArrayList containing the test case results for test cases at the level of the specified {@link TestDataGroup}.
+     */
+    private ArrayList<String> getGroupTestCaseResults(TestDataGroup tdg) {
+        
+        //start a list of test cases declared directly in the specfied TestDataGroup
+        ArrayList<String> tdgTestCaseResults = new ArrayList<String>();
+        boolean breakOnReject = tdg.isOnRejectBreak();
+        
+        //check every test case in the run (that is, every test case for the most recent execution of the Run)
+        for (RunTestCase testCase : RunUtilities.getMostRecentTestCaseResults(run)) {
+            //check if the current test case belongs to the specified TestDataGroup
+            if (testCase.getTestDataGroup()==tdg) {
+                //yes, the test case belongs to the test data group; add its result acronym string and score to the list
+                String testCaseResult = testCase.getJudgementAcronym().toString() + " " + testCase.getScore();
+                tdgTestCaseResults.add(testCaseResult);
+                // Stop adding to list on first failed case, if that's what is wanted.
+                if(breakOnReject && !testCase.isPassed()) {
+                    break;
+                }
+            }
+        }
+        return tdgTestCaseResults;
     }
 
     public String getFailureReason() {
@@ -803,8 +1077,127 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         runTestCaseResult.setElapsedMS(executionData.getExecuteTimeMS());
         runTestCaseResult.setContestTimeMS(getContest().getContestTime().getElapsedMS());
         runTestCaseResult.setValidated(isValidated());
+        
+        //if this is a "point-scoring" contest we need to obtain and save a "score" and "judgement acronym" for this particular test case
+        if (contest.getContestInformation().isScoreboardTypeScore()) {
+            
+            //put a score for the test case into the RunTestCase
+            runTestCaseResult.setScore(getRunTestCaseScore(testNumber, submissionIsCorrect));
+            
+            //put a result acronym for the test case into the RunTestCase
+            runTestCaseResult.setJudgementAcronym(getRunTestCaseJudgementAcronym(submissionIsCorrect));
+            
+            //put a reference to the "TestDataGroup" for this test case into the RunTestCase
+            runTestCaseResult.setTestDataGroup(getRunTestCaseDataGroup(testNumber));
+            
+        }
+
+        //we've now got a complete description of the results of this test case; save it in the Run
         run.addTestCase(runTestCaseResult);
+        
+        //return an indication of whether or not the submission (Run) correctly solved the problem
         return submissionIsCorrect;
+    }
+
+
+    /**
+     * Returns a "score" associated with the current test case. "Score" values are only relevant
+     * for "point-scoring" contests.
+     * 
+     * @param testCaseNumber the (1-based) number of the test case (that is, the first test case in the set of test cases
+     *              is number 1; testNumber 1 would be at index 0 in an array of test cases).
+     * @param submissionIsCorrect a boolean indicating whether or not the current test case passed (was "accepted" by the Validator).
+     * 
+     * @return a non-negative double-precision value indicating the score associated with this test case;
+     *          only relevant for "point-scoring" contests.  If any error occurs in determining the score, zero is returned.
+     */
+    private double getRunTestCaseScore(int testCaseNumber, boolean submissionIsCorrect) {
+                        
+       //see if the validator produced a "score.txt" file in the feedback directory
+       String scoreFileName = clicsFeedbackDirPath + "score.txt";
+       File f = new File(scoreFileName);
+       if (f.exists()) {
+           
+           //yes, there's a score.txt file; try reading a line containing a score out of it
+           try {
+               
+               BufferedReader reader = new BufferedReader(new FileReader(scoreFileName));
+               String scoreLine = reader.readLine();
+               reader.close();
+               
+               double scoreVal;
+               try {
+                   scoreVal = Double.parseDouble(scoreLine);
+               } catch (NumberFormatException e) {
+                   log.log(Level.WARNING, "Number format exception: '" + scoreLine + "' while reading '" 
+                           + scoreFileName + "'; returning score = 0.0");
+                   return 0; 
+               }
+               
+               //make sure the score is legal (scores cannot be negative)
+               if (scoreVal >= 0) {
+                   return scoreVal ;
+               } else {
+                   log.log(Level.WARNING, "Found illegal score value '" + scoreVal + "' while reading '" 
+                           + scoreFileName + "' (scores cannot be negative); returning score = 0.0");
+                   return 0; 
+               }
+           } catch (IOException e) {
+               log.log(Level.WARNING, "IOException reading '" + scoreFileName, e);
+               return 0; 
+           } 
+           
+        } else {
+            
+            //no, there's no "score.txt" file; try getting the score from the ranges defined in the test case
+            ProblemDataFiles probDataFiles = controller.getProblemDataFiles(problem); 
+            TestDataGroup testGroup = probDataFiles.getJudgesDataGroups()[testCaseNumber-1];  //testCaseNumber is 1-based but the array is 0-based
+            
+            if (submissionIsCorrect) {
+                return testGroup.getAcceptScore();
+            } else {
+                return testGroup.getRejectScore(); 
+            }
+        }
+    }
+
+
+    /**
+     * Returns the {@link CLICS_JUDGEMENT_ACRONYM} associated with the execution of the current submission (run) 
+     * using the currently-selected test case as input.
+     * Assumes that the process of compiling, executing, and validating the submission completed successfully and
+     * that these steps correctly filled in the "executionData" field with the appropriate result data.
+     * 
+     * @param submissionIsCorrect a boolean indicating whether the execution of the submission was judged 
+     *                              to produce correct output when given the current test case as input.
+     * 
+     * @return a {@link CLICS_JUDGEMENT_ACRONYM} corresponding to the result of executing the current submission with the current test case as input.
+     */
+    private CLICS_JUDGEMENT_ACRONYM getRunTestCaseJudgementAcronym(boolean submissionIsCorrect) {
+        
+        if (submissionIsCorrect) {
+            return CLICS_JUDGEMENT_ACRONYM.AC;
+        } else if (executionData.isRunTimeLimitExceeded()) {
+            return CLICS_JUDGEMENT_ACRONYM.TLE;
+        } else if (executionData.isMemoryLimitExceeded() || executionData.getExecuteExitValue() != 0  || executionData.getExecutionException() != null) {
+            return CLICS_JUDGEMENT_ACRONYM.RTE;
+        } else if (executionData.getValidationReturnCode() == ClicsValidator.CLICS_VALIDATOR_JUDGED_RUN_FAILURE_EXIT_CODE) {
+            return CLICS_JUDGEMENT_ACRONYM.WA;
+        } else {
+            return CLICS_JUDGEMENT_ACRONYM.JE ;
+        }
+    }
+
+    /**
+     * Returns a reference to the {@link TestDataGroup} for the specified testCaseNumber.
+     * testCaseNumber is presumed to be a 1-based value (i.e., the first test case is #1).
+     * 
+     * @param testCaseNumber the 1-based number of the test case of interest.
+     * 
+     * @return a reference to the TestDataGroup which the specified test case belongs to.
+     */
+    private TestDataGroup getRunTestCaseDataGroup(int testCaseNumber) {
+        return problemDataFiles.getJudgesDataGroups()[testCaseNumber-1];  //testCaseNumber is 1-based; index into the zero-based array
     }
 
     /**
@@ -989,20 +1382,20 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         //create the feedback directory for validators using the Clics Interface
         if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface())) {
 
-            String feedbackDirPath = getExecuteDirectoryName() + File.separator + clicsInterfaceFeedbackDirName;
+            clicsFeedbackDirPath  = getExecuteDirectoryName() + File.separator + clicsInterfaceFeedbackDirName;
 
             // get rid of any pre-existing feedback dir
             try {
-                ExecuteUtilities.removeDirectory(feedbackDirPath);
+                ExecuteUtilities.removeDirectory(clicsFeedbackDirPath);
             } catch (Exception e) {
-                log.warning("Exception trying to remove feedback directory '" + feedbackDirPath + "': " + e.getMessage());
+                log.warning("Exception trying to remove feedback directory '" + clicsFeedbackDirPath + "': " + e.getMessage());
             }
 
-            if (insureDir(feedbackDirPath)) {
+            if (insureDir(clicsFeedbackDirPath)) {
                 // clean out feedback dir
-                ExecuteUtilities.clearDirectory(feedbackDirPath);
+                ExecuteUtilities.clearDirectory(clicsFeedbackDirPath);
             } else {
-                throw new SecurityException("Unable to create ClicsValidator feedback directory '" + feedbackDirPath + "'; check logs");
+                throw new SecurityException("Unable to create ClicsValidator feedback directory '" + clicsFeedbackDirPath + "'; check logs");
             }
         }
 
@@ -2245,7 +2638,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             log.info("team process returned exit code " + exitCode);
 
-            //TODO: comment-out this debug statement
             //System.out.println ("team process returned exit code " + exitCode);
 
             //get rid of the TLE timer (whether the TLE-kill task has been fired or not)

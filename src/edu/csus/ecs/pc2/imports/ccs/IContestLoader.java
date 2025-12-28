@@ -247,6 +247,8 @@ public interface IContestLoader {
 
     String SANDBOX_INTERACTIVE_GRACE_MULTIPLIER = "sandbox-interactive-time-multiplier";
 
+    String REMOTE_CCS_SETTINGS_KEY = "remote-ccs-settings";
+
     /**
      *
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)

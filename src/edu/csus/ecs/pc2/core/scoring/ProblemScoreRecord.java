@@ -8,7 +8,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 
 /**
  * Holds summary score information for a single Problem.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: ProblemScoreRecord.java 181 2011-04-11 03:21:46Z laned $
  */
@@ -34,8 +34,10 @@ public class ProblemScoreRecord {
 
     private int submissionsBeforeYes;
 
+    private double score = 0;
+
     /**
-     * 
+     *
      * @param solved
      * @param solvingRun
      * @param problem
@@ -62,7 +64,7 @@ public class ProblemScoreRecord {
 
     /**
      * Constructor deprecated.
-     * 
+     *
      * This class is now used to store values, before it was used to both calculate and store values. <br>
      * See {@link edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm#createProblemScoreRecord(Run[], Problem, Properties)} as an example of how to compute values.
      */
@@ -73,7 +75,7 @@ public class ProblemScoreRecord {
 
     /**
      * Has problem been solved?.
-     * 
+     *
      * @return true if problem solved.
      */
     public boolean isSolved() {
@@ -86,7 +88,7 @@ public class ProblemScoreRecord {
 
     /**
      * All non-deleted Runs.
-     * 
+     *
      * @return
      */
     public int getNumberSubmissions() {
@@ -95,7 +97,7 @@ public class ProblemScoreRecord {
 
     /**
      * Time/Penalty points for this problem.
-     * 
+     *
      * @return number of points
      */
     public long getPoints() {
@@ -104,7 +106,7 @@ public class ProblemScoreRecord {
 
     /**
      * First run which solved this Problem.
-     * 
+     *
      * @return null if run solved the problem.
      */
     public Run getSolvingRun() {
@@ -113,7 +115,7 @@ public class ProblemScoreRecord {
 
     /**
      * Number of submissions before first yes.
-     * 
+     *
      * @return
      */
     public int getSubmissionsBeforeYes() {
@@ -139,6 +141,14 @@ public class ProblemScoreRecord {
 
     public int getNumberPendingSubmissions() {
         return numberPendingSubmissions;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
     }
 
 }

@@ -45,7 +45,7 @@ public class CLICSScore {
      */
     public CLICSScore(TeamStanding teamStanding) {
         num_solved = Utilities.nullSafeToInt(teamStanding.getSolved(), 0);
-        total_time = Integer.parseInt(teamStanding.getPoints());
+        total_time = Utilities.nullSafeToInt(teamStanding.getPoints(), 0);
         if(num_solved > 0) {
             // Problem solution time is in minutes.
             time = Integer.parseInt(teamStanding.getLastSolved());

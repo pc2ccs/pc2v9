@@ -1,8 +1,9 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -18,9 +19,6 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 // TODO handle multiple data sets for validator and execution.
 public class ExecutionData implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 3095803815304273632L;
 
     // Compile call results
@@ -68,6 +66,10 @@ public class ExecutionData implements Serializable {
     private boolean failedToCompile = false;
 
     private String additionalInformation = "";
+    
+    //fields associated with "point-scoring" contests
+    private double score ;
+    private CLICS_JUDGEMENT_ACRONYM judgementAcronym ;
 
     /**
      * @return Returns the validationReturnCode.
@@ -367,6 +369,22 @@ public class ExecutionData implements Serializable {
      */
     public String getAdditionalInformation() {
         return additionalInformation;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public CLICS_JUDGEMENT_ACRONYM getJudgementAcronym() {
+        return judgementAcronym;
+    }
+
+    public void setJudgementAcronym(CLICS_JUDGEMENT_ACRONYM judgementAcronym) {
+        this.judgementAcronym = judgementAcronym;
     }
 
     @Override
