@@ -358,10 +358,6 @@ public final class JudgementUtilities {
         }
     }
 
-    public static String getExecuteDirectoryName(ClientId id) {
-        return "executesite" + id.getSiteNumber() + id.getName();
-    }
-
     /**
      * Get judgements for last set of test cases.
      *

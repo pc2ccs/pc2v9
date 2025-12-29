@@ -512,7 +512,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         executable.execute();
 
         // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
+        String executeDirctoryName = executable.getExecuteDirectoryName();
         Problem problem = getContest().getProblem(fetchedRun.getProblemId());
         ClientId clientId = getContest().getClientId();
         List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(contest, fetchedRun);

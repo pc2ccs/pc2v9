@@ -876,7 +876,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * Takes a boolean condition whether to override stop on first failure condition
      */
     protected void executeRun(boolean overrideStopOnFirstFailedTestCase) {
-
+       
         executeTimeMS = 0;
         System.gc();
 
@@ -901,10 +901,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         executable.execute();
 
         // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
+        String executeDirectoryName = executable.getExecuteDirectoryName();
         ClientId clientId = getContest().getClientId();
         List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(getContest(), run);
-        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
+        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirectoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         if (executionData != null && executionData.getExecutionException() != null) {
@@ -991,7 +991,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
                 judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), solved, true);
                 judgementRecord.setValidatorResultString(results);
-
+                
                 judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
                 judgementRecord.setExecuteMS(executeTimeMS);
 
