@@ -1510,7 +1510,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     }
 
                     in.close();
-                    out.close();
+                    try {
+                        out.close();
+                    } catch (java.io.IOException e) {
+                        log.info("Caught a " + e.getMessage() + " while closing output to validator; do not be alarmed; probably a faulty validator.");
+                    }
                 }
             }
 
