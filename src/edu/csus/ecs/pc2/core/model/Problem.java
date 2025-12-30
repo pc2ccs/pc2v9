@@ -1270,7 +1270,7 @@ public class Problem implements IElementObject {
             }
 
             //check for same memory limits
-            if (this.getMemoryLimitMB() != otherProblem.getMemoryLimitMB()) {
+            if (this.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX && this.getMemoryLimitMB() != otherProblem.getMemoryLimitMB()) {
                 return false;
             }
 

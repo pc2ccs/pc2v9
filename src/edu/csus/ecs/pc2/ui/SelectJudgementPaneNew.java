@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
@@ -27,10 +28,12 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
@@ -60,6 +63,7 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import java.awt.Dimension;
 
 /**
  * Select a Judgement Pane.
@@ -153,7 +157,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel validatorAnswer = null;
 
     private JLabel selectJudgementCheckboxLabel = null;
-
+    
     private JButton viewOutputsAndDataButton = null;
 
     private GregorianCalendar startTimeCalendar;
@@ -187,6 +191,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel additionalInfoTextLabel;
 
     private JLabel addtionalInfoMoreButtonLabel;
+    
+    private boolean isPointScoring = false;
 
     /**
      * This method initializes
@@ -218,6 +224,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
+        
+        isPointScoring = inContest.getContestInformation().isScoreboardTypeScore();
+        
         log = getController().getLog();
 
         displayTeamName = new DisplayTeamName();
@@ -404,6 +413,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 executionData = executable.getExecutionData();
                 if (judgementRecord != null) {
                     judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
+                    judgementRecord.setScore(executionData.getScore());
                 }
             }
 
@@ -529,6 +539,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             // if there IS a computer judgement, try to find a corresponding RunResultFile record
             RunResultFiles matchingResult = null;
             if (computerJudgement != null) {
+                
                 // search the RunResultFiles array for a matching result
                 if (runResultFiles != null) {
                     for (int i = 0; i < runResultFiles.length; i++) {
@@ -992,6 +1003,24 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), solved, true);
                 judgementRecord.setValidatorResultString(results);
                 
+                //if it's a point-scoring contest, put the score and the judgement into the JudgementRecord
+                if (isPointScoring) {
+                    
+                    judgementRecord.setScore(executionData.getScore());
+                    
+                    CLICS_JUDGEMENT_ACRONYM acronym = executionData.getJudgementAcronym();
+                    String judgementDescription ;
+                    if (acronym != null) {
+                        judgementDescription = acronym.getValue();
+                    } else {
+                        judgementDescription = "Undefined";
+                    }
+                    boolean acronymRecognized = judgementRecord.setJudgementAcronym(judgementDescription);
+                    if (!acronymRecognized) {
+                        log.warning("Unrecognized judgement acronym description string: '" + judgementDescription + "'");
+                    }
+                }
+
                 judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
                 judgementRecord.setExecuteMS(executeTimeMS);
 
@@ -1426,12 +1455,26 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         // only set "additional info" fields visible if there is additional info to show
         if (showControls) {
-            if (executionData != null && executionData.getAdditionalInformation() != null && executionData.getAdditionalInformation().trim().length() > 0) {
-                additionalInfoLabel.setVisible(true);
-                additionalInfoTextLabel.setVisible(true);
-                additionalInfoTextLabel.setText(executionData.getAdditionalInformation());
-                additionalInfoTextLabel.setToolTipText(executionData.getAdditionalInformation());
-                getAdditionalInfoMoreButtonLabel().setVisible(true);
+            if (executionData != null) {
+                String additionalText = null;
+                boolean enableMoreButton = false;
+                
+                if (isPointScoring && executionData.getJudgementAcronym() == CLICS_JUDGEMENT_ACRONYM.AC) {
+                    DecimalFormat df = new DecimalFormat("0.0###");
+                    additionalText = "Score: " + df.format(executionData.getScore());
+                } else {
+                    if(executionData.getAdditionalInformation() != null && executionData.getAdditionalInformation().trim().length() > 0) {
+                        additionalText = executionData.getAdditionalInformation();
+                        enableMoreButton = true;
+                    }
+                }
+                if(additionalText != null && additionalText.isEmpty() == false) {
+                    additionalInfoLabel.setVisible(true);
+                    additionalInfoTextLabel.setVisible(true);
+                    additionalInfoTextLabel.setText(additionalText);
+                    additionalInfoTextLabel.setToolTipText(additionalText);
+                    getAdditionalInfoMoreButtonLabel().setVisible(enableMoreButton);
+                }
             }
         } else {
             additionalInfoLabel.setVisible(false);
@@ -1521,6 +1564,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (executable != null) {
             executionData = executable.getExecutionData();
             judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
+            judgementRecord.setScore(executionData.getScore());
         }
         newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
 
@@ -1666,7 +1710,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (mainPanel == null) {
             mainPanel = new JPanel();
             mainPanel.setLayout(new BorderLayout());
-            mainPanel.setPreferredSize(new java.awt.Dimension(700, 300));
+            mainPanel.setPreferredSize(new Dimension(700, 300));
             mainPanel.add(getRunInfoPanel(), java.awt.BorderLayout.NORTH);
             mainPanel.add(getAssignJudgementPanel(), java.awt.BorderLayout.CENTER);
         }

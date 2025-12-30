@@ -778,7 +778,18 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 // by the code above which calls executionData.setValidationResults() (in method executeAndValidateDataSet()).
                 //However, for point-scoring we need set the ValidationResults based on the runResult returned by the grader
                 // (via the call to getPointScoringRunResult(), above).
+                // In addition, the CLICS_JUDGEMENT_ACRONYM Value string does not necessarily match the judgment types configured
+                // for the contest (reject.ini), as a result, we have to look through the PC2 judgment types and find the one with
+                // an acronum that matches, and use THAT string (not the value of the CLICS_JUDGEMENT_ACRONUM.  This is because the
+                // ValidationResults stored in the executionData is looked up against the existing judgment types later on in SelectJudgement.java,
+                // getValidatorResultElementID(results) and it MUST match an existing PC2 judgment type or RTE will be used.
+                
+                // Set default if we can't find it
                 String judgementDescription = judgementAcronym.getValue();  //getValue() returns the "description", e.g. "Accepted"
+                Judgement j = JudgementUtilities.findJudgementByAcronym(getContest(), judgementAcronym.toString());
+                if(j != null) {
+                    judgementDescription = j.getDisplayName();
+                }
                 executionData.setValidationResults(judgementDescription);
                                                 
             } //end if(isScoreboardTypeScore())
@@ -1963,9 +1974,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             } else {
                 log.info("Clics Validator provided no 'Additional Details'");
                 executionData.setAdditionalInformation(null);
-                }
+            }
 
-            } else {
+        } else {
 
             //we SHOULD have had a feedback directory -- but we didn't!
             log.warning("No CLICS validator feedback directory named '" + feedbackDirPath + "' found");

@@ -1,6 +1,7 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
+import java.text.DecimalFormat;
 import java.util.Vector;
 
 import javax.swing.JLabel;
@@ -68,6 +69,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
 
                 // test case result: one of "No Validator", "Pass", or "Fail"
                 String resultString = "";
+                String scoreString = "";
                 boolean probHasValidator = testCaseResults[row].isValidated();
                 if (!probHasValidator) {
                     resultString = "No Validator";
@@ -77,6 +79,10 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
                     boolean passed = testCaseResults[row].isPassed();  
                     if (passed) {
                         resultString = "Pass";
+                        if(contest.getContestInformation().isScoreboardTypeScore()) {
+                            DecimalFormat df = new DecimalFormat("0.0###");
+                            scoreString = df.format(testCaseResults[row].getScore());
+                        }
                     } else {
                         resultString = "Fail";
                     }
@@ -141,7 +147,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
                 }
 
                 // build the row object and add it to the model
-                Object[] rowData = new Object[] { selected, testCaseNum, resultLabel, time,
+                Object[] rowData = new Object[] { selected, testCaseNum, resultLabel, scoreString, time,
                         teamOutputViewLabel, teamOutputCompareLabel, teamStderrViewLabel, judgesOutputViewLabel,
                         judgesDataViewLabel, validatorOutputViewLabel, validatorStderrViewLabel };
 
@@ -266,7 +272,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
         JLabel validatorStderrViewJLabel = new JLabel(data.getValidatorStderrViewLabel());
 
         //build the row object and add it to the model
-        Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, data.getTime(), 
+        Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, data.getScore(), data.getTime(),
                 teamOutputViewJLabel, teamOutputCompareJLabel, teamStderrViewJLabel, judgesOutputViewJLabel, 
                 judgesDataViewJLabel, validatorOutputViewJLabel, validatorStderrViewJLabel };
 
