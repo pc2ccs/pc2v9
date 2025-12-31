@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.standings.ProblemSummaryInfo;
 
 /**
@@ -55,7 +56,7 @@ public class CLICSProblemScore {
      * @param probEleToShort hashmap for mapping problem elementid to shortname
      * @param versionInfo
      */
-    public CLICSProblemScore(HashMap<String, String> probEleToShort, ProblemSummaryInfo psi) {
+    public CLICSProblemScore(IInternalContest model, HashMap<String, String> probEleToShort, ProblemSummaryInfo psi) {
         num_judged = Utilities.nullSafeToInt(psi.getAttempts(), 0);
         num_pending = Utilities.nullSafeToInt(psi.getIsPending(), 0);
         problem_id = psi.getProblemId();
@@ -63,6 +64,7 @@ public class CLICSProblemScore {
         if(probEleToShort.containsKey(problem_id)) {
             problem_id = probEleToShort.get(problem_id);
         }
+        
         solved = toBool(psi.getIsSolved(), false);
         if(solved) {
             // Problem solution time is in minutes
@@ -76,6 +78,10 @@ public class CLICSProblemScore {
                     System.err.println("Bad score: " + scoreVal);
                 }
             }
+        }
+        // score is required for point scoring contests
+        if(score == null && model.getContestInformation().isScoreboardTypeScore()) {
+            score = Double.valueOf(0);
         }
     }
 
