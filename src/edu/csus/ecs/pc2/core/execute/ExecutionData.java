@@ -415,4 +415,33 @@ public class ExecutionData implements Serializable {
 
         return retStr;
     }
+    
+    /**
+     * When the same execute data is to be used between successive test cases, certain fields should be reset.
+     * Specifically, those related to the actual execution and validation of the test case run.
+     */
+    public void ResetExecuteCallResults() {
+        // Execute call results
+        executeStderr = null;
+        executeProgramOutput = null;
+        executeExitValue = 0;
+        executeSucess = false;
+        validationStdout = null;
+        validationStderr = null;
+        validationReturnCode = 0;
+        validationSuccess = false;
+        validationResults = null;
+        compileTimeMS = 0;
+        executeTimeMS = 0;
+        validateTimeMS = 0;
+        executionException = null;
+        runTimeLimitExceeded = false;
+        memoryLimitExceeded = false;
+        failedToCompile = false;
+        additionalInformation = "";
+        
+        //fields associated with "point-scoring" contests
+        double score = 0;
+        CLICS_JUDGEMENT_ACRONYM judgementAcronym = null;
+    }
 }
