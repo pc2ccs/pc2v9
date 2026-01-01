@@ -557,6 +557,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     // or (if the problem indicates stop on first failed test case) a test case fails
                     while ((dataSetNumber < dataFiles.length) && (overrideStopOnFirstFailedTestCase || !(stopOnFirstFailedTestCase && atLeastOneTestFailed))) {
 
+                        executionData.ResetExecuteCallResults();
+                        
                         // execute against one specific data set
                         passed = executeAndValidateDataSet(dataSetNumber);
 
@@ -1093,7 +1095,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         if (contest.getContestInformation().isScoreboardTypeScore()) {
             
             //put a score for the test case into the RunTestCase
-            runTestCaseResult.setScore(getRunTestCaseScore(testNumber, submissionIsCorrect));
+            runTestCaseResult.setScore(getRunTestCaseScore(testNumber, proceedToValidation, submissionIsCorrect));
             
             //put a result acronym for the test case into the RunTestCase
             runTestCaseResult.setJudgementAcronym(getRunTestCaseJudgementAcronym(submissionIsCorrect));
@@ -1117,58 +1119,58 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * 
      * @param testCaseNumber the (1-based) number of the test case (that is, the first test case in the set of test cases
      *              is number 1; testNumber 1 would be at index 0 in an array of test cases).
+     * @param proceededToValidation indicates if validation was performed.  If no validation, then there can't be a score.
      * @param submissionIsCorrect a boolean indicating whether or not the current test case passed (was "accepted" by the Validator).
      * 
      * @return a non-negative double-precision value indicating the score associated with this test case;
      *          only relevant for "point-scoring" contests.  If any error occurs in determining the score, zero is returned.
      */
-    private double getRunTestCaseScore(int testCaseNumber, boolean submissionIsCorrect) {
+    private double getRunTestCaseScore(int testCaseNumber, boolean proceededToValidation, boolean submissionIsCorrect) {
                         
-       //see if the validator produced a "score.txt" file in the feedback directory
-       String scoreFileName = clicsFeedbackDirPath + "score.txt";
-       File f = new File(scoreFileName);
-       if (f.exists()) {
-           
-           //yes, there's a score.txt file; try reading a line containing a score out of it
-           try {
+        if(proceededToValidation) {
+            //see if the validator produced a "score.txt" file in the feedback directory
+            String scoreFileName = clicsFeedbackDirPath + "score.txt";
+            File f = new File(scoreFileName);
+            if (f.exists()) {
                
-               BufferedReader reader = new BufferedReader(new FileReader(scoreFileName));
-               String scoreLine = reader.readLine();
-               reader.close();
-               
-               double scoreVal;
+               //yes, there's a score.txt file; try reading a line containing a score out of it
                try {
-                   scoreVal = Double.parseDouble(scoreLine);
-               } catch (NumberFormatException e) {
-                   log.log(Level.WARNING, "Number format exception: '" + scoreLine + "' while reading '" 
-                           + scoreFileName + "'; returning score = 0.0");
-                   return 0; 
+                   
+                   BufferedReader reader = new BufferedReader(new FileReader(scoreFileName));
+                   String scoreLine = reader.readLine();
+                   reader.close();
+                   
+                   double scoreVal;
+                   try {
+                       scoreVal = Double.parseDouble(scoreLine);
+                   } catch (NumberFormatException e) {
+                       log.log(Level.WARNING, "Number format exception: '" + scoreLine + "' while reading '" 
+                               + scoreFileName + "'; returning score = 0.0");
+                       return 0; 
+                   }
+                   
+                   //make sure the score is legal (scores cannot be negative)
+                   if (scoreVal >= 0) {
+                       return scoreVal ;
+                   } else {
+                       log.log(Level.WARNING, "Found illegal score value '" + scoreVal + "' while reading '" 
+                               + scoreFileName + "' (scores cannot be negative); returning score = 0.0");
+                   }
+               } catch (IOException e) {
+                   log.log(Level.WARNING, "IOException reading '" + scoreFileName, e);
                }
-               
-               //make sure the score is legal (scores cannot be negative)
-               if (scoreVal >= 0) {
-                   return scoreVal ;
-               } else {
-                   log.log(Level.WARNING, "Found illegal score value '" + scoreVal + "' while reading '" 
-                           + scoreFileName + "' (scores cannot be negative); returning score = 0.0");
-                   return 0; 
-               }
-           } catch (IOException e) {
-               log.log(Level.WARNING, "IOException reading '" + scoreFileName, e);
-               return 0; 
-           } 
-           
+               return 0;
+            }  
+        }
+            
+        //no, there's no "score.txt" file (or we didn't validate); try getting the score from the ranges defined in the test case
+        ProblemDataFiles probDataFiles = controller.getProblemDataFiles(problem); 
+        TestDataGroup testGroup = probDataFiles.getJudgesDataGroups()[testCaseNumber-1];  //testCaseNumber is 1-based but the array is 0-based
+        
+        if (submissionIsCorrect) {
+            return testGroup.getAcceptScore();
         } else {
-            
-            //no, there's no "score.txt" file; try getting the score from the ranges defined in the test case
-            ProblemDataFiles probDataFiles = controller.getProblemDataFiles(problem); 
-            TestDataGroup testGroup = probDataFiles.getJudgesDataGroups()[testCaseNumber-1];  //testCaseNumber is 1-based but the array is 0-based
-            
-            if (submissionIsCorrect) {
-                return testGroup.getAcceptScore();
-            } else {
-                return testGroup.getRejectScore(); 
-            }
+            return testGroup.getRejectScore(); 
         }
     }
 
