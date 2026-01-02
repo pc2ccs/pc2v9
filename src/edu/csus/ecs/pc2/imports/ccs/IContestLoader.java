@@ -35,6 +35,8 @@ public interface IContestLoader {
 
     String DEFAULT_SYSTEM_YAML_FILENAME = "system.yaml";
 
+    public static final int DEFAULT_VALIDATION_PASSES = 2;
+
     // CDP directories
 
     String SUBMISSIONS_DIRNAME = "submissions";
@@ -88,6 +90,8 @@ public interface IContestLoader {
     String CLICS_TIME_MULTIPLIER_KEY = "time_multiplier";
 
     String CLICS_TIME_SAFETY_MARGIN_KEY = "time_safety_margin";
+
+    String CLICS_VALIDATION_PASSES = "validation_passes";
 
     final String OUTPUT_PRIVATE_SCORE_DIR_KEY = "output-private-score-dir";
 

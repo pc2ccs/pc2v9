@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -74,11 +74,11 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
-import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.inputValidator.VivaAdapter;
@@ -87,7 +87,7 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Add/Edit Problem Pane.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 
@@ -109,8 +109,8 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * The original/input problem.
      */
-    private Problem problem = null; 
-    
+    private Problem problem = null;
+
     private JTabbedPane mainTabbedPane = null;
     private JPanel generalPane = null;
     private ProblemGroupPane problemGroupPane = null;
@@ -143,8 +143,8 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * last directory where searched for files.
      */
-    private String lastDirectory; 
-    
+    private String lastDirectory;
+
     //John's local private testing directory
 //    private String lastDirectory = "C:\\clevengr\\contest\\PC2\\v9\\TestContests\\sumithello2\\config\\sumit";
 
@@ -226,7 +226,7 @@ public class EditProblemPane extends JPanePlugin {
     private JComboBox<String> pc2ValidatorOptionComboBox;
     private JCheckBox pc2ValidatorIgnoreCaseCheckBox;
     private JLabel lblWhatsThisCLICSValidator;
-    
+
     private JTextField maxOutputSizeTextfield;
     private JLabel lblMaxOutputSizeKB;
     private JLabel lblWhatsThisMaxOutputSize;
@@ -245,7 +245,7 @@ public class EditProblemPane extends JPanePlugin {
     private JLabel lblShortName;
 
     private JLabel problemLetterLabel;
-    
+
     private EditProblemSandboxPane editProblemSandboxPane;
 
     /**
@@ -255,26 +255,26 @@ public class EditProblemPane extends JPanePlugin {
         /**
          * The Problem has no associated custom validator type (eg it is bad)
          */
-        CV_NONE, 
+        CV_NONE,
         /**
          * The Custom validator uses the PC2 Validator interface, also known as the "Internal" Validator.
          */
-        CV_PC2, 
+        CV_PC2,
         /**
          * The Custom validator uses the CLICS Validator specification return values.
          */
-        CV_CLICS, 
+        CV_CLICS,
         /**
          * The Custom validator is an interactive validator using the CLICS validator specification return values.
          */
         CV_INTERACTIVE_CLICS
         }
-    
+
     private CUSTOM_VALIDATOR_INTERFACE_TYPE customValidatorInterfaceType = CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_NONE;
-    
+
     /**
      * Constructs an EditProblemPane with default settings.
-     * 
+     *
      */
     public EditProblemPane() {
         super();
@@ -283,7 +283,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes this EditProblemPane.
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -294,6 +294,7 @@ public class EditProblemPane extends JPanePlugin {
         this.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         addWindowListeners();
@@ -301,12 +302,13 @@ public class EditProblemPane extends JPanePlugin {
         getMultipleDataSetPane().setContestAndController(inContest, inController);
 
         getInputValidatorPane().setContestAndController(inContest, inController);
-        
+
         getProblemGroupPane().setContestAndController(inContest, inController);
-        
+
         getProblemSandboxPane().setContestAndController(inContest, inController);
-        
+
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 getLoadButton().setVisible(Utilities.isDebugMode());
                 getExportButton().setVisible(Utilities.isDebugMode());
@@ -319,7 +321,7 @@ public class EditProblemPane extends JPanePlugin {
                 debug22EditProblem = value.equalsIgnoreCase("true");
             }
         }
-        
+
         log = inController.getLog();
 
     }
@@ -332,9 +334,11 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (getParentFrame() != null) {
                     getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
                         public void windowClosing(java.awt.event.WindowEvent e) {
                             handleCancelButton();
                         }
@@ -344,6 +348,7 @@ public class EditProblemPane extends JPanePlugin {
                             getProblemNameTextField().requestFocus();
                         }
 
+                        @Override
                         public void windowActivated(WindowEvent e) {
                             getProblemNameTextField().requestFocus();
                         };
@@ -354,13 +359,14 @@ public class EditProblemPane extends JPanePlugin {
         });
     }
 
+    @Override
     public String getPluginTitle() {
         return "Edit Problem Pane";
     }
 
     /**
      * This method initializes messagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePane() {
@@ -378,7 +384,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -399,7 +405,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes addButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAddButton() {
@@ -409,6 +415,7 @@ public class EditProblemPane extends JPanePlugin {
             addButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
             addButton.setEnabled(false);
             addButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addProblem();
                 }
@@ -418,12 +425,12 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Adds to the contest a new Problem as defined by the current GUI fields. This method is invoked by pushing the "Add" button 
+     * Adds to the contest a new Problem as defined by the current GUI fields. This method is invoked by pushing the "Add" button
      * on the EditProblemPane GUI after having defined the values for a new problem being added.
-     * 
-     * The method also gets invoked by making GUI changes to a new problem definition, then pressing "Cancel" (which displays a 
+     *
+     * The method also gets invoked by making GUI changes to a new problem definition, then pressing "Cancel" (which displays a
      * message "Problem Modified - Save Changes?") and responding "Yes" to the message.
-     * 
+     *
      * @return true if all GUI values are valid and problem is added successfully; false otherwise
      */
     protected boolean addProblem() {
@@ -445,16 +452,16 @@ public class EditProblemPane extends JPanePlugin {
         if (showMissingInputValidatorWarningOnAddProblem && getProblemRequiresDataCheckBox().isSelected()
                 && (getInputValidatorPane().getUseNoInputValidatorRadioButton().isSelected()  //the problem explicitly says "no IV"
                     || (getInputValidatorPane().getCustomInputValidatorFile() == null
-                         && (getInputValidatorPane().getVivaPatternTextArea().getText()==null 
+                         && (getInputValidatorPane().getVivaPatternTextArea().getText()==null
                              || getInputValidatorPane().getVivaPatternTextArea().getText().equals("") )
                         )
                    )
             ) {
 
             // no input validator defined; issue a warning
-            String msg = "You are attempting to add a Problem which requires Input Data files but has no Input Data Validator." 
+            String msg = "You are attempting to add a Problem which requires Input Data files but has no Input Data Validator."
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
-                    + "\nJudge's data files meet the Problem Specification." 
+                    + "\nJudge's data files meet the Problem Specification."
                     + "\n\nAre you sure you want to do this?" + "\n\n";
 
             JCheckBox checkbox = new JCheckBox("Do not show this message again.");
@@ -475,7 +482,7 @@ public class EditProblemPane extends JPanePlugin {
                 && (getInputValidatorPane().getCustomInputValidatorCommand()!=null && !getInputValidatorPane().getCustomInputValidatorCommand().equals(""))) {
 
             // no input validator program defined; issue a warning
-            String message = "You are attempting to add a problem which has an Input Data Validator command but no Input Validator Program name." 
+            String message = "You are attempting to add a problem which has an Input Data Validator command but no Input Validator Program name."
                         + "\n\nAre you sure this is what you intended to do?"
                         + "\n\n";
 
@@ -591,7 +598,7 @@ public class EditProblemPane extends JPanePlugin {
      * It does not do any data validation on the input String; it presumes the String
      * consists solely of digits which can be parsed into a Long value.
      * If any Exception occurs during parsing then the method returns zero.
-     * 
+     *
      * @param s the input String to be parsed.
      * @return a Long whose value corresponds to the input String.
      */
@@ -605,7 +612,7 @@ public class EditProblemPane extends JPanePlugin {
 
    /**
      * Enable or disable Update button based on comparison of current problem to GUI fields.
-     * 
+     *
      */
     public void enableUpdateButton() {
 
@@ -636,13 +643,13 @@ public class EditProblemPane extends JPanePlugin {
                 }
 
                 //keep track of how many files have changed
-                int numFilesChanged = 0;   
-                
+                int numFilesChanged = 0;
+
                 // see if the problem data files have changed; enable the Update button and update the tooltip if so
                 ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
                 ProblemDataFiles proposedPDF = getMultipleDataSetPane().getProblemDataFiles();
                 if (pdf != null) {
-                    
+
                     //check the judge's data files
                     SerializedFile[] judgesDataFiles = pdf.getJudgesDataFiles();
                     SerializedFile[] judgesDataFilesNew = null;
@@ -753,7 +760,7 @@ public class EditProblemPane extends JPanePlugin {
                             }
                         }
                     }
-                    
+
                 } else {
                     logDebugException("No ProblemDataFiles for " + problem);
                 }
@@ -909,7 +916,7 @@ public class EditProblemPane extends JPanePlugin {
                     //the original problem and the GUI differ as to whether the Custom Validator has been run.
                     //This means either the problem originally had a Custom Validator which was run, and now a new Custom Validator
                     // has been assigned but has not been run, or else the problem did NOT have a Custom Validator which was run
-                    // but now there has been a Custom Validator which has been run.  Update the tooltip to reflect which of 
+                    // but now there has been a Custom Validator which has been run.  Update the tooltip to reflect which of
                     // these conditions is true.
                     String msg ;
                     if (!changedProblem.isCustomInputValidatorHasBeenRun()) {
@@ -925,7 +932,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
 
                 //TODO: should the following Custom Input Validator settings also be checked?
-                //                    private String customInputValidatorFilesOnDiskFolderName = "";   
+                //                    private String customInputValidatorFilesOnDiskFolderName = "";
                 //                    private SerializedFile customInputValidatorSerializedFile = null;
                 //                    private Vector<InputValidationResult> customInputValidationResults ;
 
@@ -979,8 +986,8 @@ public class EditProblemPane extends JPanePlugin {
 
                     }
                 }
-                
-                
+
+
                 //see if the sandbox type has changed
                 if (!(problem.getSandboxType() == changedProblem.getSandboxType())) {
                     enableButton = true;
@@ -999,7 +1006,7 @@ public class EditProblemPane extends JPanePlugin {
                             updateToolTip = "Memory Limit";
                         } else {
                             updateToolTip += ", Memory Limit";
-                        } 
+                        }
                     }
                 }
 
@@ -1070,11 +1077,11 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Compares the specified SerializedFile with the file on disk of the specified filename and returns an indication of whether or not the two are identical.
-     * 
+     *
      * If the specified SerializedFile is null, or the specified filename is null or the empty string, returns false (since no comparison can be made and hence they cannot be "the same"). If the full
      * path file name in the SerializedFile does not match the specified filename, returns false. Otherwise, compares the checksums using method {@link #needsFreshening(SerializedFile, String)} and
      * returns an indication of whether the checksums match ({@link #needsFreshening(SerializedFile, String)} returns false if the files match).
-     * 
+     *
      * @param storedFile
      *            the SerializedFile to compare
      * @param diskFileName
@@ -1090,18 +1097,18 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Create a Problem from the fields in this GUI. This method assumes the data in the GUI fields has already been validated 
-     * (i.e., the GUI values define a legitimate, complete Problem); while the method does do some sanity checking 
+     * Create a Problem from the fields in this GUI. This method assumes the data in the GUI fields has already been validated
+     * (i.e., the GUI values define a legitimate, complete Problem); while the method does do some sanity checking
      * it should not be assumed to have completely verified the validity of the GUI data.
-     * 
+     *
      * This method also populates newProblemDataFiles for the data files.
-     * 
+     *
      * @param checkProblem
      *            will update this Problem if supplied, if null creates and returns a new Problem
      * @param dataFiles
-     * 
+     *
      * @return a Problem based on fields in this EditProblemPane GUI
-     * 
+     *
      * @throws InvalidFieldValue
      *             if any of the fields in the GUI are incomplete or illegally set
      */
@@ -1157,10 +1164,10 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setLetter(getProblemLetterTextField().getText());
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
         checkProblem.setShortName(getShortNameTextfield().getText());
-        
+
         checkProblem.setLoadDataFilesSamplesFirst(multipleDataSetPane.isLoadSamplesFirst());
-        
-        //set checkProblem's max output to either the current problem's value (which is in KB), 
+
+        //set checkProblem's max output to either the current problem's value (which is in KB),
         // or if that's zero, set it to the global value (which is in BYTES and must be converted to KB)
         long maxOutputKB = getLongValue(getMaxOutputTextField().getText());
         if (maxOutputKB == 0) {
@@ -1276,7 +1283,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         checkProblem.setReadInputDataFromSTDIN(getStdinRadioButton().isSelected());
-        
+
         // set the flag indicating which output validator (if any) is being used in the Problem
         VALIDATOR_TYPE validatorType;
         validatorType = getValidatorTypeFromUI();
@@ -1285,7 +1292,23 @@ public class EditProblemPane extends JPanePlugin {
         // update settings in the Problem for each type of output validator:
         checkProblem.setPC2ValidatorSettings(getPC2ValidatorSettingsFromFields());
         checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
+
+        // Temporary until we fix the GUI to allow setting these - for now, just remember originals
+        boolean isMultiPass = false;
+        int maxMultiPassCount = IContestLoader.DEFAULT_VALIDATION_PASSES;
+        CustomValidatorSettings cov = checkProblem.getCustomOutputValidatorSettings();
+        if(cov != null) {
+            isMultiPass = cov.isUseMultipassValidatorInterface();
+            maxMultiPassCount = cov.getMaxMultipassValidationPasses();
+        }
         checkProblem.setCustomOutputValidatorSettings(getCustomValidatorSettingsFromFields());
+        cov = checkProblem.getCustomOutputValidatorSettings();
+        if(cov != null) {
+            if(isMultiPass) {
+                cov.setUseMultipassValidatorInterface();
+            }
+            cov.setMaxMultipassValidationPasses(maxMultiPassCount);
+        }
 
         // if Custom Output Validator is selected, make sure we have a SerializedFile for the Validator
         // (the PC2 and CLICS Validators use internal PC2 classes and don't need a separate SerializedFile)
@@ -1332,7 +1355,7 @@ public class EditProblemPane extends JPanePlugin {
                 newProblemDataFiles.setOutputValidatorFile(outputValidatorSF);
             }
         }
-        
+
         // update misc settings from GUI
         checkProblem.setShowValidationToJudges(getShowValidatorToJudgesCheckBox().isSelected());
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
@@ -1342,7 +1365,7 @@ public class EditProblemPane extends JPanePlugin {
 
         //update currently-selected Input Validator Type
         checkProblem.setCurrentInputValidatorType(getInputValidatorPane().getCurrentInputValidatorType());
-        
+
         //update Custom Input Validator serialized file
         //Note: the serialized file is not displayed in the GUI, but it is a field in the InputValidatorPane
         // (or more correctly, in the DefineCustomInputValidatorPane within the InputValidatorPane)
@@ -1361,11 +1384,11 @@ public class EditProblemPane extends JPanePlugin {
             // mark the problem as not having a Custom input validator
             checkProblem.setProblemHasCustomInputValidator(false);
         }
-                        
+
         //update Custom Input Validator Command
         String inputValidatorCommand = getInputValidatorPane().getCustomInputValidatorCommand();
         checkProblem.setCustomInputValidatorCommandLine(inputValidatorCommand);
-        
+
         //update Custom Input Validator has been run status
         checkProblem.setCustomInputValidatorHasBeenRun(getInputValidatorPane().isCustomInputValidatorHasBeenRun());
 
@@ -1382,28 +1405,28 @@ public class EditProblemPane extends JPanePlugin {
 //              runResults[i].setProblem(newProblem);
                 checkProblem.addCustomInputValidationResult(currentCustomResults[i]);
             }
-        } 
+        }
 
         //Update Viva Input Validator settings in checkProblem from GUI:
-        
+
 
         //This statement is commented out because there is no longer a separate "problemHasVivaInputValidatorPattern" flag in the Problem class;
         // having a Viva pattern (or not) is determined by the value in the Pattern field in the (VivaInputValidatorSettings for the) Problem.
-        // This was done to avoid the possibility of an "invalid state" where a user sets "problemHasInputValidator" to (say) false after having 
+        // This was done to avoid the possibility of an "invalid state" where a user sets "problemHasInputValidator" to (say) false after having
         // set a non-zero-length pattern in the Problem.
 //        //update Has Viva Pattern flag
 //        checkProblem.setProblemHasVivaInputValidatorPattern(getInputValidatorPane().isProblemHasVivaInputValidatorPattern());
-        
+
         //update Viva Input Validator pattern
         String [] pattern = getInputValidatorPane().getVivaPatternText().split("\\r?\\n");
         checkProblem.setVivaInputValidatorPattern(pattern);
-        
+
         //update Viva has been run flag
         checkProblem.setVivaInputValidatorHasBeenRun(getInputValidatorPane().isVivaInputValidatorHasBeenRun());
-        
+
         //update Viva run result status
         checkProblem.setVivaInputValidationStatus(getInputValidatorPane().getVivaInputValidationStatus());
-        
+
         //update Viva Input Validation results
         checkProblem.clearVivaInputValidationResults();
         InputValidationResult [] currentVivaResults = getInputValidatorPane().getVivaInputValidatorResults();
@@ -1414,9 +1437,9 @@ public class EditProblemPane extends JPanePlugin {
 //              runResults[i].setProblem(newProblem);
                 checkProblem.addVivaInputValidationResult(currentVivaResults[i]);
             }
-        } 
+        }
 
-        
+
         // update Judging Type settings from GUI
         // TODO: should be using accessors instead of hard references for these buttons and checkboxes...
         checkProblem.setComputerJudged(computerJudgingRadioButton.isSelected());
@@ -1460,21 +1483,21 @@ public class EditProblemPane extends JPanePlugin {
         //update balloon settings from GUI
         checkProblem.setColorName(balloonColorTextField.getText());
         checkProblem.setColorRGB(rgbTextField.getText());
-        
+
         //update group settings from GUI, if any
         List<Group> groups = getProblemGroupPane().getGroups();
-        
+
         checkProblem.clearGroups();
         if (groups.size() > 0){
             for (Group group : groups) {
                 checkProblem.addGroup(group);
             }
         }
-        
+
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug after populateProblemTestSetFilenames");
         }
-        
+
         //update problem sandbox settings from GUI
         if (getProblemSandboxPane().getUseNoSandboxRadioButton().isSelected()) {
             checkProblem.setSandboxType(SandboxType.NONE);
@@ -1486,13 +1509,13 @@ public class EditProblemPane extends JPanePlugin {
             } catch (NumberFormatException e) {
                 log.warning("Invalid memory limit value :" + e);
                 throw new InvalidFieldValue("Invalid memory limit value");
-            } 
+            }
         } else if (getProblemSandboxPane().getUseCustomSandboxRadioButton().isSelected()) {
             log.warning("Use Custom Sandbox radio button is selected -- function not supported in this version of PC^2!");
             throw new IllegalStateException("Use Custom Sandbox radio button is selected -- function not supported in this version of PC^2!");
         }
-        
-        
+
+
         return checkProblem;
 
     }
@@ -1527,7 +1550,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private CUSTOM_VALIDATOR_INTERFACE_TYPE getCustomValidatorInterfaceTypeFromUI() {
         CUSTOM_VALIDATOR_INTERFACE_TYPE cvt = CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_NONE;
-        
+
         if(getUsePC2ValStdRadioButton().isSelected()) {
             cvt = CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_PC2;
         } else if(getUseClicsValStdRadioButton().isSelected()) {
@@ -1537,7 +1560,7 @@ public class EditProblemPane extends JPanePlugin {
         }
         return(cvt);
     }
-    
+
     /**
      * Makes a copy of the current Custom Validator Command line so that it can be restored if the user switches back and forth between "PC2 Validator Interface" mode and "CLICS Validator Interface"
      * mode.
@@ -1564,7 +1587,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Populate the test data set file lists in Problem.
-     * 
+     *
      * @param inProblem
      * @param dataFiles
      */
@@ -1594,7 +1617,7 @@ public class EditProblemPane extends JPanePlugin {
 
         padListIfNeeded(list, filelist, dataFileList);
 
-        return (String[]) list.toArray(new String[list.size()]);
+        return list.toArray(new String[list.size()]);
     }
 
     private String[] getTestDataList(ProblemDataFiles dataFiles) {
@@ -1609,12 +1632,12 @@ public class EditProblemPane extends JPanePlugin {
 
         padListIfNeeded(list, filelist, dataFileList);
 
-        return (String[]) list.toArray(new String[list.size()]);
+        return list.toArray(new String[list.size()]);
     }
 
     /**
      * pad list with nulls if needed.
-     * 
+     *
      * @param list
      * @param filelist
      * @param dataFileList
@@ -1631,7 +1654,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes updateButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getUpdateButton() {
@@ -1641,6 +1664,7 @@ public class EditProblemPane extends JPanePlugin {
             updateButton.setEnabled(false);
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateProblem();
                 }
@@ -1650,14 +1674,14 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Updates an existing contest Problem with the values specified by the current GUI fields. 
+     * Updates an existing contest Problem with the values specified by the current GUI fields.
      * This method is invoked by pushing the "Update" button on the EditProblemPane GUI after having entered
      * into the GUI the new (updated) values for the problem being edited.
-     * 
-     * The method also gets invoked by making GUI changes to an existing problem definition, 
+     *
+     * The method also gets invoked by making GUI changes to an existing problem definition,
      * then pressing "Cancel" (which displays a message "Problem Modified - Save Changes?") and responding "Yes"
      * to the message.
-     * 
+     *
      * @return true if all GUI values are valid and problem is updated successfully; false otherwise
      */
 
@@ -1674,16 +1698,16 @@ public class EditProblemPane extends JPanePlugin {
         if (showMissingInputValidatorWarningOnUpdateProblem  && getProblemRequiresDataCheckBox().isSelected()
                 && (getInputValidatorPane().getUseNoInputValidatorRadioButton().isSelected()  //the problem explicitly says "no IV"
                     || (getInputValidatorPane().getCustomInputValidatorFile() == null
-                         && (getInputValidatorPane().getVivaPatternTextArea().getText()==null 
+                         && (getInputValidatorPane().getVivaPatternTextArea().getText()==null
                              || getInputValidatorPane().getVivaPatternTextArea().getText().equals("") )
                         )
                    )
             ) {
 
             // no input validator defined; issue a warning
-            String msg = "You are attempting to update a Problem to a state where it requires Input Data files but has no Input Data Validator." 
+            String msg = "You are attempting to update a Problem to a state where it requires Input Data files but has no Input Data Validator."
                     + "\n\nThis is usually not good practice because it provides no way to insure that the"
-                    + "\nJudge's data files meet the Problem Specification." 
+                    + "\nJudge's data files meet the Problem Specification."
                     + "\n\nAre you sure you want to do this?" + "\n\n";
 
             JCheckBox checkbox = new JCheckBox("Do not show this message again.");
@@ -1700,12 +1724,12 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         // check for the condition "missing Custom Input Validator Program name even though there is a Custom Input Validator Command defined"
-        if (showMissingInputValidatorProgramNameOnUpdateProblem 
+        if (showMissingInputValidatorProgramNameOnUpdateProblem
                 && (getInputValidatorPane().getCustomInputValidatorProgramName()==null || getInputValidatorPane().getCustomInputValidatorProgramName().equals(""))
                 && (getInputValidatorPane().getCustomInputValidatorCommand()!=null && !getInputValidatorPane().getCustomInputValidatorCommand().equals(""))) {
 
             // no input validator program defined; issue a warning
-            String message = "You are attempting to update a Problem to a state where it has an Input Data Validator command but no Input Validator Program name." 
+            String message = "You are attempting to update a Problem to a state where it has an Input Data Validator command but no Input Validator Program name."
                         + "\n\nAre you sure this is what you intended to do?"
                         + "\n\n";
 
@@ -1832,9 +1856,9 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Populate new data sets.
-     * 
+     *
      * @param problem2
-     * 
+     *
      * @param problem2
      * @return
      */
@@ -1859,7 +1883,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Validate that all problem fields in the GUI are ok.
-     * 
+     *
      * @return true if all GUI values are valid; false otherwise
      */
     private boolean validateProblemFields() {
@@ -1869,7 +1893,7 @@ public class EditProblemPane extends JPanePlugin {
             showMessage("Enter a problem name (\"General\" tab)");
             return false;
         }
-        
+
         // verify that the max output value is a non-negative number
         try {
             long maxOutput = Long.parseLong(getMaxOutputTextField().getText().trim());
@@ -1881,7 +1905,7 @@ public class EditProblemPane extends JPanePlugin {
             showMessage("Maximum output value must be a number");
             return false;
         }
-        
+
         // verify that the time limit is a positive number (code added as "continuous improvement")
         try {
             int timeLimit = Integer.parseInt(getTimeOutTextField().getText().trim());
@@ -1893,9 +1917,9 @@ public class EditProblemPane extends JPanePlugin {
             showMessage("Time limit must be a number");
             return false;
         }
-        
-        
-        // verify that the memory limit is a non-negative number 
+
+
+        // verify that the memory limit is a non-negative number
         try {
             int memLimit = Integer.parseInt(getProblemSandboxPane().getPC2SandboxOptionMemLimitTextbox().getText().trim());
             if (memLimit < 0) {
@@ -2044,11 +2068,11 @@ public class EditProblemPane extends JPanePlugin {
 
         //verify that if the Viva Input Validator has been selected then there is a valid Viva pattern provided
         if (getInputValidatorPane().getUseVivaInputValidatorRadioButton().isSelected()) {
-            
+
             String vivaPattern = getInputValidatorPane().getVivaPatternTextArea().getText();
             //check for an empty pattern
             if (vivaPattern==null || vivaPattern.trim().equals("")) {
-                showMessage ("The VIVA Input Validator has been selected; you must specify a VIVA pattern."); 
+                showMessage ("The VIVA Input Validator has been selected; you must specify a VIVA pattern.");
                 return false;
             } else {
                 //pattern is not empty; check if invalid
@@ -2056,26 +2080,26 @@ public class EditProblemPane extends JPanePlugin {
                 VivaPatternTestResult vivaPatternTestResult = vivaAdapter.checkPattern(vivaPattern);
                 if (!vivaPatternTestResult.isValidPattern()) {
                     String vivaMsg = vivaPatternTestResult.getVivaResponseMessage();
-                    String errMsg = "The VIVA Input Validator has been selected but VIVA reports that the specified pattern is invalid: " 
-                    + "\n\n" + vivaMsg ; 
+                    String errMsg = "The VIVA Input Validator has been selected but VIVA reports that the specified pattern is invalid: "
+                    + "\n\n" + vivaMsg ;
                     showMessage(errMsg);
                     return false;
                 }
             }
         }
-        
+
         //verify that if the Custom Input Validator button has been selected then there is a Custom Input Validator provided
         if (getInputValidatorPane().getUseCustomInputValidatorRadioButton().isSelected()) {
-            
+
             String customIVProgramName = getInputValidatorPane().getCustomInputValidatorProgramName();
             if (customIVProgramName==null || customIVProgramName.equals("")) {
-                showMessage ("Custom Input Validator has been selected; you must choose a Custom Input Validator program."); 
+                showMessage ("Custom Input Validator has been selected; you must choose a Custom Input Validator program.");
                 return false;
             }
         }
-        
+
        // verify that if a Custom Input Validator program has been specified, there is a command specified to invoke it.
-        // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no 
+        // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no
         // explicit program name -- for example, the command could contain the name of the program within the command)
         if (getInputValidatorPane().getCustomInputValidatorFile() != null) {
 
@@ -2093,7 +2117,7 @@ public class EditProblemPane extends JPanePlugin {
      * Checks to ensure the fileName exists, is a file, and is readable.
      * <P>
      * If error found will show Message to user.
-     * 
+     *
      * @param fileName
      *            the file to check
      * @return true if the is readable
@@ -2123,7 +2147,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes cancelButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCancelButton() {
@@ -2132,6 +2156,7 @@ public class EditProblemPane extends JPanePlugin {
             cancelButton.setText("Cancel");
             cancelButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     handleCancelButton();
                 }
@@ -2186,13 +2211,14 @@ public class EditProblemPane extends JPanePlugin {
         problem = inProblem;
         this.newProblemDataFiles = null;
         originalProblemDataFiles = problemDataFiles;
-        
+
         if (debug22EditProblem) {
             fileNameOne = createProblemReport(inProblem, problemDataFiles, "stuf1");
             Utilities.dump(originalProblemDataFiles, "debug   ORIGINAL  setProblem");
         }
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 try {
@@ -2212,19 +2238,19 @@ public class EditProblemPane extends JPanePlugin {
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();
                 }
-                
+
                 // this sets the tableModel files list, which is what the getProblemDataFiles uses
                 getMultipleDataSetPane().populateUI();
 
                 populateGUI(inProblem);
-                
+
                 try {
                     getProblemGroupPane().setProblem(inProblem);
                 } catch (Exception e) {
                     e.printStackTrace();
                     logWarning("Trouble populating problemGroupPane", e);
                 }
-                
+
                 // do not automatically set this to no update, the files may have changed on disk
                 if (inProblem == null) {
                     // new problem
@@ -2262,9 +2288,9 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Set/populate (or remove) General tab judge's files.
-     * 
+     *
      * If no first test set then clears fields.
-     * 
+     *
      */
     public void setJudgingTestSetOne(ProblemDataFiles datafiles) {
 
@@ -2330,7 +2356,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Set new Problem to be edited.
-     * 
+     *
      * @param problem
      */
     public void setProblem(final Problem problem) {
@@ -2338,12 +2364,13 @@ public class EditProblemPane extends JPanePlugin {
         this.problem = problem;
         this.newProblemDataFiles = null;
         this.originalProblemDataFiles = null;
-        
+
         if (debug22EditProblem) {
             fileNameOne = createProblemReport(problem, originalProblemDataFiles, "stuf1");
         }
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 getMultipleDataSetPane().clearDataFiles();
 
@@ -2356,7 +2383,7 @@ public class EditProblemPane extends JPanePlugin {
                     getMultipleDataSetPane().getInputDataStoragePanel().setEnabled(true);
                     getMultipleDataSetPane().getRdbtnCopyDataFiles().setEnabled(true);
                     getMultipleDataSetPane().getRdBtnKeepDataFilesExternal().setEnabled(true);
-                    
+
                 } else {
                     enableUpdateButton();
                 }
@@ -2397,7 +2424,7 @@ public class EditProblemPane extends JPanePlugin {
         enableOutputValidatorTabComponents();
 
         enableInputValidatorTabComponents();
-        
+
         enableSandboxTabComponents();
 
         // enableGeneralTabComponents:
@@ -2414,7 +2441,7 @@ public class EditProblemPane extends JPanePlugin {
             getMultipleDataSetPane().setProblemDataFiles(problem, originalProblemDataFiles);
         } catch (Exception e) {
             String message = "Error loading/editing problem data files: " + e.getMessage();
-            
+
 //            showMessage(message + " check logs.");
             showExceptionMessage(this, message, e);
             getLog().log(Log.WARNING, message, e);
@@ -2458,9 +2485,9 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Set Form data -- that is, populates the GUI from the specified Problem and ProblemDataFiles.
-     * 
+     *
      * Populates the form, no error checking is performed.
-     * 
+     *
      * @param inProblem
      *            - the Problem which will be used to populate the GUI form
      * @param problemDataFiles
@@ -2470,7 +2497,7 @@ public class EditProblemPane extends JPanePlugin {
 
         problem = inProblem;
         // System.out.println (inProblem.toStringDetails());
-        
+
         originalProblemDataFiles = problemDataFiles;
 
         // General tab fields:
@@ -2487,9 +2514,9 @@ public class EditProblemPane extends JPanePlugin {
 
         // Data Files tab:
         getMultipleDataSetPane().setLoadDirectory(inProblem.getExternalDataFileLocation());
-        
+
         getProblemGroupPane().setProblem(inProblem);
-        
+
         // Sandbox tab:
         initializeSandboxTabFields(inProblem);
 
@@ -2497,12 +2524,12 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the "General" tab GUI fields from the data in the specified Problem and ProblemDataFiles.
-     * 
+     *
      * @param inProblem
      *            - the Problem to be used to initialize the GUI fields
      * @param inProblemDataFiles
      *            - the ProblemDataFiles to be used to initialize the GUI fields
-     * 
+     *
      */
     private void initializeGeneralTabFields(Problem inProblem, ProblemDataFiles inProblemDataFiles) {
 
@@ -2514,7 +2541,7 @@ public class EditProblemPane extends JPanePlugin {
         //initialize problem limit fields
         getTimeOutTextField().setText(inProblem.getTimeOutInSeconds() + "");
         getMaxOutputTextField().setText(inProblem.getMaxOutputSizeKB() + "");
-        
+
         // input data fields:
         problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
         if (inProblem.isReadInputDataFromSTDIN()) {
@@ -2592,12 +2619,12 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Initializes the Validator tab (GUI pane) from the specified Problem and ProblemDataFiles.
-     * 
+     *
      * @param inProblem
      *            the {@link Problem} to be used to initialize the GUI
      * @param inProblemDataFiles
      *            the {@link ProblemDataFiles} to be used to initialize the GUI
-     * 
+     *
      * @throws {@link
      *             RuntimeException} if either the received Problem or ProblemDataFiles are null
      * @throws {@link
@@ -2716,7 +2743,7 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * This method sets the fields on the Input Validator tab (whose contents are defined by class {@link InputValidatorPane})
      * from the specified Problem information.
-     * 
+     *
      * @param prob
      *            - the problem used to set the InputValidatorPane data
      * @param probDataFile
@@ -2732,12 +2759,12 @@ public class EditProblemPane extends JPanePlugin {
 
         //initialize the current Input Validator type and radio buttons to correspond to the problem.
         INPUT_VALIDATOR_TYPE currentInputValidatorType = prob.getCurrentInputValidatorType();
-        
+
         if (currentInputValidatorType!=null) {
             setCurrentInputValidatorType(currentInputValidatorType);
 
             //enable (select) the Input Validator radio button corresponding to the current Input Validator type for the problem
-            //Note that since the radio buttons are in a ButtonGroup, setting any one of them automatically clears the others...           
+            //Note that since the radio buttons are in a ButtonGroup, setting any one of them automatically clears the others...
             switch (currentInputValidatorType) {
                 case NONE:
                     getInputValidatorPane().getUseNoInputValidatorRadioButton().setSelected(true);
@@ -2753,27 +2780,27 @@ public class EditProblemPane extends JPanePlugin {
                             + "\nPlease report this issue to the PC2 Development Team (pc2@ecs.csus.edu)." + "\nSee log for additional information.");
                     getController().getLog().severe("currentInputValidatorType in problem is not an element of INPUT_VALIDATOR_TYPE enum.");
             }
-            
-            
+
+
         } else {
             //we should NEVER have a problem that has a null InputValidatorType - if no I.V. is defined, type should be "NONE"
             String errMsg = "Internal error: currentInputValidatorType in problem is null."
-                    + "\nPlease report this issue to the PC2 Development Team (pc2@ecs.csus.edu)." 
+                    + "\nPlease report this issue to the PC2 Development Team (pc2@ecs.csus.edu)."
                     + "\nSee log for additional information." ;
             System.err.println(errMsg);
             JOptionPane.showMessageDialog(null, errMsg, "Internal Error", JOptionPane.ERROR_MESSAGE);
             getController().getLog().severe("currentInputValidatorType in problem is null.");
         }
-        
-        
+
+
         //initialize the VIVA Input Validator GUI settings from the problem:
-        
+
         //reset the Viva pattern text area
         getInputValidatorPane().getVivaPatternTextArea().setText(null);
-        
+
         //get the Viva pattern (if any) from the problem
         String [] lines = prob.getVivaInputValidatorPattern();
-        
+
         //copy the Viva pattern to the text area
         if (lines != null) {
             // add each line of new text to the text area
@@ -2781,10 +2808,10 @@ public class EditProblemPane extends JPanePlugin {
                 getInputValidatorPane().getVivaPatternTextArea().append(line + System.lineSeparator());
             }
         }
-        
+
         //initialize the Viva-has-been-run flag
         getInputValidatorPane().setVivaInputValidatorHasBeenRun(prob.isVivaInputValidatorHasBeenRun());
-        
+
         //initialize the Viva validation status flag
         setVivaInputValidationStatus(prob.getVivaInputValidationStatus()); // note: validation status variable is not displayed on the GUI
 
@@ -2793,16 +2820,16 @@ public class EditProblemPane extends JPanePlugin {
 
 
         //initialize the Custom Input Validator GUI settings from the problem:
-        
+
         //initialize the CustomInputValidator-has-been-run flag
         getInputValidatorPane().setCustomInputValidatorHasBeenRun(prob.isCustomInputValidatorHasBeenRun());
- 
+
         //initialize the Custom validation status flag
         setCustomInputValidationStatus(prob.getCustomInputValidationStatus()); // note: validation status variable is not displayed on the GUI
 
         //initialize the Custom Input Validator results
         getInputValidatorPane().setCustomInputValidatorResults(prob.getCustomInputValidatorResults());
-        
+
         //clear Custom IV accumulating results (these are updated when the Custom IV is actually run)
         getInputValidatorPane().resetCustomInputValidatorAccumulatingResults();
 
@@ -2817,7 +2844,7 @@ public class EditProblemPane extends JPanePlugin {
         //update the custom input validator serialized file and set the Program Name tooltip to its path
         SerializedFile customValidatorFile = prob.getCustomInputValidatorSerializedFile();
         getInputValidatorPane().setCustomInputValidatorFile(customValidatorFile);
-        
+
         //the following is done by the call to method setCustomInputValidatorFile() (above); it does not need to be repeated
 //        if (customValidatorFile == null) {
 //            // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
@@ -2861,7 +2888,7 @@ public class EditProblemPane extends JPanePlugin {
             default:
                 //we should NEVER have a problem that has an undefined inputValidatorType - if no I.V. is defined, type should be "NONE"
                 String errMsg = "Internal error: currentInputValidatorType in problem is not an element of INPUT_VALIDATOR_TYPE enum."
-                        + "\nPlease report this issue to the PC2 Development Team (pc2@ecs.csus.edu)." 
+                        + "\nPlease report this issue to the PC2 Development Team (pc2@ecs.csus.edu)."
                         + "\nSee log for additional information." ;
                 System.err.println(errMsg);
                 JOptionPane.showMessageDialog(null, errMsg, "Internal Error", JOptionPane.ERROR_MESSAGE);
@@ -2871,33 +2898,33 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Initializes the external EditProblemSandboxPane object with the values from the specified problem.
-     * 
+     *
      * @param inProblem the {@link Problem} used to initialize the sandbox pane.
      */
     private void initializeSandboxTabFields(Problem inProblem) {
-        
+
         EditProblemSandboxPane sandboxPane = getProblemSandboxPane();
-        
+
         sandboxPane.initializeFields(inProblem);
-        
+
     }
 
     /**
-     * This method updates the Input Validation Results JTable (contained in the ResultsFrame, referenced via the 
+     * This method updates the Input Validation Results JTable (contained in the ResultsFrame, referenced via the
      * {@link InputValidatorPane}) from the specified Iterable InputValidationResults.
-     * 
+     *
      * @param results an Iterable containing the InputValidationResults to be displayed in the ResultsFrame JTable.
      */
     private void updateIVResultsTable(Iterable<InputValidationResult> results) {
-        
+
         //null indicates there are no results because there is no Input Validator associated with the problem...
         if (results==null) {
             updateResultsTableModel(null);
             return;
         }
-        
+
         int numResults = 0;
-        
+
         if (results instanceof Collection) {
             numResults = ((Collection<?>) results).size();
         } else {
@@ -2906,7 +2933,7 @@ public class EditProblemPane extends JPanePlugin {
             updateResultsTableModel(null);
             return;
         }
-        
+
         // create an array with one element for each result
         InputValidationResult[] probInputValidationResults = new InputValidationResult[numResults];
 
@@ -2941,20 +2968,20 @@ public class EditProblemPane extends JPanePlugin {
             getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(true);
         }
     }
-    
+
     /**
      * Updates the {@link InputValidatorPane} results table with the specified results, and fires TableDataChanged.
-     * 
+     *
      * @param results the Input Validation Results to be put into the results table.
      */
     private void updateResultsTableModel(InputValidationResult [] results) {
-        ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).setResults(results);
-        ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
+        getInputValidatorPane().getResultsTableModel().setResults(results);
+        getInputValidatorPane().getResultsTableModel().fireTableDataChanged();
     }
 
     /**
      * Sets the Input Validation Status message on the ResultFrame referenced by the Input Validator pane.
-     * 
+     *
      * @param results
      *            an array containing the Input Validation Result values which determine what status message to display
      */
@@ -2964,7 +2991,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * update/enable Update button.
-     * 
+     *
      * @param fieldsChanged
      *            if false assumes changes must be undone aka Canceled.
      */
@@ -2984,7 +3011,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes mainTabbedPane
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getMainTabbedPane() {
@@ -3004,7 +3031,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Returns a singleton instance of the Edit Problem Sandbox pane, which is a JPanePlugin (and hence a JPanel).
-     * 
+     *
      * @return a singleton {@link EditProblemSandboxPane}.
      */
     private EditProblemSandboxPane getProblemSandboxPane() {
@@ -3031,7 +3058,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes generalPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getJudgingTypePanel() {
@@ -3047,23 +3074,23 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * This method initializes the generalPane which contains general problem description components
      * such as problem name, limits, input data and judging files, etc.
-     * 
+     *
      * @return a JPanel containing general problem description components.
      */
     private JPanel getGeneralPane() {
         if (generalPane == null) {
-            
+
             generalPane = new JPanel();
             generalPane.setLayout(null);    //TODO:  use a proper LayoutManager!
-            
+
             //add the problem identifier components -- name, shortname, letter
             generalPane.add(getProblemNameLabel(), null);
             generalPane.add(getProblemNameTextField(), null);
             generalPane.add(getShortNameLabel());
             generalPane.add(getShortNameTextField(), null);
             generalPane.add(getProblemLetterLabel(), null);
-            generalPane.add(getProblemLetterTextField(), null);      
-            
+            generalPane.add(getProblemLetterTextField(), null);
+
             //add the problem limit components
             generalPane.add(getTimeOutTextField(), null);
             generalPane.add(getProblemRequiresDataCheckBox(), null);
@@ -3074,13 +3101,13 @@ public class EditProblemPane extends JPanePlugin {
             generalPane.add(getShowCompareCheckBox(), null);
             generalPane.add(getDoShowOutputWindowCheckBox(), null);
             generalPane.add(getDeleteProblemCheckBox(), null);
-            
+
             //add "problem-specific output size limit" components
             generalPane.add(getLblMaxOutputSizeKB());
             generalPane.add(getMaxOutputTextField());
             generalPane.add(getLblWhatsThisMaxOutputSize());
-            
-           
+
+
             JLabel lblBalloonColor = new JLabel();
             lblBalloonColor.setText("Balloon Color");
             lblBalloonColor.setBounds(new Rectangle(23, 14, 179, 16));
@@ -3119,10 +3146,10 @@ public class EditProblemPane extends JPanePlugin {
         }
         return generalPane;
     }
-    
+
     /**
      * This method initializes the label for the Problem Name textfield.
-     * 
+     *
      * @return a JLabel containing the name string for the Problem Name textfield label.
      */
     private JLabel getProblemNameLabel() {
@@ -3136,7 +3163,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes problemNameTextField.
-     * 
+     *
      * @return a JTextField for holding the problem name.
      */
     protected JTextField getProblemNameTextField() {
@@ -3146,6 +3173,7 @@ public class EditProblemPane extends JPanePlugin {
             problemNameTextField.setSize(new Dimension(240, 20));
             problemNameTextField.setLocation(new Point(120, 12));
             problemNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -3156,7 +3184,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method returns the label for the Short Name textfield.
-     * 
+     *
      * @return a JLabel containing the string to be used to label the Short Name textfield.
      */
     private JLabel getShortNameLabel() {
@@ -3170,7 +3198,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the textfield used to display the problem Short name.
-     * 
+     *
      * @return a JTextField for holding the problem short name.
      */
     private JTextField getShortNameTextField() {
@@ -3179,6 +3207,7 @@ public class EditProblemPane extends JPanePlugin {
             shortNameTextfield.setPreferredSize(new Dimension(120, 20));
             shortNameTextfield.setBounds(465, 12, 97, 20);
             shortNameTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -3186,10 +3215,10 @@ public class EditProblemPane extends JPanePlugin {
         }
         return shortNameTextfield;
     }
-    
+
     /**
      * This method initializes the label for the Problem Letter textfield.
-     * 
+     *
      * @return a JLabel containing the name string for the Problem Letter textfield label.
      */
     private JLabel getProblemLetterLabel() {
@@ -3203,7 +3232,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the text field holding the problem letter.
-     * 
+     *
      * @return a JTextField used to hold the problem letter.
      */
     private JTextField getProblemLetterTextField() {
@@ -3221,7 +3250,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the label for the timeout limit textfield.
-     * 
+     *
      * @return a JLabel containing the name string for the timeout textfield.
      */
     private JLabel getTimeoutLabel() {
@@ -3235,7 +3264,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the timeOut textfield.
-     * 
+     *
      * @return javax.swing.JTextField holding the timeOut
      */
     private JTextField getTimeOutTextField() {
@@ -3245,6 +3274,7 @@ public class EditProblemPane extends JPanePlugin {
             timeOutSecondTextField.setPreferredSize(new java.awt.Dimension(120, 20));
             timeOutSecondTextField.setDocument(new IntegerDocument());
             timeOutSecondTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -3255,7 +3285,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the problemRequiresData checkbox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getProblemRequiresDataCheckBox() {
@@ -3264,6 +3294,7 @@ public class EditProblemPane extends JPanePlugin {
             problemRequiresDataCheckBox.setBounds(new java.awt.Rectangle(23, 76, 257, 26));
             problemRequiresDataCheckBox.setText("Problem Requires Input Data");
             problemRequiresDataCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
                     enableUpdateButton();
@@ -3288,7 +3319,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes DataProblemPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getDataProblemPane() {
@@ -3308,7 +3339,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the TeamReadsFrom Pane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getTeamReadsFromPane() {
@@ -3330,7 +3361,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes inputDataFilePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getInputDataFilePane() {
@@ -3351,7 +3382,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes stdinRadioButton
-     * 
+     *
      * @return javax.swing.JRadioButton
      */
     private JRadioButton getStdinRadioButton() {
@@ -3359,6 +3390,7 @@ public class EditProblemPane extends JPanePlugin {
             stdinRadioButton = new JRadioButton();
             stdinRadioButton.setText("Stdin");
             stdinRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -3369,7 +3401,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes fileRadioButton
-     * 
+     *
      * @return javax.swing.JRadioButton
      */
     private JRadioButton getFileRadioButton() {
@@ -3377,6 +3409,7 @@ public class EditProblemPane extends JPanePlugin {
             fileRadioButton = new JRadioButton();
             fileRadioButton.setText("File");
             fileRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -3387,7 +3420,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes fileNamePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getFileNamePane() {
@@ -3403,7 +3436,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes selectFileButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getSelectFileButton() {
@@ -3411,6 +3444,7 @@ public class EditProblemPane extends JPanePlugin {
             selectFileButton = new JButton();
             selectFileButton.setText("Browse");
             selectFileButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(inputDataFileLabel, "Open Input Data File")) {
                         inputDataFileLabel.setToolTipText(inputDataFileLabel.getText());
@@ -3436,7 +3470,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the JudgesHaveAnswerFiles CheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getJudgesHaveAnswerFilesCheckbox() {
@@ -3445,6 +3479,7 @@ public class EditProblemPane extends JPanePlugin {
             judgesHaveAnswerFiles.setBounds(new java.awt.Rectangle(23, 239, 302, 24));
             judgesHaveAnswerFiles.setText("Judges Have Provided Answer File");
             judgesHaveAnswerFiles.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
                     enableUpdateButton();
@@ -3463,7 +3498,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes answerFilePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getAnswerFilePane() {
@@ -3484,7 +3519,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes answerFilenamePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getAnswerFilenamePane() {
@@ -3500,7 +3535,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes answerBrowseButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAnswerBrowseButton() {
@@ -3508,6 +3543,7 @@ public class EditProblemPane extends JPanePlugin {
             answerBrowseButton = new JButton();
             answerBrowseButton.setText("Browse");
             answerBrowseButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(answerFileNameLabel, "Open Judges Answer File")) {
                         answerFileNameLabel.setToolTipText(answerFileNameLabel.getText());
@@ -3533,6 +3569,7 @@ public class EditProblemPane extends JPanePlugin {
 
     public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 JOptionPane.showMessageDialog(null, message);
             }
@@ -3541,7 +3578,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * select file, if file picked updates label.
-     * 
+     *
      * @param label
      * @param dialogTitle
      *            title for file chooser
@@ -3579,7 +3616,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * select file, if file picked updates specified JTextField.
-     * 
+     *
      * @param textField
      *            -- a JTextField whose value will be updated if a file is chosen
      * @param dialogTitle
@@ -3619,7 +3656,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes teamReadsFrombuttonGroup
-     * 
+     *
      * @return javax.swing.ButtonGroup
      */
     private ButtonGroup getTeamReadsFrombuttonGroup() {
@@ -3642,7 +3679,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the Output Validator Pane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getOutputValidatorPane() {
@@ -3670,7 +3707,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the useNoValidator RadioButton.
-     * 
+     *
      * @return javax.swing.JRadioButton
      */
     private JRadioButton getUseNOValidatatorRadioButton() {
@@ -3678,6 +3715,7 @@ public class EditProblemPane extends JPanePlugin {
             useNOValidatatorRadioButton = new JRadioButton();
             useNOValidatatorRadioButton.setText("Do not use Validator");
             useNOValidatatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableOutputValidatorTabComponents();
                     enableUpdateButton();
@@ -3717,7 +3755,7 @@ public class EditProblemPane extends JPanePlugin {
             getShowValidatorToJudgesCheckBox().setEnabled(false);
         }
     }
-    
+
     private void enableSandboxTabComponents() {
         //get the sandbox pane (which is an external class)
         EditProblemSandboxPane sandboxPane = getProblemSandboxPane();
@@ -3733,7 +3771,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the CLICS Validator jRadioButton
-     * 
+     *
      * @return javax.swing.JRadioButton
      */
     private JRadioButton getUseCLICSValidatorRadioButton() {
@@ -3742,6 +3780,7 @@ public class EditProblemPane extends JPanePlugin {
             useCLICSValidatorRadioButton.setMargin(new Insets(2, 12, 2, 2));
             useCLICSValidatorRadioButton.setText("Use CLICS Validator");
             useCLICSValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableOutputValidatorTabComponents();
                     enableUpdateButton();
@@ -3875,7 +3914,7 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton rdbtnUsePcStandard;
 
     private JRadioButton rdbtnUseClicsStandard;
-    
+
     private JRadioButton rdbtnUseInteractive;
 
     private final ButtonGroup validatorStandardButtonGroup = new ButtonGroup();
@@ -3883,7 +3922,7 @@ public class EditProblemPane extends JPanePlugin {
     private JLabel lblWhatsThisPC2ValStd;
 
     private JLabel lblWhatsThisCLICSValStd;
-    
+
     private JLabel lblWhatsThisInteractive;
 
     private InputValidatorPane inputValidatorPane;
@@ -3910,7 +3949,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the maximum output size textfield.
-     * 
+     *
      * @return javax.swing.JTextField holding the maximum allowed output size for this problem.
      */
     private JTextField getMaxOutputTextField() {
@@ -3920,6 +3959,7 @@ public class EditProblemPane extends JPanePlugin {
             maxOutputSizeTextfield.setPreferredSize(new java.awt.Dimension(120, 20));
             maxOutputSizeTextfield.setDocument(new IntegerDocument());
             maxOutputSizeTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -3948,7 +3988,7 @@ public class EditProblemPane extends JPanePlugin {
                 }
             });
             lblWhatsThisMaxOutputSize.setBorder(new EmptyBorder(0, 15, 0, 0));
-            
+
             //TODO: the General pane (on which this component is placed) should use a Layout Manager instead of using absolute coordinates.
             //  Until such a change is made, this component needs to have absolute coordinates for consistency with the rest of the pane.
             lblWhatsThisMaxOutputSize.setBounds(480, 42, 30, 25);
@@ -3989,7 +4029,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the Custom Validator jRadioButton
-     * 
+     *
      * @return javax.swing.JRadioButton
      */
     private JRadioButton getUseCustomValidatorRadioButton() {
@@ -3998,6 +4038,7 @@ public class EditProblemPane extends JPanePlugin {
             useCustomValidatorRadioButton.setMargin(new Insets(2, 12, 2, 2));
             useCustomValidatorRadioButton.setText("Use Custom (User-supplied) Validator");
             useCustomValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableOutputValidatorTabComponents();
                     enableUpdateButton();
@@ -4009,7 +4050,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes showValidatorToJudgesCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getShowValidatorToJudgesCheckBox() {
@@ -4019,6 +4060,7 @@ public class EditProblemPane extends JPanePlugin {
             showValidatorToJudgesCheckBox.setMargin(new Insets(2, 12, 2, 2));
             showValidatorToJudgesCheckBox.setText("Show Validator To Judges (SVTJ)");
             showValidatorToJudgesCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -4029,7 +4071,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the sub-panel containing the Default Validator options
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getClicsValidatorOptionsSubPanel() {
@@ -4093,7 +4135,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the Custom Validator panel (and its Options sub-panel)
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCustomValidatorPanel() {
@@ -4111,7 +4153,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the isCaseSensitive checkbox for the old (deprecated) PC2 Validator.
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getCLICSValidatorCaseSensitiveCheckBox() {
@@ -4120,6 +4162,7 @@ public class EditProblemPane extends JPanePlugin {
             isCLICSCaseSensitiveCheckBox.setText("Case-sensitive");
             isCLICSCaseSensitiveCheckBox.setSelected(false);
             isCLICSCaseSensitiveCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -4130,7 +4173,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the isSpaceSensitive checkbox.
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getCLICSSpaceSensitiveCheckBox() {
@@ -4139,6 +4182,7 @@ public class EditProblemPane extends JPanePlugin {
             isCLICSSpaceSensitiveCheckBox.setText("Space-sensitive");
             isCLICSSpaceSensitiveCheckBox.setSelected(false);
             isCLICSSpaceSensitiveCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -4149,7 +4193,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the FloatRelativeTolerance checkbox.
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getFloatRelativeToleranceCheckBox() {
@@ -4158,6 +4202,7 @@ public class EditProblemPane extends JPanePlugin {
             floatRelativeToleranceCheckBox.setText("Float relative tolerance:");
             floatRelativeToleranceCheckBox.setSelected(false);
             floatRelativeToleranceCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     getFloatRelativeToleranceTextField().setEditable(floatRelativeToleranceCheckBox.isSelected());
                     enableUpdateButton();
@@ -4169,7 +4214,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the FloatRelativeTolerance Text Field.
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getFloatRelativeToleranceTextField() {
@@ -4180,6 +4225,7 @@ public class EditProblemPane extends JPanePlugin {
             floatRelativeToleranceTextField.setColumns(20);
             floatRelativeToleranceTextField.setEditable(false);
             floatRelativeToleranceTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -4190,7 +4236,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the FloatAbsoluteTolerance checkbox.
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getFloatAbsoluteToleranceCheckBox() {
@@ -4199,6 +4245,7 @@ public class EditProblemPane extends JPanePlugin {
             floatAbsoluteToleranceCheckBox.setText("Float absolute tolerance:");
             floatAbsoluteToleranceCheckBox.setSelected(false);
             floatAbsoluteToleranceCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     getFloatAbsoluteToleranceTextField().setEditable(floatAbsoluteToleranceCheckBox.isSelected());
                     enableUpdateButton();
@@ -4210,7 +4257,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the floatAbsoluteTolerance Text Field.
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getFloatAbsoluteToleranceTextField() {
@@ -4221,6 +4268,7 @@ public class EditProblemPane extends JPanePlugin {
             floatAbsoluteToleranceTextField.setColumns(20);
             floatAbsoluteToleranceTextField.setEditable(false);
             floatAbsoluteToleranceTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -4231,7 +4279,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Show diff between files using gvim.exe.
-     * 
+     *
      * @param fileOne
      * @param fileTwo
      */
@@ -4250,7 +4298,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes validatorProgramJButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getChooseCustomOutputValidatorProgramButton() {
@@ -4258,6 +4306,7 @@ public class EditProblemPane extends JPanePlugin {
             chooseValidatorProgramButton = new JButton();
             chooseValidatorProgramButton.setText("Choose...");
             chooseValidatorProgramButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(getCustomValidatorExecutableProgramTextField(), "Select Validator Program")) {
                         getCustomValidatorExecutableProgramTextField().setToolTipText((getCustomValidatorExecutableProgramTextField().getText()));
@@ -4273,7 +4322,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes validatorCommandLineTextBox
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getCustomValidatorCommandLineTextField() {
@@ -4282,6 +4331,7 @@ public class EditProblemPane extends JPanePlugin {
             customValidatorCommandLineTextField.setEnabled(false);
             customValidatorCommandLineTextField.setMaximumSize(new Dimension(100, 20));
             customValidatorCommandLineTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     updateLocalCustomValidatorCommandLine();
                     enableUpdateButton();
@@ -4293,7 +4343,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes showCompareCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getShowCompareCheckBox() {
@@ -4302,6 +4352,7 @@ public class EditProblemPane extends JPanePlugin {
             showCompareCheckBox.setBounds(new Rectangle(23, 374, 207, 21));
             showCompareCheckBox.setText("Show Compare");
             showCompareCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -4312,7 +4363,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes jCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getDoShowOutputWindowCheckBox() {
@@ -4322,6 +4373,7 @@ public class EditProblemPane extends JPanePlugin {
             doShowOutputWindowCheckBox.setSelected(true);
             doShowOutputWindowCheckBox.setText("Show the output window");
             doShowOutputWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                     getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
@@ -4333,7 +4385,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes validatorChoiceButtonGroup
-     * 
+     *
      * @return javax.swing.ButtonGroup
      */
     private ButtonGroup getValidatorChoiceButtonGroup() {
@@ -4349,12 +4401,12 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Checks whether a given {@link SerializedFile} needs to be freshened, and if so prompts the user before freshening.
-     * 
+     *
      * @param serializedFile
      *            the file to be checked to see if it is need of freshening
      * @param fileName
      *            the file name corresponding to the specified SerializedFile
-     * 
+     *
      * @return a SerializedFile which is the updated version of the specified SerializedFile if the specified file was out of date AND the user confirmed the refresh operation
      * @throws InvalidFieldValue
      *             if the specified file cannot be read or if the user cancels the operation
@@ -4397,7 +4449,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Has this file been updated on disk ?
-     * 
+     *
      * @param serializedFile
      *            existing saved file
      * @param fileName
@@ -4434,7 +4486,7 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Checks a given {@link SerializedFile} to see if the file type matches the platform on which we are running. If the file type does not match, the user is prompted to confirm whether file should
      * be converted to the current platform format as it is read into PC2.
-     * 
+     *
      * @param newFile
      *            the SerializedFile to be checked
      * @return true if the file was converted, false if the file was null or was not converted
@@ -4521,7 +4573,7 @@ public class EditProblemPane extends JPanePlugin {
         getTimeOutTextField().setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
         getShortNameTextfield().setText("");
         getMaxOutputTextField().setText("0");
-        
+
         //show the next letter (which would be used if the problem is eventually saved)
         int numberProblems = getContest().getProblems().length;
         String nextLetter = Utilities.getProblemLetter(numberProblems + 1);
@@ -4554,7 +4606,7 @@ public class EditProblemPane extends JPanePlugin {
 
         // Input Validator tab:
         initializeInputValidatorTabFields();
-        
+
         // Sandbox tab:
         initializeSandboxTabFields();
 
@@ -4574,13 +4626,13 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorPane().getUseVivaInputValidatorRadioButton().setSelected(false);
         getInputValidatorPane().getUseCustomInputValidatorRadioButton().setSelected(false);
         getInputValidatorPane().setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.NONE);
-        
+
         //initialize all Viva settings to defaults
         getInputValidatorPane().setVivaInputValidatorHasBeenRun(false);
         getInputValidatorPane().setVivaInputValidatorResults(new InputValidationResult[0]);
         getInputValidatorPane().setVivaInputValidationStatus(InputValidationStatus.UNKNOWN);
         getInputValidatorPane().getVivaPatternTextArea().setText("");
-        
+
         //initialize all Custom IV settings to defaults
         getInputValidatorPane().setCustomInputValidatorHasBeenRun(false);
         getInputValidatorPane().setCustomInputValidatorResults(new InputValidationResult[0]);
@@ -4595,8 +4647,8 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorPane().setInputValidationSummaryMessageText("<No Input Validation test run yet>");
         getInputValidatorPane().setInputValidationSummaryMessageColor(Color.BLACK);
         getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(false);
-        ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).setResults(null);
-        ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
+        getInputValidatorPane().getResultsTableModel().setResults(null);
+        getInputValidatorPane().getResultsTableModel().fireTableDataChanged();
     }
 
     private void initializeOutputValidatorTabFields() {
@@ -4633,13 +4685,13 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     private void initializeSandboxTabFields() {
-        
+
         //get the sandbox pane (which is an external class)
         EditProblemSandboxPane sandboxPane = getProblemSandboxPane();
-        
+
         // default to "no sandbox"
         sandboxPane.getUseNoSandboxRadioButton().setSelected(true);
-        
+
         //clear and disable the PC2 sandbox options
         sandboxPane.getPC2SandboxOptionMemLimitTextbox().setText("");
         sandboxPane.setPanelEnabled(sandboxPane.getPC2SandboxOptionsSubPanel(), false);
@@ -4649,10 +4701,10 @@ public class EditProblemPane extends JPanePlugin {
         sandboxPane.getCustomSandboxExecutableProgramTextField().setText("");
         sandboxPane.setPanelEnabled(sandboxPane.getCustomSandboxOptionsSubPanel(), false);
     }
-    
+
     /**
      * This method initializes the useComputerJudging Radio Button
-     * 
+     *
      * @return javax.swing.JRadioButton
      */
     private JRadioButton getUseComputerJudgingRadioButton() {
@@ -4661,6 +4713,7 @@ public class EditProblemPane extends JPanePlugin {
             computerJudgingRadioButton.setText("Computer Judging");
             computerJudgingRadioButton.setBounds(new Rectangle(32, 14, 173, 21));
             computerJudgingRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     getManualReviewCheckBox().setEnabled(true);
                     getPrelimaryNotificationCheckBox().setEnabled(getManualReviewCheckBox().isSelected());
@@ -4675,7 +4728,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the manualJudging Radio Button
-     * 
+     *
      * @return javax.swing.JRadioButton
      */
     private JRadioButton getManualJudgingRadioButton() {
@@ -4684,6 +4737,7 @@ public class EditProblemPane extends JPanePlugin {
             manualJudgingRadioButton.setText("Manual Judging");
             manualJudgingRadioButton.setBounds(new Rectangle(32, 132, 257, 21));
             manualJudgingRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     getManualReviewCheckBox().setEnabled(false);
                     getPrelimaryNotificationCheckBox().setEnabled(false);
@@ -4697,7 +4751,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes the manualReview CheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getManualReviewCheckBox() {
@@ -4707,6 +4761,7 @@ public class EditProblemPane extends JPanePlugin {
             manualReviewCheckBox.setBounds(new Rectangle(57, 47, 186, 21));
             manualReviewCheckBox.setEnabled(false);
             manualReviewCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     getPrelimaryNotificationCheckBox().setEnabled(getManualReviewCheckBox().isSelected());
                     getPrelimaryNotificationCheckBox().setEnabled(getManualReviewCheckBox().isSelected());
@@ -4720,7 +4775,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes prelimaryNotification
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getPrelimaryNotificationCheckBox() {
@@ -4730,6 +4785,7 @@ public class EditProblemPane extends JPanePlugin {
             prelimaryNotificationCheckBox.setBounds(new Rectangle(100, 80, 328, 21));
             prelimaryNotificationCheckBox.setEnabled(false);
             prelimaryNotificationCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -4741,7 +4797,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes deleteProblemCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getDeleteProblemCheckBox() {
@@ -4750,6 +4806,7 @@ public class EditProblemPane extends JPanePlugin {
             deleteProblemCheckBox.setBounds(new Rectangle(285, 340, 182, 21));
             deleteProblemCheckBox.setText("Hide Problem");
             deleteProblemCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -4760,7 +4817,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes loadButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getLoadButton() {
@@ -4770,6 +4827,7 @@ public class EditProblemPane extends JPanePlugin {
             loadButton.setToolTipText("Load problem def from problem.yaml");
             loadButton.setMnemonic(KeyEvent.VK_L);
             loadButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     loadProblemInfoFile();
                 }
@@ -4780,9 +4838,9 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Load problem info.
-     * 
+     *
      * If selects problem.yaml then load yaml and files If selects directory will scan for .in and .ans files and load them
-     * 
+     *
      */
     protected void loadProblemInfoFile() {
         // TODO someday implement load problem info.
@@ -4838,7 +4896,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes exportButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExportButton() {
@@ -4848,6 +4906,7 @@ public class EditProblemPane extends JPanePlugin {
             exportButton.setToolTipText("Export problem and files");
             exportButton.setMnemonic(KeyEvent.VK_X);
             exportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (Utilities.isDebugMode()) {
                         saveAndCompare();
@@ -4942,8 +5001,8 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * get Letter.
-     * 
-     * 
+     *
+     *
      * @param directory
      * @return
      */
@@ -4972,7 +5031,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes reportButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getReportButton() {
@@ -4981,6 +5040,7 @@ public class EditProblemPane extends JPanePlugin {
             reportButton.setText("Report");
             reportButton.setMnemonic(KeyEvent.VK_R);
             reportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     viewProblemReport();
                 }
@@ -5010,7 +5070,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * This method initializes judgeTypeInnerPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getJudgeTypeInnerPane() {
@@ -5028,7 +5088,7 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Compare the entries in two directories.
-     * 
+     *
      * @param directory
      *            the first directory to compare
      * @param nextDirectory
@@ -5063,9 +5123,9 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Returns all filenames (relative path) under input directory.
-     * 
+     *
      * The list does not contain the string directory. Only directories under the directory will be included.
-     * 
+     *
      * @param directory
      * @param relativeDirectory
      * @param level
@@ -5247,7 +5307,7 @@ public class EditProblemPane extends JPanePlugin {
             gbc_labelWhatsThisCLICSValStd.gridx = 2;
             gbc_labelWhatsThisCLICSValStd.gridy = 3;
             customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_labelWhatsThisCLICSValStd);
-            
+
             // add the "This is a CLICS interactive problem" radio button to the subpanel
             GridBagConstraints gbc_rdbtnBoxInteractive = new GridBagConstraints();
             gbc_rdbtnBoxInteractive.anchor = GridBagConstraints.WEST;
@@ -5287,6 +5347,7 @@ public class EditProblemPane extends JPanePlugin {
             customValidatorProgramNameTextField.setEnabled(false);
             customValidatorProgramNameTextField.setColumns(25);
             customValidatorProgramNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -5360,6 +5421,7 @@ public class EditProblemPane extends JPanePlugin {
             usePC2ValidatorRadioButton.setMaximumSize(new Dimension(21, 23));
             usePC2ValidatorRadioButton.setMargin(new Insets(2, 12, 2, 2));
             usePC2ValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableOutputValidatorTabComponents();
                     enableUpdateButton();
@@ -5421,6 +5483,7 @@ public class EditProblemPane extends JPanePlugin {
             // pc2ValidatorOptionComboBox.setBounds(new java.awt.Rectangle(158, 24, 255, 26));
 
             pc2ValidatorOptionComboBox.addItemListener(new java.awt.event.ItemListener() {
+                @Override
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     enableUpdateButton();
 
@@ -5444,6 +5507,7 @@ public class EditProblemPane extends JPanePlugin {
             pc2ValidatorIgnoreCaseCheckBox.setMaximumSize(new Dimension(80, 23));
             pc2ValidatorIgnoreCaseCheckBox.setPreferredSize(new Dimension(150, 23));
             pc2ValidatorIgnoreCaseCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -5455,16 +5519,16 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Returns a {@link CustomValidatorSettings} object containing the Custom Validator settings currently displayed in the GUI. Displays an error message and throws {@link InvalidFieldValue} if the
      * Validator Interface buttons displayed in the GUI are inconsistent.
-     * 
+     *
      * @return a CustomValidatorSettings object populated from the GUI
-     * 
+     *
      * @throws {@link
      *             InvalidFieldValue} if it's not the case that exactly one of the GUI radio buttons identifying the Validator Interface mode is selected
      */
     private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
 
         CUSTOM_VALIDATOR_INTERFACE_TYPE cvt = getCustomValidatorInterfaceTypeFromUI();
-        
+
         // make sure exactly one of the Interface mode buttons is selected
         if (cvt == CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_NONE) {
             showMessage("Invalid settings for Validator Interface radio buttons");
@@ -5507,7 +5571,7 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Returns a {@link PC2ValidatorSettings} object containing the values currently displayed in the GUI. Displays an error message and throws {@link InvalidFieldValue} if the values displayed in the
      * GUI are illegal (for example, if the PC2 Validator has been selected but no PC2 Validator Mode has been chosen.
-     * 
+     *
      * @return a PC2ValidatorSettings object populated from the GUI
      * @throws {@link
      *             InvalidFieldValue} if an invalid tolerance value is detected
@@ -5532,7 +5596,7 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Returns a {@link ClicsValidatorSettings} object containing the values currently displayed in the GUI. Displays an error message and throws {@link InvalidFieldValue} if either the absolute or
      * relative tolerance are selected and the string in the corresponding text box is invalid.
-     * 
+     *
      * @return a ClicsValidatorSettings object populated from the GUI
      * @throws {@link
      *             InvalidFieldValue} if an invalid tolerance value is detected
@@ -5598,6 +5662,7 @@ public class EditProblemPane extends JPanePlugin {
             rdbtnUsePcStandard = new JRadioButton("Use PC^2 Standard Interface");
             rdbtnUsePcStandard.setSelected(false);
             rdbtnUsePcStandard.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     // switching to Use PC2 Standard Interface for this Custom Validator;
                     // check to see if we are editing a problem which might already have a PC2 Interface Validator Command Line
@@ -5629,6 +5694,7 @@ public class EditProblemPane extends JPanePlugin {
             rdbtnUseClicsStandard = new JRadioButton("Use CLICS Standard Interface");
             rdbtnUseClicsStandard.setSelected(true);
             rdbtnUseClicsStandard.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     // switching to Use Clics Standard Interface for this Custom Validator;
                     // check to see if we are editing a problem which might already have a Clics Interface Validator Command Line
@@ -5660,6 +5726,7 @@ public class EditProblemPane extends JPanePlugin {
             rdbtnUseInteractive = new JRadioButton("Use CLICS Interactive Problem Interface");
             rdbtnUseInteractive.setSelected(false);
             rdbtnUseInteractive.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     // switching to Use Clics Interactive Interface for this Custom Validator;
                     // check to see if we are editing a problem which might already have a Clics Interface Validator Command Line
@@ -5782,14 +5849,14 @@ public class EditProblemPane extends JPanePlugin {
     private void setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE ivType) {
         getInputValidatorPane().setCurrentInputValidatorType(ivType);
     }
-    
+
     public String getExecuteDirectoryName() {
         return "inputValidate" + getContest().getClientId().getSiteNumber() + getContest().getClientId().getName();
     }
 
     /**
      * Remove all files from specified directory, including subdirectories.
-     * 
+     *
      * @param dirName
      *            directory to be cleared.
      * @return true if directory was cleared.
@@ -5816,7 +5883,7 @@ public class EditProblemPane extends JPanePlugin {
      * Return string minus last extension. <br>
      * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
      * Unlike the Unix basename program, no extension is supplied.
-     * 
+     *
      * @param original
      *            the input string
      * @return a string with all text after last . removed
@@ -5838,9 +5905,9 @@ public class EditProblemPane extends JPanePlugin {
      * Displays the specified message in a modal YES_NO_CANCEL JOptionPane with a WARNING_MESSAGE icon and with the specified title, and with the specified JCheckBox displayed on the dialog. Since the
      * caller provides the checkbox, the caller can determine after the dialog returns whether or not the user checked the checkbox. This is useful for displaying things like message boxes with a "Do
      * not show this again" checkbox. Note that it is the CALLER's responsibility to implement logic to avoid displaying the message dialog in the future.
-     * 
+     *
      * The value returned by this method is exactly the value returned by the displayed JOptionPane, which is determined by the button the user uses to close the dialog (Yes, No, or Cancel).
-     * 
+     *
      * @param parentFrame
      *            a JFrame which is the parent associated with the displayed JOptionPane
      * @param msg
@@ -5849,7 +5916,7 @@ public class EditProblemPane extends JPanePlugin {
      *            a JCheckBox to be displayed on the dialog, with message text set by the caller
      * @param title
      *            the title to be displayed on the dialog
-     * 
+     *
      * @return either JOptionPane.YES, JOptionPane.NO, or JOptionPane.CANCEL
      */
     private int displayWarningDialogWithCheckbox(JFrame parentFrame, String msg, JCheckBox checkbox, String title) {
@@ -5864,9 +5931,9 @@ public class EditProblemPane extends JPanePlugin {
 
     /**
      * Replace all instances of beforeString with afterString.
-     * 
+     *
      * If before string is not found, then returns original string.
-     * 
+     *
      * @param origString
      *            string to be modified
      * @param beforeString
@@ -5917,7 +5984,7 @@ public class EditProblemPane extends JPanePlugin {
 //
 //    /**
 //     * Updates the Input Validation Status for the current problem to reflect the state of the specified result.
-//     * 
+//     *
 //     * If the received result is null the problem Input Validation Status is set to "ERROR".
 //     */
 //    private void updateProblemValidationStatus(Problem prob, InputValidationResult result) {
@@ -5949,12 +6016,12 @@ public class EditProblemPane extends JPanePlugin {
 //    /**
 //     * Returns a new InputValidationStatus for a problem based on combining the current problem Input Validation Status with the specified new status, assumed to be the result of having tested a new
 //     * input data file by running an Input Validator on the input data file.
-//     * 
+//     *
 //     * @param currentStatus
 //     *            the Input Validation Status currently assigned to the problem
 //     * @param newStatus
 //     *            a new Input Validation Result status to be merged with the current status
-//     * 
+//     *
 //     * @return the InputValidationStatus which should be assigned to the problem based on its current status and the received new Input Validator run status
 //     */
 //    private InputValidationStatus getNewStatus(InputValidationStatus currentStatus, InputValidationStatus newStatus) {
@@ -5993,26 +6060,26 @@ public class EditProblemPane extends JPanePlugin {
 //
 //        return retStatus;
 //   }
-    
+
     private void logWarning(String message, Exception e) {
         if (log != null){
             log.log(Log.WARNING, message, e);
-        } 
+        }
 
         System.err.println(message);
         if (e != null){
             e.printStackTrace();
-            
-            
+
+
         }
     }
-    
+
     //main() method for testing only
     public static void main (String [] args) {
 
         //build an EditProblemFrame containing an EditProblemPane containing an EditProblemSandboxPane
         EditProblemFrame frame = new EditProblemFrame();
-        
+
 //        //put a contest and controller in the frame (which also puts it in the panes)
 //        IInternalContest contest;
 //        IInternalController controller;
@@ -6032,7 +6099,7 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Returns the name of the last directory from which a file was selected/loaded
      * by a component of this EditProblemPane.
-     * 
+     *
      * @return a String containing the last directory name
      */
     public String getLastDirectory() {
@@ -6042,20 +6109,20 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * Saves the name of the last directory from which a file was selected/loaded
      * by a component of this EditProblemFrame.
-     * 
+     *
      * @param directory the name of the last directory from which a file was selected/loaded.
      */
     public void setLastDirectory(String directory) {
         lastDirectory = directory;
-        
+
     }
-    
+
     /**
      * This method accepts an {@link Iterable} set of {@link InputValidationResult}s and returns an array
      * containing those results.
-     * 
+     *
      * @param results an Iterable collection of InputValidationResults.
-     * 
+     *
      * @return an array containing the elements of the received Iterable.
      */
     private InputValidationResult[] convertIterableInputValidationResultToArray(Iterable<InputValidationResult> results) {
@@ -6065,9 +6132,9 @@ public class EditProblemPane extends JPanePlugin {
             temp.add(res);
         }
         //convert the Vector to an array
-        InputValidationResult [] array = temp.toArray(new InputValidationResult[temp.size()]); 
+        InputValidationResult [] array = temp.toArray(new InputValidationResult[temp.size()]);
 
         return array;
     }
-    
+
 }

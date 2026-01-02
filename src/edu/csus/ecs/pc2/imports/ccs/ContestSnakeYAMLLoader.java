@@ -1450,6 +1450,29 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return null;
     }
 
+    private Double fetchDoubleValue(Map<String, Object> map, String key) {
+        if (map == null) {
+            // SOMEDAY figure out why map would every be null
+            return null;
+        }
+        // So, the value may be a double (IE contains a decimal pt), or an integer.
+        Object oValue = map.get(key);
+        Double value = null;
+        if (oValue != null) {
+            try {
+                if(oValue instanceof Double) {
+                    value = (Double) oValue;
+                } else {
+                    value = new Double(((Integer)oValue).doubleValue());
+                }
+                return value;
+            } catch (Exception e) {
+                syntaxError("Expecting double number after " + key + ": field, found '" + oValue + "'");
+            }
+        }
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> fetchMap(Map<String, Object> content, String key) {
         Object object = content.get(key);
@@ -1507,11 +1530,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // the ONLY way to specify if the problem is interactive.
         String validationType = fetchValue(content, VALIDATION_TYPE);
         boolean isInteractive = false;
+        boolean isMultipass = false;
         if (validationType != null) {
             // validationType is a list of validation options
             String[] valOpts = validationType.split("\\s");
             // Must be one of: "default", "custom", "custom interactive"
             // PC2 does not support "custom score", which IS spec compliant; we issue a different error for that
+            // Added support for "custom multipass" (Problem Package Format: 2023-07 draft)
             if (valOpts.length >= 1) {
                 if(valOpts[0].equals(Constants.VALIDATION_CUSTOM)) {
                     usingCustomValidator = true;
@@ -1519,6 +1544,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         if(valOpts[1].equals(Constants.VALIDATION_INTERACTIVE)) {
                             // Note that interactive problems require a custom validator
                             isInteractive = true;
+                        } else if(valOpts[1].equals(Constants.VALIDATION_MULTIPASS)) {
+                            isMultipass = true;
                         } else if(valOpts[1].equals(Constants.VALIDATION_SCORE)) {
                             syntaxError("Unsupported validation type: custom score");
                         } else {
@@ -1603,6 +1630,30 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
+        // Make sure the validator settings are acceptable for multipass problems
+        if(isMultipass) {
+            if(!usingCustomValidator) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() +
+                        ", a custom validator is required for an multipass problem");
+
+            }
+            if(!problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() +
+                        ", the custom validator must be a CLICS compliant for an multipass problem");
+
+            } else {
+                // A note here about how multipass validation works.  The multipass validator must be CLICS
+                // compliant and return an exit code of 42 or 43, and possibly generating a feedback file for
+                // each test case.
+
+                // We set the custom output validator settings for interactive.  The CLICS spec does not have
+                // a validator section in the YAML, as such, we first verified that the custom validator is CLICS compliant.
+                // We then we set output validator type to clics interactive.
+                problem.getCustomOutputValidatorSettings().setUseMultipassValidatorInterface();
+            }
+        }
+
+
         //read any PC2-format limits specified at the top level of the problem.yaml file
         Integer timeoutSecs = fetchIntValue(content, TIMEOUT_KEY);
         if (timeoutSecs != null) {
@@ -1672,9 +1723,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             //check for a timeout limit within the CLICS "limits:" section.
             // Note that the presence of a "timeout:" entry within a CLICS
             // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
-            Integer clicsTimeout = fetchIntValue(limitsContent, TIMEOUT_KEY);
+            Double clicsTimeout = fetchDoubleValue(limitsContent, TIMEOUT_KEY);
             if (clicsTimeout != null) {
-                problem.setTimeOutInSeconds(clicsTimeout);
+                problem.setTimeOutInSeconds(clicsTimeout.intValue());
             }
 
             //check for a CLICS maxoutput limit - the value is in MiB
@@ -1685,6 +1736,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, memoryLimit.intValue());
             problem.setMemoryLimitMB(clicsMemoryLimit);
+
+            Integer clicsValidationPasses = fetchIntValue(limitsContent, CLICS_VALIDATION_PASSES, DEFAULT_VALIDATION_PASSES);
+            problem.getCustomOutputValidatorSettings().setMaxMultipassValidationPasses(clicsValidationPasses);
         }
 
         if (!usingCustomValidator) {

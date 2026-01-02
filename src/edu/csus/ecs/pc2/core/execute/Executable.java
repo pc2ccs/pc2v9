@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -57,6 +58,7 @@ import edu.csus.ecs.pc2.ui.NullViewer;
 import edu.csus.ecs.pc2.util.OSCompatibilityUtilities;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
+import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
@@ -221,6 +223,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private String executeDirectoryName = null;
 
     private String executeDirectoryNameSuffix = "";
+
+    private String interfaceDirectoryPrefix;
+    private String pc2InterfaceResultsFileName;
+    private String clicsInterfaceFeedbackDirName;
 
     /**
      * Overwrite judge's data and answer files.
@@ -396,6 +402,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             executeDirectoryName = getExecuteDirectoryName();
 
+            // get a "random" number to be used as part of the results file name and feedback directory name, for security
+            String secs = Long.toString((new Date().getTime()) % 100);
+            interfaceDirectoryPrefix = run.getNumber() + secs + "XRSAM.";
+
             boolean dirThere = insureDir(executeDirectoryName);
 
             if (!dirThere) {
@@ -450,7 +460,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 // Team, just compile and execute it.
 
                 if (compileProgram()) {
-                    executeProgram(0); // execute with first data set.
+                    setResultsInterfaceNames(1);
+                    executeProgram(0, 1, null); // execute with first data set.
                 } else {
                     /**
                      * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expected output file (errorString empty) If there is compiler stderr or stdout
@@ -717,6 +728,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         return fileViewer;
     }
 
+    private void setResultsInterfaceNames(int testSetNumber) {
+        pc2InterfaceResultsFileName = interfaceDirectoryPrefix + testSetNumber + ".txt";
+        //construct a "feedback directory" name, used by CLICS Interface validators
+        clicsInterfaceFeedbackDirName = interfaceDirectoryPrefix + testSetNumber + File.separator;
+    }
+
     public String getFailureReason() {
 
         if (executionData.getExecutionException() != null) {
@@ -752,17 +769,85 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         log.info(" "); //put space in the log for readability -- separate each test case
         log.info("  Test case " + testNumber + " execute, run " + run.getNumber());
 
-        boolean proceedToValidation = executeProgram(dataSetNumber);
+        setResultsInterfaceNames(testNumber);
+        boolean proceedToValidation = executeProgram(dataSetNumber, 1, null);
 
         if (proceedToValidation && isValidated()) {
-            log.info(" "); //space for readability in the log
-            log.info("  Test case " + testNumber + " validate, run " + run.getNumber());
-            submissionIsCorrect = validateProgram(dataSetNumber);
+            if(problem.isMultipass()) {
 
-            if (!ExecuteUtilities.didTeamSolveProblem(executionData)) {
-                submissionIsCorrect = false;
+                // For multipass, the first pass is the only special one since it uses the original judge's input file
+                // We know the first succeeded.  Now we have to keep looping checking the feedbackdir/nextpass.in (Constants.NEXT_PASS_FILE).
+                CustomValidatorSettings cvSettings = problem.getCustomOutputValidatorSettings();
+                String feedbackDirPath = getExecuteDirectoryName() + File.separator + clicsInterfaceFeedbackDirName;
+                // This is the path to the next pass file relative to PC2, eg. executeSite1/123XRSAM.1/nextpass.in
+                String nextPassName = feedbackDirPath + Constants.NEXT_PASS_FILE;
+                // This is the path to the next pass file relative to the execute folder, eg.  123XRSAM.1/nextpass.in
+                String nextPassRunName = clicsInterfaceFeedbackDirName + Constants.NEXT_PASS_FILE;
+                String nextSuffix = "";
+
+                log.info("This is a multi-pass problem with a maximum of " + cvSettings.getMaxMultipassValidationPasses() + " passes.");
+                for(int nPass = 1; nPass <= cvSettings.getMaxMultipassValidationPasses(); nPass++) {
+                    log.info(" "); //space for readability in the log
+                    log.info("  Test case " + testNumber + " validate, run " + run.getNumber() + ", pass " + nPass +
+                            ", executeInputFile " + nextPassName + nextSuffix +
+                            ", validateInputFile " + nextPassRunName + nextSuffix);
+
+                    // Recall we did the first pass above, so don't re-execute the first time through, just
+                    // validate the result from above.
+                    if(nPass > 1) {
+                        proceedToValidation = executeProgram(dataSetNumber, nPass, nextPassName + nextSuffix);
+                        if(!proceedToValidation) {
+                            log.info("Not proceeding to validation since executeProgram(dataSetNumber=" + dataSetNumber
+                                    + ", nPass=" + nPass + ", nextInputName=" + nextPassName + nextSuffix + ") returned false");
+                            submissionIsCorrect = false;
+                            break;
+                        }
+
+                    }
+                    // Test if validator finished normally.
+                    submissionIsCorrect = validateProgram(dataSetNumber, nPass, nextPassRunName + nextSuffix);
+
+                    // Still need to check if they got it right.
+                    if (!ExecuteUtilities.didTeamSolveProblem(executionData)) {
+                        submissionIsCorrect = false;
+                        break;
+                    }
+                    // May want to save executionData here for each pass? -- JB
+
+                    // If no next pass, we are done, and, we know it was successful
+                    File nextPassFile = new File(nextPassName);
+                    if(!nextPassFile.exists()) {
+                        break;
+                    }
+//                    // We may want to copy feedback directory for the pass we just finished
+//                    String feedbackCopyDirectoryName = feedbackDirPath + "_" + nPass;
+//                    try {
+//                        FileUtilities.copyFolder(new File(feedbackDirPath).toPath(),
+//                                new File(feedbackCopyDirectoryName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+//                    } catch(Exception e) {
+//
+//                    }
+                    // rename the next pass input file so we have a copy for later review and we have to delete
+                    // it anyway as per the spec.
+                    // File name we create is like:  clicsInterfaceFeedbackDirName/nextpass.in.pass3
+                    nextSuffix = ".pass" + nPass;
+                    String nextPassFileName = nextPassName + nextSuffix;
+                    try {
+                        log.info("Renaming " + nextPassName + " to " + nextPassFileName);
+                        Files.move(nextPassFile.toPath(), new File(nextPassFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } catch(Exception e) {
+                        log.log(log.WARNING, "Could not move " + nextPassName + " to " + nextPassFileName + " " + e);
+                    }
+                }
+            } else {
+                log.info(" "); //space for readability in the log
+                log.info("  Test case " + testNumber + " validate, run " + run.getNumber());
+                submissionIsCorrect = validateProgram(dataSetNumber, 1, null);
+
+                if (!ExecuteUtilities.didTeamSolveProblem(executionData)) {
+                    submissionIsCorrect = false;
+                }
             }
-
         } else {
             //if we get here we are not going to validate so there's no way we can declare the submission is correct
             submissionIsCorrect = false;
@@ -878,16 +963,18 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      *
      * @param dataSetNumber
      *            a zero-based value indicating the data set against which the run was executed
+     * @param pass normally 1, but for multipass problems, if > 1 then input file is nextPassFileName
+     * @param nextPassFileName Name of file to use as input - only on multipass problems after first pass
      * @return true if the validator returns "success" (indicating that the problem was correctly solved)
      */
-    protected boolean validateProgram(int dataSetNumber) {
+    protected boolean validateProgram(int dataSetNumber, int pass, String nextPassFileName) {
 
         // SOMEDAY Handle the error messages better, log and put them before the user to
         // help with debugging
 
-        int testCase = dataSetNumber + 1;
+        int testSetNumber = dataSetNumber + 1;
         log.info(" ");
-        log.info("starting validation for test case " + testCase);
+        log.info("starting validation for test case " + testSetNumber);
 
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
@@ -956,7 +1043,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                  * If not external files, must unpack files.
                  */
 
-                // Create the correct output file, aka answer file
+                // Create the correct input file, aka judges test data file
                 createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, prefixExecuteDirname(problem.getDataFileName()));
 
                 // Create the correct output file, aka answer file
@@ -965,16 +1052,36 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             } // else no need to create external data files.
 
         }
+        // For subsequent passes on multipass, use supplied judge's input file
+        if(pass > 1) {
+            judgeDataFilename = nextPassFileName;
+        }
+        boolean bSuccess = performValidation(commandPattern, dataSetNumber, testSetNumber,
+                judgeDataFilename, judgeAnswerFilename,
+                pc2InterfaceResultsFileName, clicsInterfaceFeedbackDirName, pass);
+        return bSuccess;
+    }
 
-        // get a "random" number to be used as part of the results file name and feedback directory name, for security
-        String secs = Long.toString((new Date().getTime()) % 100);
+    /**
+     * Actually performs the validation of a run test case given all the necessary input parameters:
+     * @param commandPattern Validator command including subtitution strings
+     * @param dataSetNumber Original data set number (0 - NumDatasets-1)
+     * @param testSetNumber Ordinal data set number (1 - NumDatasets)
+     * @param judgeDataFilename Judges' Input file (.in) to use
+     * @param judgeAnswerFilename Judges' answer file
+     * @param pc2InterfaceResultsFileName For PC2 validation, where to put PC2 xml result
+     * @param clicsInterfaceFeedbackDirName For CLICS validation, where to put CLICS files.
+     * @return true if the validator returns "success" (indicating that the validator finished normally
+     *          This does NOT necessarily mean the submission was correct!
+     */
+    private boolean performValidation(String commandPattern, int dataSetNumber, int testSetNumber,
+            String judgeDataFilename, String judgeAnswerFilename,
+            String pc2InterfaceResultsFileName, String clicsInterfaceFeedbackDirName,
+            int passNum) {
 
-        //construct a "results file name", used by PC2 Interface validators
-        int testSetNumber = dataSetNumber + 1;
-        String pc2InterfaceResultsFileName = run.getNumber() + secs + "XRSAM." + testSetNumber + ".txt";
-
-        //construct a "feedback directory" name, used by CLICS Interface validators
-        String clicsInterfaceFeedbackDirName = run.getNumber() + secs + "XRSAM." + testSetNumber + File.separator;
+        log.info("performValidation: passNum:" + passNum + " dataSetNumber:" + dataSetNumber + " testSetNumber:" + testSetNumber +
+                " judgeDataFilename:" + judgeDataFilename + " judgeAnswerFilename:" + judgeAnswerFilename +
+                " clicsInterfaceFeedbackDirName:" + clicsInterfaceFeedbackDirName);
 
         log.log(Log.DEBUG, "command pattern before substitution: " + commandPattern);
 
@@ -991,22 +1098,25 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             String feedbackDirPath = getExecuteDirectoryName() + File.separator + clicsInterfaceFeedbackDirName;
 
-            // get rid of any pre-existing feedback dir
-            try {
-                ExecuteUtilities.removeDirectory(feedbackDirPath);
-            } catch (Exception e) {
-                log.warning("Exception trying to remove feedback directory '" + feedbackDirPath + "': " + e.getMessage());
-            }
+            // Only clean up feedback dir on first pass
+            if(passNum == 1) {
+                // get rid of any pre-existing feedback dir
+                try {
+                    ExecuteUtilities.removeDirectory(feedbackDirPath);
+                } catch (Exception e) {
+                    log.warning("Exception trying to remove feedback directory '" + feedbackDirPath + "': " + e.getMessage());
+                }
 
-            if (insureDir(feedbackDirPath)) {
-                // clean out feedback dir
-                ExecuteUtilities.clearDirectory(feedbackDirPath);
-            } else {
-                throw new SecurityException("Unable to create ClicsValidator feedback directory '" + feedbackDirPath + "'; check logs");
+                if (insureDir(feedbackDirPath)) {
+                    // clean out feedback dir
+                    ExecuteUtilities.clearDirectory(feedbackDirPath);
+                } else {
+                    throw new SecurityException("Unable to create ClicsValidator feedback directory '" + feedbackDirPath + "'; check logs");
+                }
             }
         }
 
-        cmdLine = substituteAllStrings(run, cmdLine, testCase);
+        cmdLine = substituteAllStrings(run, cmdLine, testSetNumber);
 
         log.log(Log.DEBUG, "command pattern after substitution: " + cmdLine);
 
@@ -1060,7 +1170,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             log.info("constructed new validator ExecuteTimer " + validatorExecutionTimer.toString());
             long startTime = System.currentTimeMillis();
 
-            Process validatorProcess = runProgram(cmdLine, formatTestCasePhase(msg, testCase), false, validatorExecutionTimer);
+            Process validatorProcess = runProgram(cmdLine, formatTestCasePhase(msg, testSetNumber), false, validatorExecutionTimer);
 
             if (validatorProcess == null) {
                 log.warning("validator process is null; stopping ExecuteTimer");
@@ -1117,7 +1227,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     }
 
                     in.close();
-                    out.close();
+                    try {
+                        out.close();
+                    } catch (java.io.IOException e) {
+                        log.info("Caught a " + e.getMessage() + " while closing team output to validator; do not be alarmed - the validator just sucks.");
+                    }
                 }
             }
 
@@ -1810,9 +1924,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      *
      * @param dataSetNumber
      *            a zero-based data set number
+     * @param pass number for multi-pass problems (1 for normal problems, or first pass or multipass)
+     * @param nextPassInputFileName name to use for judge's input file in multipass on subsequent passes
      * @return true if execution worked successfully.
      */
-    protected boolean executeProgram(int dataSetNumber) {
+    protected boolean executeProgram(int dataSetNumber, int pass, String nextPassInputFileName) {
 
         boolean proceedToValidation = false;
         String inputDataFileName = null;
@@ -1941,26 +2057,31 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     /*
                      * External data files (not inside of pc2). On local disk.
                      */
-
-                    SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
-                    String dataFileName = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
-
-                    if (dataFileName != null) {
-                        // Found file
-
-                        File dataFile = new File(dataFileName);
-                        inputDataFileName = dataFile.getCanonicalPath();
-                        log.info("(External) Input data file: " + inputDataFileName);
-
+                    if(pass > 1) {
+                        log.info("Using Multi-pass Input data file: " + nextPassInputFileName + " for pass " + pass
+                                + " instead of " + inputDataFileName);
+                        inputDataFileName = nextPassInputFileName;
                     } else {
+                        SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
+                        String dataFileName = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
 
-                        // Did not find file
+                        if (dataFileName != null) {
+                            // Found file
 
-                        String expectedFileName = serializedFile.getName();
-                        log.log(Log.DEBUG, "For problem " + problem + " test case " + testSetNumber + " expecting file " + expectedFileName + " in dir " + problem.getCCSfileDirectory());
-                        FileNotFoundException notFound = new FileNotFoundException(expectedFileName + " for test case " + testSetNumber);
-                        executionData.setExecutionException(notFound);
-                        log.info("(External) Input data file: NOT FOUND ");
+                            File dataFile = new File(dataFileName);
+                            inputDataFileName = dataFile.getCanonicalPath();
+                            log.info("(External) Input data file: " + inputDataFileName);
+
+                        } else {
+
+                            // Did not find file
+
+                            String expectedFileName = serializedFile.getName();
+                            log.log(Log.DEBUG, "For problem " + problem + " test case " + testSetNumber + " expecting file " + expectedFileName + " in dir " + problem.getCCSfileDirectory());
+                            FileNotFoundException notFound = new FileNotFoundException(expectedFileName + " for test case " + testSetNumber);
+                            executionData.setExecutionException(notFound);
+                            log.info("(External) Input data file: NOT FOUND ");
+                        }
                     }
                 }
             }
@@ -2031,6 +2152,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 } else {
                     cmdline = replaceString(cmdline, Constants.CMDSUB_BASENAME_VARNAME, entryPointName);
                 }
+            }
+            // Short circuit replacement of judge's path to input file if multipass
+            if(pass > 1) {
+                cmdline = replaceString(cmdline, "{:infilename}", nextPassInputFileName);
             }
             cmdline = substituteAllStrings(run, cmdline, testSetNumber);
             log.log(Log.DEBUG, "cmdline after substitution: " + cmdline);

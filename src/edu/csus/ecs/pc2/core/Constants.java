@@ -271,6 +271,7 @@ public final class Constants {
     public static final String VALIDATION_CUSTOM = "custom";
     public static final String VALIDATION_DEFAULT = "default";
     public static final String VALIDATION_INTERACTIVE = "interactive";
+    public static final String VALIDATION_MULTIPASS = "multi-pass";
     public static final String VALIDATION_SCORE = "score";
 
     /**
@@ -291,5 +292,10 @@ public final class Constants {
     public static final String TAB = "\t";
 
     public static final String NL = System.getProperty("line.separator");
+
+    /**
+     * For multipass problems, there are some special files
+     */
+    public static final String NEXT_PASS_FILE = "nextpass.in";
 
 }
