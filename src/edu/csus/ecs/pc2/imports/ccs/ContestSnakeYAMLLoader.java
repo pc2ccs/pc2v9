@@ -1459,7 +1459,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if(oValue instanceof Double) {
                     value = (Double) oValue;
                 } else {
-                    value = new Double(((Integer)oValue).doubleValue());
+                    value = Double.valueOf(((Integer)oValue).doubleValue());
                 }
                 return value;
             } catch (Exception e) {
