@@ -392,7 +392,7 @@ public class LoadAccounts {
             }
         }
         if (institutionCodeColumn != -1 && values.length > institutionCodeColumn && values[institutionCodeColumn].length() > 0) {
-            setInstitutionInformation(account, siteString);
+            setInstitutionInformation(account, values[institutionCodeColumn]);
         }
         return account;
     }
