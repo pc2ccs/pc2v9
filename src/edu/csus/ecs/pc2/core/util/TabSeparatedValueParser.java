@@ -1,11 +1,11 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.util.Vector;
 
 /**
  * Tab delimited parser.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -17,9 +17,11 @@ public final class TabSeparatedValueParser {
 
     private static final String TAB_STRING = String.valueOf(TAB_CHAR);
 
+    private static final char ESC_CHAR = '\\';
+
     /**
      * Return array of containing the Tab Separated Values from the input string.
-     * 
+     *
      * @return java.lang.String[]
      * @param line
      *            java.lang.String
@@ -27,11 +29,11 @@ public final class TabSeparatedValueParser {
      *             if there was a problem parsing the line
      */
     public static String[] parseLine(String line) throws Exception {
-        
+
         if (line == null) {
             throw new IllegalArgumentException("null String not allowed");
         }
-        
+
         String[] array = new String[1];
         array[0] = "";
         int fieldCount = 1;
@@ -39,6 +41,7 @@ public final class TabSeparatedValueParser {
         Vector<String> v = new Vector<String>();
         int i;
         boolean inQuote = false;
+        boolean inEscape = false;
         char current;
         char next;
         int length = line.length();
@@ -46,6 +49,15 @@ public final class TabSeparatedValueParser {
         int ignoredTerminatingQuote = 0; // SOMEDAY can this be removed??
         for (i = 0; i < line.length(); i++) {
             current = line.charAt(i);
+            if(inEscape) {
+                currentField = currentField + current;
+                inEscape = false;
+                continue;
+            }
+            if(current == ESC_CHAR) {
+                inEscape = true;
+                continue;
+            }
             if (current == '"') {
                 if (inQuote) {
                     if (i + 1 >= length) {
@@ -105,7 +117,7 @@ public final class TabSeparatedValueParser {
 
     /**
      * Return String of the Tab Separated Values made from the input array
-     * 
+     *
      * @return java.lang.String
      * @param array
      *            java.lang.String[]
@@ -141,7 +153,7 @@ public final class TabSeparatedValueParser {
     }
 
     /**
-     * 
+     *
      */
     private TabSeparatedValueParser() {
         super();
