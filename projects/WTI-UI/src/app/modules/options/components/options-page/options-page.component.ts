@@ -6,8 +6,7 @@ import { ChangePasswordComponent } from '../change-password/change-password.comp
 import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
 import { environment } from 'src/environments/environment';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
-import { saveCurrentPage } from 'src/app/app.component';
-import { saveOptions } from 'src/app/app.component';
+import { saveOptions } from 'src/app/modules/core/services/session-storage.utils';
 import * as Constants from 'src/constants';
 import { DEBUG_MODE } from 'src/constants';
 
@@ -31,12 +30,6 @@ export class OptionsPageComponent implements OnInit {
 	  }
 	this._appTitleService.setTitleWithTeamId("Options");
 
-	//indicate that this Options page is the most recently accessed page
-	if (DEBUG_MODE) {
-		console.log ("...saving OPTIONS_PAGE as 'current page'");
-	}
-	saveCurrentPage(Constants.OPTIONS_PAGE);
-	
 	//save the current option values in sessionStorage so they can be restored on F5 refresh
 	let options = {
 		//TODO: the following field names (on the left) should use the names defined in constants.ts
@@ -72,6 +65,8 @@ export class OptionsPageComponent implements OnInit {
 		  console.log ("...button name = '", name, "', button value = ", value) ;
 	  }
 		let options = {
+			//use the above-declared accessor functions to get the notification settings
+			// currently stored in the ui_HelperService class
 			//TODO: the following field names (on the left) should use the names defined in constants.ts
 			clarsNotificationsEnabled : this.clarsNotificationsEnabled, 
 			runsNotificationsEnabled: this.runsNotificationsEnabled

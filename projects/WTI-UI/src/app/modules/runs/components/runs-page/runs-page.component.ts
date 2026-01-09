@@ -8,7 +8,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { NewRunComponent } from '../new-run/new-run.component';
 import { TestRunDetailComponent } from '../test-run-detail/test-run-detail.component';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
-import { saveCurrentPage } from 'src/app/app.component';
 import * as Constants from 'src/constants';
 
 @Component({
@@ -33,9 +32,6 @@ export class RunsPageComponent implements OnInit, OnDestroy {
     this.buildForm();
     this.loadRuns();
     
-    //indicate that this Runs page is the most recently accessed page
-    saveCurrentPage(Constants.RUNS_PAGE);
-
     this.filteredRuns = this.runs;
 
     // when runs are updated, trigger a reload
