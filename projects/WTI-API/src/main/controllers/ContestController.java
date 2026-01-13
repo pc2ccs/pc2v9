@@ -25,7 +25,6 @@ import org.json.XML;
 import communication.WTIWebsocket;
 import config.ServerInit;
 import edu.csus.ecs.pc2.api.IClarification;
-import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IJudgement;
@@ -40,7 +39,10 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformation.ScoreboardType;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -107,10 +109,13 @@ public class ContestController extends MainController {
 	//mutex to insure at most one browser client at a time can attempt to use the above DSA to update standings
 	private static Boolean updateStandingsMutex = new Boolean(false);
 	
+	//the current contest state information
+	private static ContestInformation contestInformation = null;
+	
 	/**
 	 * Constructs a ContestController for the WTI server. Construction includes
-	 * invoking the super-class {@link MainController}, constructor, which has the
-	 * following effects:
+	 * invoking the super-class {@link MainController} constructor; the super-class 
+	 * constructor has the following effects:
 	 * 
 	 * <pre>
 	 * <ol>
@@ -122,7 +127,7 @@ public class ContestController extends MainController {
 	 * subclass.
 	 * </pre>
 	 * 
-	 * In addition, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
+	 * Subsequently, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
 	 * the PC2 server using the scoreboard credentials specified in the WTI configuration (pc2v9.ini file).
 	 * 
 	 * @throws URISyntaxException    if a valid websocket could not be constructed in the {@link MainController} super-class from
@@ -178,6 +183,23 @@ public class ContestController extends MainController {
 			e.printStackTrace();
 			throw e;
 		}
+		
+		//fetch the current ContestInformation from the PC2 server
+		try {
+			contestInformation = scoreboardServerConn.getContest().getInternalContest().getContestInformation();
+
+			// force lazy initialization NOW (during WTI Server startup) rather than later during first browser access
+			// (we're not DOING anything with the result; we're just forcing the WTI code to completely initialize
+			//  PC2 java classes used by getScoreboardType() -- i.e., overcome "lazy initialization").
+			// This avoids seeing a delay on the first browser startup's call to /scoreboardType.
+			contestInformation.getScoreboardType();
+
+		} catch (Exception e) {
+			logger.severe("[ContestController] Exception while attempting to fetch ContestInformation from PC2 Server: " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
+
 	}
 
 	/***
@@ -837,7 +859,48 @@ public class ContestController extends MainController {
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 	}
- 
+
+
+	/***
+	 *  This method returns the Scoreboard Type for the current contest.
+	 *  The Scoreboard Type is obtained from the current cached copy of the {@link ContestInformation}; 
+	 *  the ContestInformation is obtained from the PC2 Server when the {@link ContestController} is constructed. 
+	 * 
+	 * @return Response object containing one of the following:
+	 * 				200 (OK) and a JSON string containing the current scoreboard type.
+	 * 				500 (INTERNAL_SERVER_ERROR) if the current ContestInformation is null or an error occurs
+	 * 					attempting to fetch ScoreboardType from it.
+	 */
+	@Path("/scoreboardType")
+	@GET
+	@ApiOperation(value = "Scoreboard Type",
+				notes = "Get the current Scoreboard Type for this contest.")
+	@ApiResponses({
+		@ApiResponse(code = 200, message = "Returns a string containing the contest scoreboard type", response = String.class), 
+	})
+	public Response scoreboardType() {
+		
+		if(contestInformation == null)
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Contest Information unavailable"))
+					.type(MediaType.APPLICATION_JSON).build();
+
+		try {
+			ScoreboardType scoreboardType = contestInformation.getScoreboardType();
+			return Response.ok()
+				    .entity(scoreboardType)
+				    .type(MediaType.APPLICATION_JSON)
+				    .build();
+		}
+		catch(Exception e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, 
+								"Exception attempting to fetch scoreboard type" + e.getMessage()))
+					.type(MediaType.APPLICATION_JSON).build();
+		}
+		
+	}
+	
 	/**
 	 * Logs to logger and stdout.
 	 * 
