@@ -77,6 +77,9 @@ export class AppInitService {
 	) { }
 
 	async initializeApp(): Promise<void> {
+		
+		//load the initial environment (e.g. the webserver URL and the websocketURL) from 
+		// the assets given in the remote appconfig.json file
 		console.log('[AppInit] Loading environment...');
 		try {
 			const data: any = await firstValueFrom(this.http.get('assets/appconfig.json'));
@@ -87,6 +90,18 @@ export class AppInitService {
 		} catch (err) {
 			console.warn('[AppInit] Failed to load environment, using defaults.');
 		}
+
+		//initialize the scoreboard type (e.g. pass-fail or point-scoring) by invoking the "ContestService",
+		// which will in turn obtain it from the webserver if it doesn't already have it.
+		console.log('[AppInit] Initializing ScoreboardType...');
+		try {
+			await this.contestService.initializeScoreboardType();
+			console.log('[AppInit] ScoreboardType initialized to: ', this.contestService.getScoreboardType());
+		} catch (err) {
+			console.error('[AppInit] Failed to initialize ScoreboardType', err);
+			throw err; // stop bootstrap if required
+		}
+
 
 		// Restore login state if present in sessionStorage (sessionStorage is a variable declared 
 		// by the browser and accessed via functions declared in session-storage.utils)
