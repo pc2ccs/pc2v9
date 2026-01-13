@@ -410,10 +410,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
 
         summaryMemento.putLong("problemCount", problems.length);
-        
+
         Site[] sites = theContest.getSites();
         summaryMemento.putInteger("siteCount", sites.length);
-        
+
         Group[] groups = theContest.getGroups();
         boolean bGroupsExcluded = false;
         if (groups != null) {
@@ -425,7 +425,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         //Note also that generateSummaryTotalsForProblem() already existed and was inserting MOST of that information in the output already;
         // the "colorList" processing code which used to be here was simply added to that method instead (adding internalId, letter, and
         // url to the <problem> elements), avoiding duplication of problem description data in the output XML.
-        
+
         if (runs == null) {
             // Note: we do not deal with divisionNumber here since
             //   1) it is being deprecated
@@ -521,7 +521,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 treeMap.put(record, record);
             }
 
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMemento, bGroupsExcluded);
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMemento, bGroupsExcluded, isThawn);
 
         } // mutex
 
@@ -655,7 +655,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      */
     private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot,
             AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups,
-            IInternalContest theContest, IMemento summaryMememento, boolean excludedGroups) {
+            IInternalContest theContest, IMemento summaryMememento, boolean excludedGroups, boolean isThawn) {
 
         ContestInformation contestInformation = theContest.getContestInformation();
         // easy access
@@ -755,7 +755,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
             StandingsRecord standingsRecord = (StandingsRecord)o;
             indexRank++;
-            if (!isTeamTied(standingsRecord, numSolved, score, lastSolved)) {
+            if (!isTeamTied(standingsRecord, numSolved, score, lastSolved, isThawn)) {
                 numSolved = standingsRecord.getNumberSolved();
                 score = standingsRecord.getPenaltyPoints();
                 lastSolved = standingsRecord.getLastSolved();
@@ -816,7 +816,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 int groupIndex = groupIndexHash.get(group).intValue();
                 // do the same thing as above, now for the group
                 groupIndexRank[groupIndex]++;
-                if (!isTeamTied(standingsRecord,groupNumSolved[groupIndex], groupScore[groupIndex],groupLastSolved[groupIndex])) {
+                if (!isTeamTied(standingsRecord,groupNumSolved[groupIndex], groupScore[groupIndex],groupLastSolved[groupIndex], isThawn)) {
                     groupNumSolved[groupIndex] = standingsRecord.getNumberSolved();
                     groupScore[groupIndex] = standingsRecord.getPenaltyPoints();
                     groupLastSolved[groupIndex] = standingsRecord.getLastSolved();
@@ -835,7 +835,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 if (divisionIndexHash.containsKey(group)) {
                     int divisionIndex = divisionIndexHash.get(group).intValue()-1;
                     divisionIndexRank[divisionIndex]++;
-                    if (!isTeamTied(standingsRecord, divisionNumSolved[divisionIndex], divisionScore[divisionIndex],divisionLastSolved[divisionIndex])) {
+                    if (!isTeamTied(standingsRecord, divisionNumSolved[divisionIndex], divisionScore[divisionIndex],divisionLastSolved[divisionIndex], isThawn)) {
                         divisionNumSolved[divisionIndex] = standingsRecord.getNumberSolved();
                         divisionScore[divisionIndex] = standingsRecord.getPenaltyPoints();
                         divisionLastSolved[divisionIndex] = standingsRecord.getLastSolved();
@@ -1001,11 +1001,18 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param numSolved
      * @param score
      * @param lastSolved
+     * @param isThawn - if the contest is finalized and obeyfreeze is in effect (public board) and the board is unfrozen
      * @return True if the long parameters match the corresponding numbers in the StandingsRecord
      */
-    boolean isTeamTied(StandingsRecord standingsRecord, long numSolved, long score, long lastSolved) {
+    boolean isTeamTied(StandingsRecord standingsRecord, long numSolved, long score, long lastSolved, boolean isThawn) {
         if (numSolved != standingsRecord.getNumberSolved()) {
             return false;
+        }
+        // JB - Need to determine # of metals and only do this if metal count < rank
+        // We may have to use the FinalsStandingsRecordComparator in getStandings() if isThawn is set there so
+        // that the teams will be sorted by name within a "# solved" block.
+        if(isThawn) {
+            return(true);
         }
         if (score != standingsRecord.getPenaltyPoints()) {
             return false;
@@ -1034,7 +1041,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
             IMemento problemMemento = summaryMemento.createChild("problem");
             problemMemento.putInteger("id", id);  //ordinal starting at 1
-            
+
             //the following was (probably) added when BalloonSettings were removed; BalloonSettings was creating
             // a variable named "id" and this was probably an attempt at renaming that variable.
             // It's likely that no other code is actually using "internalId", although it MIGHT be used
