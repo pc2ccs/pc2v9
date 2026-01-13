@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -157,6 +159,8 @@ public class ContestInformation implements Serializable{
         private ScoreboardType(String type) {
             this.type = type;
         }
+        
+        @JsonValue
         public String getType() {
             return type;
         }
