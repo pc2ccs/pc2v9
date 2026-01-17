@@ -7,4 +7,7 @@ export class Run {
   time: number;
   results: string;
   isPreliminary: boolean;
+  isFinal?: boolean;
+  isSolved?: boolean;
+  score?: number;
 }
