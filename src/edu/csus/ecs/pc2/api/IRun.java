@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
 
 /**
@@ -11,10 +11,8 @@ package edu.csus.ecs.pc2.api;
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
  *  
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public interface IRun {
 
     /**
@@ -76,6 +74,14 @@ public interface IRun {
      * @return list of IRunJudgements or zero length array of IRunJudgement.
      */
     IRunJudgement [] getRunJudgements();
+    
+    /**
+     * Return the score for this run.
+     * Note that "score" is only relevant for point-scoring contests.
+     * 
+     * @return a double containing the run score.
+     */
+    double getScore();
     
     /**
      * Get the judge that judged this run. 
