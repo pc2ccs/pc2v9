@@ -6,6 +6,8 @@ import { AppTitleService } from 'src/app/modules/core/services/app-title.service
 import * as Constants from 'src/constants';
 import { DEBUG_MODE } from 'src/constants';
 import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
+import { SCOREBOARD_TYPE } from 'src/constants';
+import type { ScoreboardType } from 'src/constants';
 
 interface ProblemHeader {
     label: string;
@@ -25,6 +27,9 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	numProblems: number = 0;
 	problemDetailHeaders: ProblemHeader[] = [];
 	
+	readonly SCOREBOARD_TYPE = SCOREBOARD_TYPE;
+	scoreboardType!: ScoreboardType;
+
 	//TODO: provide support for more than 26 problems
 	//TODO: provide support for the possibility that problems are not listed in alphabetical order
 	problemLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
@@ -41,6 +46,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		}
 		
 		this._appTitleService.setTitleWithTeamId("Scoreboard");
+		
+		this.scoreboardType = this._contestService.getScoreboardType();
 		
 		this.loadStandings();
 
@@ -78,8 +85,10 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		this._contestService.getStandings()
 			.pipe(takeUntil(this._unsubscribe))
 			.subscribe((standings: string) => {
-				//console.log("standings string:");
-				//console.log(standings);
+				if (DEBUG_MODE) {
+					console.log("standings string:");
+					console.log(standings);
+				}
 				this.teamStandings = this.getTeamStandingsArray(standings);
 				this.numProblems = this.getNumProblems(standings);
 				this.problemDetailHeaders = this.getProblemDetailHeaders(standings);
@@ -94,12 +103,16 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private getTeamStandingsArray(standings: any) {
 
 		const contest = standings.contestStandings ;
-		//console.log("ContestStandings element:");
-		//console.log(contest);
+		if (DEBUG_MODE){
+			console.log("ContestStandings element:");
+			console.log(contest);
+		}
 		
 		const teams = contest.teamStanding ;
-		//console.log("TeamStandings elements:");
-		//console.log(teams);
+		if (DEBUG_MODE) {
+			console.log("TeamStandings elements:");
+			console.log(teams);
+		}
 		
 		let tempArray: any = [] ;
 		
@@ -107,8 +120,10 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 			tempArray.push(temp);
 		}
 		
-//		console.log("Individual Team Standings:");
-//		console.log(tempArray);
+		if (DEBUG_MODE) {
+			console.log("Individual Team Standings:");
+			console.log(tempArray);
+		}
 		
 		return tempArray;
 	}
@@ -119,15 +134,21 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private getNumProblems(standings: any) : number {
 
 		const contest = standings.contestStandings ;
-//		console.log("getNumProblems(): ContestStandings element:");
-//		console.log(contest);
+		if (DEBUG_MODE) {
+			console.log("getNumProblems(): ContestStandings element:");
+			console.log(contest);
+		}
 		
 		const header = contest.standingsHeader ;
-//		console.log("getNumProblems(): StandingsHeader elements:");
-//		console.log(header);
+		if (DEBUG_MODE) {
+			console.log("getNumProblems(): StandingsHeader elements:");
+			console.log(header);
+		}
 		
 		const problemCount = header.problemCount;
-//		console.log ("getNumProblems(): problemCount = ", problemCount)
+		if (DEBUG_MODE){
+			console.log ("getNumProblems(): problemCount = ", problemCount)
+		}
 		return problemCount;
 	}
 	
@@ -139,12 +160,16 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private getProblemDetailHeaders(standings:any) : ProblemHeader [] {
 		
 		const contestStandings = standings.contestStandings ;
-		//console.log("ContestStandings element:");
-		//console.log(contestStandings);
+		if (DEBUG_MODE) {
+			console.log("ContestStandings element:");
+			console.log(contestStandings);
+		}
 		
 		const standingsHeader = contestStandings.standingsHeader ;
-		//console.log("ContestStandings header element:");
-		//console.log(standingsHeader);
+		if (DEBUG_MODE) {
+			console.log("ContestStandings header element:");
+			console.log(standingsHeader);
+		}
 		
 		//get the "problem" array out of standingsHeader, or use an empty array ("[]"] if the problem array is null
 		const problems = standingsHeader.problem ?? [];
@@ -222,5 +247,13 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
   	 */
   	get visibleProblemDetailHeaders() {
   		return this.isContestStarted() ? this.problemDetailHeaders as ProblemHeader[] : [];
+	}
+	
+	get isPassFail(): boolean {
+		return this._contestService.getScoreboardType() === SCOREBOARD_TYPE.PASS_FAIL;
+	}
+
+	get isPointScoring(): boolean {
+		return this._contestService.getScoreboardType() === SCOREBOARD_TYPE.POINT_SCORING;
 	}
 }
