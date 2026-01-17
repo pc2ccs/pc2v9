@@ -5,7 +5,7 @@
  * Set to null to disable debugging output; any non-null value causes debugging output.
  * NOTE: this flag should probably be set to null when creating a production release.
  */
-export const DEBUG_MODE = null ;
+export const DEBUG_MODE = true ;
  
 /**
  * Interval in minutes at which the WTI-UI will resync its clock displays with PC2
