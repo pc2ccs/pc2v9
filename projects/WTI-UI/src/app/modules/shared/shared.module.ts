@@ -1,31 +1,29 @@
 import { NgModule } from '@angular/core';
-import { LanguageSelectorComponent } from './components/language-selector/language-selector.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProblemSelectorComponent } from './components/problem-selector/problem-selector.component';
-import { AppHeaderComponent } from './components/app-header/app-header.component';
-import { AppFooterComponent } from './components/app-footer/app-footer.component';
 import { RouterModule } from '@angular/router';
-import { JudgementSelectorComponent } from './components/judgement-selector/judgement-selector.component';
+
+// Angular Material
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+
+// App components
+import { AppHeaderComponent } from './components/app-header/app-header.component';
+import { AppFooterComponent } from './components/app-footer/app-footer.component';
+import { LanguageSelectorComponent } from './components/language-selector/language-selector.component';
+import { ProblemSelectorComponent } from './components/problem-selector/problem-selector.component';
+import { JudgementSelectorComponent } from './components/judgement-selector/judgement-selector.component';
 import { AboutWtiComponent } from './components/about-wti/about-wti.component';
-import { BrowserModule } from '@angular/platform-browser';
+
+// Pipes
 import { DisplayTimePipe } from 'src/app/modules/core/services/displayTimePipe.service';
-import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
-import { ContestService } from 'src/app/modules/core/services/contest.service';
-import { ContestServiceFactory } from '../core/core.module';
-import { HttpClient } from '@angular/common/http';
 
 @NgModule({
-  providers: [
-    { provide: IContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
-    { provide: ContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
-  ],
+  providers: [],  //shared modules should not provide services; those should come from CoreModule.
   declarations: [
     AppHeaderComponent,
     AppFooterComponent,
@@ -44,8 +42,7 @@ import { HttpClient } from '@angular/common/http';
     MatSelectModule,
     MatSnackBarModule,
 	MatTooltipModule,
-    BrowserModule,
-    DisplayTimePipe
+	DisplayTimePipe
   ],
   exports: [
     AppHeaderComponent,
@@ -57,7 +54,8 @@ import { HttpClient } from '@angular/common/http';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+	MatTooltipModule
   ]
 })
 export class SharedModule { }
