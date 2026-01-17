@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -18,6 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -928,10 +930,43 @@ public class ContestController extends MainController {
 	 */
 	private String getJSONStandings(String xmlStandings) throws IOException, JSONException {
 		
-		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);;
+		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);
+		
+		//ensure that problemSummaryInfo is returned as an array even if there's only a single element
+		// (if there's a single element, XML.toJSONObject() will return an object, not an arrary;
+		//   the Angular code in WTI-UI requires an iterable)
+		
+		JSONObject standings = jsonStandingsObject.getJSONObject("standings");
+
+		Object teamStanding = standings.get("teamStanding");
+
+		if (teamStanding instanceof JSONObject) {
+			standings.put("teamStanding", Collections.singletonList(teamStanding));
+		}
+
+		// convert problemSummaryInfo objects into arrays
+		JSONArray teamArray = standings.getJSONArray("teamStanding");
+		
+		for (int i=0; i<teamArray.length(); i++) {
+			
+			JSONObject teamObj = teamArray.getJSONObject(i);
+
+		    Object problemSummaryInfo = teamObj.get("problemSummaryInfo");
+		    
+		    if (problemSummaryInfo != null) {
+		        if (!(problemSummaryInfo instanceof JSONArray)) {
+		            // Wrap single object into JSONArray
+		            JSONArray newArray = new JSONArray();
+		            newArray.put(problemSummaryInfo);
+		            teamObj.put("problemSummaryInfo", newArray);
+		        }
+		    } else {
+		        // If missing, insert empty array
+		        teamObj.put("problemSummaryInfo", new JSONArray());
+		    }
+		}
 		
 		return jsonStandingsObject.toString();
-
 	}
 
 	/**
