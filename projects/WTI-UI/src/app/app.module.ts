@@ -1,17 +1,23 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
-import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+
+// Core/Shared modules
 import { CoreModule } from './modules/core/core.module';
+import { SharedModule } from './modules/shared/shared.module';
+
+// Feature modules
 import { LoginModule } from './modules/login/login.module';
 import { RunsModule } from './modules/runs/runs.module';
 import { OptionsModule } from './modules/options/options.module';
 import { ClarificationsModule } from './modules/clarifications/clarifications.module';
 import { ScoreboardModule } from './modules/scoreboard/scoreboard.module';
-import { SharedModule } from './modules/shared/shared.module';
 
+// Components
+import { AppComponent } from './app.component';
+
+// Services
 import { AppInitService } from './modules/core/services/app-init.service';
 import { AppTitleService } from './modules/core/services/app-title.service';
 
@@ -23,6 +29,7 @@ import { AppTitleService } from './modules/core/services/app-title.service';
  * AppInitService.initializeApp(), then loading class AppComponent.
 
 */
+
 export function initializeAppFactory(appInitService: AppInitService) {
   return () => appInitService.initializeApp();
 }
@@ -30,16 +37,16 @@ export function initializeAppFactory(appInitService: AppInitService) {
 @NgModule({
   declarations: [AppComponent],
   imports: [
-    BrowserModule,
+    BrowserModule,	//Note: this should only ever be declared in AppModule
+    BrowserAnimationsModule,
     CoreModule,
-    AppRoutingModule,
     SharedModule,
+    AppRoutingModule,
     LoginModule,
     RunsModule,
     OptionsModule,
     ClarificationsModule,
-    ScoreboardModule,
-    BrowserAnimationsModule
+    ScoreboardModule
   ],
   providers: [
     AppTitleService,
