@@ -203,7 +203,9 @@ export class ContestService extends IContestService {
 		const stored = getStoredScoreboardType();
 		if (stored) {
 			this.scoreboardType = stored;
-			console.log('[ContestService] ScoreboardType restored from sessionStorage: ', stored);
+			if (DEBUG_MODE){
+				console.log('[ContestService] ScoreboardType restored from sessionStorage: ', stored);
+			}
 			return;
 		}
 
