@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -44,7 +43,6 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformation.ScoreboardType;
 import edu.csus.ecs.pc2.core.model.ElementId;
-import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -941,9 +939,11 @@ public class ContestController extends MainController {
 		Object teamStanding = standings.get("teamStanding");
 
 		if (teamStanding instanceof JSONObject) {
-			standings.put("teamStanding", Collections.singletonList(teamStanding));
+		    JSONArray teamArray = new JSONArray();
+		    teamArray.put(teamStanding);
+		    standings.put("teamStanding", teamArray);
 		}
-
+		
 		// convert problemSummaryInfo objects into arrays
 		JSONArray teamArray = standings.getJSONArray("teamStanding");
 		
@@ -966,6 +966,8 @@ public class ContestController extends MainController {
 		    }
 		}
 		
+		logger.fine("Standings JSON: " + jsonStandingsObject.toString(2));
+
 		return jsonStandingsObject.toString();
 	}
 
