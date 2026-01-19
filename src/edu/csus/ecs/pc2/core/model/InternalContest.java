@@ -2249,7 +2249,7 @@ public class InternalContest implements IInternalContest {
         // Remember scoreboard type since this can't be set once it's set
         ScoreboardType stype = this.contestInformation.getScoreboardType();
         this.contestInformation = inContestInformation;
-        this.contestInformation.setScoreboardType("score" /*stype.getType()*/);
+        this.contestInformation.setScoreboardType(stype.getType());
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.ADDED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
@@ -2259,7 +2259,7 @@ public class InternalContest implements IInternalContest {
         // Remember scoreboard type since this can't be set once it's set
         ScoreboardType stype = this.contestInformation.getScoreboardType();
         this.contestInformation = inContestInformation;
-        this.contestInformation.setScoreboardType("score" /*stype.getType()*/);
+        this.contestInformation.setScoreboardType(stype.getType());
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.CHANGED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
