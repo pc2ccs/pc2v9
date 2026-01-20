@@ -1,0 +1,10 @@
+# CLICS 2022-07 compliant 
+# Created: 2023-07-04 14:05:40 EDT
+
+id: SumH
+name: Sumit Hello Sample
+start_time:
+duration:  05:00:00
+scoreboard_freeze_duration: 01:00:00
+penalty_time: 20
+scoreboard_type: pass-fail
