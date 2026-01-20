@@ -929,43 +929,7 @@ public class ContestController extends MainController {
 	private String getJSONStandings(String xmlStandings) throws IOException, JSONException {
 		
 		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);
-		
-		//ensure that problemSummaryInfo is returned as an array even if there's only a single element
-		// (if there's a single element, XML.toJSONObject() will return an object, not an arrary;
-		//   the Angular code in WTI-UI requires an iterable)
-		
-		JSONObject standings = jsonStandingsObject.getJSONObject("standings");
-
-		Object teamStanding = standings.get("teamStanding");
-
-		if (teamStanding instanceof JSONObject) {
-		    JSONArray teamArray = new JSONArray();
-		    teamArray.put(teamStanding);
-		    standings.put("teamStanding", teamArray);
-		}
-		
-		// convert problemSummaryInfo objects into arrays
-		JSONArray teamArray = standings.getJSONArray("teamStanding");
-		
-		for (int i=0; i<teamArray.length(); i++) {
-			
-			JSONObject teamObj = teamArray.getJSONObject(i);
-
-		    Object problemSummaryInfo = teamObj.get("problemSummaryInfo");
-		    
-		    if (problemSummaryInfo != null) {
-		        if (!(problemSummaryInfo instanceof JSONArray)) {
-		            // Wrap single object into JSONArray
-		            JSONArray newArray = new JSONArray();
-		            newArray.put(problemSummaryInfo);
-		            teamObj.put("problemSummaryInfo", newArray);
-		        }
-		    } else {
-		        // If missing, insert empty array
-		        teamObj.put("problemSummaryInfo", new JSONArray());
-		    }
-		}
-		
+	
 		logger.fine("Standings JSON: " + jsonStandingsObject.toString(2));
 
 		return jsonStandingsObject.toString();
