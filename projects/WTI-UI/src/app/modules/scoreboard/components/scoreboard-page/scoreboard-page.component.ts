@@ -8,6 +8,7 @@ import { DEBUG_MODE } from 'src/constants';
 import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
 import { SCOREBOARD_TYPE } from 'src/constants';
 import type { ScoreboardType } from 'src/constants';
+import { ensureArray } from 'src/app/modules/core/utils/json-utils';
 
 interface ProblemHeader {
     label: string;
@@ -108,7 +109,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 			console.log(contest);
 		}
 		
-		const teams = contest.teamStanding ;
+		const teams = ensureArray(contest.teamStanding) ;
 		if (DEBUG_MODE) {
 			console.log("TeamStandings elements:");
 			console.log(teams);
@@ -116,8 +117,9 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		
 		let tempArray: any = [] ;
 		
-		for (let temp of teams) {
-			tempArray.push(temp);
+		for (let team of teams) {
+			team.problemSummaryInfo = ensureArray(team.problemSummaryInfo);
+			tempArray.push(team);
 		}
 		
 		if (DEBUG_MODE) {
@@ -171,8 +173,20 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 			console.log(standingsHeader);
 		}
 		
-		//get the "problem" array out of standingsHeader, or use an empty array ("[]"] if the problem array is null
-		const problems = standingsHeader.problem ?? [];
+		//create an array containing the problems from standingsHeader, or an empty array ("[]"] if the problem array is null
+		
+		const problemsRaw = standingsHeader.problem;
+
+		let problems: any[];
+
+		if (Array.isArray(problemsRaw)) {
+  			problems = problemsRaw;
+		} else if (problemsRaw) {
+  			problems = [problemsRaw];
+		} else {
+  			problems = [];
+		}
+
 		
 		//Build an array of problem detail headers by looking at every problem in the "problem" array
   		const headers: ProblemHeader[] = problems
