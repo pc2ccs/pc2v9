@@ -55,7 +55,7 @@
         				>
 
       					<ng-container *ngIf="problem.isSolved; else notSolved">
-        					{{ problem.attempts }}/{{ problem.solutionTime }}
+        					{{ problem.attempts }}/{{ problem.score | number:'1.3-3' }}
       					</ng-container>
 
       					<ng-template #notSolved>
