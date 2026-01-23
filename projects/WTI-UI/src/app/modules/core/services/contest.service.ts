@@ -224,7 +224,9 @@ export class ContestService extends IContestService {
 			this.scoreboardType = clientValue;
 			saveStoredScoreboardType(clientValue);
 
-			console.log('[ContestService] ScoreboardType initialized from server:', clientValue);
+			if (DEBUG_MODE){
+				console.log('[ContestService] ScoreboardType initialized from server:', clientValue);	
+			}
 		} catch (err) {
 			console.error('[ContestService] Failed to initialize ScoreboardType', err);
 			throw err; // important so APP_INITIALIZER can fail loudly if needed
