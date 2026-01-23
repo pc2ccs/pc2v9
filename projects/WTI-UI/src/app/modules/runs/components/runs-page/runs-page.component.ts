@@ -12,6 +12,7 @@ import { AppTitleService } from 'src/app/modules/core/services/app-title.service
 import { SCOREBOARD_TYPE } from 'src/constants';
 import type { ScoreboardType } from 'src/constants';
 import { DEBUG_MODE } from 'src/constants';
+import { ScoreboardModeService } from 'src/app/modules/core/services/scoreboard-mode.service';
 
 
 @Component({
@@ -31,7 +32,8 @@ export class RunsPageComponent implements OnInit, OnDestroy {
               private _teamService: ITeamsService,
               private _contestService: IContestService,
               private _matDialog: MatDialog,
-			  private _appTitleService: AppTitleService) { 
+			  private _appTitleService: AppTitleService,
+			  private _scoreboardMode: ScoreboardModeService) { 
 				
 				if (DEBUG_MODE) {
 					console.log('[RunsPageComponent constructor] ContestService instance:', this._contestService);
@@ -134,13 +136,12 @@ export class RunsPageComponent implements OnInit, OnDestroy {
 	this.filteredRuns = this.runs;
   }
 
+	get isPassFail(): boolean {
+		return this._scoreboardMode.isPassFail();
+	}
 
-  get isPassFail(): boolean {
-    return this._contestService.getScoreboardType() === SCOREBOARD_TYPE.PASS_FAIL;
-  }
-
-  get isPointScoring(): boolean {
-    return this._contestService.getScoreboardType() === SCOREBOARD_TYPE.POINT_SCORING;
-  }
+	get isPointScoring(): boolean {
+		return this._scoreboardMode.isPointScoring();
+	}
 
 }

@@ -9,6 +9,7 @@ import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service
 import { SCOREBOARD_TYPE } from 'src/constants';
 import type { ScoreboardType } from 'src/constants';
 import { ensureArray } from 'src/app/modules/core/utils/json-utils';
+import { ScoreboardModeService } from 'src/app/modules/core/services/scoreboard-mode.service';
 
 interface ProblemHeader {
     label: string;
@@ -38,7 +39,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	constructor(
 		private _contestService: IContestService,
 		private _appTitleService: AppTitleService,
-		private _uiHelper: UiHelperService) { }
+		private _uiHelper: UiHelperService,
+		private _scoreboardMode: ScoreboardModeService) { }
 
 	ngOnInit(): void {
 
@@ -264,10 +266,11 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	}
 	
 	get isPassFail(): boolean {
-		return this._contestService.getScoreboardType() === SCOREBOARD_TYPE.PASS_FAIL;
+		return this._scoreboardMode.isPassFail();
 	}
 
 	get isPointScoring(): boolean {
-		return this._contestService.getScoreboardType() === SCOREBOARD_TYPE.POINT_SCORING;
+		return this._scoreboardMode.isPointScoring();
 	}
+
 }
