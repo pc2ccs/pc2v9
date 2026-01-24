@@ -1049,6 +1049,11 @@ public class ContestInformation implements Serializable{
 
     /**
      * Set contest scoreboard type based on the string passed in.
+     * 
+     * If the received string does not match any of the values defined in {@link ScoreboardType},
+     * no change is made to the recorded scoreboardType.  
+     * TODO:  Arguably, this should be changed by adding "UNDEFINED" as a ScoreboardType
+     * and setting to that, with appropriate error logging, if an unknown string is received.
      *
      * @param type one of "pass-fail" or "score", currently.
      */
