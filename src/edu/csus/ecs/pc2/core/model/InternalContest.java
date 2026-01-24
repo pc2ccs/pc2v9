@@ -2246,20 +2246,20 @@ public class InternalContest implements IInternalContest {
 
     @Override
     public void addContestInformation(ContestInformation inContestInformation) {
-        // Remember scoreboard type since this can't be changed once it's set
+        // Remember scoreboard type since this can't be set once it's set
         ScoreboardType stype = this.contestInformation.getScoreboardType();
         this.contestInformation = inContestInformation;
-        this.contestInformation.setScoreboardType(stype.getType());
+        this.contestInformation.setScoreboardType("score" /*stype.getType()*/);
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.ADDED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
 
     @Override
     public void updateContestInformation(ContestInformation inContestInformation) {
-        // Remember scoreboard type since this can't be changed once it's set
+        // Remember scoreboard type since this can't be set once it's set
         ScoreboardType stype = this.contestInformation.getScoreboardType();
         this.contestInformation = inContestInformation;
-        this.contestInformation.setScoreboardType(stype.getType());
+        this.contestInformation.setScoreboardType("score" /*stype.getType()*/);
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.CHANGED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
