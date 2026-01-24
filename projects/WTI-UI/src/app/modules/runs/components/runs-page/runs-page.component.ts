@@ -144,4 +144,8 @@ export class RunsPageComponent implements OnInit, OnDestroy {
 		return this._scoreboardMode.isPointScoring();
 	}
 
+	hasAcceptedJudgement(run: Run): boolean {
+		return !!run.judgement && run.judgement.toLowerCase() === 'accepted';
+	}
+
 }
