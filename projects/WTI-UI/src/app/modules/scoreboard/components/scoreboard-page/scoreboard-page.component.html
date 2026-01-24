@@ -29,7 +29,7 @@
                 
                 <ng-container *ngIf="isPassFail"> 
                 	<th style="text-align: center">Solved</th>
-                	<th style="text-align: center">Score</th>
+                	<th style="text-align: center">Time</th>
   				</ng-container>
   				
 				<ng-container *ngIf="isPointScoring"> 
@@ -53,11 +53,19 @@
           					'pending': !problem.isSolved && problem.isPending
         					}"
         				>
+ 
+ 						<ng-container *ngIf="problem.isSolved; else notSolved">
 
-      					<ng-container *ngIf="problem.isSolved; else notSolved">
-        					{{ problem.attempts }}/{{ problem.score | number:'1.3-3' }}
-      					</ng-container>
+  							<ng-container *ngIf="isPassFail"> 
+  								{{ problem.attempts }}/{{ problem.points }}
+  							</ng-container>
 
+  							<ng-container *ngIf="isPointScoring">
+    							{{ problem.attempts }}/{{ problem.score | number:'1.3-3' }} <!-- At least one whole digit; exactly 3 fractional digits -->
+  							</ng-container>
+
+						</ng-container>
+ 
       					<ng-template #notSolved>
         					{{ problem.attempts }}/--
       					</ng-template>
