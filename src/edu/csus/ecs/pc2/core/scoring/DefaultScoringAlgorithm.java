@@ -1009,6 +1009,29 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             finalizeData = FinalizeData.getDefaultFinalizeData();
         }
 
+        // First one, handle it special to make the for loop below easier.  Basically, we're priming the pump here (prev).
+        if (numRecs > 0) {
+            sr = srArray[idx];
+            sr.setRankNumber(rank);
+            prev = sr;
+            idx++;
+        }
+
+        int numInBlock = 0;
+
+        // We always rank teams uniquely that get medals, and, the first team AFTER the medals is assigned
+        // its own rank as well.
+        int alwaysRanked = finalizeData.getBronzeRank();
+
+        if(finalizeData.getHonorSolvedCount() > 0) {
+            median = finalizeData.getHonorSolvedCount();
+        }
+
+        if(Utilities.isDebugMode()) {
+            System.err.printf("assignRankBlock: alwaysRanked=%d median=%d%n", alwaysRanked, median);
+        }
+        for(; idx < numRecs; idx++) {
+            sr = srArray[idx];
             if(Utilities.isDebugMode()) {
                 System.err.printf("  rank=%d sr.getNumberSolved=%d prev.getNumberSolver=%d numInBlock=%d%n",
                         rank, sr.getNumberSolved(), prev.getNumberSolved(), numInBlock);
