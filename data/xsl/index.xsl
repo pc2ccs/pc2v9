@@ -234,7 +234,14 @@
 								</xsl:if>
 							</xsl:if>
 						</xsl:if>
-						<xsl:value-of select="@rank"/>
+						<xsl:choose>
+							<xsl:when test="@isHonorable = 'true' and /contestStandings/standingsHeader/@scoreboardMessage = 'Final Scoreboard'">
+								HM
+						    </xsl:when>
+						    <xsl:otherwise>
+						    	<xsl:value-of select="@rank"/>
+						    </xsl:otherwise>
+						</xsl:choose>
 					</td>
 					<td>
 						<xsl:if test="@isGold = 'true'">
@@ -342,7 +349,14 @@
 								</xsl:if>
 							</xsl:if>
 						</xsl:if>
-						<xsl:value-of select="@rank"/>
+						<xsl:choose>
+							<xsl:when test="@isHonorable = 'true' and /contestStandings/standingsHeader/@scoreboardMessage = 'Final Scoreboard'">
+								HM
+						    </xsl:when>
+						    <xsl:otherwise>
+						    	<xsl:value-of select="@rank"/>
+						    </xsl:otherwise>
+						</xsl:choose>
 					</td>
 					<td>
 						<xsl:if test="@isGold = 'true'">

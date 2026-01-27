@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -736,12 +736,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
             ignoreSub = false;
 
-            if (run.isJudged()) {
-                numberJudged++;
-            } else {
-                numberPending++;
-            }
-
             if (run.isSolved() && solutionTime == 0) {
                 // set to solved, set solution time
                 solved = true;
@@ -769,6 +763,15 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                 } else {
                     submissionsBeforeYes++;
                 }
+            }
+
+            if (run.isJudged()) {
+                // Only count as judged run if not ignoring it.
+                if(!ignoreSub) {
+                    numberJudged++;
+                }
+            } else {
+                numberPending++;
             }
 
             if(!ignoreSub) {
