@@ -3,10 +3,13 @@ import { IContestService } from 'src/app/modules/core/abstract-services/i-contes
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
-import { saveCurrentPage } from 'src/app/app.component';
 import * as Constants from 'src/constants';
 import { DEBUG_MODE } from 'src/constants';
 import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
+import { SCOREBOARD_TYPE } from 'src/constants';
+import type { ScoreboardType } from 'src/constants';
+import { ensureArray } from 'src/app/modules/core/utils/json-utils';
+import { ScoreboardModeService } from 'src/app/modules/core/services/scoreboard-mode.service';
 
 interface ProblemHeader {
     label: string;
@@ -26,6 +29,9 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	numProblems: number = 0;
 	problemDetailHeaders: ProblemHeader[] = [];
 	
+	readonly SCOREBOARD_TYPE = SCOREBOARD_TYPE;
+	scoreboardType!: ScoreboardType;
+
 	//TODO: provide support for more than 26 problems
 	//TODO: provide support for the possibility that problems are not listed in alphabetical order
 	problemLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
@@ -33,7 +39,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	constructor(
 		private _contestService: IContestService,
 		private _appTitleService: AppTitleService,
-		private _uiHelper: UiHelperService) { }
+		private _uiHelper: UiHelperService,
+		private _scoreboardMode: ScoreboardModeService) { }
 
 	ngOnInit(): void {
 
@@ -43,9 +50,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		
 		this._appTitleService.setTitleWithTeamId("Scoreboard");
 		
-        	//indicate that this Scoreboard page is the most recently accessed page
-        	saveCurrentPage(Constants.SCOREBOARD_PAGE);
-
+		this.scoreboardType = this._contestService.getScoreboardType();
+		
 		this.loadStandings();
 
 		// when standings are updated, trigger a reload
@@ -82,8 +88,10 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		this._contestService.getStandings()
 			.pipe(takeUntil(this._unsubscribe))
 			.subscribe((standings: string) => {
-				//console.log("standings string:");
-				//console.log(standings);
+				if (DEBUG_MODE) {
+					console.log("standings string:");
+					console.log(standings);
+				}
 				this.teamStandings = this.getTeamStandingsArray(standings);
 				this.numProblems = this.getNumProblems(standings);
 				this.problemDetailHeaders = this.getProblemDetailHeaders(standings);
@@ -98,21 +106,28 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private getTeamStandingsArray(standings: any) {
 
 		const contest = standings.contestStandings ;
-		//console.log("ContestStandings element:");
-		//console.log(contest);
+		if (DEBUG_MODE){
+			console.log("ContestStandings element:");
+			console.log(contest);
+		}
 		
-		const teams = contest.teamStanding ;
-		//console.log("TeamStandings elements:");
-		//console.log(teams);
+		const teams = ensureArray(contest.teamStanding) ;
+		if (DEBUG_MODE) {
+			console.log("TeamStandings elements:");
+			console.log(teams);
+		}
 		
 		let tempArray: any = [] ;
 		
-		for (let temp of teams) {
-			tempArray.push(temp);
+		for (let team of teams) {
+			team.problemSummaryInfo = ensureArray(team.problemSummaryInfo);
+			tempArray.push(team);
 		}
 		
-//		console.log("Individual Team Standings:");
-//		console.log(tempArray);
+		if (DEBUG_MODE) {
+			console.log("Individual Team Standings:");
+			console.log(tempArray);
+		}
 		
 		return tempArray;
 	}
@@ -123,15 +138,21 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private getNumProblems(standings: any) : number {
 
 		const contest = standings.contestStandings ;
-//		console.log("getNumProblems(): ContestStandings element:");
-//		console.log(contest);
+		if (DEBUG_MODE) {
+			console.log("getNumProblems(): ContestStandings element:");
+			console.log(contest);
+		}
 		
 		const header = contest.standingsHeader ;
-//		console.log("getNumProblems(): StandingsHeader elements:");
-//		console.log(header);
+		if (DEBUG_MODE) {
+			console.log("getNumProblems(): StandingsHeader elements:");
+			console.log(header);
+		}
 		
 		const problemCount = header.problemCount;
-//		console.log ("getNumProblems(): problemCount = ", problemCount)
+		if (DEBUG_MODE){
+			console.log ("getNumProblems(): problemCount = ", problemCount)
+		}
 		return problemCount;
 	}
 	
@@ -143,15 +164,31 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private getProblemDetailHeaders(standings:any) : ProblemHeader [] {
 		
 		const contestStandings = standings.contestStandings ;
-		//console.log("ContestStandings element:");
-		//console.log(contestStandings);
+		if (DEBUG_MODE) {
+			console.log("ContestStandings element:");
+			console.log(contestStandings);
+		}
 		
 		const standingsHeader = contestStandings.standingsHeader ;
-		//console.log("ContestStandings header element:");
-		//console.log(standingsHeader);
+		if (DEBUG_MODE) {
+			console.log("ContestStandings header element:");
+			console.log(standingsHeader);
+		}
 		
-		//get the "problem" array out of standingsHeader, or use an empty array ("[]"] if the problem array is null
-		const problems = standingsHeader.problem ?? [];
+		//create an array containing the problems from standingsHeader, or an empty array ("[]"] if the problem array is null
+		
+		const problemsRaw = standingsHeader.problem;
+
+		let problems: any[];
+
+		if (Array.isArray(problemsRaw)) {
+  			problems = problemsRaw;
+		} else if (problemsRaw) {
+  			problems = [problemsRaw];
+		} else {
+  			problems = [];
+		}
+
 		
 		//Build an array of problem detail headers by looking at every problem in the "problem" array
   		const headers: ProblemHeader[] = problems
@@ -227,4 +264,13 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
   	get visibleProblemDetailHeaders() {
   		return this.isContestStarted() ? this.problemDetailHeaders as ProblemHeader[] : [];
 	}
+	
+	get isPassFail(): boolean {
+		return this._scoreboardMode.isPassFail();
+	}
+
+	get isPointScoring(): boolean {
+		return this._scoreboardMode.isPointScoring();
+	}
+
 }

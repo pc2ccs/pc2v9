@@ -4,7 +4,7 @@ import { ContestLanguage } from '../models/contest-language';
 import { ContestProblem } from '../models/contest-problem';
 import { ContestClock } from '../models/contest-clock';
 import { Clarification } from '../models/clarification';
-import { DEBUG_MODE } from 'src/constants';
+import { DEBUG_MODE, ScoreboardType } from 'src/constants';
 
 @Injectable({
 	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
@@ -68,4 +68,7 @@ export abstract class IContestService {
   abstract markStandingsOutOfDate(): void;
 
   abstract getStandingsAreCurrentFlag() : boolean;
+  
+  abstract getScoreboardType() : ScoreboardType;
+  abstract initializeScoreboardType(): Promise<void>;
 }

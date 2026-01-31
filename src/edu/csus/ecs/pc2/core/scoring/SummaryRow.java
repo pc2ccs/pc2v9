@@ -2,8 +2,10 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -64,4 +66,27 @@ public class SummaryRow implements Serializable {
         Arrays.sort(keys);
         return keys;
     }
+    
+    /**
+     * Returns a list of the {@link ProblemSummaryInfo}s currently stored in this SummaryRow.
+     * The returned list is ordered by increasing value of the (integer) problemNumber which was 
+     * originally used to insert ProblemSummaryInfos into the SummaryRow.
+     * 
+     * This method is useful when external code (for example, a JSON serializer) needs an
+     * Iterable list of ProblemSummaryInfos (instead of a non-iterable Map, which is how 
+     * ProblemSummaryInfos are stored internally).
+     *  
+     * @return an iterable list of current ProblemSummaryInfo's.
+     */
+    public List<ProblemSummaryInfo> toOrderedList() {
+        Integer[] keys = getSortedKeys();
+        List<ProblemSummaryInfo> result = new ArrayList<>(keys.length);
+
+        for (Integer key : keys) {
+            result.add(listOfSummaryInfo.get(key));
+        }
+
+        return result;
+    }
+
 }

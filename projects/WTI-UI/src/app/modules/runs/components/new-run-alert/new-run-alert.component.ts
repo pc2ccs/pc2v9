@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
 import { Run } from 'src/app/modules/core/models/run';
 import { Subject } from 'rxjs';
+import { ScoreboardModeService } from 'src/app/modules/core/services/scoreboard-mode.service';
 
 @Component({
   selector: 'app-new-run-alert',
@@ -17,10 +18,13 @@ export class NewRunAlertComponent implements OnInit {
   problem: string;
   judgement: string;
   isPreliminary: boolean;
+  isSolved: boolean;
+  score?: number;
 
   constructor(private _matDialogRef: MatDialogRef<NewRunAlertComponent>,
               private _router: Router,
               private _teamsService: ITeamsService,
+              private _scoreboardMode: ScoreboardModeService,
               @Inject(MAT_DIALOG_DATA) private _data: any) { }
 
   ngOnInit() {
@@ -50,7 +54,23 @@ export class NewRunAlertComponent implements OnInit {
           this.problem = latest.problem;
           this.judgement = latest.judgement;
           this.isPreliminary = latest.isPreliminary;
+          this.isSolved = latest.isSolved;
+          this.score = latest.score;
         }
       });
   }
+  
+  	/** Indicates whether the score should be shown in the Alert */
+	get showScore(): boolean {
+		return this.isPointScoring && this.isSolved && this.score !== undefined;
+	}
+
+	get isPassFail(): boolean {
+		return this._scoreboardMode.isPassFail();
+	}
+
+	get isPointScoring(): boolean {
+		return this._scoreboardMode.isPointScoring();
+	}
+  
 }

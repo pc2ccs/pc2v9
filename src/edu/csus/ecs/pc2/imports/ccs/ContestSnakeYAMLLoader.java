@@ -1324,6 +1324,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
+
     @Override
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator) {
         loadProblemInformationAndDataFiles(contest, baseDirectoryName, problem, overrideUsePc2Validator, false);
@@ -1539,7 +1540,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
             Integer clicsTimeout = ContestImportUtilities.fetchIntValue(limitsContent, TIMEOUT_KEY);
             if (clicsTimeout != null) {
-                problem.setTimeOutInSeconds(clicsTimeout);
+                problem.setTimeOutInSeconds(clicsTimeout.intValue());
             }
 
             //check for a CLICS maxoutput limit - the value is in MiB
