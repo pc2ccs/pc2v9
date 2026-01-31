@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
 import java.io.IOException;
@@ -35,10 +35,8 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  * Implementation for IRun.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class RunImplementation implements IRun {
 
     private boolean solved;
@@ -93,6 +91,11 @@ public class RunImplementation implements IRun {
      * false means process all records per usual. 
      */
     private boolean respectSendToTeam = false;
+
+    /**
+     * The score assigned to this run -- applicable only for point-scoring contests.
+     */
+    private double score;
     
     public RunImplementation(Run inRun, IInternalContest internalContest, IInternalController controller) {
 
@@ -139,6 +142,7 @@ public class RunImplementation implements IRun {
             preliminaryJudged = lastRunJudgement.isPreliminaryJudgement();
             finalJudged = !preliminaryJudged;
             judgementTitle = getJudgementTitle(run);
+            score = lastRunJudgement.getScore();
         }
     }
     
@@ -450,5 +454,16 @@ public class RunImplementation implements IRun {
     
     public ElementId getElementId() {
         return elementId;
+    }
+
+    /**
+     * Return the most recent "score" associated with this run.
+     * Note that the value returned by this method is only relevant in point-scoring contests.
+     * 
+     * @return a double containing the score.
+     */
+    @Override
+    public double getScore() {
+        return score;
     }
 }

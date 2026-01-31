@@ -6,6 +6,8 @@ import { ContestProblem } from '../models/contest-problem';
 import { Clarification } from '../models/clarification';
 import { ContestClock } from '../models/contest-clock';
 import { DEBUG_MODE } from 'src/constants';
+import { ScoreboardType, SCOREBOARD_TYPE } from 'src/constants';
+
 
 @Injectable()
 export class ContestMockService extends IContestService {
@@ -15,8 +17,11 @@ export class ContestMockService extends IContestService {
 			console.log ("Executing ContestMockService constructor; preparing to call IContestService.super()") ;
 		}
 		super();
+		this.scoreboardType = SCOREBOARD_TYPE.PASS_FAIL;
 	}
 
+  private scoreboardType!: ScoreboardType;
+  
   getLanguages(): Observable<ContestLanguage[]> {
     return of<ContestLanguage[]>([
       { id: '1', name: 'Java' },
@@ -121,5 +126,24 @@ export class ContestMockService extends IContestService {
 	getStandingsAreCurrentFlag() : boolean {
 		return true ;
 	}
+	
+  /**
+   * Mock initialization — no HTTP, no storage
+   */
+  async initializeScoreboardType(): Promise<void> {
+    // Keep async contract but complete immediately
+    this.scoreboardType = SCOREBOARD_TYPE.PASS_FAIL;
+    if (DEBUG_MODE) {
+      console.log('[ContestMockService] initializeScoreboardType set to PASS_FAIL');
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * Return the mock scoreboard type
+   */
+  getScoreboardType(): ScoreboardType {
+    return this.scoreboardType;
+  }
 
 }

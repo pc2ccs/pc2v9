@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -157,6 +159,8 @@ public class ContestInformation implements Serializable{
         private ScoreboardType(String type) {
             this.type = type;
         }
+        
+        @JsonValue
         public String getType() {
             return type;
         }
@@ -1045,6 +1049,11 @@ public class ContestInformation implements Serializable{
 
     /**
      * Set contest scoreboard type based on the string passed in.
+     * 
+     * If the received string does not match any of the values defined in {@link ScoreboardType},
+     * no change is made to the recorded scoreboardType.  
+     * TODO:  Arguably, this should be changed by adding "UNDEFINED" as a ScoreboardType
+     * and setting to that, with appropriate error logging, if an unknown string is received.
      *
      * @param type one of "pass-fail" or "score", currently.
      */

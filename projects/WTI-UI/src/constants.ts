@@ -53,6 +53,11 @@ export const BASE_URL_KEY = 'baseURL';
 export const WEBSOCKET_URL_KEY = 'websocketURL';
 
 /**
+ * The key under which the contest scoreboard type (e.g. pass-fail or point-scoring) is stored in sessionStorage.
+ */
+export const SCOREBOARD_TYPE_KEY = 'scoreboardType';
+
+/**
  * Interface defining the structure of UI options, for robustness/generality in other modules.
  */
 export interface UiOptions {
@@ -62,3 +67,12 @@ export interface UiOptions {
 
 export const DEFAULT_SHOW_RUNS_POPUP = true;
 export const DEFAULT_SHOW_CLARS_POPUP = true;
+
+export const SCOREBOARD_TYPE = {
+  PASS_FAIL: "pass-fail",
+  POINT_SCORING: "point-scoring",
+} as const;
+
+export type ScoreboardType =
+  typeof SCOREBOARD_TYPE[keyof typeof SCOREBOARD_TYPE];
+

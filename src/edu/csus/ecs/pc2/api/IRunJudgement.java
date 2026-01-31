@@ -1,14 +1,12 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
 
 /**
  * A run judgement and fields associated with that judgement.
  *  
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public interface IRunJudgement {
     
     /**
@@ -78,5 +76,13 @@ public interface IRunJudgement {
      * @return true if the run was judged by the Judges as having correctly solved a problem, false otherwise.
      */
     boolean isSolved();
+    
+    /**
+     * Return the "score" associated with this run judgement.
+     * Note that the value returned by this method is only relevant in point-scoring contests.
+     * 
+     * @return a double containing the score attached to this run judgement.
+     */
+    double getScore();
     
 }

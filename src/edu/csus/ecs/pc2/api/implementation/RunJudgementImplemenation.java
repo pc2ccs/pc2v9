@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
 import edu.csus.ecs.pc2.api.IClient;
@@ -16,10 +16,8 @@ import edu.csus.ecs.pc2.core.model.Run;
  * A single judgement.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class RunJudgementImplemenation implements IRunJudgement {
 
     private JudgementRecord record = null;
@@ -74,5 +72,17 @@ public class RunJudgementImplemenation implements IRunJudgement {
     
     public IClient getJudge(){
         return new ClientImplementation(record.getJudgerClientId(), internalContest);
+    }
+
+    /**
+     * Return the "score" associated with this run judgement.
+     * Note that the value returned by this method is only relevant in point-scoring contests.
+     * 
+     * @return a double containing the score attached to this run judgement.
+     */
+    @Override
+    public double getScore() {
+        double score = record.getScore();
+        return score;
     }
 }
