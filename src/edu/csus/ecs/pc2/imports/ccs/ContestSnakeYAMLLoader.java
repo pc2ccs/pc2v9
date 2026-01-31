@@ -1538,7 +1538,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             //check for a timeout limit within the CLICS "limits:" section.
             // Note that the presence of a "timeout:" entry within a CLICS
             // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
-            Integer clicsTimeout = ContestImportUtilities.fetchIntValue(limitsContent, TIMEOUT_KEY);
+            Double clicsTimeout = ContestImportUtilities.fetchDoubleValue(limitsContent, TIMEOUT_KEY);
             if (clicsTimeout != null) {
                 problem.setTimeOutInSeconds(clicsTimeout.intValue());
             }
