@@ -25,10 +25,6 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	numProblems: number = 0;
 	problemDetailHeaders: ProblemHeader[] = [];
 	
-	//TODO: provide support for more than 26 problems
-	//TODO: provide support for the possibility that problems are not listed in alphabetical order
-	problemLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-
 	constructor(
 		private _contestService: IContestService,
 		private _appTitleService: AppTitleService,

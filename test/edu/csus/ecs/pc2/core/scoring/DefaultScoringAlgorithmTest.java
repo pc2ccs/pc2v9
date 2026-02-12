@@ -157,6 +157,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
         // Add Problem
         Problem problem = new Problem("Problem One");
+        problem.setLetter("A");
         contest.addProblem(problem);
 
         // Add Language
@@ -225,6 +226,8 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             char letter = 'A';
             letter += i;
             Problem problem = new Problem(""+letter);
+            //the above constructor sets the DISPLAY NAME as the letter, but it doesn't set the actual "letter" field, so:
+            problem.setLetter(""+letter);
             contest.addProblem(problem);
         }
 

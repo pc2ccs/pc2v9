@@ -22,5 +22,4 @@ cacerts.pc2
 
 projects/*.gz
 projects/*.zip
-projects/WTI-UI/package-lock.json
 projects/WTI-UI/.angular/
