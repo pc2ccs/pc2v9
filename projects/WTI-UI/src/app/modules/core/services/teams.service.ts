@@ -14,31 +14,51 @@ import { DEBUG_MODE } from 'src/constants';
 	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
 })
 export class TeamsService extends ITeamsService {
-	
-  constructor(private _httpClient: HttpClient) {
-    super();
-    if (DEBUG_MODE) {
-    	console.log ("Executing TeamsService constructor") ;
-    }
-  }
 
-  login(loginCredentials: LoginCredentials): Observable<TeamsLoginResponse> {
-    return this._httpClient.post<TeamsLoginResponse>(`${environment.baseUrl}/teams/login`, loginCredentials);
-  }
+	constructor(private _httpClient: HttpClient) {
+		super();
+		if (DEBUG_MODE) {
+			console.log("Executing TeamsService constructor...");
+			const environmentCopy = JSON.parse(JSON.stringify(environment));
+			console.log('...Environment Object (Deep Copy):', environmentCopy);
+		}
+	}
 
-  logout(): Observable<any> {
-    return this._httpClient.delete<any>(`${environment.baseUrl}/teams/logout`);
-  }
+	login(loginCredentials: LoginCredentials): Observable<TeamsLoginResponse> {
+		if (DEBUG_MODE) {
+			console.log("Executing TeamsService.login()...");
+			console.log("...environment is:");
+			const environmentCopy = JSON.parse(JSON.stringify(environment));
+			console.log(environmentCopy);
+		}
 
-  submitRun(submission: Submission): Observable<any> {
-    return this._httpClient.post<Submission>(`${environment.baseUrl}/teams/run`, submission);
-  }
+		if (DEBUG_MODE) {
+			console.log(`Invoking HttpClient.post() with URL ${environment.baseUrl}/teams/login`);
+		}
+		let resp = this._httpClient.post<TeamsLoginResponse>(`${environment.baseUrl}/teams/login`, loginCredentials);
+		if (DEBUG_MODE) {
+			console.log("Response from HttClient:");
+			console.log(resp);
+			console.log("Environment following HTTPClient response is:");
+			const environmentCopy = JSON.parse(JSON.stringify(environment));
+			console.log(environmentCopy);
+		}
+		return resp;
+	}
 
-  getRuns(): Observable<Run[]> {
-    return this._httpClient.get<Run[]>(`${environment.baseUrl}/teams/run`);
-  }
+	logout(): Observable<any> {
+		return this._httpClient.delete<any>(`${environment.baseUrl}/teams/logout`);
+	}
 
-  postClarification(clarification: NewClarification): Observable<any> {
-    return this._httpClient.post<NewClarification>(`${environment.baseUrl}/teams/clarification`, clarification);
-  }
+	submitRun(submission: Submission): Observable<any> {
+		return this._httpClient.post<Submission>(`${environment.baseUrl}/teams/run`, submission);
+	}
+
+	getRuns(): Observable<Run[]> {
+		return this._httpClient.get<Run[]>(`${environment.baseUrl}/teams/run`);
+	}
+
+	postClarification(clarification: NewClarification): Observable<any> {
+		return this._httpClient.post<NewClarification>(`${environment.baseUrl}/teams/clarification`, clarification);
+	}
 }

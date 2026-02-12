@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 import { ContestClock } from 'src/app/modules/core/models/contest-clock';
+import { environment } from 'src/environments/environment';
 import { DEBUG_MODE } from 'src/constants';
 
 /*
@@ -33,105 +34,146 @@ and invokes the ContestService to determine whether the contest clock is running
 the list of contest problems).
 */
 @Component({
-  templateUrl: './login-page.component.html',
-  styleUrls: ['./login-page.component.scss']
+	templateUrl: './login-page.component.html',
+	styleUrls: ['./login-page.component.scss']
 })
 export class LoginPageComponent implements OnInit, OnDestroy {
-  _unsubscribe = new Subject<void>();
-  formGroup: FormGroup;
-  invalidCreds = false;
-  loginStarted = false;
-  contestClock: ContestClock = new ContestClock();
+	_unsubscribe = new Subject<void>();
+	formGroup: FormGroup;
+	invalidCreds = false;
+	loginStarted = false;
+	contestClock: ContestClock = new ContestClock();
 
-  constructor(private _formBuilder: FormBuilder,
-              private _authService: AuthService,
-              private _websocketService: IWebsocketService,
-              private _router: Router,
-              private _contestService: IContestService,
-			  private _appTitleService: AppTitleService) { 
-	  console.log("Executing LoginPageComponent constructor");
-  }
+	constructor(private _formBuilder: FormBuilder,
+		private _authService: AuthService,
+		private _websocketService: IWebsocketService,
+		private _router: Router,
+		private _contestService: IContestService,
+		private _appTitleService: AppTitleService) {
+		if (DEBUG_MODE) {
+			console.log("Executing LoginPageComponent constructor...");
+			console.log("...environment:");
+			const environmentCopy = JSON.parse(JSON.stringify(environment));
+			console.log(environmentCopy);
+		}
+	}
 
-  ngOnInit(): void {
-	
-	  console.log ("Executing LoginPageComponent.ngOnInit()");
-	  
-	this._appTitleService.setTitleWithTeamId("Login");
+	ngOnInit(): void {
+		if (DEBUG_MODE) {
+			console.log("Executing LoginPageComponent.ngOnInit()...");
+			console.log("...environment:");
+			const environmentCopy = JSON.parse(JSON.stringify(environment));
+			console.log(environmentCopy);
+		}
 
-	if (this._authService.token) { 
-    		this._router.navigateByUrl(this._authService.defaultRoute); 
-	  }
+		this._appTitleService.setTitleWithTeamId("Login");
 
-	this.buildForm();
-  }
+		if (this._authService.token) {
+			this._router.navigateByUrl(this._authService.defaultRoute);
+		}
 
-  ngOnDestroy(): void {
+		this.buildForm();
+	}
+
+	ngOnDestroy(): void {
 		this._unsubscribe.next();
 		this._unsubscribe.complete();
-  }
+	}
 
-  onSubmit(): void {
-	  console.log ("Entering LoginPageComponent.onSubmit()");
-    this.loginStarted = true;
-    const loginCreds = new LoginCredentials();
-    loginCreds.teamName = this.formGroup.get('username').value;
-    loginCreds.password = this.formGroup.get('password').value;
-    this._authService.login(loginCreds)
-      .pipe(takeUntil(this._unsubscribe))
-      .subscribe((result: TeamsLoginResponse) => {
+	onSubmit(): void {
+		if (DEBUG_MODE) {
+			console.log("Entering LoginPageComponent.onSubmit()...");
+			console.log("...environment:");
+			const environmentCopy = JSON.parse(JSON.stringify(environment));
+			console.log(environmentCopy);
+		}
 
-    	  console.log("LoginPageComponent.onSubmit(): received callback from authService.login()");
-    	  console.log ("LoginPageComponent.onSubmit(): invoking authService.completeLogin()");
-        this._authService.completeLogin(result.teamId, result.teamName);
-		  console.log ("LoginPageComponent.onSubmit(): invoking websocketService.startWebsocket()");
-        this._websocketService.startWebsocket();
-		  console.log ("LoginPageComponent.onSubmit(): invoking contestService.getIsContestRunning()");
-        this._contestService.getIsContestRunning()
-          .subscribe((val: boolean) => {
-              console.log ("LoginPageComponent.onSubmit(): getIsContestRunning returned ", val);
-        	  this._contestService.isContestRunning = val;
-			//trigger a contestClockEvent so the SelectProblems dropdown can decide whether to display the problems or not
-            this._contestService.contestClockEvent.next();
+		this.loginStarted = true;
+		const loginCreds = new LoginCredentials();
+		loginCreds.teamName = this.formGroup.get('username').value;
+		loginCreds.password = this.formGroup.get('password').value;
+		this._authService.login(loginCreds)
+			.pipe(takeUntil(this._unsubscribe))
+			.subscribe((result: TeamsLoginResponse) => {
+				if (DEBUG_MODE) {
+					console.log("LoginPageComponent.onSubmit(): received callback from authService.login()...");
+					console.log("...environment:");
+					let environmentCopy = JSON.parse(JSON.stringify(environment));
+					console.log(environmentCopy);
+				}
+		
+				if (DEBUG_MODE) {
+					console.log("LoginPageComponent.onSubmit(): invoking authService.completeLogin()");
+				}
+				this._authService.completeLogin(result.teamId, result.teamName);
+				if (DEBUG_MODE) {
+					console.log("LoginPageComponent.onSubmit(): returned from authService.completeLogin()...");
+					console.log("...environment:");
+					let environmentCopy = JSON.parse(JSON.stringify(environment));
+					console.log(environmentCopy);
+				}
 
-          });
+				if (DEBUG_MODE) {
+					console.log("LoginPageComponent.onSubmit(): invoking websocketService.startWebsocket()...");
+					console.log("...environment:");
+					let environmentCopy = JSON.parse(JSON.stringify(environment));
+					console.log(environmentCopy);
+				}
+				this._websocketService.startWebsocket();
+				
+				if (DEBUG_MODE) {
+					console.log("LoginPageComponent.onSubmit(): invoking contestService.getIsContestRunning()");
+				}
+				this._contestService.getIsContestRunning()
+					.subscribe((val: boolean) => {
+						if (DEBUG_MODE) {
+							console.log("LoginPageComponent.onSubmit(): getIsContestRunning returned ", val);
+						}
+						this._contestService.isContestRunning = val;
+						//trigger a contestClockEvent so the SelectProblems dropdown can decide whether to display the problems or not
+						this._contestService.contestClockEvent.next();
 
-		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
-		  console.log ("LoginPageComponent.onSubmit(): invoking contestService.getContestClock()");
-		this._contestService.getContestClock() 
-			.subscribe(
-				(data: ContestClock) => {
-        			if (!data) { 
-						console.error ("LoginPageComponent.onSubmit() ContestClock subscription callback: unable to get ContestClock from PC2 API via ContestService!");
-					} else {						
-						//copy the data fields received from the PC2 Server (via the WTI-API) into the local ContestClock object
-						this.contestClock.running = data.running ;
-						this.contestClock.contestLengthSecs = data.contestLengthSecs ;
-						this.contestClock.elapsedSecs = data.elapsedSecs ;
-						this.contestClock.wallClockStartTime = data.wallClockStartTime ;
-					}
-      			}, 
-				(error: unknown) => {
-        			console.error("LoginPageComponent.onSubmit(): getContestClock() subscription callback error: ");
-					console.error (error);
-      			}
-			);
+					});
 
-		//update the WTI-UI representations of the PC2 Contest Clock
-		this._contestService.updateLocalContestClockFromServer();
+				//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
+				if (DEBUG_MODE) {
+					console.log("LoginPageComponent.onSubmit(): invoking contestService.getContestClock()");
+				}
+				this._contestService.getContestClock()
+					.subscribe(
+						(data: ContestClock) => {
+							if (!data) {
+								console.error("LoginPageComponent.onSubmit() ContestClock subscription callback: unable to get ContestClock from PC2 API via ContestService!");
+							} else {
+								//copy the data fields received from the PC2 Server (via the WTI-API) into the local ContestClock object
+								this.contestClock.running = data.running;
+								this.contestClock.contestLengthSecs = data.contestLengthSecs;
+								this.contestClock.elapsedSecs = data.elapsedSecs;
+								this.contestClock.wallClockStartTime = data.wallClockStartTime;
+							}
+						},
+						(error: unknown) => {
+							console.error("LoginPageComponent.onSubmit(): getContestClock() subscription callback error: ");
+							console.error(error);
+						}
+					);
 
-       }, (error: unknown) => {
-			console.error ("LoginPageComponent.onSubmit(): AuthService.login() subscription callback error: ");
-			console.error(error);
-			this.invalidCreds = true;
-			this.loginStarted = false;
-       });
+				//update the WTI-UI representations of the PC2 Contest Clock
+				this._contestService.updateLocalContestClockFromServer();
 
-  }
+			}, (error: unknown) => {
+				console.error("LoginPageComponent.onSubmit(): AuthService.login() subscription callback error: ");
+				console.error(error);
+				this.invalidCreds = true;
+				this.loginStarted = false;
+			});
 
-  private buildForm(): void {
-    this.formGroup = this._formBuilder.group({
-      username: [undefined, [Validators.required]],
-      password: [undefined, [Validators.required]]
-    });
-  }
+	}
+
+	private buildForm(): void {
+		this.formGroup = this._formBuilder.group({
+			username: [undefined, [Validators.required]],
+			password: [undefined, [Validators.required]]
+		});
+	}
 }

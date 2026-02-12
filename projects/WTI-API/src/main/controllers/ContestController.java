@@ -779,8 +779,19 @@ public class ContestController extends MainController {
 							
 							String teamDivisionStr = ScoreboardUtilities.getDivision(internalContest, clientId);
 							xlog(logger, "Runs for "+key+" useDivisionFilter true, total runs  = "+runs.length+" for div "+teamDivisionStr);
-							Integer teamDivision = Integer.parseInt(teamDivisionStr);
 							
+							Integer teamDivision;
+							try {
+								teamDivision = Integer.parseInt(teamDivisionStr);
+							} catch (NumberFormatException ex) {
+								logger.throwing(dsa.getClass().getName(), "getStandings()", ex);
+								return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+										.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+												"Illegal or undefined team division in DefaultScoringAlgorithm "
+													+ "('wtiboardUseDivisions=true' in WTI pc2v9.ini but no divisions assigned to teams?)"))
+										.type(MediaType.APPLICATION_JSON).build();
+							}
+
 							xmlStandings = dsa.getStandings(internalContest, runs, teamDivision, props, logger);
 						} else {
 							runs = internalContest.getRuns();
