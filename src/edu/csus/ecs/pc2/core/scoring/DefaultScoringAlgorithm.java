@@ -139,7 +139,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     private boolean obeyFreeze = false;
 
-
     /**
      * @return the obeyFreeze
      */
@@ -877,8 +876,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
 
             if(contestInformation.isScoreboardTypeScore()) {
-                DecimalFormat df = new DecimalFormat("0.0###");
-                standingsRecordMemento.putString("score", df.format(standingsRecord.getScore()));
+                standingsRecordMemento.putString("score", Utilities.formatScore(standingsRecord.getScore()));
             } else {
                 standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
             }
@@ -974,7 +972,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     psiMemento.putString("shortName", problems[problemsIndexHash.get(psi.getProblemId())-1].getShortName());
                     psiMemento.putInteger("attempts", psi.getNumberSubmitted());
                     psiMemento.putInteger("points", psi.getPenaltyPoints());
-                    psiMemento.putDouble("score", psi.getScore());
+                    psiMemento.putString("score", Utilities.formatScore(psi.getScore()));
                     psiMemento.putLong("solutionTime", psi.getSolutionTime());
                     psiMemento.putBoolean("isSolved", psi.isSolved());
                     psiMemento.putBoolean("isPending", psi.isUnJudgedRuns());

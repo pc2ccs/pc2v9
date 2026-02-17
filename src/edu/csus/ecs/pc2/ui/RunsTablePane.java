@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -252,7 +253,7 @@ public class RunsTablePane extends JPanePlugin {
 
             if(isScoring) {
                 if(jrec != null) {
-                    score = Double.toString(jrec.getScore());
+                    score = Utilities.formatScore(jrec.getScore());
                 } else {
                     score = "0";
                 }
