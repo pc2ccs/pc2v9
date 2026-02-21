@@ -659,6 +659,11 @@ public class SubmissionService implements Feature {
                 }
 
                 srcFiles = EventFeedUtilities.getIFiles(firstFile.getData());
+                // handle empty list of src files.
+                if(srcFiles.isEmpty()) {
+                    log.info(user + " Attempt to submit empty source file in archive for problem " + prob.getShortName() + " on behalf of team " + team_id);
+                    return Response.status(Response.Status.BAD_REQUEST).entity("submission source files are empty").build();
+                }
             }
             String entry = sub.getEntry_point();
             IFile mainFile = srcFiles.get(0);
