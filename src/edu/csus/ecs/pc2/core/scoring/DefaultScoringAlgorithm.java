@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -354,6 +354,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         this.log = inputLog;
         long freezeSeconds = -1;
         boolean isThawn = false;
+        FinalizeData finalizeData = null;
+
         if (obeyFreeze) {
             String freezeTime = theContest.getContestInformation().getFreezeTime();
             try {
@@ -366,7 +368,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 log.warning("Could not convert '"+freezeTime+"' to seconds");
                 throw new InvalidParameterException("Invalid freezeTime "+freezeTime);
             }
-            FinalizeData finalizeData = theContest.getFinalizeData(); // sometimes, eg junit this is null
+            finalizeData = theContest.getFinalizeData(); // sometimes, eg junit this is null
             if (finalizeData != null && finalizeData.isCertified() && theContest.getContestInformation().isUnfrozen()) {
                 isThawn = true;
             }
@@ -432,10 +434,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
 
         summaryMemento.putLong("problemCount", problems.length);
-        
+
         Site[] sites = theContest.getSites();
         summaryMemento.putInteger("siteCount", sites.length);
-        
+
         Group[] groups = theContest.getGroups();
         boolean bGroupsExcluded = false;
         if (groups != null) {
@@ -447,7 +449,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         //Note also that generateSummaryTotalsForProblem() already existed and was inserting MOST of that information in the output already;
         // the "colorList" processing code which used to be here was simply added to that method instead (adding internalId, letter, and
         // url to the <problem> elements), avoiding duplication of problem description data in the output XML.
-        
+
         if (runs == null) {
             // Note: we do not deal with divisionNumber here since
             //   1) it is being deprecated
@@ -534,16 +536,46 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
             applyScoringAdjustments(standingsRecordHash, accountList);
 
+            boolean wfStandings = false;
+            int medianSolved = 0;
+
+            DefaultStandingsRecordComparator dsrc = new DefaultStandingsRecordComparator();
+            dsrc.setCachedAccountList(accountList);
+
             // use TreeMap to sort
-            DefaultStandingsRecordComparator src = new DefaultStandingsRecordComparator();
-            src.setCachedAccountList(accountList);
-            TreeMap<StandingsRecord, StandingsRecord> treeMap = new TreeMap<StandingsRecord, StandingsRecord>(src);
+            TreeMap<StandingsRecord, StandingsRecord> treeMap = new TreeMap<StandingsRecord, StandingsRecord>(dsrc);
             Collection<StandingsRecord> enumeration = standingsRecordHash.values();
             for (StandingsRecord record : enumeration) {
                 treeMap.put(record, record);
             }
 
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMemento, bGroupsExcluded);
+            // Determine how we want to sort the teams.  We may have to re-sort using WF rankings for the public final scoreboard
+            // For the public scoreboard, isThawn is true, however, we only want to use WF rankings if it is specified
+            // to do so, and, it's for the entire contest, not just a group(s)
+            // If you're wondering why we sort twice (once above, and once in this "if" block:
+            //   We need to get the median solved, so, we have to sort normally,
+            // just to get the median so the FinalsStandingsRecordComparator can use it.
+            if(isThawn && finalizeData.isUseWFGroupRanking() && (wantedGroups == null || wantedGroups.isEmpty())) {
+                FinalsStandingsRecordComparator fsrc = new FinalsStandingsRecordComparator();
+                fsrc.setCachedAccountList(accountList);
+                fsrc.setLastRank(finalizeData.getBronzeRank());
+                if (finalizeData.getHonorSolvedCount() != 0) {
+                    medianSolved = finalizeData.getHonorSolvedCount();
+                } else {
+                    medianSolved = getMedian(treeMap.keySet().toArray(new StandingsRecord[0]));
+                }
+                fsrc.setMedian(medianSolved);
+                wfStandings = true;
+
+                // Now we have to re-sort the treeMap using WF sorting
+                treeMap = new TreeMap<StandingsRecord, StandingsRecord>(fsrc);
+                enumeration = standingsRecordHash.values();
+                for (StandingsRecord record : enumeration) {
+                    treeMap.put(record, record);
+                }
+            }
+
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest, summaryMemento, bGroupsExcluded, wfStandings, medianSolved);
 
         } // mutex
 
@@ -677,9 +709,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      */
     private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot,
             AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups,
-            IInternalContest theContest, IMemento summaryMememento, boolean excludedGroups) {
+            IInternalContest theContest, IMemento summaryMememento, boolean excludedGroups, boolean isWFStandings, int medianSolved) {
 
         ContestInformation contestInformation = theContest.getContestInformation();
+        // This may be needed if using WF Standings
+        int lastMedalRank = 0;
+
         // easy access
         Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
         Hashtable<Group, Integer> groupIndexHash = new Hashtable<Group, Integer>();
@@ -717,7 +752,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         divisionCount = highestFound;
         String teamVarDisplayString = contestInformation.getTeamScoreboardDisplayFormat();
 
-        StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
+        // get the sorted treeMap as an array for createCitationRankInformation and later for medal citations
+        StandingsRecord[] srArray = treeMap.values().toArray(new StandingsRecord[0]);
+
+        // If doing public WF style standings, we assign the block ranks now
+        if(isWFStandings) {
+            if(Utilities.isDebugMode()) {
+                System.err.println("createStandingsXML: Generating Final board for public (obeyFreeze)");
+            }
+            assignRanksBlock(srArray, theContest, medianSolved);
+        }
 
         Collection<StandingsRecord> coll = treeMap.values();
         Iterator<StandingsRecord> iterator = coll.iterator();
@@ -776,16 +820,19 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             Object o = iterator.next();
 
             StandingsRecord standingsRecord = (StandingsRecord)o;
-            indexRank++;
-            if (!isTeamTied(standingsRecord, numSolved, score, lastSolved)) {
-                numSolved = standingsRecord.getNumberSolved();
-                score = standingsRecord.getPenaltyPoints();
-                lastSolved = standingsRecord.getLastSolved();
-                rank = indexRank;
-                standingsRecord.setRankNumber(rank);
-            } else {
-                // current user tied with last user, so same rank
-                standingsRecord.setRankNumber(rank);
+            // Only assign rank if not doing WF final rankings on public scoreboard because we did it above with assignRankBlocks()
+            if(!isWFStandings) {
+                indexRank++;
+                if (!isTeamTied(standingsRecord, numSolved, score, lastSolved)) {
+                    numSolved = standingsRecord.getNumberSolved();
+                    score = standingsRecord.getPenaltyPoints();
+                    lastSolved = standingsRecord.getLastSolved();
+                    rank = indexRank;
+                    standingsRecord.setRankNumber(rank);
+                } else {
+                    // current user tied with last user, so same rank
+                    standingsRecord.setRankNumber(rank);
+                }
             }
 //            mementoRoot.putMemento(standingsRecord.toMemento());
             long totalAttempts = 0;
@@ -923,13 +970,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // entire contest, not one particular group (or groups).  So, if any groups were excluded
         // from the scoreboard, we do not fill in citations.
         if(!excludedGroups) {
-            // Now go back and fill in any award citations for the teams
-            ResultsFile resultsInfo = new ResultsFile();
-            // Note that createCitationRankInformation() may change the order of srArray
-            CitationRankInformation ri = resultsInfo.createCitationRankInformation(theContest, srArray);
             if(index == teamStandingsMementos.size()) {
                 int teamRank, sIndex;
                 IMemento standingsRecordMemento;
+                // Now go back and fill in any award citations for the teams
+                ResultsFile resultsInfo = new ResultsFile();
+                // Note that createCitationRankInformation() may change the order of srArray
+                CitationRankInformation ri = resultsInfo.createCitationRankInformation(theContest, srArray);
+
                 for(sIndex = 0; sIndex < index; ) {
                     standingsRecordMemento = teamStandingsMementos.get(sIndex);
                     teamRank = srArray[sIndex].getRankNumber();
@@ -959,6 +1007,81 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
         }
     }
+
+    /**
+     * Assigns WF style "honors" ranking values.
+     * This is only used to generate the public (obeyFreeze), unfrozen, finalized scoreboard.
+     * This logic similar to ResultsFile.createFileLines().
+     *
+     * @param srArray - sorted array of standings records
+     * @param theContest
+     * @param median - number of problems solved by median team
+     */
+    private void assignRanksBlock(StandingsRecord [] srArray, IInternalContest theContest, int median) {
+
+        int rank = 1;
+        StandingsRecord sr, prev = null;
+        int idx = 0;
+        int numRecs = srArray.length;
+        FinalizeData finalizeData = theContest.getFinalizeData();
+        boolean didFirstHonorableMention = false;
+
+        // Tammy: just in case it IS null; purportedly it may be null for Junit's, but that is unconfirmed.
+        if(finalizeData == null) {
+            finalizeData = FinalizeData.getDefaultFinalizeData();
+        }
+
+        // First one, handle it special to make the for loop below easier.  Basically, we're priming the pump here (prev).
+        if (numRecs > 0) {
+            sr = srArray[idx];
+            sr.setRankNumber(rank);
+            prev = sr;
+            idx++;
+        }
+
+        int numInBlock = 0;
+
+        // We always rank teams uniquely that get medals, and, the first team AFTER the medals is assigned
+        // its own rank as well.
+        int alwaysRanked = finalizeData.getBronzeRank();
+
+        if(finalizeData.getHonorSolvedCount() > 0) {
+            median = finalizeData.getHonorSolvedCount();
+        }
+
+        if(Utilities.isDebugMode()) {
+            System.err.printf("assignRankBlock: alwaysRanked=%d median=%d%n", alwaysRanked, median);
+        }
+        for(; idx < numRecs; idx++) {
+            sr = srArray[idx];
+            if(Utilities.isDebugMode()) {
+                System.err.printf("  rank=%d sr.getNumberSolved=%d prev.getNumberSolver=%d numInBlock=%d%n",
+                        rank, sr.getNumberSolved(), prev.getNumberSolved(), numInBlock);
+            }
+            // For medals, each team is ranked.  Or, if after medals, teams are grouped by # solved until honorable mention
+            if (rank <= alwaysRanked || (!didFirstHonorableMention && sr.getNumberSolved() != prev.getNumberSolved())) {
+                rank++;
+                rank += numInBlock;
+                numInBlock = 0;
+                if(sr.getNumberSolved() < median) {
+                    // From now on, all teams are the same rank since they're all honorable mention
+                    if(Utilities.isDebugMode()) {
+                        System.err.printf("  FOUND first honorable mention at idx=%d rank=%d%n", idx, rank);
+                    }
+                    didFirstHonorableMention = true;
+                }
+            } else {
+                numInBlock++;
+            }
+
+            sr.setRankNumber(rank);
+            prev = sr;
+            if(Utilities.isDebugMode()) {
+                System.err.printf("    Setting team at index %d(%s) to rank %d%n",  idx, sr.getClientId().getName(), rank);
+            }
+        }
+    }
+
 
     /**
      * Input is a sorted ranking list.  What is the number of problems solved by the median team?
@@ -1056,7 +1179,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
             IMemento problemMemento = summaryMemento.createChild("problem");
             problemMemento.putInteger("id", id);  //ordinal starting at 1
-            
+
             //the following was (probably) added when BalloonSettings were removed; BalloonSettings was creating
             // a variable named "id" and this was probably an attempt at renaming that variable.
             // It's likely that no other code is actually using "internalId", although it MIGHT be used

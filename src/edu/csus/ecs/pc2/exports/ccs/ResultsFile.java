@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.util.ArrayList;
@@ -170,7 +170,7 @@ public class ResultsFile {
         int highHonorSolvedCount = 0;
 
         if (finalizeData == null) {
-            finalizeData = GenDefaultFinalizeData();
+            finalizeData = FinalizeData.getDefaultFinalizeData();
         }
         // Only use Bill honors WF ranking rules if not for a specific group and we're doing WF ranks
         // Calculating the Bill honors rules doesn't make sense for sub-groups
