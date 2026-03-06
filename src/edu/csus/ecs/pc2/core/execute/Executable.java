@@ -925,7 +925,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         }
         
         //we've recursed to the lowest level in the test case tree; create a Grader to get a Result (acronym and score) for this level
-        LegacyGrader grader = new LegacyGrader(prefixExecuteDirname("graderLog-" + tdg.getGroupName().replace(File.separator, "_") + ".txt"));
+        boolean isRoot= (tdg.getParent() == null);
+        LegacyGrader grader = new LegacyGrader(prefixExecuteDirname("graderLog-" + tdg.getGroupName().replace(File.separator, "_") + ".txt"), isRoot);
         
         //set the arguments for the grader based on the grader flags in the currently specified TestDataGroup.
         //TODO:  it seems like there SHOULD be separate "scoringMode" and "verdictMode" attributes defined in a TestDataGroup -- ,
