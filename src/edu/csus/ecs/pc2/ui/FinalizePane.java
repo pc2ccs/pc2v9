@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -199,20 +199,10 @@ public class FinalizePane extends JPanePlugin {
         return Integer.parseInt(s);
     }
 
-    private void populateDefaults() {
-        getGoldCountTextField().setText("4");
-        getSilverCountTextField().setText("4");
-        getBronzeCountTextField().setText("4");
-        getUseWFGroupRankingsCheckBox().setSelected(true);
-        getCustomizeHonorsSolvedCountCheckBox().setSelected(false);
-        getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(true);
-        setEnableHonorsCountFields(false);
-    }
-
     /**
      * This method Enables/Disables Honors solved count text fields
-     * 
-     * @param isEnabled 
+     *
+     * @param isEnabled
      */
     private void setEnableHonorsCountFields(boolean isEnabled) {
         getHighestHonorSolvedCountTextField().setText("");
@@ -229,6 +219,9 @@ public class FinalizePane extends JPanePlugin {
     protected void reloadFrame() {
 
         FinalizeData data = getContest().getFinalizeData();
+        if(data == null) {
+            data = FinalizeData.getDefaultFinalizeData();
+        }
         if (data != null) {
             int gr = data.getGoldRank();
             int sr = data.getSilverRank();
@@ -270,16 +263,16 @@ public class FinalizePane extends JPanePlugin {
             if (data.isCertified()) {
                 certificationCommentLabel.setText("Contest Finalized (Certified done)");
                 certificationCommentLabel.setToolTipText("Certified at: " + data.getCertificationDate());
+            } else {
+                certificationCommentLabel.setText("Contest not finalized");
+                certificationCommentLabel.setToolTipText("");
             }
 
+            enableButtons();
         } else {
-            certificationCommentLabel.setText("Contest not finalized");
-            certificationCommentLabel.setToolTipText("");
-            populateDefaults();
+            // Tammy, data can not be null, if it is, something really bad is going on, and we will therefore, do nothing.
+            getLog().log(Level.WARNING, "FinalizePane: finalizedata is null");
         }
-
-        enableButtons();
-
     }
 
     /**
@@ -649,7 +642,7 @@ public class FinalizePane extends JPanePlugin {
     private JTextField getCommentTextField() {
         if (commentTextField == null) {
             commentTextField = new JTextField();
-            commentTextField.setBounds(new Rectangle(250, 168, 207, 20));
+            commentTextField.setBounds(new Rectangle(250, 168, 307, 20));
         }
         return commentTextField;
     }
@@ -782,7 +775,7 @@ public class FinalizePane extends JPanePlugin {
             + "\nThen both Highest Honors and Honors by default will be 7 problems and High Honors is 6 problems solved." //
             + "\nAll teams (except medalists) solving 7 problems will get Highest Honors and the team solving 6 problems get High Honors" //
             + " \n\n";
-    
+
     private Image getScaledImage(Image srcImg, int w, int h) {
         BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = resizedImg.createGraphics();

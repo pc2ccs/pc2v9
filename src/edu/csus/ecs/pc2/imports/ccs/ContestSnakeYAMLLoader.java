@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -47,6 +47,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
@@ -477,11 +478,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         //set allow-multiple-team-logins mode
         boolean allowMultipleTeamLogins = fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
-        
+
         //set allow-zero-length-submission-files mode
         boolean allowZeroLengthSubmissionFiles = fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
         contestInformation.setAllowZeroLengthSubmissionFiles(allowZeroLengthSubmissionFiles);
-        
+
         // Load team scoreboard string (the one with variables)
         String teamScoreboadDisplayString = fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
@@ -692,6 +693,59 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if(scoreType != null && !scoreType.equals("pass-fail")) {
             throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": " + scoreType + ", expected pass-fail");
         }
+
+        //get the map (if any) of the CLICS "medals" section in the contest.yaml file
+        Map<String, Object> medalsContent = fetchMap(content, CLICS_CONTEST_MEDALS);
+        boolean updateFinalizeData = false;
+        FinalizeData finalizeData = contest.getFinalizeData();
+        if(finalizeData == null) {
+            finalizeData = FinalizeData.getDefaultFinalizeData();
+        }
+        //if there is a CLICS "medals" section in the contest.yaml, read any values in that section and use
+        // them to override defaults
+        if (medalsContent != null) {
+            // get current (system default) ranks
+            int grank = finalizeData.getGoldRank();
+            int srank = finalizeData.getSilverRank();
+            int brank = finalizeData.getBronzeRank();
+            // get current medal counts
+            int gcnt = grank;
+            int scnt = srank - grank;
+            int bcnt = brank - srank;
+            // see if new counts specified in the "medals" object
+            Integer goldCount = fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_GOLD);
+            if(goldCount != null) {
+                gcnt = goldCount.intValue();
+            }
+            Integer silverCount = fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_SILVER);
+            if(silverCount != null) {
+                scnt = silverCount.intValue();
+            }
+            Integer bronzeCount = fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_BRONZE);
+            if(bronzeCount != null) {
+                bcnt = bronzeCount.intValue();
+            }
+            // new gold rank = gc, just saying...
+            int newsrank = gcnt + scnt;
+            int newbrank = newsrank + bcnt;
+            // if any ranks change, then we have to update them
+            if(gcnt != grank || newsrank != srank || newbrank != brank) {
+                updateFinalizeData = true;
+                finalizeData.setGoldRank(gcnt);
+                finalizeData.setSilverRank(newsrank);
+                finalizeData.setBronzeRank(newbrank);
+            }
+        }
+        boolean wfRankings = fetchBooleanValue(content, CONTEST_USE_WF_RANKING);
+        if(wfRankings != finalizeData.isUseWFGroupRanking()) {
+            finalizeData.setUseWFGroupRanking(wfRankings);
+            updateFinalizeData = true;
+        }
+        // if any finalize data has changed from the defaults, update the model
+        if(updateFinalizeData) {
+            contest.setFinalizeData(finalizeData);
+        }
+
         Object privatehtmlOutputDirectory = fetchObjectValue(content, OUTPUT_PRIVATE_SCORE_DIR_KEY);
         if (privatehtmlOutputDirectory != null) {
             if (privatehtmlOutputDirectory instanceof String) {

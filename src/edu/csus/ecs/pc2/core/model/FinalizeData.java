@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -198,5 +198,21 @@ public class FinalizeData implements Serializable {
      */
     public int getHonorSolvedCount() {
         return honorSolvedCount;
+    }
+
+
+    /**
+     * Generate some default finalize data
+     * @return FinalizeData object
+     */
+    public static FinalizeData getDefaultFinalizeData()
+    {
+        FinalizeData finalizeData = new FinalizeData();
+        finalizeData.setGoldRank(1);
+        finalizeData.setSilverRank(3);
+        finalizeData.setBronzeRank(6);
+        finalizeData.setCertified(false);
+        finalizeData.setUseWFGroupRanking(false);
+        return(finalizeData);
     }
 }

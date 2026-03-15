@@ -1,6 +1,8 @@
 
 max-output-size-K: 137
 
+wf_honors_ranking: false
+
 sites:
  - number: 1
    name: Site 1

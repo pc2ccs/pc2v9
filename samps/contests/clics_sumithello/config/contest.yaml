@@ -8,3 +8,7 @@ duration:  05:00:00
 scoreboard_freeze_duration: 01:00:00
 penalty_time: 20
 scoreboard_type: pass-fail
+medals:
+  gold: 2
+  silver: 3
+  bronze: 4

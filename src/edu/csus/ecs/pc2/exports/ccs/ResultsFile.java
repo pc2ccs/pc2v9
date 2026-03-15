@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.util.ArrayList;
@@ -170,7 +170,8 @@ public class ResultsFile {
         int highHonorSolvedCount = 0;
 
         if (finalizeData == null) {
-            finalizeData = GenDefaultFinalizeData();
+            finalizeData = FinalizeData.getDefaultFinalizeData();
+            finalizeData.setComment("Preliminary Results - Contest not Finalized");
         }
         // Only use Bill honors WF ranking rules if not for a specific group and we're doing WF ranks
         // Calculating the Bill honors rules doesn't make sense for sub-groups
@@ -305,7 +306,8 @@ public class ResultsFile {
 
         finalizeData = contest.getFinalizeData();
         if (finalizeData == null) {
-            finalizeData = GenDefaultFinalizeData();
+            finalizeData = FinalizeData.getDefaultFinalizeData();
+            finalizeData.setComment("Preliminary Results - Contest not Finalized");
         }
 
         // The medal counts are fixed and are based solely on the order of finishing
@@ -507,21 +509,5 @@ public class ResultsFile {
         String xsltFileName = "results.tsv.xsl";
 
         return XMLUtilities.transformToArray(xmlString, xsltFileName);
-    }
-
-    /**
-     * Generate some default finalize data so we can make a results.tsv before the contest is finalized.
-     * @return FinalizeData object
-     */
-    private FinalizeData GenDefaultFinalizeData()
-    {
-        finalizeData = new FinalizeData();
-        finalizeData.setGoldRank(4);
-        finalizeData.setSilverRank(8);
-        finalizeData.setBronzeRank(12);
-        finalizeData.setCertified(false);
-        finalizeData.setComment("Preliminary Results - Contest not Finalized");
-        finalizeData.setUseWFGroupRanking(true);
-        return(finalizeData);
     }
 }
