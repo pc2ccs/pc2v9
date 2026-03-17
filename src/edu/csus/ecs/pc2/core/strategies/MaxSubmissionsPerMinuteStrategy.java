@@ -1,7 +1,10 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.strategies;
 
 import edu.csus.ecs.pc2.core.IThrottleStrategy;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -16,7 +19,8 @@ import edu.csus.ecs.pc2.core.model.Run;
  */
 public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
     
-    public static int DEFAULT_MAX_SUBMISSIONS_PER_MINUTE = 10 ;
+    public static int DEFAULT_MAX_SUBMISSIONS_PER_MINUTE = 6 ;
+    public static final String MAX_SUBS_PER_MINUTE_KEY = "throttle-strategies.maxSubmissionsPerMinute";
 
     private  IInternalContest contest;
     private int maxPerMinute;
@@ -28,7 +32,16 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
      */
     public MaxSubmissionsPerMinuteStrategy (IInternalContest inContest) {
         this.contest = inContest ;
-        this.maxPerMinute = DEFAULT_MAX_SUBMISSIONS_PER_MINUTE ;
+        
+        try {
+            String maxSubsPerMin = IniFile.getValue(MAX_SUBS_PER_MINUTE_KEY);
+            maxPerMinute = StringUtilities.getIntegerValue(maxSubsPerMin, DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+        } catch(Exception e) {
+            // if there is any problem reading the INI or a bad integer conversion, this does not warrant a complete failure
+            // of the submission.  Rather, we'll use the default and log the error.
+            maxPerMinute = DEFAULT_MAX_SUBMISSIONS_PER_MINUTE;
+            StaticLog.warning("MaxSubmissionsPerMinuteStrategy: Bad INI file setting '" + MAX_SUBS_PER_MINUTE_KEY + "': " + e);
+        }
     }
 
     /**
