@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -215,14 +215,27 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     @Override
+    /**
+     * This is currently only used by ContestPreloadPane to get the contest id and names
+     * directly from the YAML file.
+     */
     public String getContestTitle(String contestYamlFilename) throws IOException {
         File contestYaml = new File(contestYamlFilename);
 
         // Try CLICS name first.  Fun fact: CLICS_CONTEST_NAME == CONTEST_NAME_KEY, but may not someday
-        String contestTitle = fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_NAME);
-        // only if the CLICS name isn't there do we try the old one.  non-null means it is there.
-        if(contestTitle == null) {
-            contestTitle = fetchValue(contestYaml, IContestLoader.CONTEST_NAME_KEY);
+        String contestTitle = fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_FORMAL_NAME);
+        if(StringUtilities.isEmpty(contestTitle)) {
+            // No formal name, so try clics name (short name)
+            contestTitle = fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_NAME);
+            // only if the CLICS name isn't there do we try the old one.  non-null means it is there.
+            // See "Fun fact" above.
+            if(StringUtilities.isEmpty(contestTitle)) {
+                contestTitle = fetchValue(contestYaml, IContestLoader.CONTEST_NAME_KEY);
+                if(StringUtilities.isEmpty(contestTitle)) {
+                    // last resort, try clics id
+                    contestTitle = fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_ID);
+                }
+            }
         }
         return(contestTitle);
     }
@@ -440,8 +453,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         contest = createContest(contest);
 
+        /*
+         * What's very strange is that the contest.yaml can be loaded twice.  If, for example,
+         * this routine is called by fromYaml(IInternalContest contest, String directoryName) or
+         * fromYaml(IInternalContest, String directoryName, boolean loadDataFileCOntetns).  I don't think
+         * it's an issue though.
+         */
         // name: ACM-ICPC World Finals 2011
-
         String contestFileName = getContestYamlFilename(directoryName);
 
         Map<String, Object> content = loadYaml(contestFileName, yamlLines);
@@ -452,9 +470,26 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         setTitle(contest, null);
 
-        String contestTitle = fetchValue(content, CONTEST_NAME_KEY);
-        if (contestTitle != null) {
-            setTitle(contest, contestTitle);
+        /*
+         * A contest has an id, name (shortname) and a formal-name (title).  Here,
+         * we find the best value for these depending on what is available in the yaml
+         * file (s) - mostly, contest.yaml.
+         */
+        String contestId = fetchValue(content, CLICS_CONTEST_ID);
+        String contestName = fetchValue(content, CLICS_CONTEST_NAME);
+        String contestFormal = fetchValue(content, CLICS_CONTEST_FORMAL_NAME);
+
+        if(StringUtilities.isEmpty(contestName)) {
+            contestName = fetchValue(content, CONTEST_NAME_KEY);
+        }
+        if(StringUtilities.isEmpty(contestFormal)) {
+            contestFormal = contestName;
+        }
+        /*
+         * Internally, formal name is called title.
+         */
+        if(!StringUtilities.isEmpty(contestFormal)) {
+            setTitle(contest, contestFormal);
         }
 
         boolean ccsTestMode = fetchBooleanValue(content, CCS_TEST_MODE, false);
@@ -477,11 +512,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         //set allow-multiple-team-logins mode
         boolean allowMultipleTeamLogins = fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
-        
+
         //set allow-zero-length-submission-files mode
         boolean allowZeroLengthSubmissionFiles = fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
         contestInformation.setAllowZeroLengthSubmissionFiles(allowZeroLengthSubmissionFiles);
-        
+
         // Load team scoreboard string (the one with variables)
         String teamScoreboadDisplayString = fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
@@ -546,20 +581,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setSandboxInteractiveTimeMultiplier(contest, sandboxIntMult);
         }
 
-        for (String line : yamlLines) {
-            if (line.startsWith(CLICS_CONTEST_NAME + DELIMIT) || line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
-                setTitle(contest, unquoteAll(line.substring(line.indexOf(DELIMIT) + 1).trim()));
-
-            }
-        }
-
         loadDataFileContents = fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
 
-        String shortContestName = fetchValue(content, CLICS_CONTEST_ID);
-
         // Check if id is CLICS compliant
-        if (!StringUtilities.isEmpty(shortContestName)) {
-            if (!StringUtilities.isStringCLICSCompliant(shortContestName)) {
+        if (!StringUtilities.isEmpty(contestId)) {
+            if (!StringUtilities.isStringCLICSCompliant(contestId)) {
                 throw new YamlLoadException(
                     "ID is not CLICS compliant.\n" +
                     "Must be:\n" +
@@ -570,19 +596,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 );
             }
         } else {
-            // only if CLICS id is not present do we try older key `short-name`
-            shortContestName = fetchValue(content, SHORT_NAME_KEY);
-            shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
+            // only if CLICS id is not present do we try the name
+            contestId = contestName;
+            contestId = StringUtilities.makeStringCLICSCompliant(contestId);
         }
 
-        // only if both CLICS id and `short-name` is not present do we try the key `name`
-        if (StringUtilities.isEmpty(shortContestName)) {
-            shortContestName = fetchValue(content, CLICS_CONTEST_NAME);
-            shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
-        }
         // only set short name if string is present AND not empty
-        if (!StringUtilities.isEmpty(shortContestName)) {
-            setShortContestNameAndIdentifier(contest, shortContestName);
+        if (!StringUtilities.isEmpty(contestId)) {
+            setShortContestNameAndIdentifier(contest, contestId, contestName);
         } else if (StaticLog.getLog() != null) {
             StaticLog.warning("None of CLICS id, name and short-name is present. Contest Identifier will be set as Default-{:random_number}.");
         }
@@ -1157,11 +1178,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
-    private void setShortContestNameAndIdentifier(IInternalContest contest, String shortContestName) {
+    private void setShortContestNameAndIdentifier(IInternalContest contest, String contestId, String contestName) {
         ContestInformation contestInformation = contest.getContestInformation();
-        contestInformation.setContestShortName(shortContestName);
+        contestInformation.setContestShortName(contestName);
         contest.updateContestInformation(contestInformation);
-        contest.setContestIdentifier(shortContestName);
+        contest.setContestIdentifier(contestId);
     }
 
     /**

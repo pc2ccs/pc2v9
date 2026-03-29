@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -33,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
@@ -142,7 +144,23 @@ public class ProfilesPane extends JPanePlugin {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (e.getClickCount() > 1 && e.isControlDown() && e.isShiftDown()) {
                     Profile profile = getContest().getProfile();
-                    String message = "Contest Id " + profile.getContestId();
+                    ContestInformation ci = getContest().getContestInformation();
+                    String message = "Profile Contest Id: " + profile.getContestId() + "\n\nFrom ContestInformation:\n";
+                    String name = getContest().getContestIdentifier();
+                    if(StringUtilities.isEmpty(name)) {
+                        name = "N/A";
+                    }
+                    message = message + "   Contest Id: \"" + name + "\"\n";
+                    name = ci.getContestShortName();
+                    if(StringUtilities.isEmpty(name)) {
+                        name = "N/A";
+                    }
+                    message = message + "   Contest Name: \\\"" + name + "\\\"\n";
+                    name = ci.getContestTitle();
+                    if(StringUtilities.isEmpty(name)) {
+                        name = "N/A";
+                    }
+                    message = message + "   Contest Title/Formal Name: \\\"" + name + "\\\"\n";
                     JOptionPane.showMessageDialog(null, message);
                 }
             }
