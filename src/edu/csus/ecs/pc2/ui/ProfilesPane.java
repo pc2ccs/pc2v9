@@ -155,12 +155,12 @@ public class ProfilesPane extends JPanePlugin {
                     if(StringUtilities.isEmpty(name)) {
                         name = "N/A";
                     }
-                    message = message + "   Contest Name: \\\"" + name + "\\\"\n";
+                    message = message + "   Contest Name: \"" + name + "\"\n";
                     name = ci.getContestTitle();
                     if(StringUtilities.isEmpty(name)) {
                         name = "N/A";
                     }
-                    message = message + "   Contest Title/Formal Name: \\\"" + name + "\\\"\n";
+                    message = message + "   Contest Title/Formal Name: \"" + name + "\"\n";
                     JOptionPane.showMessageDialog(null, message);
                 }
             }
