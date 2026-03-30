@@ -480,7 +480,30 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String contestFormal = fetchValue(content, CLICS_CONTEST_FORMAL_NAME);
 
         if(StringUtilities.isEmpty(contestName)) {
+            /*
+             *  It is certain (currently) that contestName will still be null at
+             *  this point since CLICS_CONTEST_NAME and CONTEST_NAME_KEY are the same
+             */
             contestName = fetchValue(content, CONTEST_NAME_KEY);
+        }
+
+        /*
+         * To support ancient contests (older than year 2020), we check if there is no "id"
+         * property.
+         */
+        if(StringUtilities.isEmpty(contestId)) {
+            /*
+             * Look up contest short name, which is what CLICS_CONTEST_NAME is, really.
+             */
+            String oldContestName = fetchValue(content, SHORT_NAME_KEY);
+            if(!StringUtilities.isEmpty(oldContestName)) {
+                // Let's not overwrite one if there happens to be one in the contest yaml
+                if(StringUtilities.isEmpty(contestFormal)) {
+                    // Old "name" was really the formal name
+                    contestFormal = contestName;
+                }
+                contestName = oldContestName;
+            }
         }
         if(StringUtilities.isEmpty(contestFormal)) {
             contestFormal = contestName;
