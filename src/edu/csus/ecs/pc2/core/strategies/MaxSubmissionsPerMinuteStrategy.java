@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
     
     public static int DEFAULT_MAX_SUBMISSIONS_PER_MINUTE = 6 ;
-    public static final String MAX_SUBS_PER_MINUTE_KEY = "throttle-strategies.maxSubmissionsPerMinute";
+    public static final String MAX_SUBS_PER_MINUTE_KEY = "throttle-strategy-settings.maxSubmissionsPerMinute";
 
     private  IInternalContest contest;
     private int maxPerMinute;
