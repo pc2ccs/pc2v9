@@ -46,12 +46,12 @@ public abstract class MainController {
 	// *** There may be a memory leak issue here: what if a team drops without invoking logout?  This might be a problem if
 	// this class were to be used in a contest running, say, over the Internet for days or weeks...
 	protected static HashMap<String, ServerConnection> connections = new HashMap<String, ServerConnection>();
-	
+
 	//the following two fields are "static" because they need to be referenced by the static initialization block in ContestController
 	protected static ServerInit ini = ServerInit.createServerInit();
 	protected static Log logger = Logging.getLogger();
-	
-	private final String websocketUrl = String.format("ws://localhost:%s%s/WTISocket", ini.getPortNum(), ini.getWsName());
+
+	private final String websocketUrl = String.format("wss://localhost:%s%s/WTISocket", ini.getPortNum(), ini.getWsName());
 	protected static WTIWebsocket client;
 
 	public MainController() throws URISyntaxException {
@@ -60,10 +60,10 @@ public abstract class MainController {
 	}
 
 	/**
-	 * Searches the given array of IProblems and returns the first problem whose name matches the specified 
+	 * Searches the given array of IProblems and returns the first problem whose name matches the specified
 	 * nameOfProblem, or returns an {@link EmptyProblem} object if there was no match.
 	 * <P>
-	 * Note that this method is only invoked by the {@link TeamsController} class, and only from TeamsController 
+	 * Note that this method is only invoked by the {@link TeamsController} class, and only from TeamsController
 	 * methods submitClarification(), submitRun(), and submitTestRun().  This means that the received array
 	 * contains only actual contest problems (in the case of being invoked by submitting a Run), or may
 	 * also contain "Categories" (which are, somewhat illogically, defined as "class Category extends Problem") in
@@ -75,10 +75,10 @@ public abstract class MainController {
 	 * ProblemImplementation (NOT an array of Problems).  This works because both ProblemImplementation and
 	 * Problem implement IProblem.  Thus, while the declared ("Apparent") type of the elements in the received
 	 * array is "IProblem", the ACTUAL TYPE of the elements will in all cases be "ProblemImplementation".
-	 * 
+	 *
 	 * @param problems an array of IProblems, which are actually ProblemImplementations.
 	 * @param nameOfProblem a String giving the name of the desired problem.
-	 * 
+	 *
 	 * @return the named problem if it is found in the input array; otherwise, an {@link EmptyProblem} object.
 	 */
 	protected IProblem findProblem(IProblem[] problems, String nameOfProblem) {
@@ -97,17 +97,17 @@ public abstract class MainController {
 				return lang;
 		return new EmptyLanguage();
 	}
-	
+
 	protected void subscription(Contest teamCon, String teamId) {
 		teamCon.addRunListener(new RunsService(teamId, client));
 //		teamCon.addTestRunListener(new TestRunService(teamId, client));  //this was commented-out because it requires implementing Test Run support in PC2 API
 		teamCon.addClarificationListener(new ClarificationService(teamId, client));
 		teamCon.addContestConfigurationUpdateListener(new ConfigurationService(teamId, client));
-		
+
 		//listen for a connectionDropped so we can notify the UI that a forced logout has happened
         teamCon.addConnectionListener(new DroppedConnectionListener(teamId, client));
 	}
-	
+
 	protected ServerConnection createNewServerConnection() {
 		return new ServerConnection();
 	}

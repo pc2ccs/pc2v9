@@ -22,42 +22,46 @@ import edu.csus.ecs.pc2.core.log.Log;
  * the server listens for browser connections, the base name to be used for the websocket connections between
  * the server and browser sessions, and the scoreboard account/pw information which the WTI server uses to
  * fetch scoreboard information from the PC2 server.
- * 
+ *
  * The initialization values are read from the pc2v9.ini file in the WTI server's startup folder; if no such
  * file is present then default values are assigned.
- * 
+ *
  * @author EWU WTI Student Project Team
  *
  */
 public class ServerInit {
 
     private final String WTI_PUBLIC_IP_OVERRIDE_KEY = "wtiOverridePublicIP";
-    
+    private final String WTI_KEY_STORE_PATH_KEY = "keyStoreFilePath";
+    private final String WTI_KEY_STORE_PASSWORD_KEY = "keyStorePassword";
+
 	private static ServerInit init = null;
 	private static String publicIPOverride;
 	private static List<String> allowedOSNames;
-	
+
 	private int portNum;
 	private String socketSource;
 	private String scoreboardAccount;
 	private String scoreboardPassword;
+	private String keyStoreFilePath;
+	private String keyStorePassword;
 
 
 	private Log logger;
-	
+
 	private ServerInit() {
 		this.logger = Logging.getLogger();
 		this.readIniFile();
 	}
-	
+
 	public static ServerInit createServerInit() {
 		if (init == null)
 			init = new ServerInit();
 		return init;
 	}
-	
+
 	private void readIniFile() {
-		
+
 		Properties p = new Properties();
 		try {
 		      //p.load(new FileInputStream("WebTeamInterface.ini"));
@@ -66,10 +70,13 @@ public class ServerInit {
 		      this.socketSource = p.getProperty("wtiwsName");
 		      this.scoreboardAccount = p.getProperty("wtiscoreboardaccount", "scoreboard2");
 		      this.scoreboardPassword = p.getProperty("wtiscoreboardpassword", "scoreboard2");
-		      
+
 		      publicIPOverride = p.getProperty(WTI_PUBLIC_IP_OVERRIDE_KEY);
 		      allowedOSNames = getAllowedOSNames(p);
-		      
+
+		      keyStoreFilePath = p.getProperty(WTI_KEY_STORE_PATH_KEY);
+		      keyStorePassword = p.getProperty(WTI_KEY_STORE_PASSWORD_KEY);
+
 		      System.out.println ("Found the following properties in pc2v9.ini: " + p);
 
 		} catch(FileNotFoundException e) {
@@ -83,11 +90,11 @@ public class ServerInit {
 			setDefaults();
 		}
 	}
-	
+
 	/**
 	 * Returns a list of property values for every entry in the specified Properties object
 	 * whose key starts with the String "allowedOSName".
-	 * 
+	 *
 	 * @param p a Properties object which potentially contains entries giving allowed OS names.
 	 * @return a List<String> containing the values for all entries in the specified Properties whose key starts with "allowedOSName".
 	 * 			The returned list may be empty but will never be null.
@@ -98,7 +105,7 @@ public class ServerInit {
 		for (Object key : p.keySet()) {
 			String keyName = key.toString();
 			if (keyName.startsWith("allowedOSName")) {
-				allowedNames.add(p.getProperty(keyName)); 
+				allowedNames.add(p.getProperty(keyName));
 			}
 		}
 		return allowedNames;
@@ -110,7 +117,7 @@ public class ServerInit {
 		this.scoreboardAccount = "scoreboard2";
 		this.scoreboardPassword = "scoreboard2";
 	}
-	
+
 	/**
 	 * Returns the port number on which the WTI server should listen for browser (team) connections.
 	 * @return an integer port number
@@ -118,7 +125,7 @@ public class ServerInit {
 	public int getPortNum() {
 		return this.portNum;
 	}
-	
+
 	/**
 	 * Returns the String which is the base name for websocket connections between the WTI server and client (browser) sessions.
 	 * @return a String containing the websocket base name
@@ -126,7 +133,7 @@ public class ServerInit {
 	public String getWsName() {
 		return this.socketSource;
 	}
-	
+
 	/**
 	 * Returns a String containing the PC2 account name which the WTI server should use to login to the PC2 server to fetch
 	 * scoreboard information.
@@ -135,7 +142,7 @@ public class ServerInit {
 	public String getScoreboardAccount() {
 		return this.scoreboardAccount;
 	}
-	
+
 	/**
 	 * Returns a String containing the password for the PC2 scoreboard account.
 	 * @return a password String
@@ -143,7 +150,23 @@ public class ServerInit {
 	public String getScoreboardPassword() {
 		return this.scoreboardPassword;
 	}
-	
+
+	/**
+	 * Returns a String containing the SSL keystore file path.
+	 * @return a full path String
+	 */
+	public String getKeystoreFile() {
+		return this.keyStoreFilePath;
+	}
+
+	/**
+	 * Returns a String containing the SSL keystore password.
+	 * @return the password String
+	 */
+	public String getKeystorePassword() {
+		return this.keyStorePassword;
+	}
+
 	/**
 	 * This method constructs a JSON string containing the HTTP and WebSocket URLs which the WTI-UI front-end
 	 * code will use to contact this WTI server.  The JSON string is saved in a (hard-coded) file location
@@ -154,21 +177,21 @@ public class ServerInit {
 			ServerInit ini = ServerInit.createServerInit();
 			String localIpAddress = getLocalIp();
 			if (localIpAddress == null) throw new Exception("could not get local ip address.");
-			
-			String baseUrl = new StringBuilder("http://")
+
+			String baseUrl = new StringBuilder("https://")
 					.append(localIpAddress)
 					.append(":")
 					.append(ini.getPortNum())
 					.append("/api")
 					.toString();
-			
-			String websocketUrl = new StringBuilder("ws://")
+
+			String websocketUrl = new StringBuilder("wss://")
 					.append(localIpAddress)
 					.append(":")
 					.append(ini.getPortNum())
 					.append("/websocket/WTISocket")
 					.toString();
-			
+
 			JsonObject newJson = Json.createObjectBuilder()
 					.add("baseUrl", baseUrl)
 					.add("websocketUrl", websocketUrl)
@@ -183,16 +206,16 @@ public class ServerInit {
 			output.close();
 		}
 		catch (Exception ex) {
-			
+
 		}
 	}
-	
+
 	/**
 	 * Returns a String containing the local IP address of the machine on which the WTI server is running.
 	 * The returned address is initially obtained by calling {@link InetAddress#getHostAddress()} on the address
 	 * returned by {@link DatagramSocket#getLocalAddress()}. This is the address returned unless the pc2v9.ini
 	 * file contains an entry "wtiOverridePublicIP", in which case the value of that entry is returned instead.
-	 * 
+	 *
 	 * @return a String containing an IP address, or null if an exception occurs while fetching the local IP address.
 	 */
 	public static String getLocalIp() {
@@ -211,7 +234,7 @@ public class ServerInit {
 	}
 
 	/** Returns the {@link pc2.core.log.Log} logger being used by this WTI server
-	 * 
+	 *
 	 * @return a {@link pc2.core.log.Log} logger.
 	 */
 	public Log getLogger() {
