@@ -31,18 +31,37 @@ import edu.csus.ecs.pc2.core.log.Log;
  */
 public class ServerInit {
 
+	// File where WTI properties are configured
+    public final String WTI_INI_FILE_KEY = "pc2v9.ini";
+	// Property keys for WTI
+    public final String WTI_HTTP_PORT_KEY = "wtiport";
+    private final String WTI_WEBSOCKET_NAME_KEY = "wtiwsName";
+    private final String WTI_SCOREBOARD_ACCT_KEY = "wtiscoreboardaccount";
+    private final String WTI_SCOREBOARD_PASS_KEY = "wtiscoreboardPassword";
     private final String WTI_PUBLIC_IP_OVERRIDE_KEY = "wtiOverridePublicIP";
+    // eg. allowedOSName1, allowedOSName2, ..., allowedOSNameLinux
+    private final String WTI_ALLOWED_OS_NAME_PREFIX_KEY = "allowedOSName";
+    // Property keys for running WTI over https
+    private final String WTI_USE_SSL_KEY = "useSSL";
     private final String WTI_KEY_STORE_PATH_KEY = "keyStoreFilePath";
     private final String WTI_KEY_STORE_PASSWORD_KEY = "keyStorePassword";
+
+    private static final boolean DEF_USE_SSL = false;
+    private static final int DEF_WTI_HTTP_PORT = 8080;
+    private static final String DEF_WEBSOCK_PATH = "/websocket";
+    private static final String DEF_SCOREBOARD_ACCT = "scoreboard2";
+    private static final String DEF_SCOREBOARD_PASS = "scoreboard2";
 
 	private static ServerInit init = null;
 	private static String publicIPOverride;
 	private static List<String> allowedOSNames;
 
+	private boolean useSSL = DEF_USE_SSL;
 	private int portNum;
 	private String socketSource;
 	private String scoreboardAccount;
 	private String scoreboardPassword;
+
 	private String keyStoreFilePath;
 	private String keyStorePassword;
 
@@ -63,13 +82,25 @@ public class ServerInit {
 	private void readIniFile() {
 
 		Properties p = new Properties();
+		String exceptKey = "none";
+
 		try {
 		      //p.load(new FileInputStream("WebTeamInterface.ini"));
-              p.load(new FileInputStream("pc2v9.ini"));
-		      this.portNum = Integer.parseInt(p.getProperty("wtiport"));
-		      this.socketSource = p.getProperty("wtiwsName");
-		      this.scoreboardAccount = p.getProperty("wtiscoreboardaccount", "scoreboard2");
-		      this.scoreboardPassword = p.getProperty("wtiscoreboardpassword", "scoreboard2");
+              p.load(new FileInputStream(WTI_INI_FILE_KEY));
+
+              exceptKey = WTI_USE_SSL_KEY;
+              String sslValue = p.getProperty(WTI_USE_SSL_KEY);
+              if(sslValue != null && Integer.parseInt(sslValue) > 0) {
+            	  this.useSSL = true;
+              } else {
+            	  this.useSSL = false;
+              }
+              exceptKey = WTI_HTTP_PORT_KEY;
+		      this.portNum = Integer.parseInt(p.getProperty(WTI_HTTP_PORT_KEY));
+
+		      this.socketSource = p.getProperty(WTI_WEBSOCKET_NAME_KEY);
+		      this.scoreboardAccount = p.getProperty(WTI_SCOREBOARD_ACCT_KEY, DEF_SCOREBOARD_ACCT);
+		      this.scoreboardPassword = p.getProperty(WTI_SCOREBOARD_PASS_KEY, DEF_SCOREBOARD_PASS);
 
 		      publicIPOverride = p.getProperty(WTI_PUBLIC_IP_OVERRIDE_KEY);
 		      allowedOSNames = getAllowedOSNames(p);
@@ -77,13 +108,13 @@ public class ServerInit {
 		      keyStoreFilePath = p.getProperty(WTI_KEY_STORE_PATH_KEY);
 		      keyStorePassword = p.getProperty(WTI_KEY_STORE_PASSWORD_KEY);
 
-		      System.out.println ("Found the following properties in pc2v9.ini: " + p);
+		      System.out.println ("Found the following properties in " + WTI_INI_FILE_KEY + ": " + p);
 
 		} catch(FileNotFoundException e) {
-			this.logger.info("pc2v9.ini File missing; reverting to default WTI port/socket/scoreboard values");
+			this.logger.info(WTI_INI_FILE_KEY + " File missing; reverting to default WTI port/socket/scoreboard values");
 			setDefaults();
 		} catch (NumberFormatException e) {
-            this.logger.info("No parsable integer wtiport value found in pc2v9.ini; reverting to default WTI port/socket/scoreboard values");
+            this.logger.info("No parsable integer '" + exceptKey + "' value found in " + WTI_INI_FILE_KEY + "; reverting to default WTI port/socket/scoreboard values");
             setDefaults();
 		} catch (IOException e) {
 			this.logger.info(e.getLocalizedMessage());
@@ -104,7 +135,7 @@ public class ServerInit {
 		List<String> allowedNames = new ArrayList<String>();
 		for (Object key : p.keySet()) {
 			String keyName = key.toString();
-			if (keyName.startsWith("allowedOSName")) {
+			if (keyName.startsWith(WTI_ALLOWED_OS_NAME_PREFIX_KEY)) {
 				allowedNames.add(p.getProperty(keyName));
 			}
 		}
@@ -112,10 +143,20 @@ public class ServerInit {
 	}
 
 	private void setDefaults() {
-		this.portNum = 8080;
-		this.socketSource ="/websocket";
-		this.scoreboardAccount = "scoreboard2";
-		this.scoreboardPassword = "scoreboard2";
+		this.useSSL = DEF_USE_SSL;
+		this.portNum = DEF_WTI_HTTP_PORT;
+		this.socketSource = DEF_WEBSOCK_PATH;
+		this.scoreboardAccount = DEF_SCOREBOARD_ACCT;
+		this.scoreboardPassword = DEF_SCOREBOARD_PASS;
+	}
+
+	/**
+	 * Returns true if the WTI server should listen for HTTPS browser (team) connections as opposed
+	 * to HTTP browser connections.
+	 * @return a boolean
+	 */
+	public boolean isUseSSL() {
+		return useSSL;
 	}
 
 	/**
@@ -178,14 +219,14 @@ public class ServerInit {
 			String localIpAddress = getLocalIp();
 			if (localIpAddress == null) throw new Exception("could not get local ip address.");
 
-			String baseUrl = new StringBuilder("https://")
+			String baseUrl = new StringBuilder(ini.isUseSSL() ? "https://" : "http://")
 					.append(localIpAddress)
 					.append(":")
 					.append(ini.getPortNum())
 					.append("/api")
 					.toString();
 
-			String websocketUrl = new StringBuilder("wss://")
+			String websocketUrl = new StringBuilder(ini.isUseSSL() ? "wss://" : "ws://")
 					.append(localIpAddress)
 					.append(":")
 					.append(ini.getPortNum())

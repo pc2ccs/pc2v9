@@ -51,8 +51,17 @@ public class WebServer {
 	//the initialization values for the server
 	private static ServerInit ini;
 
+	public static void startServer(ServerInit initServer) throws LoginFailureException, Exception {
+		ini = initServer;
+		if(ini.isUseSSL()) {
+			startHTTPSServer();
+		} else {
+			startHTTPServer();
+		}
+	}
+
 	/**
-	 * Starts a Jetty server using the initialization values specified in the received {@link ServerInit} object.
+	 * Starts an HTTP Jetty server using the initialization values specified in the received {@link ServerInit} object.
 	 *
 	 * Verifies that the {@link ContestController} which will be used by Jetty will be able to successfully login to
 	 * the PC2 scoreboard account specified in the configuration.  If so,
@@ -65,15 +74,74 @@ public class WebServer {
 	 * 								configured scoreboard account
 	 * @throws Exception if any other Exception occurs during webserver startup
 	 */
-	public static void startServer(ServerInit initServer) throws LoginFailureException, Exception {
-		ini = initServer;
+	private static void startHTTPServer() throws LoginFailureException, Exception {
 
 		Log logger = ini.getLogger();
 
 		try {
 			//make sure the ContestController created by the server is going to be able to login using the configured PC2 scoreboard account
 			if (!verifyPC2ScoreboardLogin()) {
-				throw new LoginFailureException("PC2 Scoreboard login failed");
+				throw new LoginFailureException("PC2 Scoreboard login failed for HTTP");
+			}
+
+			// get the endpoint handlers which will be installed in Jetty
+			logger.info("Constructing HTTP Jetty service handlers");
+			HandlerList handlers = new HandlerList();
+			handlers.addHandler(getWebsocketHandler());
+			handlers.addHandler(getSwaggerHandler());
+			handlers.addHandler(getWebApp());
+			handlers.addHandler(getJerseyHandler());
+
+			//create a new Jetty server
+			logger.info("Creating HTTP Jetty server");
+			Server server = new Server(ini.getPortNum());
+			System.out.println("Starting HTTP on port "+ini.getPortNum());
+
+			//install the endpoint handlers in Jetty
+			logger.info("Installing HTTP service handlers in Jetty");
+			server.setHandler(handlers);
+
+			//start Jetty listening for endpoint references
+			logger.info("Starting HTTP Jetty server");
+			server.start();
+
+			//block until all server threads are done (which won't normally happen - so, wait forever)
+			server.join();
+
+		} catch (LoginFailureException ex) {
+			System.err.println("WTI HTTP server failed to login with PC2 Scoreboard account: " + ex);
+			logger.severe("WTI server failed to login with PC2 Scoreboard account: " + ex);
+			throw ex;
+		} catch (Exception ex) {
+			System.err.println(ex);
+			logger.severe("Exception during WTI HTTP server startup: " + ex);
+			throw ex;
+
+		}
+	}
+
+	/**
+	 * Starts an HTTPS Jetty server using the initialization values specified in the received {@link ServerInit} object.
+	 *
+	 * Verifies that the {@link ContestController} which will be used by Jetty will be able to successfully login to
+	 * the PC2 scoreboard account specified in the configuration.  If so,
+	 * initializes the Jetty server with resource handlers, starts it listening on the port specified in the
+	 * received {@link ServerInit} object, and blocks (via a join()) waiting for the server to be shut down.
+	 *
+	 * @param initServer a {@link ServerInit} object containing initialization values for the server being started
+	 *
+	 * @throws LoginFailureException if a failure occurs when attempting to log in to the PC2 server using the
+	 * 								configured scoreboard account
+	 * @throws Exception if any other Exception occurs during webserver startup
+	 */
+	private static void startHTTPSServer() throws LoginFailureException, Exception {
+
+		Log logger = ini.getLogger();
+
+		try {
+			//make sure the ContestController created by the server is going to be able to login using the configured PC2 scoreboard account
+			if (!verifyPC2ScoreboardLogin()) {
+				throw new LoginFailureException("PC2 Scoreboard login failed for HTTPS");
 			}
 
 			// get the endpoint handlers which will be installed in Jetty
@@ -85,9 +153,9 @@ public class WebServer {
 			handlers.addHandler(getJerseyHandler());
 
 			//create a new Jetty server
-			logger.info("Creating Jetty server");
+			logger.info("Creating HTTPS Jetty server");
 			Server server = new Server();
-			System.out.println("Starting on port "+ini.getPortNum());
+			System.out.println("Starting HTTPS on port "+ini.getPortNum());
 
 	        // 1. Configure SSL Context with your keystore
 	        SslContextFactory sslContextFactory = new SslContextFactory(true);
@@ -119,23 +187,23 @@ public class WebServer {
             server.setConnectors(new Connector[] { sslConnector });
 
 			//install the endpoint handlers in Jetty
-			logger.info("Installing service handlers in Jetty");
+			logger.info("Installing HTTPS service handlers in Jetty");
 			server.setHandler(handlers);
 
 			//start Jetty listening for endpoint references
-			logger.info("Starting Jetty server");
+			logger.info("Starting HTTPS Jetty server");
 			server.start();
 
 			//block until all server threads are done (which won't normally happen - so, wait forever)
 			server.join();
 
 		} catch (LoginFailureException ex) {
-			System.err.println("WTI server failed to login with PC2 Scoreboard account: " + ex);
-			logger.severe("WTI server failed to login with PC2 Scoreboard account: " + ex);
+			System.err.println("WTI HTTPS server failed to login with PC2 Scoreboard account: " + ex);
+			logger.severe("WTI HTTPS server failed to login with PC2 Scoreboard account: " + ex);
 			throw ex;
 		} catch (Exception ex) {
 			System.err.println(ex);
-			logger.severe("Exception during WTI server startup: " + ex);
+			logger.severe("Exception during WTI HTTPS server startup: " + ex);
 			throw ex;
 
 		}
@@ -208,7 +276,7 @@ public class WebServer {
 //            }
 //		};
 //		return(wsHandler);
-private static ServletContextHandler getWebsocketHandler() {
+	private static ServletContextHandler getWebsocketHandler() {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath(ini.getWsName());
 		try {
@@ -287,7 +355,12 @@ private static ServletContextHandler getWebsocketHandler() {
 		ServletHolder swaggerServlet = api.addServlet(DefaultJaxrsConfig.class, "/swagger-core");
 		swaggerServlet.setInitOrder(2);
 		swaggerServlet.setInitParameter("api.version", "1.0.0");
-		swaggerServlet.setInitParameter("swagger.api.basepath", String.format("http://%s:%s/api", ServerInit.getLocalIp(), ini.getPortNum()));
+		String webProtocol = "https";
+		if(!ini.isUseSSL()) {
+			webProtocol = "http";
+		}
+		swaggerServlet.setInitParameter("swagger.api.basepath", String.format("%s://%s:%s/api",
+				webProtocol, ServerInit.getLocalIp(), ini.getPortNum()));
 		swaggerServlet.setInitParameter("swagger.api.title", "Web Team Interface");
 
 		// Enable Cors
