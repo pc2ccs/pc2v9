@@ -86,12 +86,11 @@ then
 	if [[ "$cpunum" =~ ^[1-9][0-9]*$ ]]
 	then
 		# Restrict to number of CPU's.
-		cpunum=$(((cpunum-1)%(MAX_CPU_NUM+1)))
+		cpunum=$((cpunum%(MAX_CPU_NUM+1)))
 	else
-		cpunum=$(((DEFAULT_CPU_NUM+1)))
+		cpunum=$DEFAULT_CPU_NUM
 	fi
 fi
-CPUMASK=$((1<<cpunum-1))
 
 # Process ID of submission
 submissionpid=""
@@ -135,6 +134,13 @@ DEBUG_FILE=sandbox.log
 function DEBUG()
 {
   [ "$_DEBUG" == "on" ] && "$@" >> $DEBUG_FILE
+}
+
+# control whether the script outputs debug info for timing details
+_TDEBUG="on"   # change this to anything other than "on" to disable debug/trace output
+function TDEBUG()
+{
+  [ "$_TDEBUG" == "on" ] && "$@" >> $DEBUG_FILE
 }
 
 # For per-testcase reporting/logging
@@ -223,6 +229,8 @@ HandleTerminateFromPC2()
 	REPORT_DEBUG "Killing off submission process group $submissionpid and all children"
 	KillValidator
 	KillChildProcs
+	GetSandboxStats
+	ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
 	REPORT_DEBUG Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
 	exit $FAIL_WALL_TIME_LIMIT_EXCEEDED 
 }
@@ -242,6 +250,8 @@ GetSandboxStats()
 {
 	# Get cpu time immediately to minimize any usage by this shell
 	cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
+	read cpuend < $PC2_SANDBOX_CGROUP_PATH/cpu.stat
+	TDEBUG  echo CGroup2 Start: $cpustart End: $cpuend
 	# Get wall time - we want it as close as possible to when we fetch the cpu time so they stay close
 	# since the cpu.stat includes the time this script takes AFTER the submission finishes.
 	endtime=`GetTimeInMicros`
@@ -532,20 +542,18 @@ $VALIDATOR $JUDGEIN $JUDGEANS $INT_FEEDBACKDIR > $INFIFO < $OUTFIFO &
 intv_pid=$!
 REPORT_DEBUG Started interactive validator PID $intv_pid
 
+# Create variables for various ulimit values.  These will be set in once inside the cgroup.
+
 # We use ulimit to limit CPU time, not cgroups.  Time is supplied in seconds.  This may have to
 # be reworked if ms accuracy is needed.  The problem is, cgroups do not kill off a process that
 # exceeds the time limit, ulimit does.
 TIMELIMIT_US=$((TIMELIMIT * 1000000))
 REPORT_DEBUG Setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
-ulimit -t $TIMELIMIT
 
 MAXPROCS=$((MAXPROCS+`ps -T -u $USER | wc -l`))
 REPORT_DEBUG Setting maximum user processes to $MAXPROCS 
-ulimit -u $MAXPROCS
-
 
 REPORT_DEBUG Setting stack size to unlimited
-ulimit -s unlimited
 
 # Keep track of details for reports
 REPORT_BRIEF ${JUDGEIN}
@@ -554,23 +562,32 @@ REPORT_BRIEF $cpunum
 REPORT_BRIEF $$
 REPORT_BRIEF $(date "+%F %T.%6N")
 
+TDEBUG echo -n 'CGroup2 cpu usec to start: '
+TDEBUG grep usage_usec  $PC2_SANDBOX_CGROUP_PATH/cpu.stat
+
+# run the command
+REPORT_DEBUG Executing "setsid taskset -c ${cpunum} $COMMAND $* < $INFIFO > $OUTFIFO"
+
+TDEBUG echo -n 'CGroup2 cpu usec right before starting submission: '
+TDEBUG grep usage_usec  $PC2_SANDBOX_CGROUP_PATH/cpu.stat
+
 # Remember wall time when we started
 starttime=`GetTimeInMicros`
 
-#put the current process (and implicitly its children) into the pc2sandbox cgroup.
-REPORT Putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
-if ! echo $$ > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
-then
-	echo $0: Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs - not executing submission.
-	SysFailure Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
-	rm -f "$INFIFO" "$OUTFIFO"
-	exit $FAIL_SANDBOX_ERROR
-fi
+# Get CPU starting time (first line)
+read cpustart < $PC2_SANDBOX_CGROUP_PATH/cpu.stat
 
-# run the command
-REPORT_DEBUG Executing "setsid taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO"
+# This will create a new process group and put it into the created cgroup
+( if ! echo $BASHPID > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
+  then
+    echo $0: Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs - not executing submission.
+    SysFailure Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
+    exit $FAIL_SANDBOX_ERROR
+  fi
+  ulimit -t $TIMELIMIT -u $MAXPROCS -s unlimited
+  exec setsid taskset -c ${cpunum} $COMMAND $*
+) <$INFIFO >$OUTFIFO 2>&2 &
 
-setsid taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO  &
 # Remember child's PID/PGRP for possible killing off later
 submissionpid=$!
 
@@ -605,9 +622,11 @@ do
 	# If interactive validator finishes
 	if test "$child_pid" -eq "$intv_pid"
 	then
+		need_child_stats=0
 		REPORT_DEBUG Validator finishes with exit code $wstat
 		if test "$contestant_done" -eq 0
 		then
+			need_child_stats=1
 			# Added this test 04/30/2025 - apparently it was missing.  We will only kill the submission if this
 			# flag is 1, as per the comment at the top of this script.
 			if test ${KILL_WA_VALIDATOR} -eq 0
@@ -617,8 +636,6 @@ do
 				wait -n "$submissionpid"
 				COMMAND_EXIT_CODE=$?
 	
-				GetSandboxStats
-	
 				if test $COMMAND_EXIT_CODE -eq 127
 				then
 					REPORT_DEBUG No more children found.  Setting submission exit code to 0
@@ -627,13 +644,17 @@ do
 					FormatExitCode $COMMAND_EXIT_CODE
 					REPORT_DEBUG Contestant PID $submissionpid finished with exit code $result but after the validator
 				fi
-				ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
 			else
 				REPORT_DEBUG Killing child submission pid $submissionpid since it is still running "(KILL_WA_VALIDATOR=1)"
 			fi
 		fi
 
 		KillChildProcs
+		if test $need_child_stats -eq 1
+		then
+			GetSandboxStats
+			ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
+		fi
 
 		if test "$wstat" -eq $EXITCODE_AC
 		then
@@ -757,6 +778,9 @@ do
 		REPORT_DEBUG Waiting for interactive validator to finish...
 	fi
 done
+
+TDEBUG echo -n 'CGroup2 cpu usec after all done: '
+TDEBUG grep usage_usec  $PC2_SANDBOX_CGROUP_PATH/cpu.stat
 
 DEBUG echo
 REPORT "________________________________________"
