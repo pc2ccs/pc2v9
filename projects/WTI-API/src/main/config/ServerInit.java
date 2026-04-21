@@ -45,12 +45,14 @@ public class ServerInit {
     private final String WTI_USE_SSL_KEY = "useSSL";
     private final String WTI_KEY_STORE_PATH_KEY = "keyStoreFilePath";
     private final String WTI_KEY_STORE_PASSWORD_KEY = "keyStorePassword";
+    private final String WTI_CERT_ALIAS_KEY = "certificateAlias";
 
     private static final boolean DEF_USE_SSL = false;
     private static final int DEF_WTI_HTTP_PORT = 8080;
     private static final String DEF_WEBSOCK_PATH = "/websocket";
     private static final String DEF_SCOREBOARD_ACCT = "scoreboard2";
     private static final String DEF_SCOREBOARD_PASS = "scoreboard2";
+    private static final String DEF_KEY_STORE_PASSWORD = "contest";
 
 	private static ServerInit init = null;
 	private static String publicIPOverride;
@@ -63,8 +65,8 @@ public class ServerInit {
 	private String scoreboardPassword;
 
 	private String keyStoreFilePath;
-	private String keyStorePassword;
-
+	private String keyStorePassword = DEF_KEY_STORE_PASSWORD;
+	private String certAlias;
 
 	private Log logger;
 
@@ -107,6 +109,7 @@ public class ServerInit {
 
 		      keyStoreFilePath = p.getProperty(WTI_KEY_STORE_PATH_KEY);
 		      keyStorePassword = p.getProperty(WTI_KEY_STORE_PASSWORD_KEY);
+		      certAlias = p.getProperty(WTI_CERT_ALIAS_KEY);
 
 		      System.out.println ("Found the following properties in " + WTI_INI_FILE_KEY + ": " + p);
 
@@ -206,6 +209,14 @@ public class ServerInit {
 	 */
 	public String getKeystorePassword() {
 		return this.keyStorePassword;
+	}
+
+	/**
+	 * Returns a String containing the alias of the certificate to use from the keystore.
+	 * @return the certificate alias String
+	 */
+	public String getCertAlias() {
+		return this.certAlias;
 	}
 
 	/**

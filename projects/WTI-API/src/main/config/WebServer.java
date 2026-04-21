@@ -35,6 +35,7 @@ import controllers.TeamsController;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import io.swagger.jaxrs.config.DefaultJaxrsConfig;
 
@@ -161,6 +162,13 @@ public class WebServer {
 	        SslContextFactory sslContextFactory = new SslContextFactory(true);
 	        sslContextFactory.setKeyStorePath(ini.getKeystoreFile());
             sslContextFactory.setKeyStoreType("PKCS12");
+            String alias = ini.getCertAlias();
+            // it's ok if this isn't specified since jetty will use the first one in the store
+            // you should specify a certificateAlias in the pc2v9.ini if there are multiple
+            // certificates in the key store file and you want to use a specific one.
+            if(!StringUtilities.isEmpty(alias)) {
+            	sslContextFactory.setCertAlias(alias);
+            }
 	        sslContextFactory.setKeyStorePassword(ini.getKeystorePassword());
 
             // suggestions from http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
