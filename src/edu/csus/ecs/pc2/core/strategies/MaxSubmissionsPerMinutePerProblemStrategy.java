@@ -2,6 +2,9 @@
 package edu.csus.ecs.pc2.core.strategies;
 
 import edu.csus.ecs.pc2.core.IThrottleStrategy;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -10,10 +13,10 @@ import edu.csus.ecs.pc2.core.model.Run;
 
 /**
  * This class implements an {@link IThrottleStrategy} which rejects runs when the submitting team
- * has submitted more than "N" runs in the last minute for the specified problem
+ * has submitted more than "N" runs in the last minute *for the specified problem*
  * (that is, it only considers previous submissions for the same problem rather then for all problems).  
- * The value of N is set either to a default value or a value passed to the constructor
- * when the class is instantiated.
+ * The value of N is set to a value read from the pc2.ini file if present; otherwise it is set to a default value,
+ * or a value passed to the constructor when the class is instantiated.
  * 
  * @author John Clevenger
  *
@@ -21,7 +24,8 @@ import edu.csus.ecs.pc2.core.model.Run;
 public class MaxSubmissionsPerMinutePerProblemStrategy implements IThrottleStrategy {
     
     public static int DEFAULT_MAX_SUBMISSIONS_PER_MINUTE_PER_PROBLEM = 6 ;
-
+    public static final String MAX_SUBS_PER_MINUTE_PER_PROBLEM_KEY = "throttle-strategy-settings.maxSubmissionsPerMinutePerProblem";
+    
     private  IInternalContest contest;
     private int maxPerMinutePerProblem;
     
@@ -32,7 +36,17 @@ public class MaxSubmissionsPerMinutePerProblemStrategy implements IThrottleStrat
      */
     public MaxSubmissionsPerMinutePerProblemStrategy (IInternalContest inContest) {
         this.contest = inContest ;
-        this.maxPerMinutePerProblem = DEFAULT_MAX_SUBMISSIONS_PER_MINUTE_PER_PROBLEM ;
+        
+        //try to get a max-per-minute value from the INI file (credit:  @johnbrvc)
+        try {
+            String maxSubsPerMinString = IniFile.getValue(MAX_SUBS_PER_MINUTE_PER_PROBLEM_KEY);
+            maxPerMinutePerProblem = StringUtilities.getIntegerValue(maxSubsPerMinString, DEFAULT_MAX_SUBMISSIONS_PER_MINUTE_PER_PROBLEM);
+        } catch(Exception e) {
+            // if there is any problem reading the INI or a bad integer conversion, this does not warrant a complete failure
+            // of the submission.  Rather, we'll use the default and log the error.      
+            this.maxPerMinutePerProblem = DEFAULT_MAX_SUBMISSIONS_PER_MINUTE_PER_PROBLEM ;
+            StaticLog.warning("MaxSubmissionsPerMinutePerProblemStrategy: Bad INI file setting '" + MAX_SUBS_PER_MINUTE_PER_PROBLEM_KEY + "': " + e);
+        }        
     }
 
     /**
@@ -56,7 +70,7 @@ public class MaxSubmissionsPerMinutePerProblemStrategy implements IThrottleStrat
 
     /**
      * Queries the specified contest to obtain the complete list of runs, then determines whether 
-     * the count of runs previously submitted for the specified problem in the last minute by the new-run submitter
+     * the count of runs previously submitted *for the specified problem* in the last minute by the new-run submitter
      * has already reached the maximum allowed.
      * 
      * @param contest the contest containing runs submitted by teams.
@@ -94,7 +108,7 @@ public class MaxSubmissionsPerMinutePerProblemStrategy implements IThrottleStrat
                 // yes, same submitter; see if the problem in the new run is the same as the problem in the curRun
                 if (curRun.getProblemId().equals(newRunProbId)) {
 
-                    // yes, same submitter and same problem; get the submission time (in seconds) for the current run
+                    // yes, same submitter and same problem; get the submission time (in seconds) for the curRun
                     long runSubmisionTimeSecs = curRun.getOriginalElapsedMS() / 1000;
 
                     // check if the curRun submission time was within the last minute (60 seconds)
