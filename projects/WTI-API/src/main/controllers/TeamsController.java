@@ -18,6 +18,7 @@ import javax.ws.rs.GET;
 
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.implementation.ProblemImplementation;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.api.IClient;
@@ -455,7 +456,7 @@ public class TeamsController extends MainController {
 							run.isFinalJudged(),
 							run.isSolved(),
 							String.format("%s-%s", run.getSiteNumber(), run.getNumber()),
-							run.getScore()));
+							Utilities.formatScore(run.getScore())));
 				}
 				
 			}

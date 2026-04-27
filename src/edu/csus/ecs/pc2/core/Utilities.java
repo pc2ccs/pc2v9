@@ -112,7 +112,7 @@ public final class Utilities {
      * and the key: format in the [scoring] section
      */
     private static final String POINT_SCORING_FORMAT_INI_KEY = "scoring.format";
-    private static final String DEFAULT_POINT_SCORING_FORMAT = "0.0##";
+    private static final String DEFAULT_POINT_SCORING_FORMAT = "0.000";
     private static DecimalFormat dfPointScore = null;
 
 

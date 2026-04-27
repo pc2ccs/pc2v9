@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -224,7 +224,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Load and Save configuration to disk
      */
-    private boolean saveCofigurationToDisk = true;
+    private boolean saveConfigurationToDisk = true;
 
     /**
      * Evaluations log (evals.log).
@@ -788,6 +788,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     /**
+     * If there are any DecimalFormats defined in the ini file(s) for scores, eg. for formatting scoreboard, runs, etc then
+     * Make sure those formats are valid, if not it's a fatal error.  We do this by simply trying to format a value
+     * and checking for an exception.
+     */
+    private void validateScoreFormats() {
+        try {
+            String szTestFormat = Utilities.formatScore(3.14159265358979);
+        } catch(Exception e) {
+            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR - Invalid scoring format in INI file", e);
+            fatalError("The scoring format specified in the INI file is invalid: " + e.getMessage());
+        }
+    }
+    
+    /**
      * Login to contest server.
      *
      * @param id
@@ -1160,7 +1174,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             inContest.storeConfiguration(getLog());
         } else {
-            if (saveCofigurationToDisk) {
+            if (saveConfigurationToDisk) {
                 inContest.initializeSubmissions(inContest.getSiteNumber());
             }
             info("Loaded configuration from disk");
@@ -1171,7 +1185,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 logException(e);
             }
 
-            if (saveCofigurationToDisk) {
+            if (saveConfigurationToDisk) {
                 // save newly merged profiles
                 inContest.storeConfiguration(getLog());
             }
@@ -3004,7 +3018,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
 
 
-                    if (saveCofigurationToDisk) {
+                    if (saveConfigurationToDisk) {
                         // save newly merged profiles
                         contest.storeConfiguration(getLog());
                     }
@@ -3239,11 +3253,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 String currentDirectory = Utilities.getCurrentDirectory();
                 fatalError("Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
             }
+            validateScoreFormats();
         }
-
+        
         // SOMEDAY code add NO_SAVE_OPTION_STRING
         if (parseArguments.isOptPresent(AppConstants.NO_SAVE_OPTION_STRING)) {
-            saveCofigurationToDisk = false;
+            saveConfigurationToDisk = false;
         }
 
         if (parseArguments.isOptPresent(AppConstants.SERVER_OPTION_STRING)) {
@@ -4177,7 +4192,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public boolean readConfigFromDisk(int siteNum) {
 
         boolean loadedConfiguration = false;
-        if (saveCofigurationToDisk) {
+        if (saveConfigurationToDisk) {
             try {
                 loadedConfiguration = contest.readConfiguration(siteNum, getLog());
 
