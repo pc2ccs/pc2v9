@@ -636,7 +636,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
             sendToLocalServer(packet);
         } else {
-            throw new SubmissionRejectedException("Submission threshold exceeded", 
+            throw new SubmissionRejectedException("Submission threshold exceeded - wait a minute and try again", 
                                                     SubmissionRejectedException.SubmissionRejectionReason.THROTTLE_EXCEEDED);
         }
     }
@@ -5063,7 +5063,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
             sendToLocalServer(packet);
         } else {
-            throw new SubmissionRejectedException("Submission threshold exceeded",
+            throw new SubmissionRejectedException("Submission threshold exceeded - wait a minute and try again",
                                                     SubmissionRejectedException.SubmissionRejectionReason.THROTTLE_EXCEEDED);
         }
     }
