@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.convert;
 
 import java.io.ByteArrayInputStream;
@@ -167,23 +167,24 @@ public final class EventFeedUtilities {
 
                 String entryName = entry.getName();
 
-//                ByteOutputStream byteOutputStream = new ByteOutputStream();
-                ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+                // Only add the file to the list if the file name is not an empty string.
+                // and it's not a directory entry.
+                if(!entryName.isEmpty() && !entryName.endsWith("/")) {
+                    ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
 
-                byte[] buffer = new byte[8096];
-                int bytesRead = 0;
-                while ((bytesRead = zipStream.read(buffer)) != -1)
-                {
-                    byteOutputStream.write(buffer, 0, bytesRead);
+                    byte[] buffer = new byte[8096];
+                    int bytesRead = 0;
+                    while ((bytesRead = zipStream.read(buffer)) != -1)
+                    {
+                        byteOutputStream.write(buffer, 0, bytesRead);
+                    }
+
+                    String base64Data = getBase64Data(byteOutputStream.toByteArray());
+                    IFile iFile = new IFileImpl(entryName, base64Data);
+                    files.add(iFile);
+
+                    byteOutputStream.close();
                 }
-
-//                String base64Data = getBase64Data(byteOutputStream.getBytes());
-                String base64Data = getBase64Data(byteOutputStream.toByteArray());
-                IFile iFile = new IFileImpl(entryName, base64Data);
-                files.add(iFile);
-
-                byteOutputStream.close();
-
                 zipStream.closeEntry();
             }
             zipStream.close();

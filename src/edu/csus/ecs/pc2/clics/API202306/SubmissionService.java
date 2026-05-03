@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.File;
@@ -53,7 +53,6 @@ import edu.csus.ecs.pc2.convert.EventFeedUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
-import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException.SubmissionRejectionReason;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -358,21 +357,34 @@ public class SubmissionService implements Feature {
 
                     SerializedFile mainFile = runFiles.getMainFile();
                     SerializedFile[] otherFiles = runFiles.getOtherFiles();
+                    int fileIndex = 0;
+
                     java.nio.file.Path tmpDir = null;
                     try {
                         tmpDir = Files.createTempDirectory("subService");
                         // dump mainFile and otherFiles to tmpDir
                         HashMap<Integer, String> filesToWrite = new HashMap<Integer, String>();
-                        if (mainFile != null) {
-                            filesToWrite.put(Integer.valueOf(0), mainFile.getName());
+                        // Do not add entry for an empty mainfile name - could be it's included as otherFiles
+                        if (mainFile != null && !mainFile.getName().isEmpty()) {
+                            filesToWrite.put(Integer.valueOf(fileIndex), mainFile.getName());
+                            fileIndex++;
                             mainFile.buffer2file(mainFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + mainFile.getName());
                         }
                         if (otherFiles != null) {
                             for (int j = 0; j < otherFiles.length; j++) {
                                 SerializedFile serializedFile = otherFiles[j];
-                                filesToWrite.put(Integer.valueOf(j + 1), serializedFile.getName());
-                                serializedFile.buffer2file(serializedFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + serializedFile.getName());
+                                // Do not add filenames that are empty strings.
+                                if(!serializedFile.getName().isEmpty()) {
+                                    filesToWrite.put(Integer.valueOf(fileIndex), serializedFile.getName());
+                                    fileIndex++;
+                                    serializedFile.buffer2file(serializedFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + serializedFile.getName());
+                                }
                             }
+                        }
+                        // Make sure we're returning a valid source zip - that is, it must have files in it.
+                        if(fileIndex == 0) {
+                            controller.getLog().log(Log.INFO, "Returned runFiles was empty or all file names were empty strings; returning 'NOT_FOUND'");
+                            return Response.status(Status.NOT_FOUND).build();
                         }
                         String zipFileName = tmpDir.toAbsolutePath().toString() + File.pathSeparator + "files.zip";
                         createZip(submission, tmpDir, filesToWrite, zipFileName);
@@ -494,9 +506,9 @@ public class SubmissionService implements Feature {
                 return Response.status(Status.BAD_REQUEST).entity("invalid json supplied").build();
             }
 
-            // These next three are for admin users only
+            // These next two are for admin users only
             long overrideTimeMS = -1;
-            long overrideSubmissionID = -1;
+            long overrideSubmissionID = 0;
 
             Log log = controller.getLog();
             String user = sc.getUserPrincipal().getName();
@@ -579,7 +591,7 @@ public class SubmissionService implements Feature {
                 }
                 overrideSubmissionID = Utilities.stringToLong(sub.getId());
                 if(overrideSubmissionID < 0) {
-                    overrideSubmissionID = -1;
+                    overrideSubmissionID = 0;
                 }
             }
 
