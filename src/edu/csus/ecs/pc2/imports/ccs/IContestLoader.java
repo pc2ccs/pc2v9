@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -66,6 +66,10 @@ public interface IContestLoader {
     final String CLICS_CONTEST_DURATION = "duration";
     final String CLICS_CONTEST_FREEZE_DURATION = "scoreboard_freeze_duration";
     final String CLICS_CONTEST_SCOREBOARD_TYPE = "scoreboard_type";
+    final String CLICS_CONTEST_MEDALS = "medals";
+    final String CLICS_CONTEST_MEDAL_GOLD = "gold";
+    final String CLICS_CONTEST_MEDAL_SILVER = "silver";
+    final String CLICS_CONTEST_MEDAL_BRONZE = "bronze";
     // This is not currently used, but penalty_time SHOULD be used instead of
     // reading it from properties. It is here for completeness, and, it happens
     // to be a required value in the yaml, but we do not enforce that.
@@ -106,6 +110,8 @@ public interface IContestLoader {
     String DEFAULT_CLARS_KEY = "default-clars";
 
     String CLAR_CATEGORIES_KEY = "clar-categories";
+
+    final String CONTEST_USE_WF_RANKING = "wf_honors_ranking";
 
     /**
      * Name for problem set in contest.yaml
