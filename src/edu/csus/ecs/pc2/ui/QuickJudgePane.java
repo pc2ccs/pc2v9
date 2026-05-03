@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -47,11 +47,11 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
  * Quick Judge Pane.
- * 
+ *
  * This pane shows the list of runs in the system and
  * allows the user to multi select and judge those runs.
- * Also allows the user to rejudge runs. 
- * 
+ * Also allows the user to rejudge runs.
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class QuickJudgePane extends JPanePlugin implements UIPlugin {
@@ -61,14 +61,14 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
     private static final String RANDOM_NO_ENTRY = "Random No";
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 114647004580210428L;
 
     /**
      * Run list box.
      */
-    // TODO REFACTOR LATER replace MCLB 
+    // TODO REFACTOR LATER replace MCLB
     private MCLB runListBox = null;
 
     private JPanel buttonPanel = null;
@@ -89,8 +89,8 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * A list of pending judgements for runs.
-     * 
-     * When the run is checked out to this client, use the judgement in this list to assign a judgement.  
+     *
+     * When the run is checked out to this client, use the judgement in this list to assign a judgement.
      */
     public Hashtable<ElementId, JudgementRecord> pendingJudgements = new Hashtable<ElementId, JudgementRecord>();
 
@@ -117,7 +117,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public QuickJudgePane() {
         super();
@@ -126,7 +126,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -241,16 +241,18 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * Run Listener.
-     * 
+     *
      * @author Douglas A. Lane <pc2@ecs.csus.edu>
      *
      */
     public class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun());
         }
 
+        @Override
         public void runChanged(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun());
 
@@ -260,15 +262,16 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
                 Run run = event.getRun();
                 JudgementRecord judgementRecord = pendingJudgements.get(run.getElementId());
                 if (judgementRecord != null) {
-                    
+
                     // Found a judgement for this run in pendingJudgements, send the judgement to the server.
-                    
+
                     getController().submitRunJudgement(run, judgementRecord, null);
                     pendingJudgements.remove(run.getElementId());
                 }
             }
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             // not used
         }
@@ -282,7 +285,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes runListBox
-     * 
+     *
      * @return edu.csus.ecs.pc2.core.log.MCLB
      */
     private MCLB getRunsListBox() {
@@ -291,6 +294,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
             runListBox.setMultipleSelections(true);
             runListBox.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.getClickCount() > 1) {
                         showJudgementRecords(runListBox.getSelectedIndex());
@@ -364,6 +368,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
     public void updateRunRow(final Run run, final ClientId whoModifiedId) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 Object[] objects = buildRunRow(run, whoModifiedId);
                 int rowNumber = runListBox.getIndexByKey(run.getElementId());
@@ -455,12 +460,13 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * Remove run from grid.
-     * 
+     *
      * @param run
      */
     private void removeRunRow(final Run run) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 int rowNumber = runListBox.getIndexByKey(run.getElementId());
@@ -472,6 +478,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
         });
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         setContest(inContest);
         setController(inController);
@@ -481,6 +488,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
         getEditFilterFrame().setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 reloadJudgements();
                 reloadRunList();
@@ -506,7 +514,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes buttonPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
@@ -539,7 +547,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes statusPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getStatusPanel() {
@@ -558,7 +566,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes judgementComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Judgement> getJudgementComboBox() {
@@ -572,7 +580,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes judgementSubmittedButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getJudgementSubmittedButton() {
@@ -581,6 +589,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
             judgementSubmittedButton.setToolTipText("Update judgements on selected runs");
             judgementSubmittedButton.setText("Update judgement");
             judgementSubmittedButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     judgeSelectedRuns();
                 }
@@ -616,7 +625,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
         for (int idx = 0; idx < selectedIndexes.length; idx++) {
             int judgementIndex = getNextJudgementIndex();
-            judgement = (Judgement) judgementComboBox.getItemAt(judgementIndex);
+            judgement = judgementComboBox.getItemAt(judgementIndex);
             ElementId id = (ElementId) runListBox.getRowKey(selectedIndexes[idx]);
 
             Object[] cells = runListBox.getRow(selectedIndexes[idx]);
@@ -661,8 +670,8 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
     }
 
     private void slog(String string, Exception e, boolean isShowMessage) {
-        
-        // TODO REFACTOR replace this method with a future pc2 standard log method. 
+
+        // TODO REFACTOR replace this method with a future pc2 standard log method.
 
         if (e != null) {
             getLog().log(Level.WARNING, string, e);
@@ -714,7 +723,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes showUnJudgedCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getShowNewRunsCheckBox() {
@@ -725,6 +734,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
             showNewRunsCheckBox.setToolTipText("View New or Queued for computer judgement");
             showNewRunsCheckBox.setSelected(true);
             showNewRunsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateRunListDisplay(showNewRunsCheckBox.isSelected());
                 }
@@ -734,7 +744,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
     }
 
     /**
-     * 
+     *
      * @param b
      */
     protected void updateRunListDisplay(boolean showUnjudgedOnly) {
@@ -744,9 +754,16 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
         getRunsListBox().removeAllRows();
 
         Run[] runs = getContest().getRuns();
+        ClientId judgeId;
 
         for (Run run : runs) {
-            updateRunRow(run, null);
+            JudgementRecord judgementRecord = run.getJudgementRecord();
+            if (judgementRecord != null) {
+                judgeId = judgementRecord.getJudgerClientId();
+            } else {
+                judgeId = null;
+            }
+            updateRunRow(run, judgeId);
         }
 
         updateRowCount();
@@ -766,6 +783,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
             rejudgeButton = new JButton("Rejudge");
             rejudgeButton.setToolTipText("Rejudge selected runs");
             rejudgeButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
 
                     try {
@@ -853,7 +871,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes filterButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getFilterButton() {
@@ -863,6 +881,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
             filterButton.setToolTipText("Edit Filter");
             filterButton.setMnemonic(java.awt.event.KeyEvent.VK_F);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showFilterRunsFrame();
                 }
@@ -888,6 +907,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
     public EditFilterFrame getEditFilterFrame() {
         if (editFilterFrame == null) {
             Runnable callback = new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
