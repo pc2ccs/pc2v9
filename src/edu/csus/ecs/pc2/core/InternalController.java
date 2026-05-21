@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -622,7 +622,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // GUI (such as the PC2 Admin)
     //            IThrottleStrategy strategy = new AcceptAllStrategy();
     //            IThrottleStrategy strategy = new RejectAllStrategy();
-                IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,6);
+                IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest);
     //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
     //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest); //uses DEFAULT_MAX_SUBMISSIONS_PER_MINUTE; same as prev line
                 accept = strategy.accept(run);
@@ -636,7 +636,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
             sendToLocalServer(packet);
         } else {
-            throw new SubmissionRejectedException("Submission threshhold exceeded", 
+            throw new SubmissionRejectedException("Submission threshold exceeded - wait a minute and try again", 
                                                     SubmissionRejectedException.SubmissionRejectionReason.THROTTLE_EXCEEDED);
         }
     }
@@ -786,6 +786,28 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         return s;
     }
+    
+    /**
+     * Check INI file settings specific sub-systems.  These settings may not actually be
+     * used until the system is up, so we have to validate them at startup time.
+     */
+    private void validateIniSubSystemSettings() {
+        if(!validateThrottleStrategySettings()) {
+            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR - Invalid throttle strategy setting in INI file");
+            // Put up the standard fatal pop-up with the famous "check logs" message.  The details
+            // of the bad setting will be in the log.
+            fatalError("Throttle strategy settings specified in the INI file are invalid");
+            // No return
+        }
+    }
+    
+    /**
+     * Validate the settings for throttling strategies
+     */
+    private boolean validateThrottleStrategySettings() {
+        return MaxSubmissionsPerMinuteStrategy.validateConfigurationSettings();
+    }
+    
 
     /**
      * Login to contest server.
@@ -3239,6 +3261,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 String currentDirectory = Utilities.getCurrentDirectory();
                 fatalError("Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
             }
+            // Check specific settings for sub-systems.  In the event of a bad setting,
+            // this will not return since it would call fatalError().
+            validateIniSubSystemSettings();
         }
 
         // SOMEDAY code add NO_SAVE_OPTION_STRING
@@ -5025,7 +5050,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // GUI (such as the PC2 Admin)
     //            IThrottleStrategy strategy = new AcceptAllStrategy();
     //            IThrottleStrategy strategy = new RejectAllStrategy();
-                IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest, 6);
+                IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest);
     //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
 
                 accept = strategy.accept(run);
@@ -5038,7 +5063,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
             sendToLocalServer(packet);
         } else {
-            throw new SubmissionRejectedException("Submission threshhold exceeded",
+            throw new SubmissionRejectedException("Submission threshold exceeded - wait a minute and try again",
                                                     SubmissionRejectedException.SubmissionRejectionReason.THROTTLE_EXCEEDED);
         }
     }

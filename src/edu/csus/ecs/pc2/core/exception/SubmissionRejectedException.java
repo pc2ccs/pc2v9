@@ -1,11 +1,11 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.exception;
 
 import edu.csus.ecs.pc2.core.IThrottleStrategy;
 
 /**
  * This exception is intended to be thrown when a team makes a submission ("submits a Run" in PC2 terminology)
- * but the system refuses to accept the run, for example due to the team having exceeded the submission threshhold
+ * but the system refuses to accept the run, for example due to the team having exceeded the submission threshold
  * defined by the current {@link IThrottleStrategy}.
  *
  * @author John Clevenger

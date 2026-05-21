@@ -1,7 +1,10 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.strategies;
 
 import edu.csus.ecs.pc2.core.IThrottleStrategy;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -16,7 +19,8 @@ import edu.csus.ecs.pc2.core.model.Run;
  */
 public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
     
-    public static int DEFAULT_MAX_SUBMISSIONS_PER_MINUTE = 10 ;
+    public static int DEFAULT_MAX_SUBMISSIONS_PER_MINUTE = 6 ;
+    public static final String MAX_SUBS_PER_MINUTE_KEY = "throttle-strategy-settings.maxSubmissionsPerMinute";
 
     private  IInternalContest contest;
     private int maxPerMinute;
@@ -28,7 +32,18 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
      */
     public MaxSubmissionsPerMinuteStrategy (IInternalContest inContest) {
         this.contest = inContest ;
-        this.maxPerMinute = DEFAULT_MAX_SUBMISSIONS_PER_MINUTE ;
+        
+        try {
+            String maxSubsPerMin = IniFile.getValue(MAX_SUBS_PER_MINUTE_KEY);
+            maxPerMinute = StringUtilities.getIntegerValue(maxSubsPerMin, DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+        } catch(Exception e) {
+            // this should not happen, tammy, since we validated this setting at startup.
+            // However, if there is any problem reading the INI for some reason, or a bad integer conversion,
+            // this does not warrant a complete failure of the submission.  Rather, we'll use the default
+            // and log the error.
+            maxPerMinute = DEFAULT_MAX_SUBMISSIONS_PER_MINUTE;
+            StaticLog.warning("MaxSubmissionsPerMinuteStrategy: Bad INI file setting '" + MAX_SUBS_PER_MINUTE_KEY + "': " + e);
+        }
     }
 
     /**
@@ -48,7 +63,7 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
     public boolean accept(Run run) {
         return !numSubmittedInTheLastMinuteExceedsMaximum(contest, run);
     }
-
+    
     /**
      * Queries the specified contest to obtain the complete list of runs, then determines whether 
      * the count of runs previously submitted in the last minute by the new-run submitter
@@ -101,6 +116,29 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
         }
         
         return limitReached ;
+    }
+
+    /**
+     * Check ini file settings for validity.
+     * This is typically called at client startup time to make sure any settings this
+     * class needs from the INI file are valid.
+     */
+    public static boolean validateConfigurationSettings() {
+        // by default, settings are valid
+        boolean valid = true;
+        try {
+            String maxSubsPerMin = IniFile.getValue(MAX_SUBS_PER_MINUTE_KEY);
+            int maxPerMinute = StringUtilities.getIntegerValue(maxSubsPerMin, DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+            if(maxPerMinute <= 0) {
+                StaticLog.warning("MaxSubmissionsPerMinuteStrategy: The value for INI file setting '" + MAX_SUBS_PER_MINUTE_KEY + "' is invalid: " + maxPerMinute);
+                valid = false;
+            }
+        } catch(Exception e) {
+            // if there is any problem reading the INI or a bad integer conversion, then the setting is bad.
+            valid = false;
+            StaticLog.warning("MaxSubmissionsPerMinuteStrategy: Bad INI file setting '" + MAX_SUBS_PER_MINUTE_KEY + "': " + e);
+        }
+        return valid;
     }
 
 }
