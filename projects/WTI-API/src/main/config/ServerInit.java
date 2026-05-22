@@ -111,7 +111,9 @@ public class ServerInit {
 		      keyStorePassword = p.getProperty(WTI_KEY_STORE_PASSWORD_KEY);
 		      certAlias = p.getProperty(WTI_CERT_ALIAS_KEY);
 
-		      System.out.println ("Found the following properties in " + WTI_INI_FILE_KEY + ": " + p);
+		      String infoMsg = "Found the following properties in " + WTI_INI_FILE_KEY + ": " + p;
+		      System.out.println (infoMsg);
+		      logger.info(infoMsg);
 
 		} catch(FileNotFoundException e) {
 			this.logger.info(WTI_INI_FILE_KEY + " File missing; reverting to default WTI port/socket/scoreboard values");

@@ -96,7 +96,10 @@ public class WebServer {
 			//create a new Jetty server
 			logger.info("Creating HTTP Jetty server");
 			Server server = new Server(ini.getPortNum());
-			System.out.println("Starting HTTP on port "+ini.getPortNum());
+
+			String infoMsg = "Starting HTTP on port "+ini.getPortNum();
+			System.out.println(infoMsg);
+			logger.info(infoMsg);
 
 			//install the endpoint handlers in Jetty
 			logger.info("Installing HTTP service handlers in Jetty");
@@ -156,7 +159,10 @@ public class WebServer {
 			//create a new Jetty server
 			logger.info("Creating HTTPS Jetty server");
 			Server server = new Server();
-			System.out.println("Starting HTTPS on port "+ini.getPortNum());
+
+			String infoMsg = "Starting HTTPS on port "+ini.getPortNum();
+			System.out.println(infoMsg);
+			logger.info(infoMsg);
 
 	        // 1. Configure SSL Context with your keystore
 	        SslContextFactory sslContextFactory = new SslContextFactory(true);
