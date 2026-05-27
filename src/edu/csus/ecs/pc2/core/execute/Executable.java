@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
@@ -1140,30 +1140,38 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                    String scoreLine = reader.readLine();
                    reader.close();
                    
-                   double scoreVal;
-                   try {
-                       scoreVal = Double.parseDouble(scoreLine);
-                   } catch (NumberFormatException e) {
-                       log.log(Level.WARNING, "Number format exception: '" + scoreLine + "' while reading '" 
-                               + scoreFileName + "'; returning score = 0.0");
-                       return 0; 
-                   }
-                   
-                   //make sure the score is legal (scores cannot be negative)
-                   if (scoreVal >= 0) {
-                       return scoreVal ;
-                   } else {
-                       log.log(Level.WARNING, "Found illegal score value '" + scoreVal + "' while reading '" 
-                               + scoreFileName + "' (scores cannot be negative); returning score = 0.0");
+                   // Make sure it wasn't an empty file - some sloppy validators will create empty files
+                   if(!StringUtilities.isEmpty(scoreLine)) {
+                       double scoreVal = 0;
+                       boolean scoreValid = false;
+                       
+                       try {
+                           scoreVal = Double.parseDouble(scoreLine);
+                           scoreValid = true;
+                       } catch (Exception e) {
+                           log.log(Level.WARNING, "Exception converting score: '" + scoreLine + "' while reading '" 
+                                   + scoreFileName + "'; returning TestDataGroup Reject score", e);
+                       }
+                       
+                       //if the score was successfully converted to a Double, make sure the score is legal (scores cannot be negative)
+                       //note: if there was exception converting the score, scoreValid will be false, and the log message above would
+                       //      have been printed.
+                       if (scoreValid) {
+                           if(scoreVal >= 0) {
+                               return scoreVal ;
+                           } else {
+                               log.log(Level.WARNING, "Found illegal score value '" + scoreVal + "' while reading '" 
+                                       + scoreFileName + "' (scores cannot be negative); returning TestDataGroup Reject score");
+                           }
+                       }
                    }
                } catch (IOException e) {
                    log.log(Level.WARNING, "IOException reading '" + scoreFileName, e);
                }
-               return 0;
             }  
         }
             
-        //no, there's no "score.txt" file (or we didn't validate); try getting the score from the ranges defined in the test case
+        //no, there's no valid "score.txt" file (or we didn't validate); try getting the score from the ranges defined in the test case
         ProblemDataFiles probDataFiles = controller.getProblemDataFiles(problem); 
         TestDataGroup testGroup = probDataFiles.getJudgesDataGroups()[testCaseNumber-1];  //testCaseNumber is 1-based but the array is 0-based
         
