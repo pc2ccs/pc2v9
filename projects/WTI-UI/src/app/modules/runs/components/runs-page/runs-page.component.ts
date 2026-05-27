@@ -145,7 +145,7 @@ export class RunsPageComponent implements OnInit, OnDestroy {
 	}
 
 	hasAcceptedJudgement(run: Run): boolean {
-		return !!run.judgement && run.judgement.toLowerCase() === 'accepted';
-	}
+    return (run.score ?? 0) > 0 || ['accepted', 'yes'].includes(run.judgement?.toLowerCase() ?? '');	
+  }
 
 }
