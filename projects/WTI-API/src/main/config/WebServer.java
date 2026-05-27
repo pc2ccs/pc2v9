@@ -8,8 +8,15 @@ import javax.servlet.ServletException;
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
 
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -17,6 +24,7 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -27,45 +35,117 @@ import controllers.TeamsController;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import io.swagger.jaxrs.config.DefaultJaxrsConfig;
 
 /**
  * This class encapsulates a Jetty webserver which acts as the WTI server listening for connections from team browsers.
- * 
+ *
  * The Jetty server is initialized with a set of {@link Handler}s for websocket connections, Swagger connections,
  * webcontent resources, and Jersey (JAX-RS) connections.
- * 
+ *
  * @author EWU WTI Student Project Team
  *
  */
 public class WebServer {
 	//the initialization values for the server
 	private static ServerInit ini;
-	
+
+	public static void startServer(ServerInit initServer) throws LoginFailureException, Exception {
+		ini = initServer;
+		if(ini.isUseSSL()) {
+			startHTTPSServer();
+		} else {
+			startHTTPServer();
+		}
+	}
+
 	/**
-	 * Starts a Jetty server using the initialization values specified in the received {@link ServerInit} object.
-	 * 
+	 * Starts an HTTP Jetty server using the initialization values specified in the received {@link ServerInit} object.
+	 *
 	 * Verifies that the {@link ContestController} which will be used by Jetty will be able to successfully login to
-	 * the PC2 scoreboard account specified in the configuration.  If so, 
-	 * initializes the Jetty server with resource handlers, starts it listening on the port specified in the 
+	 * the PC2 scoreboard account specified in the configuration.  If so,
+	 * initializes the Jetty server with resource handlers, starts it listening on the port specified in the
 	 * received {@link ServerInit} object, and blocks (via a join()) waiting for the server to be shut down.
-	 * 
+	 *
 	 * @param initServer a {@link ServerInit} object containing initialization values for the server being started
-	 * 
+	 *
 	 * @throws LoginFailureException if a failure occurs when attempting to log in to the PC2 server using the
 	 * 								configured scoreboard account
 	 * @throws Exception if any other Exception occurs during webserver startup
 	 */
-	public static void startServer(ServerInit initServer) throws LoginFailureException, Exception {
-		ini = initServer;
-		
+	private static void startHTTPServer() throws LoginFailureException, Exception {
+
 		Log logger = ini.getLogger();
-		
+
 		try {
 			//make sure the ContestController created by the server is going to be able to login using the configured PC2 scoreboard account
 			if (!verifyPC2ScoreboardLogin()) {
-				throw new LoginFailureException("PC2 Scoreboard login failed");
+				throw new LoginFailureException("PC2 Scoreboard login failed for HTTP");
+			}
+
+			// get the endpoint handlers which will be installed in Jetty
+			logger.info("Constructing HTTP Jetty service handlers");
+			HandlerList handlers = new HandlerList();
+			handlers.addHandler(getWebsocketHandler());
+			handlers.addHandler(getSwaggerHandler());
+			handlers.addHandler(getWebApp());
+			handlers.addHandler(getJerseyHandler());
+
+			//create a new Jetty server
+			logger.info("Creating HTTP Jetty server");
+			Server server = new Server(ini.getPortNum());
+
+			String infoMsg = "Starting HTTP on port "+ini.getPortNum();
+			System.out.println(infoMsg);
+			logger.info(infoMsg);
+
+			//install the endpoint handlers in Jetty
+			logger.info("Installing HTTP service handlers in Jetty");
+			server.setHandler(handlers);
+
+			//start Jetty listening for endpoint references
+			logger.info("Starting HTTP Jetty server");
+			server.start();
+
+			//block until all server threads are done (which won't normally happen - so, wait forever)
+			server.join();
+
+		} catch (LoginFailureException ex) {
+			System.err.println("WTI HTTP server failed to login with PC2 Scoreboard account: " + ex);
+			logger.severe("WTI server failed to login with PC2 Scoreboard account: " + ex);
+			throw ex;
+		} catch (Exception ex) {
+			System.err.println(ex);
+			logger.severe("Exception during WTI HTTP server startup: " + ex);
+			throw ex;
+
+		}
+	}
+
+	/**
+	 * Starts an HTTPS Jetty server using the initialization values specified in the received {@link ServerInit} object.
+	 *
+	 * Verifies that the {@link ContestController} which will be used by Jetty will be able to successfully login to
+	 * the PC2 scoreboard account specified in the configuration.  If so,
+	 * initializes the Jetty server with resource handlers, starts it listening on the port specified in the
+	 * received {@link ServerInit} object, and blocks (via a join()) waiting for the server to be shut down.
+	 *
+	 * @param initServer a {@link ServerInit} object containing initialization values for the server being started
+	 *
+	 * @throws LoginFailureException if a failure occurs when attempting to log in to the PC2 server using the
+	 * 								configured scoreboard account
+	 * @throws Exception if any other Exception occurs during webserver startup
+	 */
+	private static void startHTTPSServer() throws LoginFailureException, Exception {
+
+		Log logger = ini.getLogger();
+
+		try {
+			//make sure the ContestController created by the server is going to be able to login using the configured PC2 scoreboard account
+			if (!verifyPC2ScoreboardLogin()) {
+				throw new LoginFailureException("PC2 Scoreboard login failed for HTTPS");
 			}
 
 			// get the endpoint handlers which will be installed in Jetty
@@ -77,28 +157,67 @@ public class WebServer {
 			handlers.addHandler(getJerseyHandler());
 
 			//create a new Jetty server
-			logger.info("Creating Jetty server");
-			Server server = new Server(ini.getPortNum());
-			System.out.println("Starting on port "+ini.getPortNum());
+			logger.info("Creating HTTPS Jetty server");
+			Server server = new Server();
+
+			String infoMsg = "Starting HTTPS on port "+ini.getPortNum();
+			System.out.println(infoMsg);
+			logger.info(infoMsg);
+
+	        // 1. Configure SSL Context with your keystore
+	        SslContextFactory sslContextFactory = new SslContextFactory(true);
+	        sslContextFactory.setKeyStorePath(ini.getKeystoreFile());
+            sslContextFactory.setKeyStoreType("PKCS12");
+            String alias = ini.getCertAlias();
+            // it's ok if this isn't specified since jetty will use the first one in the store
+            // you should specify a certificateAlias in the pc2v9.ini if there are multiple
+            // certificates in the key store file and you want to use a specific one.
+            if(!StringUtilities.isEmpty(alias)) {
+            	sslContextFactory.setCertAlias(alias);
+            }
+	        sslContextFactory.setKeyStorePassword(ini.getKeystorePassword());
+
+            // suggestions from http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
+            sslContextFactory.setIncludeCipherSuites("TLS_DHE_RSA.*", "TLS_ECDHE.*");
+            sslContextFactory.setExcludeProtocols("SSL", "SSLv2", "SSLv2Hello", "SSLv3");
+            sslContextFactory.setRenegotiationAllowed(false);
+
+            // 2. Configure HTTP Configuration
+            HttpConfiguration httpConfig = new HttpConfiguration();
+            httpConfig.setSecureScheme("https");
+            httpConfig.setSecurePort(ini.getPortNum());
+            httpConfig.setOutputBufferSize(32768);
+
+            HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
+            httpsConfig.addCustomizer(new SecureRequestCustomizer());
+
+            // 3. Create the HTTPS Connector
+            ServerConnector sslConnector = new ServerConnector(server,
+                new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+                new HttpConnectionFactory(httpsConfig));
+            sslConnector.setPort(ini.getPortNum());
+            sslConnector.setIdleTimeout(0);
+
+            server.setConnectors(new Connector[] { sslConnector });
 
 			//install the endpoint handlers in Jetty
-			logger.info("Installing service handlers in Jetty");
+			logger.info("Installing HTTPS service handlers in Jetty");
 			server.setHandler(handlers);
-			
+
 			//start Jetty listening for endpoint references
-			logger.info("Starting Jetty server");
+			logger.info("Starting HTTPS Jetty server");
 			server.start();
-			
+
 			//block until all server threads are done (which won't normally happen - so, wait forever)
 			server.join();
 
 		} catch (LoginFailureException ex) {
-			System.err.println("WTI server failed to login with PC2 Scoreboard account: " + ex);
-			logger.severe("WTI server failed to login with PC2 Scoreboard account: " + ex);
+			System.err.println("WTI HTTPS server failed to login with PC2 Scoreboard account: " + ex);
+			logger.severe("WTI HTTPS server failed to login with PC2 Scoreboard account: " + ex);
 			throw ex;
 		} catch (Exception ex) {
 			System.err.println(ex);
-			logger.severe("Exception during WTI server startup: " + ex);
+			logger.severe("Exception during WTI HTTPS server startup: " + ex);
 			throw ex;
 
 		}
@@ -106,12 +225,12 @@ public class WebServer {
 
 	//verifies that the provided (or default) PC2 scoreboard login credentials work
 	private static boolean verifyPC2ScoreboardLogin() {
-		
+
 		ini.getLogger().fine("Verifying PC2 scoreboard account login...");
-		
+
 		//create a scoreboard account connection to the PC2 server
 		ServerConnection scoreboardServerConn = new ServerConnection();
-	
+
 		//get the credentials to be used to login to the PC2 server, either those given in the WTI pc2v9.ini file or the defaults
 		String sbAccount = ini.getScoreboardAccount();
 		if (sbAccount==null || sbAccount.equals("")) {
@@ -121,7 +240,7 @@ public class WebServer {
 		if (sbPassword==null || sbPassword.equals("")) {
 			sbPassword = ContestController.DEFAULT_PC2_SCOREBOARD_PASSWORD;
 		}
-		
+
 		//try to login to the PC2 server
 		try {
 			ini.getLogger().fine("Attempting to login to PC2 scoreboard account '" + sbAccount + "'");
@@ -129,10 +248,10 @@ public class WebServer {
 		} catch (LoginFailureException e) {
 			ini.getLogger().severe("WTI Login failed for scoreboard account '" + sbAccount + "': " + e.getMessage());
 			return false;
-		} 
-		
+		}
+
 		ini.getLogger().fine("Successfully logged in to PC2 scoreboard account");
-		
+
 		//log the scoreboard account back out so the ContestController can re-login
 		try {
 			ini.getLogger().fine("Logging back out of PC2 scoreboard account pending team connections");
@@ -147,80 +266,89 @@ public class WebServer {
             System.err.println("Exception during scoreboard logout after successful login: " + e.getMessage());
             e.printStackTrace();
             return false;
-		    
+
 		}
-		
+
 		return true;
 	}
 
 	/**
-	 * Returns a {@link Handler} for websocket connections.  
-	 * 
-	 * The "context path" for the handler is set to be the websocket name specified in the {@link ServerInit} 
+	 * Returns a {@link Handler} for websocket connections.
+	 *
+	 * The "context path" for the handler is set to be the websocket name specified in the {@link ServerInit}
 	 * object used to start the server. An instance of {@link WTIWebsocketMediator} is set as an endpoint handler
 	 * for the handler.
-	 * 
-	 * @return a {@link ServletContextHandler} 
+	 *
+	 * @return a {@link ServletContextHandler}
 	 */
+//	private static WebSocketHandler getWebsocketHandler() {
+//		WebSocketHandler wsHandler = new WebSocketHandler() {
+//            @Override
+//            public void configure(WebSocketServletFactory factory) {
+//                // Register your custom socket class
+//                factory.register(WTIWebsocketMediator.class);
+//            }
+//		};
+//		return(wsHandler);
 	private static ServletContextHandler getWebsocketHandler() {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath(ini.getWsName());
 		try {
 			ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
 			wscontainer.addEndpoint(WTIWebsocketMediator.class);
-			
+
 		} catch (ServletException e) {
 			e.printStackTrace();
 		} catch (DeploymentException e) {
 			e.printStackTrace();
-		} 
+		}
 		return context;
 	}
-	
+
 	/**
 	 * Returns a {@link Handler} for webapp content.
-	 * 
+	 *
 	 * The webcontent resource base in the Handler is set to the WebContent folder of the WTI-UI project.
-	 * 
+	 *
 	 * @return a {@link ContextHandler}
 	 */
 	private static Handler getWebApp() {
-		
+
 		ResourceHandler webContent = new ResourceHandler();
 		webContent.setResourceBase("./WebContent/WTI-UI/");
-		
+
 		ContextHandler webApp = new ContextHandler();
 		webApp.setHandler(webContent);
-		
+
 		return webApp;
 	}
-	
+
 	/**
 	 * Returns a {@link Handler} for Swagger content.
-	 * 
+	 *
 	 * The webcontent resource base in the Handler is set to the WebContent folder of the WTI-UI project;
 	 * the context path for the Handler is set to "/swagger".
-	 * 
+	 *
 	 * @return a {@link ContextHandler}
 	 */
 	private static Handler getSwaggerHandler() {
 
 		ResourceHandler webContent = new ResourceHandler();
 		webContent.setResourceBase("./WebContent/webapp");
-		
+
 		ContextHandler swagger = new ContextHandler("/swagger");
 		swagger.setHandler(webContent);
-		
+
 		return swagger;
 	}
 
 	/**
 	 * Returns a {@link Handler} for Jersey (JAX-RS) connections.
-	 * 
-	 * The context path for the Handler is set to "/api"; the Handler has {@link ServletHolder}s containing 
+	 *
+	 * The context path for the Handler is set to "/api"; the Handler has {@link ServletHolder}s containing
 	 * JacksonJaxbJsonProvider, {@link TeamsController}, {@link ContestController}, {@link JacksonFeature},
 	 * Swagger, and CORS servlets.
-	 * 
+	 *
 	 * @return a {@link ServletContextHandler}
 	 * @throws LoginFailureException if the ContestController servlet could not log in to the PC2 server
 	 * @throws URISyntaxException if the URI built from the pc2v9.ini WTI attributes is invalid
@@ -229,21 +357,26 @@ public class WebServer {
 
 		//Add basic api servlet
 		ServletContextHandler api = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-		api.setContextPath("/api"); 
+		api.setContextPath("/api");
 
 		ServletHolder servletHolder = api.addServlet(ServletContainer.class, "/*");
-		servletHolder.setInitParameter("jersey.config.server.provider.classnames", 
+		servletHolder.setInitParameter("jersey.config.server.provider.classnames",
 				"org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider, controllers.TeamsController, controllers.ContestController, org.glassfish.jersey.jackson.JacksonFeature");
 		servletHolder.setInitParameter("jersey.config.server.provider.packages", "jerseyConfig; io.swagger.jaxrs.json; io.swagger.jaxrs.listing");
 		servletHolder.setInitOrder(1); //force servlet to initialize when handler first starts
-		
-		
+
+
 		ServletHolder swaggerServlet = api.addServlet(DefaultJaxrsConfig.class, "/swagger-core");
 		swaggerServlet.setInitOrder(2);
 		swaggerServlet.setInitParameter("api.version", "1.0.0");
-		swaggerServlet.setInitParameter("swagger.api.basepath", String.format("http://%s:%s/api", ServerInit.getLocalIp(), ini.getPortNum()));
+		String webProtocol = "https";
+		if(!ini.isUseSSL()) {
+			webProtocol = "http";
+		}
+		swaggerServlet.setInitParameter("swagger.api.basepath", String.format("%s://%s:%s/api",
+				webProtocol, ServerInit.getLocalIp(), ini.getPortNum()));
 		swaggerServlet.setInitParameter("swagger.api.title", "Web Team Interface");
-		
+
 		// Enable Cors
 		FilterHolder cors = api.addFilter(CrossOriginFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 		cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");

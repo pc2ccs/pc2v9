@@ -20,7 +20,17 @@ accounts:
 
   - account: SCOREBOARD
     site: 1
+    count: 2
+
+  - account: FEEDER
+    site: 1
     count: 1
+
+# enable perms for FEEDER 1 to edit runs and submit runs
+permissions:
+  - account: FEEDER
+    number: 1
+    enable: SHADOW_PROXY_TEAM, EDIT_RUN, START_CONTEST_CLOCK, STOP_CONTEST_CLOCK
     
 auto-judging:
   - account: JUDGE
@@ -40,5 +50,9 @@ auto-judging:
     number: 5
     letters: B
     enabled: yes
+
+# pc2 Shadow CCS settings
+shadow-mode: false
+ccs-test-mode : true
 
 # EOF Contest Configuration
