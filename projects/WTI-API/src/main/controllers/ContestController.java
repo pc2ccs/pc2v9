@@ -35,8 +35,6 @@ import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
-import edu.csus.ecs.pc2.core.IniFile;
-import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -45,9 +43,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -82,11 +78,6 @@ import services.ScoreboardChangeListener;
 		@Authorization(value="sampleoauth", scopes = {})
 })
 public class ContestController extends MainController {
-	
-	/**
-	 * Key to enable filtering scoreboard by division.
-	 */
-	private static final String SERVER_WTI_BOARD_USE_DIVISIONS_KEY = "server.wtiBoardUseDivisions";
 	
 	public final static String DEFAULT_PC2_SCOREBOARD_ACCOUNT = "scoreboard2";
 	public final static String DEFAULT_PC2_SCOREBOARD_PASSWORD = "scoreboard2";
@@ -714,27 +705,6 @@ public class ContestController extends MainController {
 			
 			//insure that only one browser client at a time can attempt to use the DSA to update standings
 			synchronized (updateStandingsMutex) {
-				
-				// check if some event has occurred which could have changed the standings
-				
-				/**
-				 * Should scoreboaed only show the teams in a team's division?
-				 */
-				boolean useDivisionFilter = false;
-
-				if (IniFile.isFilePresent()) {
-					new IniFile();
-					useDivisionFilter = StringUtilities.getBooleanValue(IniFile.getValue(SERVER_WTI_BOARD_USE_DIVISIONS_KEY), false);
-				}
-
-				if (useDivisionFilter) {
-					/**
-					 * If divisions are to be shown to each user, must force a new recacl of
-					 * standings for each call. This removes the efficiency of using a cached copy
-					 * of the standings.
-					 */
-					wtiServerStandingsAreCurrent = false; // force scoreboard recalc
-				}
 
 				if (!wtiServerStandingsAreCurrent) {
 
@@ -772,35 +742,7 @@ public class ContestController extends MainController {
 						// this is a temporary fix until root cause is found, and the bug fixed.
 						props = DefaultScoringAlgorithm.getDefaultProperties();
 
-						String xmlStandings = null;
-						Run[] runs = null;
-						if (useDivisionFilter) {
-							String userLogin= userInformation.getMyClient().getLoginName();
-							Integer clientNumber = StringUtilities.getTeamNumber(userLogin);
-							ClientId clientId = new ClientId(internalContest.getSiteNumber(), Type.TEAM, clientNumber);
-							runs = ScoreboardUtilities.getRunsForUserDivision(clientId, internalContest);
-							
-							String teamDivisionStr = ScoreboardUtilities.getDivision(internalContest, clientId);
-							xlog(logger, "Runs for "+key+" useDivisionFilter true, total runs  = "+runs.length+" for div "+teamDivisionStr);
-							
-							Integer teamDivision;
-							try {
-								teamDivision = Integer.parseInt(teamDivisionStr);
-							} catch (NumberFormatException ex) {
-								logger.throwing(dsa.getClass().getName(), "getStandings()", ex);
-								return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-										.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
-												"Illegal or undefined team division in DefaultScoringAlgorithm "
-													+ "('wtiboardUseDivisions=true' in WTI pc2v9.ini but no divisions assigned to teams?)"))
-										.type(MediaType.APPLICATION_JSON).build();
-							}
-
-							xmlStandings = dsa.getStandings(internalContest, runs, teamDivision, props, logger);
-						} else {
-							runs = internalContest.getRuns();
-							xlog(logger, "Runs for "+key+" Not using division useDivisionFilter false, total runs  = "+runs.length);
-							xmlStandings = dsa.getStandings(internalContest, runs, null, props, logger);
-						}
+						String xmlStandings = dsa.getStandings(internalContest, null, null, props, logger);
 
 						//					logger.fine("Got the following XML from DSA:");
 						//					logger.fine(xmlStandings);
