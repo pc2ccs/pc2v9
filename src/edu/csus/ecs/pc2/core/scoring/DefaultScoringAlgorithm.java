@@ -328,21 +328,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     @Override
     public String getStandings(IInternalContest theContest, Properties properties, Log inputLog) throws IllegalContestState {
-           return getStandings(theContest, null, null, null, properties, inputLog);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
-     */
-    @Override
-    public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
-        return(getStandings(theContest, runs, divisionNumber, null, properties, inputLog));
+           return getStandings(theContest, null, null, properties, inputLog);
     }
 
     @Override
-    public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, List<Group> wantedGroups, Properties properties, Log inputLog) throws IllegalContestState {
+    public String getStandings(IInternalContest theContest, Run[] runs, List<Group> wantedGroups, Properties properties, Log inputLog) throws IllegalContestState {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -394,30 +384,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Problem[] allProblems = theContest.getProblems();
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
         int p2 = 0;
-        
-        //if divisionNumber!=null it means we're using Division filtering, in which case divisionNumber is 1 or 2.
-        //if wantedGroups!=null it means the caller has specified a set of groups it wants to filter on.
-        //if the caller HASN'T specified any groups, we need to add to the wantedGroups list the groups for the specified division.
-        if (wantedGroups==null && divisionNumber!=null) {
-            //the caller didn't request any group filtering via wantedGroups but we are doing division filtering so we need a collection
-            // (this is because if wantedGroups is null it causes method canView(wantedGroups) to always return "yes").
-            wantedGroups = new ArrayList<Group>();
-        }
-        
+
+        // if wantedGroups!=null the caller has specified group(s) to filter on.
         for (int p=1; p <= allProblems.length ; p++) {
             Problem prob = allProblems[p-1];
-            
-            if (divisionNumber!=null) {
-                //we are filtering on divisions so we need to update "wantedGroups" with the "division" groups
-                // in the problem which match the desired division.
-                for (Group probGroup : prob.getGroups()) {
-                   //Note: getGroupId() returns the "CMS external id".
-                   if (probGroup.getGroupId()==divisionNumber) {
-                        wantedGroups.add(probGroup); 
-                    }
-                }
-            }
-            
+
             if (prob.isActive() && prob.canView(wantedGroups)) {
                 p2++;
                 problemsIndexHash.put(prob.getElementId(), new Integer(p2));
@@ -449,10 +420,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // url to the <problem> elements), avoiding duplication of problem description data in the output XML.
         
         if (runs == null) {
-            // Note: we do not deal with divisionNumber here since
-            //   1) it is being deprecated
-            //   2) if a divisionNumber is passed in, the 'runs' will be non-null and pre-filtered for the division.
-            // here, we only filter the runs based on groups wanted.
             runs = ScoreboardUtilities.getGroupFilteredRuns(theContest, wantedGroups);
         }
         synchronized (mutex) {
@@ -475,7 +442,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
 
             grandTotalTeams = 0;
-            initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, wantedGroups);
+            initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, wantedGroups);
 
             for (int i = 0; i < runs.length; i++) {
                 Account account = accountList.getAccount(runs[i].getSubmitter());
@@ -483,8 +450,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     log.info("account could not be located for " + runs[i].getSubmitter());
                     continue;
                 }
-                // skip runs for accounts that are not on this scoreboard (after divisionNumber or group are applied)
-                // if division and group are null, then the account will always be in the hashtable (full scoreboard)
+                // skip runs for accounts that are not on this scoreboard (when group filtering is applied)
+                // if wantedGroups is null, then the account will always be in the hashtable (full scoreboard)
                 if(!standingsRecordHash.containsKey(account.getClientId().toString())) {
                     continue;
                 }
@@ -1203,27 +1170,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param accounts
      * @param problems
      * @param standingsRecordHash
-     * @param divisionNumber filter on division number
-     * @param wantedGroups filter on group lsit
+     * @param wantedGroups filter on group list
      */
-    private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, Integer divisionNumber, List<Group> wantedGroups) {
+    private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, List<Group> wantedGroups) {
 
         for (int i = 0; i < accountList.size(); i++) {
             Account account = accounts[i];
             if (account.getClientId().getClientType() == ClientType.Type.TEAM && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 // keep track of the total number of teams on the unfiltered scoreboard.  That is, all teams
-                // regardless of whether we are going to filter them out below based on division or group
+                // regardless of whether we are going to filter them out below based on group
                 grandTotalTeams++;
-                if (divisionNumber != null) {
-                    String div = ScoreboardUtilities.getDivision(theContest, account.getClientId());
-                    // div may be null if the team is not a member of any division group, but is being shown on the board.
-                    if (div == null || !divisionNumber.toString().trim().equals(div.trim())) {
-                        /**
-                         * If this account is NOT in the same division as divisionNumber then do not add StandingsRecord, skip to next account.
-                         */
-                        continue;
-                    }
-                }
                 if(!ScoreboardUtilities.isWantedTeam(account, wantedGroups)) {
                     continue;
                 }

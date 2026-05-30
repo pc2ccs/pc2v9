@@ -88,7 +88,7 @@ public class ContestAPIStandingsJSON {
                 honorScoreboardFreeze = false;
             }
 
-            StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null, null, properties,
+            StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null, properties,
                     honorScoreboardFreeze, null);
 
             for (StandingsRecord sr : standingsRecords) {

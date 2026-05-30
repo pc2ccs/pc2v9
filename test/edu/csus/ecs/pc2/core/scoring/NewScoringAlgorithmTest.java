@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -377,20 +378,26 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         Group group2 = contest.getGroup(acc.getPrimaryGroupId());
         assertNotNull(group2);
 
-        String divString = ScoreboardUtilities.getDivision(contest, client1);
-        Integer division = new Integer(divString);
         ClientId id  = contest.getClientId();
         assertNotNull("No client Id for contest",id);
-        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, division,DefaultScoringAlgorithm.getDefaultProperties(), false, runs);
+        ArrayList<Group> wantedGroups = new ArrayList<Group>();
+        wantedGroups.add(group2);
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, wantedGroups,
+                DefaultScoringAlgorithm.getDefaultProperties(), false, null);
         assertEquals("Expecting standing records for client "+client1, 18, standingsRecords.length);
 
 
         ClientId lastClient = accounts[accounts.length-1].getClientId();
-        division = 3;
-        standingsRecords = scoringAlgorithm.getStandingsRecords(contest, division, DefaultScoringAlgorithm.getDefaultProperties(), false, runs);
+        Account lastAccount = contest.getAccount(lastClient);
+        Group lastGroup = contest.getGroup(lastAccount.getPrimaryGroupId());
+        assertNotNull(lastGroup);
+        ArrayList<Group> wantedGroupsForLast = new ArrayList<Group>();
+        wantedGroupsForLast.add(lastGroup);
+        standingsRecords = scoringAlgorithm.getStandingsRecords(contest, wantedGroupsForLast,
+                DefaultScoringAlgorithm.getDefaultProperties(), false, null);
         assertEquals("Expecting standing records for client "+lastClient, 22, standingsRecords.length);
 
-        division = 1;
+        Integer division = 1;
         Run[] divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
         assertEquals("Expecting run count for division "+division, 5, divRuns.length);
 

@@ -191,7 +191,7 @@ public class StandingsHTMLPane extends JPanePlugin {
         String xmlString;
         try {
             Properties scoringProperties = getScoringProperties();
-            xmlString = scoringAlgorithm.getStandings(getContest(), null, null, garray, scoringProperties, log);
+            xmlString = scoringAlgorithm.getStandings(getContest(), null, garray, scoringProperties, log);
             transformAndDisplay(xmlString, styleSheetFileName);
             showMessage("Last update " + new Date());
         } catch (IllegalContestState e) {
