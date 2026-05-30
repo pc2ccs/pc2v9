@@ -16,12 +16,10 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.ProblemSummaryInfo;
 import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
 import edu.csus.ecs.pc2.core.scoring.SummaryRow;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /*
@@ -90,8 +88,8 @@ public class ContestAPIStandingsJSON {
                 honorScoreboardFreeze = false;
             }
 
-            Run[] runs = ScoreboardUtilities.getRunsForUserDivision(contest.getClientId(), contest);
-            StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null, properties, honorScoreboardFreeze, runs);
+            StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null, null, properties,
+                    honorScoreboardFreeze, null);
 
             for (StandingsRecord sr : standingsRecords) {
                 dumpStandingRecord(mapper, childNode, sr);
