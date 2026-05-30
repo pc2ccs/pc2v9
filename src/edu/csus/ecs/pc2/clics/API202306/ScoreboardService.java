@@ -58,13 +58,12 @@ public class ScoreboardService implements Feature {
      * @param sc
      * @param contestId
      * @param group_id - optional group id query param
-     * @param division - optional division query param
      * @return {@link Response} object containing the JSON scoreboard
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getScoreboard(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId,
-            @QueryParam("group_id") String group_id, @QueryParam("division") String division) {
+            @QueryParam("group_id") String group_id) {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == true) {
@@ -77,7 +76,6 @@ public class ScoreboardService implements Feature {
                   sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)))) {
 
                 Group specificGroup = null;
-                Integer divNumber = null;
 
                 // only staff and judges get an unabridged scoreboard
                 boolean obeyFreeze = !(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
@@ -96,20 +94,9 @@ public class ScoreboardService implements Feature {
                     }
                 }
 
-                // see if a division number was specified - this is a PC2 extension(!!) and is NOT part of the CLICS API, but,
-                // we are allowed to add things.
-                if(!StringUtilities.isEmpty(division)) {
-                    try {
-                        divNumber = Integer.parseInt(division);
-                    } catch(Exception e) {
-                        // Bad division specified
-                        return Response.status(Response.Status.BAD_REQUEST).build();
-                    }
-                }
-
                 // ok to return scoreboard
                 try {
-                    CLICSScoreboard scoreboard = new CLICSScoreboard(model, specificGroup, divNumber, obeyFreeze);
+                    CLICSScoreboard scoreboard = new CLICSScoreboard(model, specificGroup);
                     return Response.ok(scoreboard.toJSON(), MediaType.APPLICATION_JSON).build();
                 } catch (IllegalContestState | JAXBException | IOException e) {
                     controller.getLog().log(Log.WARNING, "Exception creating PC2 scoreboard JSON: " + e.getMessage(), e);
