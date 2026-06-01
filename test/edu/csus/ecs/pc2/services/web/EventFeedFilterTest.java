@@ -18,33 +18,65 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  */
 public class EventFeedFilterTest extends AbstractTestCase {
 
+    /**
+     * Line count for {@link SampleContest#createStandardContest()} with collections off
+     * (one notification per line).
+     */
+    private static final int STANDARD_CONTEST_NON_COLLECTION_LINES = 277;
+
+    /**
+     * Line count for the same contest when every notification type uses a collection
+     * (including accounts).
+     */
+    private static final int STANDARD_CONTEST_ALL_COLLECTION_LINES = 7;
+
     public void testNoFilter() throws Exception {
 
         EventFeedFilter filter = new EventFeedFilter();
 
         assertEquals("startid = <none set>, event types = <none set>, groupids = <none set>", filter.toString());
 
-        String[] lines = getStandardContestJSON(false);
-        // Used to be 143, but there are now 134 additional 'account' records.
-        assertEquals("Expected line count ", 277, lines.length);
-
-        assertNumberEvents(277, filter, lines);
-
-        lines = getStandardContestJSON(true);
-        assertEquals("Expected line count ", 7, lines.length);
-
-        assertNumberEvents(7, filter, lines);
-    }
-
-    private String[] getStandardContestJSON(boolean bCollections) throws IllegalContestState {
-
         SampleContest samp = new SampleContest();
         IInternalContest contest = samp.createStandardContest();
 
+        EventFeedJSON efJson = createEventFeedJSON(contest, false);
+        String[] lines = createEventFeedLines(contest, efJson);
+        int expectedNonCollection = expectedLineCount(contest, false, efJson);
+        assertEquals("Expected line count (non-collection) ", expectedNonCollection, lines.length);
+        assertNumberEvents(expectedNonCollection, filter, lines);
+
+        efJson = createEventFeedJSON(contest, true);
+        lines = createEventFeedLines(contest, efJson);
+        int expectedCollection = expectedLineCount(contest, true, efJson);
+        assertEquals("Expected line count (collection) ", expectedCollection, lines.length);
+        assertNumberEvents(expectedCollection, filter, lines);
+    }
+
+    private EventFeedJSON createEventFeedJSON(IInternalContest contest, boolean useCollections) {
         EventFeedJSON efJson = new EventFeedJSON(new JSONTool(contest, null));
-        efJson.setUseCollections(bCollections);
+        efJson.setUseCollections(useCollections);
+        return efJson;
+    }
+
+    private String[] createEventFeedLines(IInternalContest contest, EventFeedJSON efJson) throws IllegalContestState {
         String json = efJson.createJSON(contest, null, null);
         return json.split(JSON202306Utilities.NL);
+    }
+
+    /**
+     * Expected JSON line count respects {@link EventFeedJSON} collection settings loaded from
+     * pc2v9.ini (e.g. {@code clics.disable-collections=accounts}).
+     */
+    private int expectedLineCount(IInternalContest contest, boolean useCollections, EventFeedJSON efJson) {
+        if (!useCollections) {
+            return STANDARD_CONTEST_NON_COLLECTION_LINES;
+        }
+        int expected = STANDARD_CONTEST_ALL_COLLECTION_LINES;
+        if (!efJson.isUseNotificationCollection(EventFeedType.ACCOUNTS)) {
+            // Accounts are not bundled: lose one collection line, gain one line per account.
+            expected += contest.getAccounts().length - 1;
+        }
+        return expected;
     }
 
     private void assertNumberEvents(int expectedCount, EventFeedFilter filter, String[] lines) {
