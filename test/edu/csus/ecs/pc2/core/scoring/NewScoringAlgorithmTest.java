@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
@@ -384,7 +385,10 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         wantedGroups.add(group2);
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, wantedGroups,
                 DefaultScoringAlgorithm.getDefaultProperties(), false, null);
-        assertEquals("Expecting standing records for client "+client1, 18, standingsRecords.length);
+        // wantedGroups filters by PC2 Group membership (not legacy division digit "3" across all D3-named groups).
+        int expectedInGroup2 = countScoreboardTeamsInGroup(contest, group2);
+        assertEquals("Expecting standing records for group " + group2.getDisplayName(), expectedInGroup2,
+                standingsRecords.length);
 
 
         ClientId lastClient = accounts[accounts.length-1].getClientId();
@@ -395,7 +399,9 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         wantedGroupsForLast.add(lastGroup);
         standingsRecords = scoringAlgorithm.getStandingsRecords(contest, wantedGroupsForLast,
                 DefaultScoringAlgorithm.getDefaultProperties(), false, null);
-        assertEquals("Expecting standing records for client "+lastClient, 22, standingsRecords.length);
+        int expectedInLastGroup = countScoreboardTeamsInGroup(contest, lastGroup);
+        assertEquals("Expecting standing records for group " + lastGroup.getDisplayName(), expectedInLastGroup,
+                standingsRecords.length);
 
         Integer division = 1;
         Run[] divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
@@ -410,6 +416,21 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         assertEquals("Expecting run count for division "+division, 9, divRuns.length);
 
 
+    }
+
+    /**
+     * Teams shown on the scoreboard that belong to the given group (same rules as {@link NewScoringAlgorithm#getStandingsRecords}).
+     */
+    private int countScoreboardTeamsInGroup(IInternalContest contest, Group group) {
+        int count = 0;
+        for (Account account : contest.getAccounts()) {
+            if (account.getClientId().getClientType() == Type.TEAM
+                    && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)
+                    && account.isGroupMember(group.getElementId())) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
