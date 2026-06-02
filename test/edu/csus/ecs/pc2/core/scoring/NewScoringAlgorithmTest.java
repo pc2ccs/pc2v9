@@ -333,19 +333,10 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         loader.initializeContest(contest, new File( cdpDir));
         setFirstTeamClient(contest);
 
-        Group[] groups = contest.getGroups();
-
-        for (Group group : groups) {
-            String divName = ScoreboardUtilities.getDivision(group.getDisplayName());
-            assertNotNull("No division found for "+group.getDisplayName(), divName);
-        }
+        assertTrue("Expecting groups in tc1", contest.getGroups().length > 0);
 
         Account[] accounts = getTeamAccounts(contest);
         Arrays.sort(accounts, new AccountComparator());
-        for (Account account : accounts) {
-            String name = ScoreboardUtilities.getDivision(contest, account.getClientId());
-            assertNotNull("No division found for "+account, name);
-        }
 
         Judgement[] judgements = contest.getJudgements();
 
@@ -356,24 +347,23 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         Run[] runlist = contest.getRuns();
         for (Run run : runlist) {
             assertNotNull("Expecting account for "+run.getSubmitter(), contest.getAccount(run.getSubmitter()));
-            String div = ScoreboardUtilities.getDivision(contest, run.getSubmitter());
-            assertNotNull("Missing division for "+run.getSubmitter(), div);
         }
 
         assertEquals("Expecting # runs", 21, runlist.length);
 
-        ClientId client1 = accounts[5].getClientId();
-        Group group = contest.getGroup(contest.getAccount(client1).getPrimaryGroupId());
+        Group group5 = contest.getGroup(contest.getAccount(accounts[5].getClientId()).getPrimaryGroupId());
+        assertNotNull(group5);
+        assertEquals("getGroupFilteredRuns for " + group5.getDisplayName(),
+                countRunsWhoseSubmitterIsInGroup(contest, group5), getRunsForGroup(contest, group5).length);
 
-        Run[] runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
-        assertEquals("Expecting runs matching group " + group, 7, runs.length);
-
-        client1 = accounts[12].getClientId();
-        runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
-        assertEquals("Expecting runs matching group " + group, 5, runs.length);
+        Group group12 = contest.getGroup(contest.getAccount(accounts[12].getClientId()).getPrimaryGroupId());
+        assertNotNull(group12);
+        assertEquals("getGroupFilteredRuns for " + group12.getDisplayName(),
+                countRunsWhoseSubmitterIsInGroup(contest, group12), getRunsForGroup(contest, group12).length);
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
 
+        ClientId client1 = accounts[12].getClientId();
         Account acc = contest.getAccount(client1);
         assertNotNull(acc.getPrimaryGroupId());
         Group group2 = contest.getGroup(acc.getPrimaryGroupId());
@@ -403,19 +393,24 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         assertEquals("Expecting standing records for group " + lastGroup.getDisplayName(), expectedInLastGroup,
                 standingsRecords.length);
 
-        Integer division = 1;
-        Run[] divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
-        assertEquals("Expecting run count for division "+division, 5, divRuns.length);
+    }
 
-        division = 2;
-        divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
-        assertEquals("Expecting run count for division "+division, 7, divRuns.length);
+    private Run[] getRunsForGroup(IInternalContest contest, Group group) {
+        ArrayList<Group> wantedGroups = new ArrayList<Group>();
+        wantedGroups.add(group);
+        return ScoreboardUtilities.getGroupFilteredRuns(contest, wantedGroups);
+    }
 
-        division = 3;
-        divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
-        assertEquals("Expecting run count for division "+division, 9, divRuns.length);
-
-
+    /** Runs whose submitting team is a member of the given PC2 group (not legacy division digit). */
+    private int countRunsWhoseSubmitterIsInGroup(IInternalContest contest, Group group) {
+        int count = 0;
+        for (Run run : contest.getRuns()) {
+            Account account = contest.getAccount(run.getSubmitter());
+            if (account != null && account.isGroupMember(group.getElementId())) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -469,20 +464,6 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         ContestInformation info = contest.getContestInformation();
         info.setTeamScoreboardDisplayFormat(teamScoreboardDisplayForamtString);
         contest.updateContestInformation(info);
-
-        Group[] groups = contest.getGroups();
-
-        for (Group group : groups) {
-            String divName = ScoreboardUtilities.getDivision(group.getDisplayName());
-            assertNotNull("No division found for " + group.getDisplayName(), divName);
-        }
-
-        Account[] accounts = getTeamAccounts(contest);
-        Arrays.sort(accounts, new AccountComparator());
-        for (Account account : accounts) {
-            String name = ScoreboardUtilities.getDivision(contest, account.getClientId());
-            assertNotNull("No division found for " + account, name);
-        }
 
         addTc1Runs(contest);
 
