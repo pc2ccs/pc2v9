@@ -70,7 +70,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 
 	ngDoCheck(): void {
         //console.log("Scoreboard ngDoCheck(): ") ;
-        if (!this._contestService.getStandingsAreCurrentFlag() ) {
+        if (!this._contestService.getStandingsAreCurrentFlag(this.selectedGroupId)) {
 	        //console.log("Standings have changed; updating...");
 	        this.loadStandings();
         } else {
@@ -79,15 +79,17 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	}
 
 	private loadStandings(): void {
-		this._contestService.getStandings()
+		// Pass selectedGroupId so the server scopes teams and problem columns via wantedGroups.
+		// standingsHeader.groupList still lists all groups (for the dropdown) even on a group-scoped response.
+		this._contestService.getStandings(this.selectedGroupId)
 			.pipe(takeUntil(this._unsubscribe))
 			.subscribe((standings: any) => {
-				// Snapshot all team rows, derive dropdown options from the header groupList (or from rows if the header is unusable),
+				// Snapshot team rows, derive dropdown options from standingsHeader.groupList (or team rows as fallback),
 				// reset an invalid filter choice, then derive visible rows and table metadata from the same payload.
 				const rows = this.getTeamStandingsArray(standings);
 				this.fullTeamStandings = rows;
 				this.groupOptions = this.buildGroupDropdownOptions(standings, rows);
-				// Hide the filter unless two or more groups qualify; clear selection if the chosen group vanished.
+				// Hide the filter (dropdown list) unless two or more groups qualify; clear selection if the chosen group vanished.
 				if (this.groupOptions.length <= 1) {
 					this.selectedGroupId = '';
 				} else if (
@@ -96,11 +98,13 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 				) {
 					this.selectedGroupId = '';
 				}
+				// Server filters when groupId is sent; client filter still applies for "All teams" multi-group rows.
 				this.teamStandings = this.getFilteredStandings(rows);
 				this.numProblems = this.getNumProblems(standings);
 				this.problemDetailHeaders = this.getProblemDetailHeaders(standings);
 			});
 	}
+
 
 	/**
 	 * Update scoreboard standings whenever group dropdown ("filter") changes.

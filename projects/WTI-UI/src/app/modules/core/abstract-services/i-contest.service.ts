@@ -63,9 +63,14 @@ export abstract class IContestService {
 
   abstract getRemainingSecs(): number;
 
-  abstract getStandings(): Observable<String>;
+  /**
+   * @param groupId optional scoreboard group id (standingsHeader.groupList.group.id).
+   *        Omit or pass '' for full-contest standings.
+   */
+  abstract getStandings(groupId?: string): Observable<String>;
 
   abstract markStandingsOutOfDate(): void;
 
-  abstract getStandingsAreCurrentFlag() : boolean;
+  /** @param groupId same group scope as {@link getStandings} */
+  abstract getStandingsAreCurrentFlag(groupId?: string): boolean;
 }
