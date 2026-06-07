@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -86,8 +87,14 @@ public class ContestController extends MainController {
 	// it is updated to true whenever an access to the /scoreboard REST API endpoint causes the current standings to be updated
 	private boolean wtiServerStandingsAreCurrent = false;
 			
-	//the current ("cached") copy of the scoreboard standings, converted to JSON from XML returned by {@link DefaultScoringAlgorithm#getStandings()}
-	private String currentJSONStandings ;
+	/** Cache key for full-contest standings (no group filter). */
+	private static final String STANDINGS_CACHE_KEY_ALL = "";
+
+	/**
+	 * Cached scoreboard standings JSON by group scope. Key {@link #STANDINGS_CACHE_KEY_ALL} is the full contest;
+	 * other keys are scoreboard {@code groupList.group.id} values from {@link DefaultScoringAlgorithm#dumpGroupList}.
+	 */
+	private final HashMap<String, String> standingsJsonCache = new HashMap<>();
 	
 	// Static vars -- must be initialized as soon as the class is loaded so that Jetty startup fails if
 	// PC2 Scoreboard login fails
@@ -655,11 +662,14 @@ public class ContestController extends MainController {
 	 *  <a href="https://github.com/pc2ccs/pc2v9/wiki/Scoreboard-HTML-Configuration#xml-standings-format">this URL</a>.
 	 *  This XML string is then converted to JSON before being returned to the caller.
 	 *  
-	 *  The ContestController <I>caches</i> the scoreboard standings JSON each time they are updated; if standings have not changed
-	 *  since the last call to this endpoint then the cached copy is returned rather than making a new call to {@link DefaultScoringAlgorithm}.
+	 *  The ContestController <I>caches</i> scoreboard standings JSON per scope (full contest and each requested
+	 *  {@code groupId}). If standings have not changed since the last DSA run, a cached entry is returned.
+	 *  Optional {@code groupId} matches {@code standingsHeader.groupList.group.id} and causes DSA to generate
+	 *  standings for that PC2 {@link Group} only (correct teams and problem columns).
 	 * 
 	 * @param key a String containing a key which uniquely identifies the team making the request.  
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
+	 * @param groupId optional scoreboard group id from the standings header; omit for full contest
 	 *
 	 * @return Response of:
 	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
@@ -676,7 +686,8 @@ public class ContestController extends MainController {
 		@ApiResponse(code = 500, message = "Return if server is having trouble handling request", response = ServerErrorResponseModel.class)
 	})
 	public Response getStandings(
-			@ApiParam(value="token used by logged in users to access team information", required = true) @HeaderParam("team_id")String key) {
+			@ApiParam(value="token used by logged in users to access team information", required = true) @HeaderParam("team_id")String key,
+			@ApiParam(value="optional scoreboard group id (standingsHeader.groupList.group.id) for group-scoped standings") @QueryParam("groupId") String groupId) {
 
 		logger.fine("Looking up team login connection");
 		
@@ -699,20 +710,26 @@ public class ContestController extends MainController {
 		}
 		
 		try {
-			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName());
+			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName()
+					+ (groupId != null && !groupId.trim().isEmpty() ? " groupId=" + groupId.trim() : " (full contest)"));
 			
 			xlog(logger, "debug 22 Start" );
 			
+			final String cacheKey = getStandingsCacheKey(groupId);
+			String responseJson = null;
+
 			//insure that only one browser client at a time can attempt to use the DSA to update standings
 			synchronized (updateStandingsMutex) {
 
 				if (!wtiServerStandingsAreCurrent) {
+					logger.info("Standings are not current; clearing scoreboard JSON cache");
+					standingsJsonCache.clear();
+				}
 
-					logger.info("Standings are not current; invoking DSA to update");
-					
+				responseJson = standingsJsonCache.get(cacheKey);
+				if (responseJson == null) {
+					logger.info("Generating scoreboard JSON for cache key '" + cacheKey + "'");
 
-					// Standings could have changed; try to get the actual InternalContest so
-					// we can use it to get updated standings
 					IInternalContest internalContest = scoreboardServerConn.getContest().getInternalContest();
 
 					if (internalContest == null) {
@@ -723,34 +740,13 @@ public class ContestController extends MainController {
 								.type(MediaType.APPLICATION_JSON).build();
 					}
 
-					// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
 					try {
-						Properties props = internalContest.getContestInformation().getScoringProperties();
-
-
-						if (props != null) {
-						       Set<Object> set = props.keySet();
-						        String[] keys = (String[]) set.toArray(new String[set.size()]);
-						        Arrays.sort(keys);
-						        for (String string : keys) {
-									xlog(logger, "input SA properties " + string + "='" + props.get(string) + "'");
-						        }
-						} 
-
-						// Assigning DefaultScoringAlgorithm.getDefaultProperties(); is a tempoary fix, i686 and i680 describe the bug.
-						// TODO i686 - Find/fix root cause for NPE in WTI DSA, details in i680 #686
-						// this is a temporary fix until root cause is found, and the bug fixed.
-						props = DefaultScoringAlgorithm.getDefaultProperties();
-
-						String xmlStandings = dsa.getStandings(internalContest, null, null, props, logger);
-
-						//					logger.fine("Got the following XML from DSA:");
-						//					logger.fine(xmlStandings);
-						logger.info("Converting DSA XML to JSON");
-						currentJSONStandings = this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings),
-								internalContest);
-						//					logger.fine("Got the following JSON standings:");
-						//					logger.fine(currentJSONStandings);
+						responseJson = buildScoreboardJson(internalContest, groupId);
+					} catch (IllegalArgumentException e) {
+						logger.warning("Invalid groupId for scoreboard request: " + e.getMessage());
+						return Response.status(Response.Status.BAD_REQUEST)
+								.entity(new ServerErrorResponseModel(Response.Status.BAD_REQUEST, e.getMessage()))
+								.type(MediaType.APPLICATION_JSON).build();
 					} catch (IllegalContestState e) {
 						logger.throwing(dsa.getClass().getName(), "getStandings()", e);
 						return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -770,18 +766,116 @@ public class ContestController extends MainController {
 										"IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
 								.type(MediaType.APPLICATION_JSON).build();
 					}
+					if (responseJson != null) {
+						standingsJsonCache.put(cacheKey, responseJson);
+					}
 					wtiServerStandingsAreCurrent = true;
 				}
 			}//end synchronized block
-			
-			// standings are (now) current; return them to requestor
-			return Response.ok().entity(currentJSONStandings).type(MediaType.APPLICATION_JSON).build();
+
+			if (responseJson == null) {
+				logger.severe("Scoreboard JSON unavailable for cache key '" + cacheKey + "'");
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+								"Scoreboard JSON unavailable"))
+						.type(MediaType.APPLICATION_JSON).build();
+			}
+
+			return Response.ok().entity(responseJson).type(MediaType.APPLICATION_JSON).build();
 			
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED).entity(
 					new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request - not logged in"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
+	}
+
+	/**
+	 * Builds enriched JSON standings for the full contest or one scoreboard group.
+	 */
+	private String buildScoreboardJson(IInternalContest internalContest, String groupId)
+			throws IllegalContestState, IOException, JSONException {
+
+		Properties props = internalContest.getContestInformation().getScoringProperties();
+
+		if (props != null) {
+			Set<Object> set = props.keySet();
+			String[] keys = (String[]) set.toArray(new String[set.size()]);
+			Arrays.sort(keys);
+			for (String string : keys) {
+				xlog(logger, "input SA properties " + string + "='" + props.get(string) + "'");
+			}
+		}
+
+		// Assigning DefaultScoringAlgorithm.getDefaultProperties(); is a tempoary fix, i686 and i680 describe the bug.
+		// TODO i686 - Find/fix root cause for NPE in WTI DSA, details in i680 #686
+		props = DefaultScoringAlgorithm.getDefaultProperties();
+
+		ArrayList<Group> wantedGroups = resolveWantedGroups(internalContest, groupId);
+		String xmlStandings = dsa.getStandings(internalContest, null, wantedGroups, props, logger);
+
+		logger.info("Converting DSA XML to JSON");
+		return this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings), internalContest);
+	}
+
+	private static String getStandingsCacheKey(String groupId) {
+		if (groupId == null) {
+			return STANDINGS_CACHE_KEY_ALL;
+		}
+		String trimmed = groupId.trim();
+		return trimmed.isEmpty() ? STANDINGS_CACHE_KEY_ALL : trimmed;
+	}
+
+	/**
+	 * Resolves optional {@code groupId} to a one-element {@code wantedGroups} list for DSA.
+	 * {@code groupId} matches sequential scoreboard ids assigned in {@link DefaultScoringAlgorithm#dumpGroupList}.
+	 *
+	 * @return {@code null} for full-contest standings
+	 */
+	private ArrayList<Group> resolveWantedGroups(IInternalContest contest, String groupId) {
+		String cacheKey = getStandingsCacheKey(groupId);
+		if (STANDINGS_CACHE_KEY_ALL.equals(cacheKey)) {
+			return null;
+		}
+		Group group = resolveGroupForScoreboardId(contest, cacheKey);
+		if (group == null) {
+			throw new IllegalArgumentException("Unknown scoreboard groupId: " + cacheKey);
+		}
+		ArrayList<Group> wantedGroups = new ArrayList<Group>();
+		wantedGroups.add(group);
+		return wantedGroups;
+	}
+
+	/**
+	 * Maps a scoreboard header group {@code id} to the corresponding {@link Group}.
+	 * Id assignment matches {@link DefaultScoringAlgorithm#dumpGroupList}: only groups with
+	 * {@link Group#isDisplayOnScoreboard()} true, in contest order, numbered from 1.
+	 */
+	private Group resolveGroupForScoreboardId(IInternalContest contest, String scoreboardGroupId) {
+		int targetId;
+		try {
+			targetId = Integer.parseInt(scoreboardGroupId);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+		if (targetId < 1) {
+			return null;
+		}
+		int id = 0;
+		Group[] groups = contest.getGroups();
+		if (groups == null) {
+			return null;
+		}
+		for (Group group : groups) {
+			if (!group.isDisplayOnScoreboard()) {
+				continue;
+			}
+			id++;
+			if (id == targetId) {
+				return group;
+			}
+		}
+		return null;
 	}
  
 	/**
