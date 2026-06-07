@@ -34,6 +34,8 @@ export class ContestService extends IContestService {
 
 	standingsAreCurrent: boolean;
 	cachedStandings: Observable<String>;
+	/** Group scope of {@link cachedStandings}; '' means full contest. */
+	standingsCacheGroupId = '';
 
 	//the WTI-UI timer service which updates on-screen elapsed and remaining time when started (enabled)
 	contestTimer: ContestTimerService = new ContestTimerService(this);
@@ -87,9 +89,14 @@ export class ContestService extends IContestService {
 		return this._httpClient.get<ContestClock>(`${environment.baseUrl}/contest/contestclock`);
 	}
 
-	getStandings(): Observable<String> {
-		if (!this.standingsAreCurrent) {
-			this.cachedStandings = this._httpClient.get<String>(`${environment.baseUrl}/contest/scoreboard`);
+	getStandings(groupId: string = ''): Observable<String> {
+		const cacheKey = groupId || '';
+		if (!this.standingsAreCurrent || this.standingsCacheGroupId !== cacheKey) {
+			const url = cacheKey
+				? `${environment.baseUrl}/contest/scoreboard?groupId=${encodeURIComponent(cacheKey)}`
+				: `${environment.baseUrl}/contest/scoreboard`;
+			this.cachedStandings = this._httpClient.get<String>(url);
+			this.standingsCacheGroupId = cacheKey;
 			this.standingsAreCurrent = true;
 		}
 		return this.cachedStandings;
@@ -99,8 +106,9 @@ export class ContestService extends IContestService {
 		this.standingsAreCurrent = false;
 	}
 
-	getStandingsAreCurrentFlag(): boolean {
-		return this.standingsAreCurrent;
+	getStandingsAreCurrentFlag(groupId: string = ''): boolean {
+		const cacheKey = groupId || '';
+		return this.standingsAreCurrent && this.standingsCacheGroupId === cacheKey;
 	}
 
 	/** This method invokes the local getContestClock() method, which makes an HTTP call to the WTI-API to get the current
