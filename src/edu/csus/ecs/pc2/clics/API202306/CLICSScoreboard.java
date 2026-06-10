@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
@@ -59,10 +59,17 @@ public class CLICSScoreboard {
     }
 
     /**
-     * Fill in the scoreboard information
-     *
+     * Fill in the scoreboard information for reports and exports.
+     * These are internal (staff) related things, and we do not obey the freeze.
      */
     public CLICSScoreboard(IInternalContest model, Group group, Integer division)  throws IllegalContestState, JAXBException, IOException {
+        this(model, group, division, false);
+    }
+
+    /**
+     * Fill in the scoreboard information possibly obeying the freeze.
+     */
+    public CLICSScoreboard(IInternalContest model, Group group, Integer division, boolean obeyFreeze)  throws IllegalContestState, JAXBException, IOException {
 
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
@@ -74,6 +81,8 @@ public class CLICSScoreboard {
             groupList = new ArrayList<Group>();
             groupList.add(group);
         }
+        scoringAlgorithm.setObeyFreeze(obeyFreeze);
+
         // legacy - standings are created as XML, and we convert that to JSON.
         String xml = scoringAlgorithm.getStandings(model, null, division, groupList, properties, StaticLog.getLog());
 

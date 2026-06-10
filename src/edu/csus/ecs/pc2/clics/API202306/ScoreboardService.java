@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
@@ -69,6 +69,7 @@ public class ScoreboardService implements Feature {
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == true) {
             ContestTime contestTime = model.getContestTime();
+
             // verify contest has started or user is special
             if (contestTime.getElapsedMS() > 0 ||
                 ((sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
@@ -77,6 +78,10 @@ public class ScoreboardService implements Feature {
 
                 Group specificGroup = null;
                 Integer divNumber = null;
+
+                // only staff and judges get an unabridged scoreboard
+                boolean obeyFreeze = !(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
+                    sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE));
 
                 // if a specific group was requested, let's look for that so we can pass it to the standings routine
                 if(!StringUtilities.isEmpty(group_id)) {
@@ -104,7 +109,7 @@ public class ScoreboardService implements Feature {
 
                 // ok to return scoreboard
                 try {
-                    CLICSScoreboard scoreboard = new CLICSScoreboard(model, specificGroup, divNumber);
+                    CLICSScoreboard scoreboard = new CLICSScoreboard(model, specificGroup, divNumber, obeyFreeze);
                     return Response.ok(scoreboard.toJSON(), MediaType.APPLICATION_JSON).build();
                 } catch (IllegalContestState | JAXBException | IOException e) {
                     controller.getLog().log(Log.WARNING, "Exception creating PC2 scoreboard JSON: " + e.getMessage(), e);
