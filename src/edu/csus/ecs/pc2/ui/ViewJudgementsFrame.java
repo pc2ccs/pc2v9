@@ -1,7 +1,8 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,7 +13,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
-import java.awt.Dimension;
 
 /**
  * View Judgement Frame.
@@ -22,9 +22,9 @@ import java.awt.Dimension;
 
 // $HeadURL$
 public class ViewJudgementsFrame extends JFrame implements UIPlugin {
-    
+
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 3591229492456973289L;
 
@@ -44,7 +44,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public ViewJudgementsFrame() {
         super();
@@ -53,7 +53,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setSize(new Dimension(1024, 329));
@@ -62,6 +62,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
         this.setTitle("Run Judgements");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 dispose();
             }
@@ -70,6 +71,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
@@ -89,38 +91,44 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
         viewJudgementsPane.setRun(theRun);
     }
 
+    @Override
     public String getPluginTitle() {
         return "Edit Run Frame";
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @author pc2@ecs.csus.edu
      */
 
     // $HeadURL$
     public class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             // ignore
         }
-        
+
+        @Override
         public void refreshRuns(RunEvent event) {
             // ignore
-            
+
         }
 
+        @Override
         public void runChanged(RunEvent event) {
-            if (run != null) {
+            // Make sure we have a run, and ignore any test case results since they don't change anything
+            if (run != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
                 if (event.getRun().getElementId().equals(run.getElementId())) {
 
                     viewJudgementsPane.setRun(event.getRun());
-                    
+
                 }
             }
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             // TODO Auto-generated method stub
         }
@@ -128,7 +136,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes mainPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainPanel() {
@@ -143,7 +151,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes buttonPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
@@ -157,7 +165,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes viewJudgementsPane
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.ViewJudgementsPane
      */
     private ViewJudgementsPane getViewJudgementsPane() {
@@ -169,7 +177,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes Close
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCloseButton() {
@@ -178,6 +186,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
             closeButton.setText("Close");
             closeButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             closeButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     dispose();
                 }

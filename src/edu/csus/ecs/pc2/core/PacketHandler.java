@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -1474,8 +1474,12 @@ public class PacketHandler {
               sendToSpectatorsAndSites(runExecuteStatusPacket, true);
             }
         } else {
+            int nTestCase = -1;
+            if(status == RunExecutionStatus.TESTCASE_RESULT) {
+                nTestCase = (Integer)PacketFactory.getObjectValue(packet, PacketFactory.TESTCASE_ORDINAL);
+            }
             // Accept and process this packet (for the API)
-            contest.updateRunStatus(run, status, judgeClientId);
+            contest.updateRunStatus(run, status, judgeClientId, nTestCase);
         }
     }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -18,7 +18,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 
 /**
  * Shows all run judgements for the input run.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 2350404181525660056L;
 
@@ -56,6 +56,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     private void populateGUI() {
         Runnable updateGrid = new Runnable() {
+            @Override
             public void run() {
                 // Update Run title
 
@@ -63,7 +64,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
                 if (run.isDeleted()){
                     deletedString = " DELETED ";
                 }
-                
+
                 setTitle("Run " + run.getNumber() + " elapsed " + run.getElapsedMins()+  deletedString);
 
                 JudgementRecord judgementRecord = run.getJudgementRecord();
@@ -84,6 +85,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     protected void setTitle(final String infoString) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 titleLabel.setText(infoString);
             }
@@ -112,7 +114,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
             judgementsListbox.addRow(objects);
         }
         judgementsListbox.autoSizeAllColumns();
-        
+
         if (records.length == 1) {
             showMessage("There is " + records.length + " judgement");
         } else {
@@ -130,9 +132,9 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     /**
      * Return the columns to populate the grid.
-     * 
+     *
      * Assumes that record is NOT null.
-     * 
+     *
      * @param rowNumber
      * @param inRun
      * @param record
@@ -189,16 +191,16 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         } else {
             column[col] = "(None)";
         }
-        
+
         col++;
         column[col] = judgementRecord.getExecuteMS() + "ms";
         return column;
     }
 
     private String getJudgementName(JudgementRecord judgementRecord) {
-        
+
         String name = "No";
-        
+
         if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
             if (judgementRecord.isUsedValidator() && judgementRecord.getValidatorResultString() != null) {
                 name = judgementRecord.getValidatorResultString();
@@ -217,7 +219,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(527, 195));
@@ -229,7 +231,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes jPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPane() {
@@ -243,7 +245,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes jPanel1
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getNorthPane() {
@@ -262,7 +264,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes jPanel2
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -280,7 +282,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
 
     /**
      * This method initializes multiColumnListbox
-     * 
+     *
      * @return com.ibm.webrunner.j2mclb.MCLB
      */
     private MCLB getJudgementsListbox() {
@@ -297,36 +299,42 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
     public String getPluginTitle() {
         return "Run Judgement View";
     }
-    
+
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-        
+
         getContest().addRunListener(new RunListenerImplementation());
     }
-    
+
     /**
-     * 
-     * 
+     *
+     *
      * @author pc2@ecs.csus.edu
      */
     public class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             if (run != null && event.getRun().getElementId().equals(run.getElementId())) {
                 setRun(event.getRun());
             }
         }
-        
+
+        @Override
         public void refreshRuns(RunEvent event) {
-            // FIXME - close this frame, remove from screen 
+            // FIXME - close this frame, remove from screen
         }
 
+        @Override
         public void runChanged(RunEvent event) {
-            if (run != null && event.getRun().getElementId().equals(run.getElementId())) {
+            // Make sure we have a run, and ignore any test case results since they don't change anything
+            if (run != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT && event.getRun().getElementId().equals(run.getElementId())) {
                 setRun(event.getRun());
             }
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             if (run != null && event.getRun().getElementId().equals(run.getElementId())) {
                 setRun(event.getRun());

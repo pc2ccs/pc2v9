@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
@@ -1541,7 +1541,7 @@ public class InternalContest implements IInternalContest {
     }
 
     @Override
-    public void updateRunStatus(Run run, RunExecutionStatus status, ClientId whoUpdatedRun) {
+    public void updateRunStatus(Run run, RunExecutionStatus status, ClientId whoUpdatedRun, int param) {
 
         RunEvent.Action action = null;
         switch (status) {
@@ -1551,6 +1551,9 @@ public class InternalContest implements IInternalContest {
             case VALIDATING:
                 action = RunEvent.Action.RUN_VALIDATING;
                 break;
+            case TESTCASE_RESULT:
+                action = RunEvent.Action.RUN_TESTCASE_RESULT;
+                break;
             case COMPILING:
             default:
                 action = RunEvent.Action.RUN_COMPILING;
@@ -1559,6 +1562,9 @@ public class InternalContest implements IInternalContest {
 
         RunEvent runEvent = new RunEvent(action, run, null, null);
         runEvent.setWhoModifiedRun(whoUpdatedRun);
+        if(action == RunEvent.Action.RUN_TESTCASE_RESULT) {
+            runEvent.setActionParam(new Integer(param));
+        }
         fireRunListener(runEvent);
     }
 
@@ -1667,9 +1673,6 @@ public class InternalContest implements IInternalContest {
 
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), runFiles, runResultFiles);
         runEvent.setWhoModifiedRun(whoChangedRun);
-        if (run.getStatus().equals(RunStates.BEING_JUDGED) || run.getStatus().equals(RunStates.BEING_RE_JUDGED) ){
-            runEvent.setDetailedAction(RunEvent.Action.CHECKEDOUT_RUN);
-        }
 
         if (checkOutRun) {
             runEvent.setSentToClientId(whoChangedRun);
@@ -2087,23 +2090,23 @@ public class InternalContest implements IInternalContest {
     public ConnectionHandlerID[] getConnectionHandlerIDs() {
         return localConnectionHandlerList.getList();
     }
-    
+
     /**
-     * Examines the current list of all clarifications and returns an array containing the 
+     * Examines the current list of all clarifications and returns an array containing the
      * clarifications which are allowed to be seen by the specified clientId.
      * For example certain clarifications might be only directed towards certain groups/teams.
-     * Note that "Announcements" are a type of Clarification; the returned array will include 
+     * Note that "Announcements" are a type of Clarification; the returned array will include
      * any "Announcement Clarifications" that the client is allowed to see.
-     * 
-     * @return an array containing exactly (and only) the current clarifications (including 
-     *          "Announcement Clarifications") which the specified client is allowed to see.  
+     *
+     * @return an array containing exactly (and only) the current clarifications (including
+     *          "Announcement Clarifications") which the specified client is allowed to see.
      */
     @Override
     public Clarification[] getClarifications(ClientId clientId) {
 
         Vector<Clarification> clientClarifications = new Vector<Clarification>();
         Enumeration<Clarification> enumeration = clarificationList.getClarList();
-        
+
         Account account = getAccount(clientId);
         while (enumeration.hasMoreElements()) {
             Clarification clarification = enumeration.nextElement();
@@ -2399,17 +2402,17 @@ public class InternalContest implements IInternalContest {
     public Group[] getGroups() {
         return groupDisplayList.getList();
     }
-    
+
     @Override
     public boolean doGroupsExist() {
         return groupDisplayList.getList().length != 0;
     }
-    
+
     @Override
     public int getNumberofGroups() {
         return groupDisplayList.getList().length;
     }
-    
+
     @Override
     public void addGroupListener(IGroupListener groupListener) {
         groupListenerList.addElement(groupListener);

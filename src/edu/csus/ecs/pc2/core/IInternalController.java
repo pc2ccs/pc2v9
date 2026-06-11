@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -647,6 +647,14 @@ public interface IInternalController {
      * @param run
      */
     void sendValidatingMessage(Run run);
+
+    /**
+     * Send the result of a run testcase.  The test case index into the
+     * run's testcases is ordinal.
+     * @param run
+     * @param ordinal
+     */
+    void sendRunTestCaseResult(Run run, int ordinal);
 
     boolean isClientAutoShutdown();
 

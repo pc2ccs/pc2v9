@@ -254,19 +254,22 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
         @Override
         public void runChanged(RunEvent event) {
-            updateRunRow(event.getRun(), event.getWhoModifiedRun());
+            // Do not update things if it was a test case result
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+                updateRunRow(event.getRun(), event.getWhoModifiedRun());
 
-            if (getContest().getClientId().equals(event.getSentToClientId())) {
-                // we checked out the run, let's try to judge it.
+                if (getContest().getClientId().equals(event.getSentToClientId())) {
+                    // we checked out the run, let's try to judge it.
 
-                Run run = event.getRun();
-                JudgementRecord judgementRecord = pendingJudgements.get(run.getElementId());
-                if (judgementRecord != null) {
+                    Run run = event.getRun();
+                    JudgementRecord judgementRecord = pendingJudgements.get(run.getElementId());
+                    if (judgementRecord != null) {
 
-                    // Found a judgement for this run in pendingJudgements, send the judgement to the server.
+                        // Found a judgement for this run in pendingJudgements, send the judgement to the server.
 
-                    getController().submitRunJudgement(run, judgementRecord, null);
-                    pendingJudgements.remove(run.getElementId());
+                        getController().submitRunJudgement(run, judgementRecord, null);
+                        pendingJudgements.remove(run.getElementId());
+                    }
                 }
             }
         }

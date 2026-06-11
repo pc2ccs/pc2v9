@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -551,84 +551,85 @@ public class RunsTablePane extends JPanePlugin {
 
         @Override
         public void runChanged(RunEvent event) {
-            updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
+            Action action = event.getAction();
 
-            // check if this is a team; if so, pop up a response dialog
-            if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
-                showResponseToTeam(event);
-            }
+            // Do not update if just a test case result
+            if(action != RunEvent.Action.RUN_TESTCASE_RESULT) {
+                updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
 
-            //code copied from FetchRunService.RunListenerImplementation.runChanged():
+                // check if this is a team; if so, pop up a response dialog
+                if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
+                    showResponseToTeam(event);
+                }
 
-                Action action = event.getAction();
-                Action details = event.getDetailedAction();
-                Run aRun = event.getRun();
-                RunFiles aRunFiles = event.getRunFiles();
-                String msg = event.getMessage();
+                //code copied from FetchRunService.RunListenerImplementation.runChanged():
 
-                getController().getLog().log(Log.INFO, "RunsPane.RunListener: Action=" + action + "; DetailedAction=" + details + "; msg=" + msg
-                                        + "; run=" + aRun + "; runFiles=" + aRunFiles);
+                    Action details = event.getDetailedAction();
+                    Run aRun = event.getRun();
+                    RunFiles aRunFiles = event.getRunFiles();
+                    String msg = event.getMessage();
 
-                if (aRun != null) {
-                    // make local reference for consistency in case requestedRun gets cleared - avoids synchronization
-                    Run locRun = requestedRun;
+                    getController().getLog().log(Log.INFO, "RunsPane.RunListener: Action=" + action + "; DetailedAction=" + details + "; msg=" + msg
+                                            + "; run=" + aRun + "; runFiles=" + aRunFiles);
 
-                    // we are only interested in the run we may have requested from View Source - all other run changes are ignored.
-                    if(locRun != null && aRun.getNumber() == locRun.getNumber() && aRun.getSiteNumber() == locRun.getSiteNumber()) {
+                    if (aRun != null) {
+                        // make local reference for consistency in case requestedRun gets cleared - avoids synchronization
+                        Run locRun = requestedRun;
 
-                        // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
-                        if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
+                        // we are only interested in the run we may have requested from View Source - all other run changes are ignored.
+                        if(locRun != null && aRun.getNumber() == locRun.getNumber() && aRun.getSiteNumber() == locRun.getSiteNumber()) {
 
-                            getController().getLog().log(Log.WARNING, "Reply from server: requested run not available");
-                            serverReplied = true;
-                        } else {
-                            // Only interested in the first reply (we don't want fetchedRun changing once its been set - it really shouldn't)
-                            if(fetchedRun == null) {
-                                ClientId toClient = event.getSentToClientId() ;
-                                ClientId myID = getContest().getClientId();
+                            // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
+                            if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
 
-                                // see if the event was directed to me explicitly, which it should be (see PacketHandler.handleFetchedRun())
-                                // but isn't due to the way updateRun() works.  We'll leave this code here in case someday that changes.
-                                if (toClient != null && toClient.equals(myID)) {
+                                getController().getLog().log(Log.WARNING, "Reply from server: requested run not available");
+                                serverReplied = true;
+                            } else {
+                                // Only interested in the first reply (we don't want fetchedRun changing once its been set - it really shouldn't)
+                                if(fetchedRun == null) {
+                                    ClientId toClient = event.getSentToClientId() ;
+                                    ClientId myID = getContest().getClientId();
 
-                                    getController().getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
-                                                            + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
+                                    // see if the event was directed to me explicitly, which it should be (see PacketHandler.handleFetchedRun())
+                                    // but isn't due to the way updateRun() works.  We'll leave this code here in case someday that changes.
+                                    if (toClient != null && toClient.equals(myID)) {
 
-                                    fetchedRun = aRun;
-                                    fetchedRunFiles = aRunFiles;
-                                    serverReplied = true;
+                                        getController().getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
+                                                                + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
 
-                                } else {
-
-                                    // The FETCHED_REQUESTED_RUN reply is sent with a a SentToClientID of null as found in
-                                    // InternalContest.updateRun().  the RunEvent's sentToClientId member is only set when the run
-                                    // is being checked out for BEING_JUDGED, BEING_RE_JUDGED, CHECKED_OUT, HOLD, otherwise it is
-                                    // is not set (null), and winds up here in the case of "View Source" but not from a being-judged dialog.
-
-                                    getController().getLog().log(Log.INFO, "Event not directed to me: sent to " + toClient + " but my ID is " + myID);
-
-                                    if(toClient == null) {
                                         fetchedRun = aRun;
                                         fetchedRunFiles = aRunFiles;
                                         serverReplied = true;
+
+                                    } else {
+
+                                        // The FETCHED_REQUESTED_RUN reply is sent with a a SentToClientID of null as found in
+                                        // InternalContest.updateRun().  the RunEvent's sentToClientId member is only set when the run
+                                        // is being checked out for BEING_JUDGED, BEING_RE_JUDGED, CHECKED_OUT, HOLD, otherwise it is
+                                        // is not set (null), and winds up here in the case of "View Source" but not from a being-judged dialog.
+
+                                        getController().getLog().log(Log.INFO, "Event not directed to me: sent to " + toClient + " but my ID is " + myID);
+
+                                        if(toClient == null) {
+                                            fetchedRun = aRun;
+                                            fetchedRunFiles = aRunFiles;
+                                            serverReplied = true;
+                                        }
                                     }
                                 }
                             }
+                        } else {
+                            // changed run was not the one we wanted
+                            getController().getLog().log(Log.INFO, "Run event not for requested run: " + "Run Status=" + event.getAction()
+                                + "; run=" + aRun + " requested=" + locRun);
                         }
                     } else {
-                        // changed run was not the one we wanted
-                        getController().getLog().log(Log.INFO, "Run event not for requested run: " + "Run Status=" + event.getAction()
-                            + "; run=" + aRun + " requested=" + locRun);
+                        //run from server was null
+                        getController().getLog().log(Log.WARNING, "Run received from server was null");
+                        fetchedRun = null;
+                        fetchedRunFiles = null;
                     }
-                } else {
-                    //run from server was null
-                    getController().getLog().log(Log.WARNING, "Run received from server was null");
-                    fetchedRun = null;
-                    fetchedRunFiles = null;
-                }
-
-
-
+            }
         }
 
         @Override

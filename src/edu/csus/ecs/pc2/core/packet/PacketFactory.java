@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.packet;
 
 import java.io.PrintStream;
@@ -358,6 +358,11 @@ public final class PacketFactory {
     public static final String TEAM_RUN_SOURCE_FILES_LIST = "TEAM_RUN_SOURCE_FILES_LIST";
 
     public static final String REQUEST_LOGIN_AS_PROXY = "REQUEST_LOGIN_AS_PROXY";
+
+    /**
+     * Index into runcases for the testcase in question
+     */
+    public static final String TESTCASE_ORDINAL = "TESTCASE_ORDINAL";
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -2106,6 +2111,15 @@ public final class PacketFactory {
         prop.put(CLIENT_ID, judgeClient);
         prop.put(RUN, run);
         prop.put(RUN_STATUS, status);
+        return createPacket(PacketType.Type.RUN_EXECUTION_STATUS, source, destination, prop);
+    }
+
+    public static Packet createRunTestCaseResultPacket(ClientId source, ClientId destination, Run run, ClientId judgeClient, int ordinal) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, judgeClient);
+        prop.put(RUN, run);
+        prop.put(RUN_STATUS, RunExecutionStatus.TESTCASE_RESULT);
+        prop.put(TESTCASE_ORDINAL, ordinal);
         return createPacket(PacketType.Type.RUN_EXECUTION_STATUS, source, destination, prop);
     }
 

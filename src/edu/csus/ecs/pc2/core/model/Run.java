@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Arrays;
@@ -466,8 +466,11 @@ public class Run extends Submission {
         return testcases.toArray(new RunTestCase[testcases.size()]);
     }
 
-    public void addTestCase(RunTestCase runTestCaseResult) {
+    public int addTestCase(RunTestCase runTestCaseResult) {
+        // Remember size before adding element, as this will be its index.
+        int testCaseIndex = testcases.size();
         testcases.add(runTestCaseResult);
+        return(testCaseIndex);
     }
 
     public void replaceTestCases(RunTestCase[] runTestCases) {

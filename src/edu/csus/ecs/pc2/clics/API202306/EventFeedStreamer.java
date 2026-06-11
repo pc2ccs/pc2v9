@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.ByteArrayOutputStream;
@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -541,16 +542,44 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                     String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "null");
                     sendJSON(json + NL);
                 } else {
+                    ContestInformation ci = contest.getContestInformation();
                     if (run.isJudged()) {
                         String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
                         sendJSON(json + NL);
-                        // Now send out the runcases (test cases).  Get most recent ones for this run.
-                        RunTestCase [] testCases = JudgementUtilities.getLastTestCaseArray(contest, run);
-                        for (int j = 0; j < testCases.length; j++) {
-                            json = getJSONEvent(RUN_KEY, getNextEventId(), testCases[j].getElementId().toString(), jsonTool.convertToJSON(testCases, j).toString());
-                            sendJSON(json + NL);
+                        // Only send test cases if batching, otherwise, we would have sent them.
+                        if(ci.isBatchTestCasesOnEF()) {
+                            // Now send out the runcases (test cases).  Get most recent ones for this run.
+                            RunTestCase [] testCases = JudgementUtilities.getLastTestCaseArray(contest, run);
+                            for (int j = 0; j < testCases.length; j++) {
+                                json = getJSONEvent(RUN_KEY, getNextEventId(), testCases[j].getElementId().toString(), jsonTool.convertToJSON(testCases, j).toString());
+                                sendJSON(json + NL);
+                            }
                         }
+                    } else if(event.getDetailedAction() == RunEvent.Action.RUN_TESTCASE_RESULT) {
+                        Object param = event.getDetailedActionParam();
+                        // Get the run index
+                        if(param != null && param instanceof Integer) {
+                            int testCase = ((Integer)param).intValue();
 
+                            // testcase index has to be within bounds of the run's test cases
+                            if(testCase >= 0) {
+                                RunTestCase [] testCases = run.getRunTestCases();
+                                if(testCases != null && testCase < testCases.length) {
+                                    String json;
+                                    // If very first test case, send a "blank" judgment (null judgment).
+                                    // This is absolutely ridiculous, but we've been asked to do it.
+                                    // Send a 'null' judgment at the start of run on the first testcase.
+                                    // Note that jsonTool.convertJudgementToJSON(run) uses CLICSJudgement, which understands
+                                    // to emit 'null' for judgment type, and the end times if there is no judgment yet.
+                                    if(testCase == 0 && ci.isSendBeginJudgmentOnEF()) {
+                                        json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
+                                        sendJSON(json + NL);
+                                    }
+                                    json = getJSONEvent(RUN_KEY, getNextEventId(), testCases[testCase].getElementId().toString(), jsonTool.convertToJSON(testCases, testCase).toString());
+                                    sendJSON(json + NL);
+                                }
+                            }
+                        }
                     } else {
                         log.info("runChanged: (not adding) " + run.toString());
 

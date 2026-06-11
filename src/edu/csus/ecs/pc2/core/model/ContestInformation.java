@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -224,11 +224,25 @@ public class ContestInformation implements Serializable{
      * Submission Throttling
      */
     private boolean submissionThrottling = true;
-    
+
     /**
      * Whether or not zero-length files are allowed in submissions.
      */
     private boolean allowZeroLengthSubmissionFiles = false;
+
+    /**
+     * Whether or not we should "batch" sending all run testcases after the entire submission is judged (true).
+     * If false, we send run testcases as they are judged (default).
+     */
+    private boolean batchTestCasesOnEF = false;
+
+    /**
+     * Whether or not we should send an empty judgment at the start of judging a submission.
+     * This can be used in conjunction with batchTestCasesOnEF to signify that a judgment for
+     * a submission is starting, and the testcases will be coming in for that submission.
+     * If false, we will not send such a judgment on the vent feed.  true is the default.
+     */
+    private boolean sendBeginJudgmentOnEF = true;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -469,6 +483,13 @@ public class ContestInformation implements Serializable{
             }
 
             if (allowZeroLengthSubmissionFiles != contestInformation.isAllowZeroLengthSubmissionFiles()) {
+                return false;
+            }
+
+            if(batchTestCasesOnEF != contestInformation.isBatchTestCasesOnEF()) {
+                return false;
+            }
+            if(sendBeginJudgmentOnEF != contestInformation.isSendBeginJudgmentOnEF()) {
                 return false;
             }
 
@@ -987,6 +1008,22 @@ public class ContestInformation implements Serializable{
 
     public void setAllowZeroLengthSubmissionFiles(boolean allowZeroLengthSubmissionFiles) {
         this.allowZeroLengthSubmissionFiles = allowZeroLengthSubmissionFiles;
+    }
+
+    public boolean isBatchTestCasesOnEF() {
+        return batchTestCasesOnEF;
+    }
+
+    public void setBatchTestCasesOnEF(boolean batchTestCasesOnEF) {
+        this.batchTestCasesOnEF = batchTestCasesOnEF;
+    }
+
+    public boolean isSendBeginJudgmentOnEF() {
+        return batchTestCasesOnEF;
+    }
+
+    public void setSendBeginJudgmentOnEF(boolean sendBeginJudgmentOnEF) {
+        this.sendBeginJudgmentOnEF = sendBeginJudgmentOnEF;
     }
 
 }

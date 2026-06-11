@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -1366,9 +1366,12 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
         @Override
         public void runChanged(RunEvent event) {
-            SubmissionSample sub = getSubmission(event);
-            if(sub != null) {
-                updateRunRow(sub, event.getWhoModifiedRun(), true);
+            // Run Test case results are uninteresting in terms of adding a new submission
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+                SubmissionSample sub = getSubmission(event);
+                if(sub != null) {
+                    updateRunRow(sub, event.getWhoModifiedRun(), true);
+                }
             }
         }
 

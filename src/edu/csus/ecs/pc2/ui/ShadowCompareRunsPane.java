@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
@@ -1047,7 +1047,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         @Override
         public void runChanged(RunEvent event) {
 
-            if (event != null) {
+            // Not interested run test cases
+            if (event != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
 
                 //get the run for which we have received a server "changed" notification
                 Run updatedRun = event.getRun();
