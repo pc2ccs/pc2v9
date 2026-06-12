@@ -803,8 +803,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         runTestCaseResult.setElapsedMS(executionData.getExecuteTimeMS());
         runTestCaseResult.setContestTimeMS(getContest().getContestTime().getElapsedMS());
         runTestCaseResult.setValidated(isValidated());
+        int nTestCaseOrdinal = run.addTestCase(runTestCaseResult);
         if(!getContest().getContestInformation().isBatchTestCasesOnEF()) {
-            int nTestCaseOrdinal = run.addTestCase(runTestCaseResult);
             getController().sendRunTestCaseResult(run, nTestCaseOrdinal);
         }
         return submissionIsCorrect;

@@ -243,6 +243,13 @@ public interface IInternalController {
     void sendToSpectators(Packet packet);
 
     /**
+     * Send to all feeder clients
+     *
+     * @param packet
+     */
+    void sendToFeeders(Packet packet);
+
+    /**
      * Start InternalController with command line arguments.
      *
      * @param stringArray

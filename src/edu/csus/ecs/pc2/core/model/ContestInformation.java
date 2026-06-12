@@ -1019,7 +1019,7 @@ public class ContestInformation implements Serializable{
     }
 
     public boolean isSendBeginJudgmentOnEF() {
-        return batchTestCasesOnEF;
+        return sendBeginJudgmentOnEF;
     }
 
     public void setSendBeginJudgmentOnEF(boolean sendBeginJudgmentOnEF) {

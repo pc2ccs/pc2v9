@@ -190,7 +190,7 @@ public class RunEvent {
         this.actionParam = param;
     }
 
-    public Object getDetailedActionParam() {
+    public Object getActionParam() {
         return actionParam;
     }
 }

@@ -1465,13 +1465,13 @@ public class PacketHandler {
 
                 // If this is not a run status from this site, then send to spectators/API only
 
-                sendToSpectatorsAndSites(packet, false);
+                sendToSpectatorsFeedersAndSites(packet, false);
 
             } else {
                 // packet from this site, send to all spectators/API and to other servers.
 
               Packet runExecuteStatusPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
-              sendToSpectatorsAndSites(runExecuteStatusPacket, true);
+              sendToSpectatorsFeedersAndSites(runExecuteStatusPacket, true);
             }
         } else {
             int nTestCase = -1;
@@ -3182,14 +3182,16 @@ public class PacketHandler {
     }
 
     /**
-     * Send to spectators and servers
+     * Send to spectators, feeders and servers.
+     * This is currently used for forwarding run execution status messages
      * @param packet
      * @param sendToServers
      */
-    public void sendToSpectatorsAndSites(Packet packet, boolean sendToServers) {
+    public void sendToSpectatorsFeedersAndSites(Packet packet, boolean sendToServers) {
 
         if (isServer()) {
             controller.sendToSpectators(packet);
+            controller.sendToFeeders(packet);
             if (sendToServers) {
                 controller.sendToServers(packet);
             }

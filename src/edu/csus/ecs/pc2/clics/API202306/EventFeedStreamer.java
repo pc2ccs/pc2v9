@@ -46,6 +46,7 @@ import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -543,20 +544,37 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                     sendJSON(json + NL);
                 } else {
                     ContestInformation ci = contest.getContestInformation();
+                    // To be clear, isJudged() means: JUDGED, BEING_REJUDGED or MANUAL REVIEW
                     if (run.isJudged()) {
-                        String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
-                        sendJSON(json + NL);
-                        // Only send test cases if batching, otherwise, we would have sent them.
-                        if(ci.isBatchTestCasesOnEF()) {
-                            // Now send out the runcases (test cases).  Get most recent ones for this run.
-                            RunTestCase [] testCases = JudgementUtilities.getLastTestCaseArray(contest, run);
-                            for (int j = 0; j < testCases.length; j++) {
-                                json = getJSONEvent(RUN_KEY, getNextEventId(), testCases[j].getElementId().toString(), jsonTool.convertToJSON(testCases, j).toString());
+                        // We are only interested in sending a judgements notification iff the judgment has changed.
+                        // There is no point in sending a (duplicate) judgment if it's BEING_REJUDGED; we'll wait
+                        // for the JUDGED updated to send the notification.
+                        if(run.getStatus() == RunStates.JUDGED) {
+                            // If judged already, we dont send out a judgements notification for each test case.
+                            // Just ignore them, we'll send them all at the end when the judgment finally comes in.
+                            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+                                String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
                                 sendJSON(json + NL);
+                                // Only send test cases if batching, otherwise, we would have sent them.
+                                // JB TODO: Also want to batch if re-judging - need to figure out how to tell.
+                                //     May need a paremeter passed in.  We may be able to check how many previous judgments
+                                //     there have been and if > 0, then show batch the run testcases?
+                                if(ci.isBatchTestCasesOnEF()) {
+                                    // Now send out the runcases (test cases).  Get most recent ones for this run.
+                                    RunTestCase [] testCases = JudgementUtilities.getLastTestCaseArray(contest, run);
+                                    for (int j = 0; j < testCases.length; j++) {
+                                        json = getJSONEvent(RUN_KEY, getNextEventId(), testCases[j].getElementId().toString(), jsonTool.convertToJSON(testCases, j).toString());
+                                        sendJSON(json + NL);
+                                    }
+                                }
                             }
                         }
-                    } else if(event.getDetailedAction() == RunEvent.Action.RUN_TESTCASE_RESULT) {
-                        Object param = event.getDetailedActionParam();
+                    } else if(event.getAction() == RunEvent.Action.RUN_TESTCASE_RESULT) {
+                        // Note:  If the run is already judged above (that is, this is a "rejudge"),
+                        // then we do not send per-testcase results.  I don't think we want re-judges
+                        // going to the clients (such as LIVE).  They'll get the batch at the end
+                        // like before.
+                        Object param = event.getActionParam();
                         // Get the run index
                         if(param != null && param instanceof Integer) {
                             int testCase = ((Integer)param).intValue();
@@ -568,10 +586,10 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                                     String json;
                                     // If very first test case, send a "blank" judgment (null judgment).
                                     // This is absolutely ridiculous, but we've been asked to do it.
-                                    // Send a 'null' judgment at the start of run on the first testcase.
                                     // Note that jsonTool.convertJudgementToJSON(run) uses CLICSJudgement, which understands
                                     // to emit 'null' for judgment type, and the end times if there is no judgment yet.
-                                    if(testCase == 0 && ci.isSendBeginJudgmentOnEF()) {
+                                    RunTestCase rtc = testCases[testCase];
+                                    if(rtc.getTestNumber() == 1 && ci.isSendBeginJudgmentOnEF()) {
                                         json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
                                         sendJSON(json + NL);
                                     }

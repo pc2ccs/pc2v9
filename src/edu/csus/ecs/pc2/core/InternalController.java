@@ -2752,6 +2752,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
     }
 
+    @Override
     public void sendToFeeders(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.FEEDER);
     }
