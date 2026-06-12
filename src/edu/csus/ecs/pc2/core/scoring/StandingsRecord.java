@@ -18,11 +18,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 public class StandingsRecord {
 
     /**
-     * Division Rank Number.
-     */
-    private int divisionRankNumber = 0;
-
-    /**
      * Rank Number.
      */
     private int rankNumber;
@@ -209,16 +204,5 @@ public class StandingsRecord {
         }
         return jsonString;
     }
-
-    public int getDivisionRankNumber() {
-        return divisionRankNumber;
-    }
-    /**
-     * @param divisionRankNumber The groupRankNumber to set.
-     */
-    public void setDivisionRankNumber(int divisionRankNumber) {
-        this.divisionRankNumber = divisionRankNumber;
-    }
-
 
 }
