@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.log;
 
 import java.io.IOException;
@@ -351,6 +351,11 @@ public class NullController implements IInternalController{
     }
 
     @Override
+    public void sendRunTestCaseResult(Run run, int ordinal) {
+
+    }
+
+    @Override
     public void sendToTeams(Packet packet) {
         // TODO Auto-generated method stub
 
@@ -376,6 +381,11 @@ public class NullController implements IInternalController{
     @Override
     public void sendToScoreboards(Packet packet) {
         // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void sendToFeeders(Packet packet) {
 
     }
 
