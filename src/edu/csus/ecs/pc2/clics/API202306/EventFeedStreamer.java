@@ -558,6 +558,10 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                             // Just ignore them, we'll send them all at the end when the judgment finally comes in,
                             // unless they were being sent during judging (and this is the first judging of the submission).
                             if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+                                // Send final judgment BEFORE the testcases ('runs') to provide referential integrity on the judgement_id
+                                json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
+                                sendJSON(json + NL);
+
                                 // Only send test cases if batching OR there were previous judgments,
                                 // otherwise, we would have sent them below in the RUN_TESTCASE_RESULT handling code.
                                 JudgementRecord [] allJudgments = run.getAllJudgementRecords();
@@ -569,9 +573,6 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                                         sendJSON(json + NL);
                                     }
                                 }
-                                // Send final judgment AFTER the testcases ('runs')
-                                json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
-                                sendJSON(json + NL);
                             }
                         }
                     } else if(event.getAction() == RunEvent.Action.RUN_TESTCASE_RESULT) {
