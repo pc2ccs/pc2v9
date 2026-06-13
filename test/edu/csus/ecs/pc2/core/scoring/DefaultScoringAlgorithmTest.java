@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.core.scoring;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -19,6 +20,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -42,7 +44,11 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Test Scoring Algorithm.
@@ -1710,6 +1716,155 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         idx++;
         assertEquals("Standings row "+rankIndex+" penalty points incorrect ", expectedRow[idx], standingsRow[idx]);
 //        assertTrue ("Standings row "+rankIndex+" points wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
+    }
+
+    /**
+     * Group-filtered standings via {@link DefaultScoringAlgorithm#getStandings} with wantedGroups only.
+     * Mirrors {@link NewScoringAlgorithmTest#testWithTestContest1} but validates DSA XML output.
+     */
+    public void testGroupFilteredStandingsTc1() throws Exception {
+        InternalContest contest = new InternalContest();
+        String cdpDir = getTestSampleContestDirectory("tc1");
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        loader.initializeContest(contest, new File(cdpDir));
+        setFirstTeamClient(contest);
+
+        assertTrue("Expecting groups in tc1", contest.getGroups().length > 0);
+
+        Account[] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+
+        addTc1Runs(contest);
+
+        DefaultScoringAlgorithm dsa = new DefaultScoringAlgorithm();
+        dsa.setObeyFreeze(false);
+        Properties props = DefaultScoringAlgorithm.getDefaultProperties();
+
+        String fullXml = dsa.getStandings(contest, props, log);
+        int fullTeamCount = countTeamStandingsInXml(fullXml);
+        assertTrue("Expecting multiple teams in full contest standings", fullTeamCount > 0);
+
+        ClientId client1 = accounts[12].getClientId();
+        Group group2 = contest.getGroup(contest.getAccount(client1).getPrimaryGroupId());
+        assertNotNull(group2);
+
+        ArrayList<Group> wantedGroups = new ArrayList<>();
+        wantedGroups.add(group2);
+        String groupXml = dsa.getStandings(contest, null, wantedGroups, props, log);
+        int expectedInGroup2 = countScoreboardTeamsInGroup(contest, group2);
+        assertEquals("Expecting teamStanding count for group " + group2.getDisplayName(),
+                expectedInGroup2, countTeamStandingsInXml(groupXml));
+        assertTrue("Group-filtered standings should be smaller than full contest",
+                countTeamStandingsInXml(groupXml) < fullTeamCount);
+
+        ClientId lastClient = accounts[accounts.length - 1].getClientId();
+        Group lastGroup = contest.getGroup(contest.getAccount(lastClient).getPrimaryGroupId());
+        assertNotNull(lastGroup);
+        ArrayList<Group> wantedGroupsForLast = new ArrayList<>();
+        wantedGroupsForLast.add(lastGroup);
+        String lastGroupXml = dsa.getStandings(contest, null, wantedGroupsForLast, props, log);
+        assertEquals("Expecting teamStanding count for group " + lastGroup.getDisplayName(),
+                countScoreboardTeamsInGroup(contest, lastGroup),
+                countTeamStandingsInXml(lastGroupXml));
+    }
+
+    /**
+     * Group filter with pre-filtered runs (CLICS/HTML path): same team count as wantedGroups alone.
+     */
+    public void testGroupFilteredStandingsWithFilteredRunsTc1() throws Exception {
+        InternalContest contest = new InternalContest();
+        String cdpDir = getTestSampleContestDirectory("tc1");
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        loader.initializeContest(contest, new File(cdpDir));
+        setFirstTeamClient(contest);
+
+        Account[] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+
+        addTc1Runs(contest);
+
+        DefaultScoringAlgorithm dsa = new DefaultScoringAlgorithm();
+        dsa.setObeyFreeze(false);
+        Properties props = DefaultScoringAlgorithm.getDefaultProperties();
+
+        ClientId client1 = accounts[12].getClientId();
+        Group group2 = contest.getGroup(contest.getAccount(client1).getPrimaryGroupId());
+        assertNotNull(group2);
+
+        ArrayList<Group> wantedGroups = new ArrayList<>();
+        wantedGroups.add(group2);
+        Run[] filteredRuns = ScoreboardUtilities.getGroupFilteredRuns(contest, wantedGroups);
+
+        String xmlWithFilteredRuns = dsa.getStandings(contest, filteredRuns, wantedGroups, props, log);
+        String xmlWithAllRuns = dsa.getStandings(contest, null, wantedGroups, props, log);
+
+        int expectedInGroup2 = countScoreboardTeamsInGroup(contest, group2);
+        assertEquals("Expecting teamStanding count with filtered runs for group " + group2.getDisplayName(),
+                expectedInGroup2, countTeamStandingsInXml(xmlWithFilteredRuns));
+        assertEquals("Filtered runs and all runs should yield same team count for group " + group2.getDisplayName(),
+                countTeamStandingsInXml(xmlWithAllRuns), countTeamStandingsInXml(xmlWithFilteredRuns));
+    }
+
+    private Run[] addTc1Runs(IInternalContest contest) throws Exception {
+        String[] runsDataList = { //
+                "1,101,B,1,Yes", //
+                "2,151,C,1,Yes", //
+                "3,201,B,1,Yes", //
+                "4,251,C,1,Yes", //
+                "5,301,D,1,Yes", //
+                "6,351,A,1,Yes", //
+                "7,401,A,1,Yes", //
+                "8,451,B,1,No", //
+                "9,501,A,1,Yes", //
+                "10,551,A,1,Yes", //
+                "11,551,D,1,Yes", //
+                "12,551,D,1,No", //
+                "13,602,A,1,Yes", //
+                "14,801,A,1,No", //
+                "15,801,D,1,Yes", //
+                "16,801,B,1,No", //
+                "17,801,A,1,No", //
+                "18,901,C,1,No", //
+                "19,901,D,1,Yes", //
+                "20,901,B,1,No", //
+                "90,901,C,2,No" //
+        };
+
+        for (String runInfoLine : runsDataList) {
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+        }
+
+        return contest.getRuns();
+    }
+
+    private void setFirstTeamClient(IInternalContest contest) {
+        Account[] acc = getTeamAccounts(contest);
+        Arrays.sort(acc, new AccountComparator());
+        contest.setClientId(acc[0].getClientId());
+    }
+
+    /**
+     * Teams shown on the scoreboard that belong to the given group (same rules as standings generation).
+     */
+    private int countScoreboardTeamsInGroup(IInternalContest contest, Group group) {
+        int count = 0;
+        for (Account account : contest.getAccounts()) {
+            if (account.getClientId().getClientType() == Type.TEAM
+                    && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)
+                    && account.isGroupMember(group.getElementId())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int countTeamStandingsInXml(String xmlString) throws Exception {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document doc = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+        return doc.getElementsByTagName("teamStanding").getLength();
     }
 
     @Override
