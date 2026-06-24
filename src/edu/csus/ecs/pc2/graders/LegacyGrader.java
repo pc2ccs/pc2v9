@@ -53,6 +53,7 @@ public class LegacyGrader {
     private boolean ignoreSample = false;
     private int graderError = 0;
 
+    private boolean isRootGrader = false;
     private String logFile = null;
     private PrintWriter debugStream = null;
     
@@ -60,8 +61,15 @@ public class LegacyGrader {
         
     }
     
-    public LegacyGrader(String logFile) {
+    /**
+     * Construct a grader
+     * 
+     * @param logFile
+     * @param isRoot - if this is the topmost level, since there are slightly different rules
+     */
+    public LegacyGrader(String logFile, boolean isRoot) {
         this.logFile = logFile;
+        this.isRootGrader = isRoot;
         try {
             debugStream = new PrintWriter(logFile, "UTF-8");
         } catch(Exception e) {
@@ -216,17 +224,27 @@ public class LegacyGrader {
              * with the next line, which will be secret.
              */
             if(ignoreSampleGroup) {
-                // Ignore sample group which is the first one.  There better be exactly one more
-                // group in the list, or it's a judging error.
-                if(testCaseResults.size() != 2) {
+                // ignore_sample is only allowed at topmost level
+                if(!isRootGrader) {
                     graderError = GRADER_ERROR_IGNORE_SAMPLE;
+                    if(debugStream != null) {
+                        debugStream.println("Grader Error: " + IGNORE_SAMPLE_FLAG + " is only allowed at top data level.");
+                    }
                     break;
                 }
-                ignoreSampleGroup = false;
-                if(debugStream != null) {
-                    debugStream.println("Ignored previous line due to ignore_sample");
+                // Ignore sample group which is the first one if there are 2 groups (eg sample, secret).  We know
+                // we're at the root level at this point so there can only be 1 or 2 groups: secret or (sample & secret)
+                if(testCaseResults.size() == 2) {
+                    ignoreSampleGroup = false;
+                    if(debugStream != null) {
+                        debugStream.println("Ignored previous line due to ignore_sample.");
+                    }
+                    continue;
+                } else {
+                    if(debugStream != null) {
+                        debugStream.println("Notice: " + IGNORE_SAMPLE_FLAG + " specified, but no sample group - ignoring it.");
+                    }
                 }
-                continue;
             }
             String [] values = line.trim().split("\\s+");
             if(values.length != 2) {
