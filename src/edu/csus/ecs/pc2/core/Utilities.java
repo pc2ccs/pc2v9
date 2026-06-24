@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -14,6 +14,7 @@ import java.io.RandomAccessFile;
 import java.security.InvalidParameterException;
 import java.text.CharacterIterator;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -105,6 +106,15 @@ public final class Utilities {
      * SimpleDateFormat for iso8601 including milliseconds
      */
     private static SimpleDateFormat iso8601formatterWithMS = new SimpleDateFormat(ISO_8601_TIMEDATE_FORMAT_WITH_MS);
+    
+    /**
+     * Allows changing of the point scoring score format from the default using the pc2v9.ini file
+     * and the key: format in the [scoring] section
+     */
+    private static final String POINT_SCORING_FORMAT_INI_KEY = "scoring.format";
+    private static final String DEFAULT_POINT_SCORING_FORMAT = "0.000";
+    private static DecimalFormat dfPointScore = null;
+
 
     /**
      * List of extensions for files considered to be executable.
@@ -2126,5 +2136,26 @@ public final class Utilities {
         return newArray;
     }
 
-
+    /**
+     * Format a score according to the format specified in the INI file.
+     * If no format found in the ini file, use the default.
+     * Note: You may ask "Why this isn't a "Setting" in ContestInformation (or something similar)?"
+     *     The answer is that some applications may wish to format the point scoring score differently.  This
+     *     allows those apps to set a specific format in the pc2v9.ini file.  (pc2board, pc2feeder, pc2admin to name a few).
+     * 
+     * @param score the score to format
+     * @return formatted score string
+     */
+    public static String formatScore(double score) {
+        
+        // first time through, create the formatter
+        if(dfPointScore == null) {
+            String scoreFormatString = IniFile.getValue(POINT_SCORING_FORMAT_INI_KEY);
+            if(StringUtilities.isEmpty(scoreFormatString)) {
+                scoreFormatString = DEFAULT_POINT_SCORING_FORMAT;
+            }
+            dfPointScore = new DecimalFormat(scoreFormatString);
+        }
+        return(dfPointScore.format(score));
+    }
 }

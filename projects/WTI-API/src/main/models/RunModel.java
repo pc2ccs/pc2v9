@@ -10,10 +10,10 @@ public class RunModel {
 	public long time;
 	public boolean isTestRun, isPreliminary, isFinal, isSolved;
 	public String id;
-	public double score;
+	public String score;
 
 	public RunModel(String teamID, String language, String problem, String judgement, List<File> result, long time, 
-			boolean isTestRun, boolean isPreliminary, boolean isFinal, boolean isSolved, String id, double score) {
+			boolean isTestRun, boolean isPreliminary, boolean isFinal, boolean isSolved, String id, String score) {
 		this.teamID = teamID;
 		this.language = language;
 		this.problem = problem;

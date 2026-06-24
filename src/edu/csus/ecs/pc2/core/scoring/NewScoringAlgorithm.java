@@ -67,7 +67,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     private PermissionList permissionList = new PermissionList();
 
     private boolean isPointScoring = false;
-
+    
     /**
      * Return a list of regional winners.
      *
@@ -576,8 +576,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
 
         if(contestInformation.isScoreboardTypeScore()) {
-            DecimalFormat df = new DecimalFormat("0.0###");
-            standingsRecordMemento.putString("score", df.format(standingsRecord.getScore()));
+            standingsRecordMemento.putString("score", Utilities.formatScore(standingsRecord.getScore()));
         } else {
             standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
         }
@@ -887,7 +886,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         summaryInfoMemento.putString("shortName", summaryInfo.getShortName());
         summaryInfoMemento.putInteger("attempts", summaryInfo.getNumberSubmitted());
         summaryInfoMemento.putInteger("points", summaryInfo.getPenaltyPoints());
-        summaryInfoMemento.putDouble("score", summaryInfo.getScore());
+        summaryInfoMemento.putString("score", Utilities.formatScore(summaryInfo.getScore()));
         summaryInfoMemento.putLong("solutionTime", summaryInfo.getSolutionTime());
         summaryInfoMemento.putBoolean("isSolved", summaryInfo.isSolved());
         summaryInfoMemento.putBoolean("isPending", summaryInfo.isUnJudgedRuns());

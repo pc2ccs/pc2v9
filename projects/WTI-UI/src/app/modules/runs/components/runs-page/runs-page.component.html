@@ -88,7 +88,7 @@
 					<ng-container *ngIf="isPassFail"> {{ run.time }} </ng-container>					
 					<ng-container *ngIf="isPointScoring"> 
 						<ng-container *ngIf="hasAcceptedJudgement(run); else noScore"> 
-							{{ run.score | number:'1.3-3' }} <!-- format numbers with at least one whole digit and exactly 3 decimal digits -->
+							{{ run.score }}
 						</ng-container> 
 						<ng-template #noScore> 
 							<span title="Score shown only for accepted runs">--</span>
