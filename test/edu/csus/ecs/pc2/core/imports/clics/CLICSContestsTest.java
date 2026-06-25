@@ -30,7 +30,7 @@ public class CLICSContestsTest extends AbstractTestCase {
 
         String json = "{\"token\":\"1567\",\"id\":null,\"type\":\"contest\"," + //
                 "\"data\":{\"formal_name\":\"Benelux Algorithm Programming Contest 2022\",\"penalty_time\":20," + //
-                "\"start_time\":\"2022-10-22T12:30:00+02:00\",\"end_time\":\"2022-10-22T17:30:00+02:00\",\"duration\":\"5:00:00.000\",\"scoreboard_freeze_duration\":\"1:00:00.000\",\"id\":\"bapc2022\",\"external_id\":\"bapc2022\",\"name\":\"Benelux Algorithm Programming Contest 2022\",\"shortname\":\"bapc2022\"},\"time\":\"2022-10-21T12:35:37.218+02:00\"}";
+                "\"start_time\":\"2022-10-22T12:30:00+02:00\",\"end_time\":\"2022-10-22T17:30:00+02:00\",\"duration\":\"5:00:00.000\",\"scoreboard_freeze_duration\":\"1:00:00.000\",\"external_id\":\"bapc2022\",\"name\":\"Benelux Contest 2022\",\"id\":\"bapc2022\"},\"time\":\"2022-10-21T12:35:37.218+02:00\"}";
 
         ObjectMapper mapper = getMapper();
 //        String json = "{\"type\": \"problems\", \"id\": \"542cc6e2-104a-49bc-9fea-04752f9af5ad\", \"op\": \"delete\", \"data\": null }";
@@ -60,7 +60,7 @@ public class CLICSContestsTest extends AbstractTestCase {
         String startTimeStr = formatter.format(startTime.getTime());
 
         assertEquals("formal_name", info.getContestTitle(), clicsContests.getFormal_name());
-        assertEquals("shortname", info.getContestShortName(), clicsContests.getShortname());
+        assertEquals("shortname", info.getContestShortName(), clicsContests.getName());
 
         assertEquals("duration", contestTime.getContestLengthStr(), ContestCompareModel.clipMs(clicsContests.getDuration()));
 
