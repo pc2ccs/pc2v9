@@ -1,22 +1,36 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.ButtonGroup;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.TeamStatus;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -40,6 +54,13 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.awt.Dimension;
+
 /**
  * Team Status Pane.
  * 
@@ -50,10 +71,10 @@ import edu.csus.ecs.pc2.core.security.Permission;
  * If one hovers over a team name will display the number of clarifications and runs that the team has submitted.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Doug Lane -- added Status Counts (posthumous credit)
+ * @author John Clevenger -- ported Doug's code, added buttons to select between count modes.
  */
 
-// $HeadURL$
 public class TeamStatusPane extends JPanePlugin {
 
     /**
@@ -117,6 +138,23 @@ public class TeamStatusPane extends JPanePlugin {
 
     private JCheckBox showTeamsCheckBox = null;
 
+    private Map<TeamStatus, Integer> teamStatusCount = new HashMap<TeamStatus, Integer>();
+    
+    /**
+     * Use simple status counts.
+     * <br>
+     * 
+     * true - show counts based on only the team color.
+     * false - show counts based on "logical" counts.
+     * <br>
+     * See https://github.com/pc2ccs/pc2v9/pull/264 and https://github.com/pc2ccs/pc2v9/issues/253 for details.
+     * 
+     */
+    private boolean showSimpleStatusCounts = true;
+    private JPanel statusCountTypePanel;
+
+    private JLabel statusCountWhatsThisButton;
+    
     /**
      * This method initializes
      * 
@@ -127,12 +165,12 @@ public class TeamStatusPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes this
+     * This method initializes the Team Status Pane.
      * 
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(583, 193));
+        this.setSize(new Dimension(770, 249));
         this.add(getTeamStatusPane(), java.awt.BorderLayout.CENTER);
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -147,7 +185,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Teams Pane";
+        return "Team Status Pane";
     }
 
     /**
@@ -235,6 +273,8 @@ public class TeamStatusPane extends JPanePlugin {
      */
     private void repopulateGrid(boolean populate) {
 
+        teamStatusCount = new HashMap<TeamStatus, Integer>();
+        
         boolean allSites = false;
 
         Site site = null;
@@ -312,6 +352,7 @@ public class TeamStatusPane extends JPanePlugin {
                 }
 
                 teamStatusColor = getStatusColor(clientId, runs, clarifications);
+                updateStatusCounters(clientId, runs, clarifications);
             }
 
             toolTipText = toolTipText + " (" + account.getDisplayName() + ")";
@@ -321,9 +362,62 @@ public class TeamStatusPane extends JPanePlugin {
             teamLabel.setToolTipText(toolTipText);
             centerPane.add(teamName, teamLabel);
         }
+        
         centerPane.repaint();
+        
+        /**
+         * Update counts for each status
+         */
+        
+        submittedClarsLabel.setText("Submitted Clar(s) (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_CLARS_ONLY), 0) + ")");
+        submittedRunsLabel.setText("Submitted Run(s) (" +toInt(  teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY) , 0) + ")");
+        hasLoggedInLabel.setText("Has Logged In (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_LOGGED_IN), 0 ) + ")");
+        nocontactLabel.setText("No Contact (" + toInt( teamStatusCount.get(TeamStatus.NO_TEAM_CONTACT), 0) + ")");
+        readyLabel.setText("READY (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS),0) + ")");
+        
+        getController().getLog().log(Log.INFO, "Use simple team status counts "+showSimpleStatusCounts);
     }
 
+    private int toInt(Integer integer, int defaultValue) {
+        if (integer == null) {
+            return defaultValue;
+        } else {
+            return integer.intValue();
+        }
+    }
+    
+    /**
+     * Determine status and increment the count for the status.
+     * @param clientId
+     * @param runs an array of runs submitted by the specified client
+     * @param clarifications an array of clarifications submitted by the specified client
+     */
+    private void updateStatusCounters(ClientId clientId, Run[] runs, Clarification[] clarifications) {
+
+        if (runs.length > 0 && clarifications.length > 0) {
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS);
+            if (! showSimpleStatusCounts) {
+                incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+                incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY);
+                incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_CLARS_ONLY);
+            }
+        } else if (runs.length > 0) {
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY);
+            if (! showSimpleStatusCounts) {
+                incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+            }
+        } else if (clarifications.length > 0) {
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_CLARS_ONLY);
+            if (! showSimpleStatusCounts) {
+                incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+            }
+        } else if (hasLoggedIn(clientId)) {
+            incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+        } else {
+            incrementStatusCount(TeamStatus.NO_TEAM_CONTACT);
+        }
+    }
+    
     private Color getStatusColor(ClientId clientId, Run[] runs, Clarification[] clarifications) {
         Color outColor = NO_CONTACT_COLOR;
 
@@ -338,6 +432,20 @@ public class TeamStatusPane extends JPanePlugin {
         }
 
         return outColor;
+    }
+
+    private void incrementStatusCount(TeamStatus teamStatus) {
+        
+        Integer value = teamStatusCount.get(teamStatus);
+        if (value == null) {
+            
+            value = 0;
+        }
+        
+        value++;
+        
+        teamStatusCount.put(teamStatus,value);
+        
     }
 
     /**
@@ -535,6 +643,7 @@ public class TeamStatusPane extends JPanePlugin {
             buttonPane.add(getReloadButton(), null);
             buttonPane.add(getSiteComboBox(), null);
             buttonPane.add(getShowTeamsCheckBox(), null);
+            buttonPane.add(getStatusCountTypePanel());
         }
         return buttonPane;
     }
@@ -615,6 +724,14 @@ public class TeamStatusPane extends JPanePlugin {
             nocontactLabel.setText("No Contact");
             nocontactLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             stateDescriptonPane = new JPanel();
+            stateDescriptonPane.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() > 0 && e.isControlDown()) {
+                        switchTeamStatusCounters();
+                    }
+                }
+            });
             stateDescriptonPane.setLayout(flowLayout);
             stateDescriptonPane.add(nocontactLabel, null);
             stateDescriptonPane.add(hasLoggedInLabel, null);
@@ -623,6 +740,17 @@ public class TeamStatusPane extends JPanePlugin {
             stateDescriptonPane.add(readyLabel, null);
         }
         return stateDescriptonPane;
+    }
+
+    protected void switchTeamStatusCounters() {
+        
+        /**
+         * Change state and repopulate status counts.
+         */
+        showSimpleStatusCounts = ! showSimpleStatusCounts;
+        populateGUI();
+
+        
     }
 
     /**
@@ -669,7 +797,7 @@ public class TeamStatusPane extends JPanePlugin {
     private JCheckBox getShowTeamsCheckBox() {
         if (showTeamsCheckBox == null) {
             showTeamsCheckBox = new JCheckBox();
-            showTeamsCheckBox.setText("Show enabled teams");
+            showTeamsCheckBox.setText("Show only scoreboard teams");
             showTeamsCheckBox.setToolTipText("Show only teams who can login and are on the scoreboard");
             showTeamsCheckBox.setSelected(true);
             showTeamsCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -680,4 +808,103 @@ public class TeamStatusPane extends JPanePlugin {
         }
         return showTeamsCheckBox;
     }
-} // @jve:decl-index=0:visual-constraint="10,10"
+    
+    /**
+     * Initializes a panel containing a button group which can be used to select the type of "status counts"
+     * displayed in the Status Panel header.  If "By State" is selected, the counts for each header status
+     * are the counts of teams currently in that state (in other words, the number of teams currently rendered
+     * in that state's color).  If "Cummulative" is selected, the header counts reflect how many teams have
+     * reached, or move past, that state (for example, if a team logs in and submits a run, that team will be
+     * counted in both the "Has Logged In" count and the "Has Submitted Runs" count -- whereas with the "By State"
+     * selection the team would ONLY appear in the "Has Submitted Runs" count).
+     * 
+     * @return a Panel containing a button group for selecting the type of status count.
+     */
+    private JPanel getStatusCountTypePanel() {
+        if (statusCountTypePanel == null) {
+        	statusCountTypePanel = new JPanel();
+        	statusCountTypePanel.setBorder(new LineBorder(Color.black, 1));
+        	statusCountTypePanel.add(new JLabel("Show status counts: "));
+        	
+        	JRadioButton byStateButton = new JRadioButton("By State");
+        	byStateButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    showSimpleStatusCounts = true;
+                    repopulateGrid(true);
+                }
+        	});
+        	statusCountTypePanel.add(byStateButton);
+        	
+        	JRadioButton cummulativeButton = new JRadioButton("Cummulative");
+        	cummulativeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    showSimpleStatusCounts = false;
+                    repopulateGrid(true);
+                }
+            });
+        	statusCountTypePanel.add(cummulativeButton);
+        	
+        	ButtonGroup statusButtonGroup = new ButtonGroup();
+        	statusButtonGroup.add(byStateButton);
+        	statusButtonGroup.add(cummulativeButton);
+        	byStateButton.setSelected(true);
+        	
+        	statusCountTypePanel.add(getStatusCountWhatsThisButton());
+        }
+        return statusCountTypePanel;
+    }
+    
+    /**
+     * This method initializes customizeHonorsSolvedCountWhatsThisButton
+     *
+     * @return javax.swing.JLabel
+     */
+    private JLabel getStatusCountWhatsThisButton() {
+
+        if (statusCountWhatsThisButton == null) {
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                statusCountWhatsThisButton = new JLabel("<What's This?>");
+                statusCountWhatsThisButton.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                statusCountWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
+
+            statusCountWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+            statusCountWhatsThisButton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, statusCountWhatsThisMessage, "About Status Count values", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            statusCountWhatsThisButton.setBounds(new Rectangle(620, 242, 20, 20));
+        }
+        return statusCountWhatsThisButton;
+    }
+
+    private String statusCountWhatsThisMessage = //
+            "\nThe count values (in parentheses) in the STATUS header can be configured in two modes." //
+            + "\nIf 'By State' is selected, each count represents the total number of teams in precisely that state." //
+            + "\nIf 'Cummulative' is selected, each count represents the total number of teams who are OR WERE AT SOME POINT in that state." //
+            + "\n\nFor example, if two teams login in, and then one of those teams submits a run," //
+            + "\n'By State' will show one team in the 'Has Logged In' state and one team in the 'Submitted Run(s)' state," //
+            + "\nwhereas 'Cummulative' will show that TWO teams have logged in (and one is currently in the 'Submitted Run(s)' state)." //
+            + " \n\n";
+    
+    private Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
+    }
+
+
+}
