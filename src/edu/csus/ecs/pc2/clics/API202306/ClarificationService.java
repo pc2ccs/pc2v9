@@ -37,7 +37,6 @@ import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -301,7 +300,22 @@ public class ClarificationService implements Feature {
                     // not fit in the model of CLICS
                     // tell listener what to wait for
                     // TODO: allow submitAnnouncement to take 'null' for the 2 arrays.
-                    clarListener.setWaitId(controller.submitAnnouncement(clientId, problem, clar.getText(), new ElementId[0], new ClientId[0]));
+
+                    // Need to get client id of clar.getTo_team_id() and fill in first element
+                    // of array that gets passed to submitAnnouncement()
+                    String teamId = clar.getTo_team_id();
+                    ClientId [] destTeams = null;
+                    if(teamId == null || teamId.isEmpty()) {
+                        destTeams = new ClientId[0];
+                    } else {
+                        destTeams = new ClientId[1];
+                        destTeams[0] = getClientIdFromUser("team" + teamId);
+                        if(destTeams[0] == null) {
+                            // bad to team specified
+                            return Response.status(Status.BAD_REQUEST).entity("Bad to_team_id " + teamId).build();
+                        }
+                    }
+                    clarListener.setWaitId(controller.submitAnnouncement(clientId, problem, clar.getText(), new ElementId[0], destTeams));
                 } else {
                     // tell listener what to wait for
                     clarListener.setWaitId(controller.submitClarification(clientId, problem, clar.getText()));
@@ -319,11 +333,11 @@ public class ClarificationService implements Feature {
                 if(clarificationAnswer != null) {
                     clar.setId(clarificationAnswer.getElementId().toString());
                     clar.setTime(Utilities.getIso8601formatterWithMS().format(clarificationAnswer.getDate()));
-                    clar.setContest_time(ContestTime.formatTimeMS(clarificationAnswer.getElapsedMS()));
+                    clar.setContest_time(Utilities.formatDuration(clarificationAnswer.getElapsedMS()));
                 } else {
                     clar.setId(clarResponse.getElementId().toString());
                     clar.setTime(Utilities.getIso8601formatterWithMS().format(clarResponse.getCreateDate()));
-                    clar.setContest_time(ContestTime.formatTimeMS(clarResponse.getElapsedMS()));
+                    clar.setContest_time(Utilities.formatDuration(clarResponse.getElapsedMS()));
                 }
                 try {
                     ObjectMapper mapper = JSONUtilities.getObjectMapper();

@@ -66,8 +66,8 @@ public class RemoteRunSubmitter {
      * @param mainFile - main file name
      * @param auxFiles - other submittted files
      * @param overrideTimeMS - override submission time in MS
-     * @param overrideRunId - override run id
-     * @throws Exception if run can't be submitted, eg. throttling
+     * @param overrideRunId - override run id.  If negative, it means the run the remote shadow will provide the judgment and we
+     *                        do not have to execute the run.  Used in "combined" scoreboard mode.     * @throws Exception if run can't be submitted, eg. throttling
      */
     public void submitRun(String clientIdString, String problemID, String languageID, String entry_point, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) throws Exception {
 
@@ -81,10 +81,10 @@ public class RemoteRunSubmitter {
             throw new InvalidParameterException("Parameter mainFile is null");
         }
 
-        if (overrideRunId <= 0)
-        {
-            throw new InvalidParameterException("Parameter overrideRunId has invalid id.  " + overrideRunId + " <= 0");
-        }
+//        if (overrideRunId <= 0)
+//        {
+//            throw new InvalidParameterException("Parameter overrideRunId has invalid id.  " + overrideRunId + " <= 0");
+//        }
 
         /**
          * Verify input fields

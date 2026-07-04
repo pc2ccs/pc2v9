@@ -310,7 +310,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 GenerateAnnouncementPane announcementPane = new GenerateAnnouncementPane();
                 addUIPlugin(getRunContestTabbedPane(), "Announce", announcementPane);
-                
+
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
 
@@ -403,7 +403,13 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     StandingsTablePane standingsTablePane = new StandingsTablePane();
                     addUIPlugin(getRunContestTabbedPane(), "Standings", standingsTablePane);
 
-                    StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
+                    String xslFileName;
+                    if(contest.getContestInformation().isScoreboardTypeScore()) {
+                        xslFileName = "fullps.xsl";
+                    } else {
+                        xslFileName = "full.xsl";
+                    }
+                    StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane(xslFileName);
                     addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);
                 }
 

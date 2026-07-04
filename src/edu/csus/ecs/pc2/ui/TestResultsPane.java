@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -105,12 +105,12 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      * list of columns
      */
     protected enum COLUMN {
-        SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, TEAM_ERR,
+        SELECT_CHKBOX, DATASET_NUM, RESULT, SCORE, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, TEAM_ERR,
             JUDGE_OUTPUT, JUDGE_DATA, VALIDATOR_OUTPUT, VALIDATOR_ERR
     };
 
     // define the column headers for the table of results
-    private String[] columnNames = { "Select", "Data Set #", "Result", "Time (ms)", 
+    private String[] columnNames = { "Select", "Data Set #", "Result", "Score", "Time (ms)", 
                                         "Team Output", "Compare Outputs", "Team StdErr",
                                         "Judge's Output", "Judge's Data", "Validator StdOut",
                                         "Validator StdErr" };
@@ -260,6 +260,8 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     private JLabel lblTotalTestCases;
     private Component horizontalGlue_9;
     
+    private boolean isPointScoring = false;
+    
     private boolean debug = false;
 
     /**
@@ -287,6 +289,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
+        isPointScoring = getContest().getContestInformation().isScoreboardTypeScore();
         clientSettings = getContest().getClientSettings();
         // attempt to load settings from clientSettings (if set)
         if (clientSettings != null) {
@@ -1759,6 +1762,10 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
         // render Result column as Pass/Fail on Green/Red (if the test case was validated), or else either "<No Validator>" or "(Not Executed)"
         localResultsTable.getColumn(columnNames[COLUMN.RESULT.ordinal()]).setCellRenderer(new TestCaseResultCellRenderer());
+        
+        // render Score column right-justified
+        localResultsTable.getColumn(columnNames[COLUMN.SCORE.ordinal()]).setCellRenderer(new RightJustifiedCellRenderer());
+
 
         // render Time column right-justified
         localResultsTable.getColumn(columnNames[COLUMN.TIME.ordinal()]).setCellRenderer(new RightJustifiedCellRenderer());
@@ -1766,6 +1773,10 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         // force table column widths to nice values
 //         resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
          localResultsTable.getColumn(columnNames[COLUMN.SELECT_CHKBOX.ordinal()]).setPreferredWidth(15);
+         
+         if(!isPointScoring) {
+             localResultsTable.removeColumn(localResultsTable.getColumnModel().getColumn(COLUMN.SCORE.ordinal()));
+         }
 
         // add a listener to allow users to click an output or data file name and display it
         localResultsTable.addMouseListener(new MouseAdapter() {
@@ -1946,7 +1957,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 //                viewJudgeDataFile,                          //link to judge's data if any
 //                "",                                         //link to validator stdout (none)
 //                ""                                          //link to validator stderr (none)
-                TestResultsRowData rowData = new TestResultsRowData("Not Executed", "--  ", "", "", "",viewJudgeAnswerFile,viewJudgeDataFile, "", "");
+                TestResultsRowData rowData = new TestResultsRowData("Not Executed", "", "--  ", "", "", "",viewJudgeAnswerFile,viewJudgeDataFile, "", "");
                 tableModel.addRow(
                         new Boolean(false),                         //selection checkbox
                         new String(Integer.toString(testCaseNum)),  //test case number
@@ -1987,7 +1998,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             //      "",                                         //link to judge's data if any
             //      "",                                         //link to validator stdout (none)
             //      ""                                          //link to validator stderr (none)
-            TestResultsRowData rowData = new TestResultsRowData("Judging", "--  ", "", "", "", "", "", "", "");
+            TestResultsRowData rowData = new TestResultsRowData("Judging", "", "--  ", "", "", "", "", "", "", "");
             // add new row
             tableModel.addRow(
                     new Boolean(false),                         //selection checkbox

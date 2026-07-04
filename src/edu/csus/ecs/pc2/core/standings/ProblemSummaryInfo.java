@@ -39,6 +39,9 @@ public class ProblemSummaryInfo {
     private String points;
 
     @XmlAttribute
+    private String score;
+
+    @XmlAttribute
     private String problemId;
 
     @XmlAttribute
@@ -109,6 +112,20 @@ public class ProblemSummaryInfo {
 
     public void setSolutionTime(String solutionTime) {
         this.solutionTime = solutionTime;
+    }
+
+    /**
+     * @return the score
+     */
+    public String getScore() {
+        return score;
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setScore(String score) {
+        this.score = score;
     }
 
 }

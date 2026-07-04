@@ -6,13 +6,11 @@ import java.util.Date;
 import java.util.Set;
 import java.util.logging.Level;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -26,7 +24,6 @@ import edu.csus.ecs.pc2.core.util.IJSONTool;
  *
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonFilter("rtFilter")
 public class CLICSJudgement {
 
     @JsonProperty
@@ -38,9 +35,8 @@ public class CLICSJudgement {
     @JsonProperty
     private String judgement_type_id;
 
-//    Only for "score" type contests, N/A for ICPC pass/fail
-//    @JsonProperty
-//    private String score;
+    @JsonProperty
+    private Double score;
 
     @JsonProperty
     private String start_time;
@@ -90,6 +86,9 @@ public class CLICSJudgement {
 
                 // Fetch judgement_type_id from judgement acronym
                 judgement_type_id = model.getJudgement(judgementRecord.getJudgementId()).getAcronym();
+                if(model.getContestInformation().isScoreboardTypeScore()) {
+                    score = new Double(judgementRecord.getScore());
+                }
                 Date judgeDate = judgementRecord.getJudgeStartDate();
                 if(judgeDate == null) {
                     judgeDate = startJudgeDate;
@@ -115,10 +114,10 @@ public class CLICSJudgement {
                 } else {
                     contestStartDate = contestStartTime.getTime();
                 }
-                start_contest_time = ContestTime.formatTimeMS(judgeDate.getTime() - contestStartDate.getTime());
+                start_contest_time = Utilities.formatDuration(judgeDate.getTime() - contestStartDate.getTime());
 
                 end_time = Utilities.getIso8601formatterWithMS().format(judgementRecord.getDate());
-                end_contest_time = ContestTime.formatTimeMS(judgementRecord.getDate().getTime() - contestStartDate.getTime());
+                end_contest_time = Utilities.formatDuration(judgementRecord.getDate().getTime() - contestStartDate.getTime());
                 max_run_time = (judgementRecord.getExecuteMS())/1000.;
             } else {
                 // Filter out max_run_time from serialization
@@ -126,7 +125,7 @@ public class CLICSJudgement {
             }
         } else if(startJudgeDate != null) {
             start_time = Utilities.getIso8601formatterWithMS().format(startJudgeDate);
-            start_contest_time = ContestTime.formatTimeMS(startJudgeDate.getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
+            start_contest_time = Utilities.formatDuration(startJudgeDate.getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
         }
         // else not much to do here if no start date.
     }

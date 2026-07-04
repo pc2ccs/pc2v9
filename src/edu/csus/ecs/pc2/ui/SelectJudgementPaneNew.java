@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
@@ -27,10 +28,12 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
@@ -60,6 +63,7 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import java.awt.Dimension;
 
 /**
  * Select a Judgement Pane.
@@ -153,7 +157,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel validatorAnswer = null;
 
     private JLabel selectJudgementCheckboxLabel = null;
-
+    
     private JButton viewOutputsAndDataButton = null;
 
     private GregorianCalendar startTimeCalendar;
@@ -187,6 +191,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel additionalInfoTextLabel;
 
     private JLabel addtionalInfoMoreButtonLabel;
+    
+    private boolean isPointScoring = false;
 
     /**
      * This method initializes
@@ -218,6 +224,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
+        
+        isPointScoring = inContest.getContestInformation().isScoreboardTypeScore();
+        
         log = getController().getLog();
 
         displayTeamName = new DisplayTeamName();
@@ -404,6 +413,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 executionData = executable.getExecutionData();
                 if (judgementRecord != null) {
                     judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
+                    judgementRecord.setScore(executionData.getScore());
                 }
             }
 
@@ -529,6 +539,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             // if there IS a computer judgement, try to find a corresponding RunResultFile record
             RunResultFiles matchingResult = null;
             if (computerJudgement != null) {
+                
                 // search the RunResultFiles array for a matching result
                 if (runResultFiles != null) {
                     for (int i = 0; i < runResultFiles.length; i++) {
@@ -876,7 +887,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * Takes a boolean condition whether to override stop on first failure condition
      */
     protected void executeRun(boolean overrideStopOnFirstFailedTestCase) {
-
+       
         executeTimeMS = 0;
         System.gc();
 
@@ -884,8 +895,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         executable = new Executable(getContest(), getController(), run, runFiles, executeFrame);
 
+        Problem problem = getContest().getProblem(run.getProblemId());
+
         // only if do not show output is not checked, clear the results pane
-        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+        if (!problem.isHideOutputWindow()) {
             getTestResultsFrame().clearData();
         }
 
@@ -899,11 +912,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         executable.execute();
 
         // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
-        Problem juProblem = getContest().getProblem(run.getProblemId());
+        String executeDirectoryName = executable.getExecuteDirectoryName();
         ClientId clientId = getContest().getClientId();
         List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(getContest(), run);
-        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, judgements, executable.getExecutionData(), "", new Properties());
+        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirectoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         if (executionData != null && executionData.getExecutionException() != null) {
@@ -940,9 +952,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
         // only if do not show output is not checked
-        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+        if (!problem.isHideOutputWindow()) {
             // the run gets modified in Executable to have testCases, so resend the data
-            Problem problem = getContest().getProblem(run.getProblemId());
             getTestResultsFrame().setData(run, runFiles, problem, getProblemDataFiles());
             getTestResultsFrame().setVisible(true);
         }
@@ -960,7 +971,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 if (results.equalsIgnoreCase("accepted") || results.equalsIgnoreCase("yes")) {
                     results = getContest().getJudgements()[0].getDisplayName();
                 }
-                validatorAnswer.setText(results);
+
 
                 boolean solved = false;
 
@@ -969,8 +980,46 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 if (yesJudgement.getElementId().equals(elementId)) {
                     solved = true;
                 }
+
+                if(!solved) {
+                    // Map results string to configured judgment display string
+                    if(problem.isUsingCLICSValidator()) {
+                        results = JudgementUtilities.mapCLICSValidatorJudgmentToDefinedJudgments(getContest(), results, executable.getExecutionData().getValidationReturnCode());
+                    } else if(elementId != null) {
+                        // Note: elementId has to be non-null here since getValidatorResultElementID() guarantees that
+                        // Use judgment display from configured judgment types.  Basically, this will make the
+                        // judgment display string consistent for all judgments (that is, whatever the display string is)
+                        Judgement judgment = getContest().getJudgement(elementId);
+                        // This had better be non-null by this point since we know elementId is valid.
+                        if(judgment != null) {
+                            results = judgment.getDisplayName();
+                        }
+                    }
+                }
+
+                // Update gui result
+                validatorAnswer.setText(results);
+
                 judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), solved, true);
                 judgementRecord.setValidatorResultString(results);
+                
+                //if it's a point-scoring contest, put the score and the judgement into the JudgementRecord
+                if (isPointScoring) {
+                    
+                    judgementRecord.setScore(executionData.getScore());
+                    
+                    CLICS_JUDGEMENT_ACRONYM acronym = executionData.getJudgementAcronym();
+                    String judgementDescription ;
+                    if (acronym != null) {
+                        judgementDescription = acronym.getValue();
+                    } else {
+                        judgementDescription = "Undefined";
+                    }
+                    boolean acronymRecognized = judgementRecord.setJudgementAcronym(judgementDescription);
+                    if (!acronymRecognized) {
+                        log.warning("Unrecognized judgement acronym description string: '" + judgementDescription + "'");
+                    }
+                }
 
                 judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
                 judgementRecord.setExecuteMS(executeTimeMS);
@@ -1406,12 +1455,26 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         // only set "additional info" fields visible if there is additional info to show
         if (showControls) {
-            if (executionData != null && executionData.getAdditionalInformation() != null && executionData.getAdditionalInformation().trim().length() > 0) {
-                additionalInfoLabel.setVisible(true);
-                additionalInfoTextLabel.setVisible(true);
-                additionalInfoTextLabel.setText(executionData.getAdditionalInformation());
-                additionalInfoTextLabel.setToolTipText(executionData.getAdditionalInformation());
-                getAdditionalInfoMoreButtonLabel().setVisible(true);
+            if (executionData != null) {
+                String additionalText = null;
+                boolean enableMoreButton = false;
+                
+                if (isPointScoring && executionData.getJudgementAcronym() == CLICS_JUDGEMENT_ACRONYM.AC) {
+                    DecimalFormat df = new DecimalFormat("0.0###");
+                    additionalText = "Score: " + df.format(executionData.getScore());
+                } else {
+                    if(executionData.getAdditionalInformation() != null && executionData.getAdditionalInformation().trim().length() > 0) {
+                        additionalText = executionData.getAdditionalInformation();
+                        enableMoreButton = true;
+                    }
+                }
+                if(additionalText != null && additionalText.isEmpty() == false) {
+                    additionalInfoLabel.setVisible(true);
+                    additionalInfoTextLabel.setVisible(true);
+                    additionalInfoTextLabel.setText(additionalText);
+                    additionalInfoTextLabel.setToolTipText(additionalText);
+                    getAdditionalInfoMoreButtonLabel().setVisible(enableMoreButton);
+                }
             }
         } else {
             additionalInfoLabel.setVisible(false);
@@ -1421,21 +1484,27 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     /*
-     * Get the ElementId corresponding to the Validator Judgement. @returns 1st No if not found
+     * Get the ElementId corresponding to the Validator Judgement.
+     * @returns 1st No if not found (TODO: this is bad and has to be addressed.  JB)
      */
     private ElementId getValidatorResultElementID(String results) {
         // Try to find result text in judgement list
         // (start with a default of a non-variable-scoring "no" judgment)
+        // JB TODO: This is horrible.  There should be a "default" defined in the configuration.
+        // We should not blindy choose element[2] of judgments.
         ElementId elementId = getContest().getJudgements()[2].getElementId();
 
         for (Judgement judgement : getContest().getJudgements()) {
-            if (judgement.getDisplayName().equals(results)) {
+            if (judgement.getDisplayName().trim().equalsIgnoreCase(results)) {
                 elementId = judgement.getElementId();
+                break;
             }
         }
 
         // Or perhaps it is a yes? yes?
+        // JB TODO: This is horrible.  Should look up AC judgment, not assumes it's index 0
         Judgement yesJudgement = getContest().getJudgements()[0];
+
         if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
             elementId = yesJudgement.getElementId();
         }
@@ -1495,6 +1564,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (executable != null) {
             executionData = executable.getExecutionData();
             judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
+            judgementRecord.setScore(executionData.getScore());
         }
         newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
 
@@ -1640,7 +1710,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (mainPanel == null) {
             mainPanel = new JPanel();
             mainPanel.setLayout(new BorderLayout());
-            mainPanel.setPreferredSize(new java.awt.Dimension(700, 300));
+            mainPanel.setPreferredSize(new Dimension(700, 300));
             mainPanel.add(getRunInfoPanel(), java.awt.BorderLayout.NORTH);
             mainPanel.add(getAssignJudgementPanel(), java.awt.BorderLayout.CENTER);
         }

@@ -1,23 +1,36 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.convert;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
+
+import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.IFile;
+import edu.csus.ecs.pc2.core.model.IFileImpl;
 
 /**
  * Event Feed Utilities
- * 
+ *
  * @author ICPC
  *
  */
 public final class EventFeedUtilities {
 
     public static final long MS_PER_SECOND = 1000;
-    
+    public static final String ZIP_DEFLATE_EXT_ERROR = "only DEFLATED entries can have EXT descriptor";
+    // Somewhat arbitrary - more of a sentinel with a touch of paranoia.
+    public static final int MAX_ZIP_ENTRIES_TO_PROCESS = 1000;
+
     private EventFeedUtilities() {
         super();
     }
@@ -29,7 +42,7 @@ public final class EventFeedUtilities {
             map.put(eventFeedRun.getLanguage(), "");
         }
         Set<String> set = map.keySet();
-        return (String[]) set.toArray(new String[set.size()]);
+        return set.toArray(new String[set.size()]);
     }
 
     public static int getMaxProblem(List<EventFeedRun> runs) {
@@ -55,7 +68,7 @@ public final class EventFeedUtilities {
 
     /**
      * Convert decimal string to ms.
-     * 
+     *
      * @param decimalSeconds
      *            - declimal second
      * @return ms
@@ -98,7 +111,7 @@ public final class EventFeedUtilities {
 
     /**
      * Fetch list of filenames, full path
-     * 
+     *
      * @param dirname
      *            location of submission files
      * @param runId
@@ -121,6 +134,115 @@ public final class EventFeedUtilities {
             }
         }
         return list;
+    }
+
+    /**
+     * Get files from a zipfile's base64 encoded string data
+     *
+     * @param base64Data String comprising a zip file encoded as base64
+     * @return list of IFiles extracted from the input bytes
+     * @throws IllegalArgumentException from the base64 decoder on a data error
+     */
+    public static List<IFile> getIFiles(String base64Data) {
+
+        // use the decoder to both check the validity of, and to store, the byte data.
+        // this will throw an IllegalArgumentException if the data is basd
+        return(getIFiles(Base64.getDecoder().decode(base64Data)));
+    }
+
+    /**
+     * Get files from a zipfile's bytes.
+     *
+     * @param bytes bytes comprising a zip file.
+     * @return list of IFiles extracted from the input bytes
+     */
+    public static List<IFile> getIFiles(byte[] bytes) {
+
+        List<IFile> files = new ArrayList<IFile>();
+
+        ZipInputStream zipStream = null;
+
+        try {
+            zipStream = new ZipInputStream(new ByteArrayInputStream(bytes));
+            ZipEntry entry = null;
+            int nEnt;
+            
+            /**
+             * Read each zip entry, add IFile.
+             * We use a separate try block here since there is a deficiency with Java 8 ZipInputStream where
+             * you'll get a: "only DEFLATED entries can have EXT descriptor" ZipException if an entry is 0 bytes in length.
+             * So we check that specifically, since it is legal.
+             */
+            for(nEnt = 0; nEnt < MAX_ZIP_ENTRIES_TO_PROCESS; nEnt++) {
+                try {
+                    entry = zipStream.getNextEntry();
+                    if(entry == null) {
+                        break;
+                    }
+                    String entryName = entry.getName();
+                    
+                    // Only add the file to the list if the file name is not an empty string.
+                    // and it's not a directory entry.
+                    if(!entryName.isEmpty() && !entryName.endsWith("/")) {
+                        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+    
+                        byte[] buffer = new byte[8096];
+                        int bytesRead = 0;
+                        while ((bytesRead = zipStream.read(buffer)) != -1)
+                        {
+                            byteOutputStream.write(buffer, 0, bytesRead);
+                        }
+    
+                        String base64Data = getBase64Data(byteOutputStream.toByteArray());
+                        IFile iFile = new IFileImpl(entryName, base64Data);
+                        files.add(iFile);
+    
+                        byteOutputStream.close();
+                    }
+                } catch (ZipException e) {
+                    String msg = e.getLocalizedMessage();
+                    // If not the single exception we ignore, then abort like we used to
+                    if(msg == null || !msg.equals(ZIP_DEFLATE_EXT_ERROR)) {
+                        try {
+                            zipStream.close();
+                        } catch (Exception ze) {
+                            ; // problem closing stream, ignore.
+                        }
+                        throw new RuntimeException(e);
+                    }
+                } 
+                zipStream.closeEntry();
+            }
+            // If we maxed out on reading entries, log it in case someone cares later.
+            if(nEnt >= MAX_ZIP_ENTRIES_TO_PROCESS) {
+                StaticLog.warning(ZIP_DEFLATE_EXT_ERROR);
+            }
+            zipStream.close();
+        } catch (Exception e) {
+            if (zipStream != null){
+                try {
+                    zipStream.close();
+                } catch (Exception ze) {
+                    ; // problem closing stream, ignore.
+                }
+            }
+            throw new RuntimeException(e);
+        }
+
+        return files;
+
+    }
+
+    /**
+     * Encode bytes into BASE64.
+     * @param data
+     * @return
+     */
+    public static String getBase64Data( byte [] bytes) {
+        // TODO REFACTOR move to FileUtilities
+        Base64.Encoder encoder = Base64.getEncoder();
+        String base64String = encoder.encodeToString(bytes);
+        return base64String;
     }
 
 }

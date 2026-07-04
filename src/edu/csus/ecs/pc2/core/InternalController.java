@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -224,7 +224,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Load and Save configuration to disk
      */
-    private boolean saveCofigurationToDisk = true;
+    private boolean saveConfigurationToDisk = true;
 
     /**
      * Evaluations log (evals.log).
@@ -610,20 +610,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         //determine whether to apply the "current throttling strategy" to this submission
         // (i.e., whether to accept the run for submission to the PC2 Server)
         boolean accept = true;
-        Account submitterAccount = contest.getAccount(contest.getClientId());
 
-        if (submitterAccount.isTeam()) {
-            //Determine the throttling strategy to be applied to team submissions.
-            //The following shows several alternative strategy selections, with only one being enabled.
-            //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
-            // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
-            // GUI (such as the PC2 Admin)
-//            IThrottleStrategy strategy = new AcceptAllStrategy();
-//            IThrottleStrategy strategy = new RejectAllStrategy();
-            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,6);
-//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
-//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest); //uses DEFAULT_MAX_SUBMISSIONS_PER_MINUTE; same as prev line
-            accept = strategy.accept(run);
+        if(contest.getContestInformation().isSubmissionThrottling()) {
+            Account submitterAccount = contest.getAccount(contest.getClientId());
+
+            if (submitterAccount.isTeam()) {
+                //Determine the throttling strategy to be applied to team submissions.
+                //The following shows several alternative strategy selections, with only one being enabled.
+                //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
+                // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
+                // GUI (such as the PC2 Admin)
+    //            IThrottleStrategy strategy = new AcceptAllStrategy();
+    //            IThrottleStrategy strategy = new RejectAllStrategy();
+                IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,6);
+    //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+    //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest); //uses DEFAULT_MAX_SUBMISSIONS_PER_MINUTE; same as prev line
+                accept = strategy.accept(run);
+            }
         }
 
         Packet packet ;
@@ -633,7 +636,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
             sendToLocalServer(packet);
         } else {
-            throw new SubmissionRejectedException("Submission threshhold exceeded");
+            throw new SubmissionRejectedException("Submission threshhold exceeded", 
+                                                    SubmissionRejectedException.SubmissionRejectionReason.THROTTLE_EXCEEDED);
         }
     }
 
@@ -783,6 +787,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return s;
     }
 
+    /**
+     * If there are any DecimalFormats defined in the ini file(s) for scores, eg. for formatting scoreboard, runs, etc then
+     * Make sure those formats are valid, if not it's a fatal error.  We do this by simply trying to format a value
+     * and checking for an exception.
+     */
+    private void validateScoreFormats() {
+        try {
+            String szTestFormat = Utilities.formatScore(3.14159265358979);
+        } catch(Exception e) {
+            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR - Invalid scoring format in INI file", e);
+            fatalError("The scoring format specified in the INI file is invalid: " + e.getMessage());
+        }
+    }
+    
     /**
      * Login to contest server.
      *
@@ -1156,7 +1174,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             inContest.storeConfiguration(getLog());
         } else {
-            if (saveCofigurationToDisk) {
+            if (saveConfigurationToDisk) {
                 inContest.initializeSubmissions(inContest.getSiteNumber());
             }
             info("Loaded configuration from disk");
@@ -1167,7 +1185,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 logException(e);
             }
 
-            if (saveCofigurationToDisk) {
+            if (saveConfigurationToDisk) {
                 // save newly merged profiles
                 inContest.storeConfiguration(getLog());
             }
@@ -3000,7 +3018,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
 
 
-                    if (saveCofigurationToDisk) {
+                    if (saveConfigurationToDisk) {
                         // save newly merged profiles
                         contest.storeConfiguration(getLog());
                     }
@@ -3235,11 +3253,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 String currentDirectory = Utilities.getCurrentDirectory();
                 fatalError("Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
             }
+            validateScoreFormats();
         }
-
+        
         // SOMEDAY code add NO_SAVE_OPTION_STRING
         if (parseArguments.isOptPresent(AppConstants.NO_SAVE_OPTION_STRING)) {
-            saveCofigurationToDisk = false;
+            saveConfigurationToDisk = false;
         }
 
         if (parseArguments.isOptPresent(AppConstants.SERVER_OPTION_STRING)) {
@@ -4173,7 +4192,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public boolean readConfigFromDisk(int siteNum) {
 
         boolean loadedConfiguration = false;
-        if (saveCofigurationToDisk) {
+        if (saveConfigurationToDisk) {
             try {
                 loadedConfiguration = contest.readConfiguration(siteNum, getLog());
 
@@ -5008,30 +5027,41 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         //       There should probably be a "bypass" flag that can be set via config file, or
         //       a separate user created for receiving CLICS API requests.
         boolean accept = true;
-        // use the submitter account, not this client.  This client is doing a proxy submit for a team.
-        Account submitterAccount = contest.getAccount(submitter);
 
-        if (submitterAccount.isTeam()) {
-            //Determine the throttling strategy to be applied to team submissions.
-            //The following shows several alternative strategy selections, with only one being enabled.
-            //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
-            // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
-            // GUI (such as the PC2 Admin)
-//            IThrottleStrategy strategy = new AcceptAllStrategy();
-//            IThrottleStrategy strategy = new RejectAllStrategy();
-            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest, 6);
-//            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+        if(contest.getContestInformation().isSubmissionThrottling()) {
+            // use the submitter account, not this client.  This client is doing a proxy submit for a team.
+            Account submitterAccount = contest.getAccount(submitter);
 
-            accept = strategy.accept(run);
+            if (submitterAccount.isTeam()) {
+                //Determine the throttling strategy to be applied to team submissions.
+                //The following shows several alternative strategy selections, with only one being enabled.
+                //A preferable extension would be to allow external (e.g. run-time) selection of the desired strategy,
+                // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
+                // GUI (such as the PC2 Admin)
+    //            IThrottleStrategy strategy = new AcceptAllStrategy();
+    //            IThrottleStrategy strategy = new RejectAllStrategy();
+                IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest, 6);
+    //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
+
+                accept = strategy.accept(run);
+            }
         }
 
         if (accept) {
             ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
             RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
+            // If using remote's judgement as authoritative, put run in HOLD state
+            // We will wait for the judgment from the remote
+            if(overrideSubmissionId < 0) {
+                overrideSubmissionId = -overrideSubmissionId;
+                // Waiting for remote judgement
+                run.setStatus(RunStates.BEING_JUDGED);
+            }
             Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
             sendToLocalServer(packet);
         } else {
-            throw new SubmissionRejectedException("Submission threshhold exceeded");
+            throw new SubmissionRejectedException("Submission threshhold exceeded",
+                                                    SubmissionRejectedException.SubmissionRejectionReason.THROTTLE_EXCEEDED);
         }
     }
 

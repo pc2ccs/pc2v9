@@ -1,6 +1,6 @@
 <form class='newClarificationForm' [formGroup]='newClarificationForm' (ngSubmit)='submitNewClarification()'>
     <h1 mat-dialog-title>Submit a Clarification</h1>
-    <app-problem-selector [allowGeneral]='false' formControlName='problem'></app-problem-selector>
+    <app-problem-selector [allowGeneral]='true' formControlName='problem'></app-problem-selector>
     <br />
     <br />
     <textarea placeholder='Enter Clarification...' formControlName='content'></textarea>

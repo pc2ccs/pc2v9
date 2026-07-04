@@ -51,6 +51,8 @@ import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.RemoteCCSInformation;
+import edu.csus.ecs.pc2.core.model.RemoteCCSInformation.RemoteCCSType;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -357,6 +359,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contestInformation.setAutoStartContest(isBeforeNow(date));
     }
 
+    private void setContestScoreboardType(IInternalContest contest, String type) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setScoreboardType(type);
+    }
+
     /**
      * Input date before now, aka current date/time.
      *
@@ -410,10 +417,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         //set allow-multiple-team-logins mode
         boolean allowMultipleTeamLogins = ContestImportUtilities.fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
-
+        
+        //set allow-zero-length-submission-files mode
+        boolean allowZeroLengthSubmissionFiles = ContestImportUtilities.fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
+        contestInformation.setAllowZeroLengthSubmissionFiles(allowZeroLengthSubmissionFiles);
+        
         // Load team scoreboard string (the one with variables)
         String teamScoreboadDisplayString = ContestImportUtilities.fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
+
+        // control submission throttling
+        boolean submissionThrottling = ContestImportUtilities.fetchBooleanValue(content, SUBMISSION_THROTTLING_KEY, contestInformation.isSubmissionThrottling());
+        contestInformation.setSubmissionThrottling(submissionThrottling);
 
         // enable shadow mode
         boolean shadowMode = ContestImportUtilities.fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
@@ -439,6 +454,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         String executeDir = ContestImportUtilities.fetchValue(content, EXECUTE_FOLDER, contestInformation.getExecuteFolder());
         contestInformation.setExecuteFolder(executeDir);
+
+        // per-account ccs settings (overrides the above)
+        getRemoteCCSSettings(contestInformation, content);
 
         // save ContesInformation to model
         contest.updateContestInformation(contestInformation);
@@ -614,9 +632,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         // If the contest type is present in contest.yaml, verify it
         String scoreType = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_SCOREBOARD_TYPE);
-        if(scoreType != null && !scoreType.equals("pass-fail")) {
-            throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": " + scoreType + ", expected pass-fail");
+        if(scoreType != null) {
+            if(!scoreType.equals(CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL)
+                && !scoreType.equals(CLICS_CONTEST_SCOREBOARD_TYPE_SCORE)) {
+                throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": "
+                    + scoreType + ", expected "
+                    + CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL
+                    + " or "
+                    + CLICS_CONTEST_SCOREBOARD_TYPE_SCORE);
+            }
+            setContestScoreboardType(contest, scoreType);
         }
+
         Object privatehtmlOutputDirectory = ContestImportUtilities.fetchObjectValue(content, OUTPUT_PRIVATE_SCORE_DIR_KEY);
         if (privatehtmlOutputDirectory != null) {
             if (privatehtmlOutputDirectory instanceof String) {
@@ -643,10 +670,26 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (maxSizeInK > 0) {
                     setMaxOutputSize(contest, maxSizeInK * Constants.BYTES_PER_KIBIBYTE);
                 } else {
-                    throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
+                    throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + "' size must be > 0 ", null, contestFileName);
                 }
             } else {
-                throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must an integer", null, contestFileName);
+                throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + "' size must an integer", null, contestFileName);
+            }
+        }
+
+        Object maxSourceSize = ContestImportUtilities.fetchObjectValue(content, MAX_SOURCE_SIZE_K_KEY);
+        if (maxSourceSize != null) {
+
+            if (maxSourceSize instanceof Integer) {
+                // Convert value in KiB to long here since object mapper converted it to Integer
+                long maxSizeInK = ((Integer) maxSourceSize).intValue();
+                if (maxSizeInK > 0) {
+                    setMaxSourceSize(contest, maxSizeInK * Constants.BYTES_PER_KIBIBYTE);
+                } else {
+                    throw new YamlLoadException("Invalid max-source-size-K value '" + maxSourceSize + "' size must be > 0 ", null, contestFileName);
+                }
+            } else {
+                throw new YamlLoadException("Invalid maxSourceSize value '" + maxSourceSize + "' size must an integer", null, contestFileName);
             }
         }
 
@@ -796,6 +839,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         contest.addAccounts(accounts);
+
+        // Apply YAML permissions to ALL accounts, not just those that were added
+        // in the ACCOUNTS_KEY section.
+        PermissionYamlLoader loader = new PermissionYamlLoader(yamlLines, contest.getAccounts());
+        // This will replace all accounts if they exist, which, of course, they will.
+        contest.addAccounts(loader.getAccountsArray());
 
         AutoJudgeSetting[] autoJudgeSettings = null;
         if (problems.length == 0) {
@@ -984,6 +1033,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
+    private void setMaxSourceSize(IInternalContest contest, long maxSourceBytes) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setMaxSourceSizeInBytes(maxSourceBytes);
+        contest.updateContestInformation(contestInformation);
+    }
+
     public Date parseISO8601Date(String startTime) {
         Calendar cal = DatatypeConverter.parseDateTime(startTime);
         Date date = cal.getTime();
@@ -1125,12 +1180,65 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         }
 
-        // Load permissions from yaml into accounts
-        Account[] fullAccountList = accountVector.toArray(new Account[accountVector.size()]);
-        PermissionYamlLoader loader = new PermissionYamlLoader(yamlLines, fullAccountList);
-        return loader.getAccountsArray();
+        return(accountVector.toArray(new Account[accountVector.size()]));
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean getRemoteCCSSettings(ContestInformation contestInfo, Map<String, Object> yamlContent) {
+
+        Vector<RemoteCCSInformation> ccsVector = new Vector<RemoteCCSInformation>();
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, REMOTE_CCS_SETTINGS_KEY);
+
+        if (list != null) {
+            for (Object object : list) {
+
+                Map<String, Object> map = (Map<String, Object>) object;
+
+                /**
+                 * <pre>
+                 * remote-ccs-settings:
+                 *
+                 *   - account: feeder1
+                 *     type: shadow
+                 *     enable: true
+                 *     url: https://icpc.displayadmin.com:50443/cgi-bin/GNY2024Real
+                 *     login: pc2
+                 *     password: GNY123
+                 *     team-offset: 1000
+                 *
+                 *   - account: feeder2
+                 *     type: combinescoreboard
+                 *     enable: true
+                 *     url: https://kattis.com/api/contests/ecna
+                 *     login: pc2
+                 *     password: Abcd1234
+                 * </pre>
+                 */
+                String accountName = ContestImportUtilities.fetchValue(map, "account");
+                checkField(accountName, "RemoteCCS account");
+                String feederType = ContestImportUtilities.fetchValue(map, "type");
+                checkField(feederType, "RemoteCCS type");
+                RemoteCCSType type = RemoteCCSType.valueOf(feederType.toUpperCase());
+                boolean enabled = ContestImportUtilities.fetchBooleanValue(map,  "enable", true);
+                String url = ContestImportUtilities.fetchValue(map, "url");
+                checkField(url, "RemoteCCS url");
+                String login = ContestImportUtilities.fetchValue(map, "login");
+                checkField(login, "RemoteCCS login");
+                String password = ContestImportUtilities.fetchValue(map, "password");
+                checkField(password, "RemoteCCS password");
+                int teamOffset = ContestImportUtilities.fetchIntValue(map,  "team-offset", 0);
+
+                ccsVector.add(new RemoteCCSInformation(accountName, type, enabled, url, login, password, teamOffset));
+            }
+        }
+        if(ccsVector.size() > 0) {
+            RemoteCCSInformation [] remoteInfo = ccsVector.toArray(new RemoteCCSInformation[ccsVector.size()]);
+            contestInfo.setRemoteCCSInfo(remoteInfo);
+        }
+        return true;
 
     }
+
     @SuppressWarnings("unchecked")
     @Override
     public PlaybackInfo getReplaySettings(String[] yamlLines) {
@@ -1215,6 +1323,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return sitesVector.toArray(new Site[sitesVector.size()]);
 
     }
+
 
     @Override
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator) {
@@ -1429,9 +1538,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             //check for a timeout limit within the CLICS "limits:" section.
             // Note that the presence of a "timeout:" entry within a CLICS
             // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
-            Integer clicsTimeout = ContestImportUtilities.fetchIntValue(limitsContent, TIMEOUT_KEY);
+            Double clicsTimeout = ContestImportUtilities.fetchDoubleValue(limitsContent, TIMEOUT_KEY);
             if (clicsTimeout != null) {
-                problem.setTimeOutInSeconds(clicsTimeout);
+                problem.setTimeOutInSeconds(clicsTimeout.intValue());
             }
 
             //check for a CLICS maxoutput limit - the value is in MiB

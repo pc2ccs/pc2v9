@@ -159,6 +159,9 @@ public final class ICPCTSVLoader {
             institutionCode = fields[fieldnum++];
             String[] fieldArray = getInstitutionNames(institutionCode);
             if (fieldArray != null) {
+                if(fieldArray.length < 3) {
+                    throw new InvalidValueException("Bad institution code '" + institutionCode + "' on line " + originalLine + " (need at least 3 fields, but there are only " + fieldArray.length + ")");
+                }
                 institutionFormalName = fieldArray[1];
                 institutionName = fieldArray[2];
             }
@@ -386,7 +389,7 @@ public final class ICPCTSVLoader {
 //            String formalName = fields[1];
 //            String name = fields[2];
             institutionsMap.put(icpcId, fields);
-            
+
             // We also add the institution ID minus the INST- "Due to the non-specificity of the format of an inst code
             if(icpcId.startsWith("INST-")) {
                 institutionsMap.put(icpcId.substring(5), fields);

@@ -33,7 +33,7 @@ table tr.gold td.rank {
 }
 table tr.silver td.rank {
 	background: Silver;
-	border: 2px outset sILVER;
+	border: 2px outset Silver;
 }
 table tr.bronze td.rank {
 	background: #c08e55; 
@@ -97,19 +97,67 @@ span.right {
 table tr.odd {
         background-color: #0; color: black;
 }
+table tr.odd td.gold {
+	background-color: #f9d923;
+	border: outset 2px #ffd700;
+}
+table tr.odd td.silver {
+	background-color: Silver;
+	border: 2px outset Silver;
+}
+table tr.odd td.bronze {
+	background-color: #c08e55; 
+	border: outset 2px #c9960c;
+}
+table tr.odd td.highest {
+	background-color: #F0FFF0;
+}
+table tr.odd td.high {
+	background-color: #F0F0FF;
+}
+table tr.odd td.honors {
+	background-color: #FFF0FF;
+}
 table tr.even {
         background-color: #EEEEFF; color: black;
 }
+table tr.even td.gold {
+	background-color: #f9d923;
+	border: outset 2px #ffd700;
+}
+table tr.even td.silver {
+	background-color: Silver;
+	border: 2px outset Silver;
+}
+table tr.even td.bronze {
+	background-color: #c08e55; 
+	border: outset 2px #c9960c;
+}
+table tr.even td.highest {
+	background-color: #E0F7E0;
+}
+table tr.even td.high {
+	background-color: #E0E0F7;
+}
+table tr.even td.honors {
+	background-color: #F7E0F7;
+}
 table tr td.yes {
-        background-color: #50e050; color: black;
+        background-color: #7fff7f; color: black;
+        text-align: center;
+}
+table tr td.firstYes {
+        background-color: #7fFF7f;
+  		background-image: radial-gradient(#0fff0f, #0c630f);
+		color: black;
         text-align: center;
 }
 table tr td.pending {
-        background-color: #e0e050; color: black;
+        background-color: #3e9ae9; color: black;
         text-align: center;
 }
 table tr td.no {
-        background-color: #e05050; color: black;
+        background-color: #ff6060; color: black;
         text-align: center;
 }
 table tr td.center {
@@ -118,4 +166,3 @@ table tr td.center {
 table tr td.right {
         text-align: right;
 }
-

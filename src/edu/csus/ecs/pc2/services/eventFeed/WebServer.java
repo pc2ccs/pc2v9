@@ -55,12 +55,15 @@ import org.eclipse.jetty.util.security.Password;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import edu.csus.ecs.pc2.clics.API202306.SubmitPostSizeLimitFilter;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.services.web.ICLICSResourceConfig;
@@ -109,6 +112,8 @@ public class WebServer implements UIPlugin {
     private ICLICSResourceConfig apiResource = null;
 
     private AccountListener accountListener = new AccountListener();
+
+    private ContestInformationListener contestInformationListener = new ContestInformationListener();
 
     private static final Provider bcProvider = new BouncyCastleProvider();;
 
@@ -268,6 +273,7 @@ public class WebServer implements UIPlugin {
             jettyServer.setHandler(context);
 
             getContest().addAccountListener(accountListener);
+            getContest().addContestInformationListener(contestInformationListener);
 
             // ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
             // jerseyServlet.setInitOrder(0);
@@ -460,6 +466,7 @@ public class WebServer implements UIPlugin {
     }
 
     public void stop() {
+        getContest().removeContestInformationListener(contestInformationListener);
         getContest().removeAccountListener(accountListener);
         try {
             jettyServer.stop();
@@ -523,6 +530,36 @@ public class WebServer implements UIPlugin {
         @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             // ignore
+        }
+    }
+
+    /**
+     * Contest Information Listener to listen for changes in the max source size.
+     * We have to update a static member in the Jersey filter when the source size changes.
+     *
+     * @author John Buck
+     */
+    protected class ContestInformationListener implements IContestInformationListener {
+
+        @Override
+        public void contestInformationChanged(ContestInformationEvent event) {
+            SubmitPostSizeLimitFilter.setMaxSubmitPostSizeBytes(event.getContestInformation().getMaxSourceSizeInBytes());
+        }
+
+        @Override
+        public void contestInformationAdded(ContestInformationEvent event) {
+        }
+
+        @Override
+        public void contestInformationRemoved(ContestInformationEvent event) {
+        }
+
+        @Override
+        public void contestInformationRefreshAll(ContestInformationEvent event) {
+         }
+
+        @Override
+        public void finalizeDataChanged(ContestInformationEvent event) {
         }
     }
 

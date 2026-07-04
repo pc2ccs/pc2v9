@@ -141,8 +141,16 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	        this._teamService.runsUpdated.next();
 	    },
 	    error: (error: any) => {
-	      this._uiHelper.alertError('Not accepting submissions at this time');
-	        console.error(error);
+	      //get the error message supplied by the PC2 API (if any)
+          let msg = error.error.entity.message;
+	      
+	      // if the error msg wasn't a valid string (or was empty) we'll use a generic default message.
+          if (!(typeof msg === 'string' && msg.trim().length > 0)){
+              msg = 'Error in submission';
+          }
+	      
+	      this._uiHelper.alertError(msg);
+	      console.error(msg);
 	    },
 	    complete: () => {
 	    // Called when the observable completes

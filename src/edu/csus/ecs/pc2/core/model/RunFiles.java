@@ -1,11 +1,15 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.Serializable;
+
+import edu.csus.ecs.pc2.core.log.Log;
 
 /**
  * The files that were submitted with a Run.
- * 
+ *
  * @see Run
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -15,10 +19,10 @@ import java.io.Serializable;
 public class RunFiles implements Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -7676377417419464772L;
-    
+
     private Submission submission = null;
 
     /**
@@ -37,7 +41,7 @@ public class RunFiles implements Serializable {
     private SerializedFile mainFile;
 
     /**
-     * 
+     *
      */
     private SerializedFile[] otherFiles;
 
@@ -51,7 +55,7 @@ public class RunFiles implements Serializable {
         this.mainFile = new SerializedFile(filename);
         this.submission = run;
     }
-    
+
     /**
      * @param run
      * @param filename
@@ -62,7 +66,7 @@ public class RunFiles implements Serializable {
         this.mainFile = new SerializedFile(iFile);
         this.submission = run;
     }
-    
+
     public RunFiles(Run run, IFile mainFile, IFile[] auxFiles) {
         super();
         this.runId = run.getElementId();
@@ -72,7 +76,7 @@ public class RunFiles implements Serializable {
     }
 
     private SerializedFile[] createArray(IFile[] auxFiles) {
-        
+
         SerializedFile[] outArray = new SerializedFile[auxFiles.length];
         for (int i = 0; i < auxFiles.length; i++) {
             outArray[i] = new SerializedFile(auxFiles[i]);
@@ -95,7 +99,7 @@ public class RunFiles implements Serializable {
 
     /**
      * Unique identifier for this class.
-     * 
+     *
      * @return Returns the elementId.
      */
     public ElementId getElementId() {
@@ -122,15 +126,15 @@ public class RunFiles implements Serializable {
     public ElementId getRunId() {
         return runId;
     }
-    
+
     public void setSubmission(Submission submission) {
         this.submission = submission;
     }
-    
+
     public Submission getSubmission() {
         return submission;
     }
-    
+
     /**
      * Returns a String representation of this RunFiles object consisting of a list of the names of the files in the RunFiles object.
      * The returned string is in JSON format: an array containing two elements:  the MainFile and a sub-array containing the OtherFiles (if any;
@@ -139,9 +143,9 @@ public class RunFiles implements Serializable {
     @Override
     public String toString() {
         String retStr = "";
-        
+
         retStr += "[" + "\"MainFile\"" + ":" + "\"";
-        
+
         if (getMainFile()!=null) {
             String mainFileName = getMainFile().getName();
             if (mainFileName!=null) {
@@ -152,11 +156,11 @@ public class RunFiles implements Serializable {
         } else {
             retStr += "null";
         }
-        
+
         retStr += "\",";
-        
+
         retStr += "\"OtherFiles\":[" ;
-        
+
         if (getOtherFiles()!=null) {
             if (getOtherFiles().length>0) {
                 boolean first = true;
@@ -178,16 +182,91 @@ public class RunFiles implements Serializable {
                 }
 
             }
-            
-        } 
+
+        }
         //close OtherFiles list
-        retStr += "]";  
-        
+        retStr += "]";
+
         //close retStr object
         retStr += "]";
-        
+
         return retStr ;
-        
+
     }
 
+    /**
+     * createCatalogJSON - Generate detailed JSON information about the files submitted and write it to the
+     * supplied BufferedWriter.  Similar to toString above, but supplies more details.
+     *
+     * @param catlog Where to send the detailed JSON about the submission files
+     */
+    public void createCatalogJSON(BufferedWriter catlog, Log log) {
+        try {
+            boolean needComma = false;
+            catlog.write("[");
+            if(mainFile != null) {
+                catlog.newLine();
+                catlog.write(" {\"mainfile\":");
+                catlog.write(serializedFileInfoToJSON(mainFile));
+                catlog.write("}");
+                needComma = true;
+            }
+            if(otherFiles != null && otherFiles.length > 0) {
+                if(needComma) {
+                    catlog.write(',');
+                }
+                catlog.newLine();
+                catlog.write(" {\"otherfiles\": {");
+                boolean needComma2 = false;
+                for(SerializedFile f : otherFiles) {
+                    // one per line
+                    if(needComma2) {
+                        catlog.write(',');
+                        catlog.newLine();
+                    }
+                    // indent
+                    catlog.write("  ");
+                    catlog.write(serializedFileInfoToJSON(f));
+                    needComma2 = true;
+                }
+                catlog.newLine();
+                catlog.write(" }");
+                // in case we add more stuff to the array later
+                needComma = true;
+            }
+            catlog.write(']');
+            catlog.newLine();
+        } catch (IOException e) {
+            log.log(Log.WARNING, "Exception writing RunFiles catalog file for run " + getRunId().toString(), e);
+        }
+    }
+
+    /**
+     * serializedFileToJSON - pick out the detailed info we want from the SerializedFile
+     *     and create a JSON string.  Ex.
+     *     { "absolutePath":"C:/home/icpc/pc2/current/config/atotientquotient/submissions/time_limit_exceeded/evouga-brute.cpp",
+     *       "name":"evouga-brute.cpp",
+     *       "fileType":2,
+     *       "externalFile":false
+     *     }
+     * @param f the serialized file
+     * @return JSON string representation of the detailed info
+     */
+    private String serializedFileInfoToJSON(SerializedFile f) {
+        StringBuilder str = new StringBuilder();
+
+        str.append('{');
+        if(f != null) {
+            str.append("\"absolutePath\":\"");
+            str.append(f.getAbsolutePath().replace('\\', '/'));
+            str.append("\",\"name\":\"");
+            str.append(f.getName());
+            str.append("\",\"fileType\":");
+            str.append(f.getFileType());
+            str.append(",\"externalFile\":");
+            str.append(f.isExternalFile());
+        }
+        str.append('}');
+        return(str.toString());
+    }
 }

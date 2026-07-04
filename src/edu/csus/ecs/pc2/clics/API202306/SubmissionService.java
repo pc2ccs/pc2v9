@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.File;
@@ -49,8 +49,10 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
+import edu.csus.ecs.pc2.convert.EventFeedUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -279,7 +281,7 @@ public class SubmissionService implements Feature {
         if(clientId != null) {
             account = model.getAccount(clientId);
         }
-        // only admin and analyst are authorized to access this endpoint, and analyst is restricted in that
+        // admins and analysts are authorized to access this endpoint, and analyst is restricted in that
         // they can't see it during freeze period.
         boolean allowed = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
             sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) ||
@@ -287,9 +289,12 @@ public class SubmissionService implements Feature {
                 Utilities.getFreezeTime(model) > model.getContestTime().getElapsedSecs() &&
                 !model.getContestInformation().isUnfrozen());
 
+        // only teams with a real account can fetch their runs
+        boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM) && (account != null);
+
         // In order to get source code for a run, the user role must be allowed AND if it's
         // a pc2 account, the account has to have permission to fetch the run.
-        if (!allowed || (account != null && !account.isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN))) {
+        if ((!allowed && !isTeam) || (account != null && !account.isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN))) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
         // get the submissions from the contest
@@ -300,6 +305,9 @@ public class SubmissionService implements Feature {
             Run submission = runs[i];
             if (IJSONTool.getSubmissionId(submission).equals(submissionId)) {
 
+                if(isTeam && !submission.getSubmitter().equals(clientId)) {
+                    return Response.status(Response.Status.FORBIDDEN).build();
+                }
                 //we found the requested Submission ID in the list of runs returned from the model; try to get the runfiles for Submission
                 runFiles = null;
                 try {
@@ -349,21 +357,34 @@ public class SubmissionService implements Feature {
 
                     SerializedFile mainFile = runFiles.getMainFile();
                     SerializedFile[] otherFiles = runFiles.getOtherFiles();
+                    int fileIndex = 0;
+
                     java.nio.file.Path tmpDir = null;
                     try {
                         tmpDir = Files.createTempDirectory("subService");
                         // dump mainFile and otherFiles to tmpDir
                         HashMap<Integer, String> filesToWrite = new HashMap<Integer, String>();
-                        if (mainFile != null) {
-                            filesToWrite.put(Integer.valueOf(0), mainFile.getName());
+                        // Do not add entry for an empty mainfile name - could be it's included as otherFiles
+                        if (mainFile != null && !mainFile.getName().isEmpty()) {
+                            filesToWrite.put(Integer.valueOf(fileIndex), mainFile.getName());
+                            fileIndex++;
                             mainFile.buffer2file(mainFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + mainFile.getName());
                         }
                         if (otherFiles != null) {
                             for (int j = 0; j < otherFiles.length; j++) {
                                 SerializedFile serializedFile = otherFiles[j];
-                                filesToWrite.put(Integer.valueOf(j + 1), serializedFile.getName());
-                                serializedFile.buffer2file(serializedFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + serializedFile.getName());
+                                // Do not add filenames that are empty strings.
+                                if(!serializedFile.getName().isEmpty()) {
+                                    filesToWrite.put(Integer.valueOf(fileIndex), serializedFile.getName());
+                                    fileIndex++;
+                                    serializedFile.buffer2file(serializedFile.getBuffer(), tmpDir.toAbsolutePath().toString() + File.pathSeparator + serializedFile.getName());
+                                }
                             }
+                        }
+                        // Make sure we're returning a valid source zip - that is, it must have files in it.
+                        if(fileIndex == 0) {
+                            controller.getLog().log(Log.INFO, "Returned runFiles was empty or all file names were empty strings; returning 'NOT_FOUND'");
+                            return Response.status(Status.NOT_FOUND).build();
                         }
                         String zipFileName = tmpDir.toAbsolutePath().toString() + File.pathSeparator + "files.zip";
                         createZip(submission, tmpDir, filesToWrite, zipFileName);
@@ -485,9 +506,9 @@ public class SubmissionService implements Feature {
                 return Response.status(Status.BAD_REQUEST).entity("invalid json supplied").build();
             }
 
-            // These next three are for admin users only
+            // These next two are for admin users only
             long overrideTimeMS = -1;
-            long overrideSubmissionID = -1;
+            long overrideSubmissionID = 0;
 
             Log log = controller.getLog();
             String user = sc.getUserPrincipal().getName();
@@ -496,14 +517,14 @@ public class SubmissionService implements Feature {
                 log.info("User " + user + " attempted to POST submission from an invalid client");
                 // Client must be a valid account, not from realm.properties, we need to
                 // check permissions, this is why.
-                return Response.status(Response.Status.FORBIDDEN).build();
+                return Response.status(Response.Status.FORBIDDEN.getStatusCode(), "No client for user " + user).build();
             }
             Account account = model.getAccount(clientId);
             if(account == null) {
                 log.info("User " + user + " attempted to POST submission from a non-existing account");
                 // Client must be a valid account, not from realm.properties, we need to
                 // check permissions, this is why.
-                return Response.status(Response.Status.FORBIDDEN).build();
+                return Response.status(Response.Status.FORBIDDEN.getStatusCode(), "No account for user " + user).build();
             }
             ContestTime ct = model.getContestTime();
             boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
@@ -545,20 +566,20 @@ public class SubmissionService implements Feature {
                 if(bad) {
                     msg.append(" DENIED.");
                     log.info(msg.toString());
-                    return Response.status(Response.Status.FORBIDDEN).build();
+                    return Response.status(Response.Status.FORBIDDEN.getStatusCode(), msg.toString()).build();
                 }
                 // Force team id for team submission
                 sub.setTeam_id("" + clientId.getClientNumber());
             } else if(account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM)) {
                 if(sub.getTime() != null || sub.getContest_time() != null || sub.getId() != null) {
                     log.info(user + " attempted to POST submission as PROXY but specified time, contest_time or id");
-                    return Response.status(Response.Status.FORBIDDEN).build();
+                    return Response.status(Response.Status.FORBIDDEN.getStatusCode(), "No proxy permission").build();
                 }
             } else if((!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) ||
                        (!account.isAllowed(Permission.Type.SUBMIT_RUN) && !account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM))) {
                 // non admins can't post anything
                 log.info(user + " attempted to POST submission without permission");
-                return Response.status(Response.Status.FORBIDDEN).build();
+                return Response.status(Response.Status.FORBIDDEN.getStatusCode(), "This account does not have permission to submit.").build();
             } else {
                 // ** Departure from CLICS Spec - they say this should be done only by PUT
                 // I happen to disagree. --JB
@@ -570,7 +591,7 @@ public class SubmissionService implements Feature {
                 }
                 overrideSubmissionID = Utilities.stringToLong(sub.getId());
                 if(overrideSubmissionID < 0) {
-                    overrideSubmissionID = -1;
+                    overrideSubmissionID = 0;
                 }
             }
 
@@ -600,18 +621,49 @@ public class SubmissionService implements Feature {
                 return Response.status(Response.Status.BAD_REQUEST).entity("no file specified").build();
             }
 
-            List<IFile> srcFiles = new ArrayList<IFile>();
-            for(CLICSFileReference file : files) {
-                String fileName = file.getFilename();
-                if("".equals(fileName)) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity("no file name specified").build();
+            List<IFile> srcFiles;
+
+            // Backward compatability test: If no mime property specified on the first file, then the CLICSFileReference's are
+            // actual files and not a zip file.  This is in here because initially, due to a misinterpretation of the CLICS
+            // 2023-06 specification, the command line submit utility (a.k.a. pc2submit) did not put the files in a zip file,
+            // rather, it created an array of base64 encoded file contents.  The CLICS spec has since been clarified but for now,
+            // we will still support the incorrect implementation as well as the correct one.
+            CLICSFileReference firstFile = files[0];
+            String mimeType = firstFile.getMime();
+
+            // TODO: deprecate this "if" part and leave the "else" part.  JB
+            if(mimeType == null || "".equals(mimeType)) {
+                srcFiles = new ArrayList<IFile>();
+                for(CLICSFileReference file : files) {
+                    String fileName = file.getFilename();
+                    if("".equals(fileName)) {
+                        return Response.status(Response.Status.BAD_REQUEST).entity("no file name specified").build();
+                    }
+                    // allow contestant submission of a zero length file.  This will generate a CE (hopefully).
+                    // if the following code is uncommented, the submission is not made and a 400 is returned to the submitter.
+                    // it appears that other CCS's allow zero length submissions.  *sigh* -- JB
+                    String fileData = file.getData();
+                    if(fileData == null || fileData.length() == 0) {
+                        // nice to put it in the log in case any questions come up.
+                        log.info(user + " POSTing empty source submission on behalf of team " + team_id);
+
+    //                    return Response.status(Response.Status.BAD_REQUEST).entity("no file data specified for " + fileName).build();
+                    }
+                    IFile iFile = new IFileImpl(file.getFilename(), fileData);
+                    srcFiles.add(iFile);
                 }
-                String fileData = file.getData();
-                if(fileData == null || fileData.length() == 0) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity("no file data specified for " + fileName).build();
+            } else {
+                // There should be precisely one file in the files[] array, which is a zip archive of the source file(s)
+                if(files.length > 1) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("only one zip archive is allowed").build();
                 }
-                IFile iFile = new IFileImpl(file.getFilename(), fileData);
-                srcFiles.add(iFile);
+
+                srcFiles = EventFeedUtilities.getIFiles(firstFile.getData());
+                // handle empty list of src files.
+                if(srcFiles.isEmpty()) {
+                    log.info(user + " Attempt to submit empty source file in archive for problem " + prob.getShortName() + " on behalf of team " + team_id);
+                    return Response.status(Response.Status.BAD_REQUEST).entity("submission source files are empty").build();
+                }
             }
             String entry = sub.getEntry_point();
             IFile mainFile = srcFiles.get(0);
@@ -666,6 +718,26 @@ public class SubmissionService implements Feature {
                 // No run entered, this is really really bad
                 log.log(Level.WARNING, "No Run added after submitting CLICS API run for team " + team_id + " by " + user);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to add submission").build();
+            } catch (SubmissionRejectedException sre) {
+            	switch (sre.getRejectionReason()) {
+            	    case THROTTLE_EXCEEDED :
+            	        log.log(Level.WARNING, "SubmissionRejectedException (Throttling) submitting CLICS API run for team " + team_id + " by " + user);
+            	        return Response.status(Response.Status.TOO_MANY_REQUESTS).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+
+            	    //the following case should never happen since the webserver has a filter which rejects submissions which are too large before
+            	    //they ever get to this method (see SubmitPostSizeLimitFilter and ResourceConfig202306.getResourceConfig()).  But... Tammy...
+            	    case SOURCE_TOO_BIG :
+                        log.log(Level.WARNING, "SubmissionRejectedException (Source too large) submitting CLICS API run for team " + team_id + " by " + user);
+                        return Response.status(Response.Status.REQUEST_ENTITY_TOO_LARGE).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+
+            	    case ZERO_LENGTH_FILE :
+                        log.log(Level.WARNING, "SubmissionRejectedException (Zero-length file) submitting CLICS API run for team " + team_id + " by " + user);
+                        return Response.status(Response.Status.BAD_REQUEST).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+
+            	    default:
+                        log.log(Level.WARNING, "SubmissionRejectedException (Reason: Unknown) submitting CLICS API run for team " + team_id + " by " + user);
+                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+            	}
             } catch (Exception e) {
                 log.log(Level.WARNING, "Exception submitting CLICS API run for team " + team_id + " by " + user, e);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to submit run: " + e.getLocalizedMessage()).build();

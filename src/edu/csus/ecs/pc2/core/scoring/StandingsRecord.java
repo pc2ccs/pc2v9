@@ -1,10 +1,12 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.api.BaseClient;
 import edu.csus.ecs.pc2.core.model.ClientId;
 
 /**
@@ -31,12 +33,18 @@ public class StandingsRecord {
      * Rank within the Group.
      */
     private int groupRankNumber = 0;
-    
+
     /**
      * Penalty Points.
      *
      */
     private long penaltyPoints;
+
+    /**
+     * Point score
+     *
+     */
+    private double score;
 
     /**
      * Number of problems solved.
@@ -163,9 +171,17 @@ public class StandingsRecord {
     }
 
     /**
+     * Returns the SummaryRow contained in this StandingsRecord.
+     * This method is marked as "@JsonIgnore" so that JSON serialization
+     * will not use the summaryRow directly; this is important because
+     * the SummaryRow contains a Map, which JSON serializes as an Object
+     * instead of an Iterable (e.g. array).  
+     * 
+     * @see #getProblemSummaryInfo()
+     * 
      * @return Returns the summaryRow.
      */
-    @JsonProperty
+    @JsonIgnore
     public SummaryRow getSummaryRow() {
         return summaryRow;
     }
@@ -192,14 +208,14 @@ public class StandingsRecord {
     public void setGroupRankNumber(int groupRankNumber) {
         this.groupRankNumber = groupRankNumber;
     }
-    
+
     /**
      * Returns a String representation of this object in JSON format.
      */
     @Override
     public String toString() {
         ObjectMapper mapper = new ObjectMapper();
-      
+
         String jsonString = "{}";
         try {
             jsonString = mapper.writeValueAsString(this);
@@ -220,5 +236,41 @@ public class StandingsRecord {
         this.divisionRankNumber = divisionRankNumber;
     }
 
+    /**
+     * @return the score
+     */
+    public double getScore() {
+        return score;
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setScore(double score) {
+        this.score = score;
+    }
+    
+    /**
+     * Returns the per-problem summary information as an ordered list.
+     * This is intended for JSON serialization and UI consumers (e.g. WTI / Angular),
+     * since Angular requires Iterables for *ngFor.
+     * 
+     * Note that this method is never called directly by any PC2 code; rather,
+     * it gets invoked by Jackson during the serialization process (that is,
+     * when some code executes (something like):
+     *      ObjectMapper mapper = new ObjectMapper();
+     *      String json = mapper.writeValueAsString(standingsRecord);
+     *      
+     * Note also that this is the reason the "@JsonIgnore" annotations was added
+     * to method getSummaryRow() (above); that annotation keeps the Jackson
+     * serializer from using a method which returns a Object when what we want
+     * to serialize for StandingsRecord components are iterables (e.g. arrays).
+     * 
+     */
+    @JsonProperty("problemSummaryInfo")
+    public java.util.List<ProblemSummaryInfo> getProblemSummaryInfo() {
+        return summaryRow == null ? java.util.Collections.emptyList()
+                                  : summaryRow.toOrderedList();
+    }
 
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -66,6 +66,9 @@ public interface IContestLoader {
     final String CLICS_CONTEST_DURATION = "duration";
     final String CLICS_CONTEST_FREEZE_DURATION = "scoreboard_freeze_duration";
     final String CLICS_CONTEST_SCOREBOARD_TYPE = "scoreboard_type";
+    final String CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL = "pass-fail";
+    final String CLICS_CONTEST_SCOREBOARD_TYPE_SCORE = "score";
+
     // This is not currently used, but penalty_time SHOULD be used instead of
     // reading it from properties. It is here for completeness, and, it happens
     // to be a required value in the yaml, but we do not enforce that.
@@ -80,6 +83,8 @@ public interface IContestLoader {
     String CONTEST_START_TIME_KEY = "start-time";
 
     String MAX_OUTPUT_SIZE_K_KEY = "max-output-size-K";
+
+    String MAX_SOURCE_SIZE_K_KEY = "max-source-size-K";
 
     String CLICS_MAX_OUTPUT_KEY = "output";
 
@@ -234,17 +239,23 @@ public interface IContestLoader {
 
     String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
 
+    String ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY = "allow-zero-length-submission-files";
+
     String LOAD_ACCOUNTS_FILE_KEY = "load-accounts-file";
 
     String SANDBOX_GRACE_TIME = "sandbox-grace-time-secs";
 
     String SANDBOX_INTERACTIVE_GRACE_MULTIPLIER = "sandbox-interactive-time-multiplier";
 
+    String REMOTE_CCS_SETTINGS_KEY = "remote-ccs-settings";
+
     /**
      *
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)
      */
     String TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING  = "team-scoreboard-display-format-string";
+
+    String SUBMISSION_THROTTLING_KEY = "submission-throttling";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

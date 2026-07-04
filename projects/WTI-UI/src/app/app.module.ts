@@ -1,46 +1,62 @@
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { LoginModule } from './modules/login/login.module';
+
+// Core/Shared modules
 import { CoreModule } from './modules/core/core.module';
-import { RunsModule } from './modules/runs/runs.module';
 import { SharedModule } from './modules/shared/shared.module';
+
+// Feature modules
+import { LoginModule } from './modules/login/login.module';
+import { RunsModule } from './modules/runs/runs.module';
 import { OptionsModule } from './modules/options/options.module';
 import { ClarificationsModule } from './modules/clarifications/clarifications.module';
 import { ScoreboardModule } from './modules/scoreboard/scoreboard.module';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule} from '@angular/material/icon';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
-//import { DeviceDetectorModule } from 'ngx-device-detector';
+
+// Components
+import { AppComponent } from './app.component';
+
+// Services
+import { AppInitService } from './modules/core/services/app-init.service';
+import { AppTitleService } from './modules/core/services/app-title.service';
+
+/**
+ * This module defines the outer structure of the WTI-UI Angular application.
+ * (The overall Single-Page-App, or SPA, starts in main.ts, which invokes AppModule
+ * in this app.module.ts file.) 
+ * AppModule in turn bootstraps the AppComponent class by invoking method 
+ * AppInitService.initializeApp(), then loading class AppComponent.
+
+*/
+
+export function initializeAppFactory(appInitService: AppInitService) {
+  return () => appInitService.initializeApp();
+}
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
+  declarations: [AppComponent],
   imports: [
-    BrowserModule,
+    BrowserModule,	//Note: this should only ever be declared in AppModule
+    BrowserAnimationsModule,
     CoreModule,
-    AppRoutingModule,
     SharedModule,
+    AppRoutingModule,
     LoginModule,
     RunsModule,
     OptionsModule,
     ClarificationsModule,
-    ScoreboardModule,
-    BrowserAnimationsModule,
-    MatButtonModule, 
-    MatIconModule,
-    MatSidenavModule,
-    MatSnackBarModule,
-    MatToolbarModule
-//	DeviceDetectorModule.forRoot()
+    ScoreboardModule
   ],
-  providers: [AppTitleService],
+  providers: [
+    AppTitleService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (appInit: AppInitService) => () => appInit.initializeApp(),
+      deps: [AppInitService],
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

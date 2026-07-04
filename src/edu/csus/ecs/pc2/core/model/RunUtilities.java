@@ -183,5 +183,35 @@ public final class RunUtilities {
 
         }
     }
+    
+    /**
+     * Looks at all the TestCaseResults for a run and filters
+     * that list to just the most recent -- that is, the TestCaseResults
+     * for the latest (most recent) time the run was judged.
+     * Copied from TestResultsPane 7/31/2025 (jlc)
+     * 
+     * @param run the Run to be examined.
+     * @return most recent RunTestCaseResults for the specified run.
+     */
+    public static RunTestCase[] getMostRecentTestCaseResults(Run run) {
+        RunTestCase[] mostRecentTestCases = null;
+        RunTestCase[] allTestCases = run.getRunTestCases();
+        // hope the lastTestCase has the highest testNumber....
+        if (allTestCases != null && allTestCases.length > 0) {
+            mostRecentTestCases = new RunTestCase[allTestCases[allTestCases.length-1].getTestNumber()];
+            for (int i = allTestCases.length-1; i >= 0; i--) {
+                RunTestCase runTestCaseResult = allTestCases[i];
+                int testCaseNumIndex = runTestCaseResult.getTestNumber()-1;
+                //this test for null is probably unnecessary -- but it's also innocuous
+                if (mostRecentTestCases[testCaseNumIndex] == null) {
+                    mostRecentTestCases[testCaseNumIndex] = runTestCaseResult;
+                    if (testCaseNumIndex == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return mostRecentTestCases;
+    }
 
 }

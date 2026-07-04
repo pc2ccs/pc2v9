@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Announcement Received</h1>
 <div mat-dialog-content>
     <p>Problem: {{ problem }}</p>
-    <p>Announcement: {{ answer }}</p>
+    <p [ngStyle]="{ 'white-space': 'pre-wrap' }">Announcement: {{ answer }}</p>
 </div>
 <div mat-dialog-actions>
     <button (click)='goToClarifications()' type='button' class='warning'>Go to Clarifications</button>&nbsp;

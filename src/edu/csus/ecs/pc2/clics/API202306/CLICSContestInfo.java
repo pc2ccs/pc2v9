@@ -107,7 +107,10 @@ public class CLICSContestInfo {
             }
         }
         penalty_time = Integer.valueOf(ci.getScoringProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO, "20"));
-        scoreboard_type = "pass-fail";
+        if(ci.getThawed() != null) {
+            scoreboard_thaw_time = Utilities.getIso8601formatterWithMS().format(ci.getThawed());
+        }
+        scoreboard_type = ci.getScoreboardType().toString().toLowerCase();
     }
 
     public String toJSON() {

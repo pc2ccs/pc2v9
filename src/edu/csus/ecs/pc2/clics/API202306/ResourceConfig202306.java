@@ -43,6 +43,10 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
         ResourceConfig resConfig = new ResourceConfig();
         resConfig.register(RolesAllowedDynamicFeature.class);
 
+        // Set static member of SubmitPostSizeLimitFilter to max source size
+        SubmitPostSizeLimitFilter.setMaxSubmitPostSizeBytes(aContest.getContestInformation().getMaxSourceSizeInBytes());
+        resConfig.register(SubmitPostSizeLimitFilter.class);
+
         // CLICS Contest API services are collective -- either all enabled or all disabled (and default to enabled if unspecified)
         if (wsPropUtilities.getBooleanProperty(WebServerPropertyUtils.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, true)) {
 

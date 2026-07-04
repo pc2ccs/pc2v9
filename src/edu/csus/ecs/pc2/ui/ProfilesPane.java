@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -50,10 +50,10 @@ import edu.csus.ecs.pc2.core.util.QuickLoad;
 
 /**
  * Profile administration pane.
- * 
+ *
  * Provides a front end to all profile functions, like rename, change, clone, etc.
- * 
- * 
+ *
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -62,7 +62,7 @@ import edu.csus.ecs.pc2.core.util.QuickLoad;
 public class ProfilesPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 9075523788534575300L;
 
@@ -94,6 +94,10 @@ public class ProfilesPane extends JPanePlugin {
 
     private JLabel profileDescriptionLabel = null;
 
+    private JTextField profileContestIdTextField = null;
+
+    private JLabel profileContestIdLabel = null;
+
     private JPanel topPanel = null;
 
     private MCLB profilesListBox = null;
@@ -105,7 +109,7 @@ public class ProfilesPane extends JPanePlugin {
     private SwitchProfileConfirmFrame switchFrame = null;
 
     private boolean usingExtraColumns = false;
-    
+
     private boolean showHidden = false;
 
     private JCheckBox showHiddenProfilesCheckbox = null;
@@ -115,7 +119,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public ProfilesPane() {
         super();
@@ -124,16 +128,17 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
-        
+
         usingExtraColumns = Utilities.isDebugMode();
-        
+
         profileNameLabel = new JLabel();
         profileNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         profileNameLabel.setText("Active Profile Name");
         profileNameLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (e.getClickCount() > 1 && e.isControlDown() && e.isShiftDown()) {
                     Profile profile = getContest().getProfile();
@@ -150,17 +155,18 @@ public class ProfilesPane extends JPanePlugin {
         this.add(getTopPanel(), BorderLayout.NORTH);
         FrameUtilities.centerFrame(this);
 
-       
-        
+
+
     }
 
+    @Override
     public String getPluginTitle() {
         return "Profiles Pane";
     }
 
     /**
      * This method initializes Set
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getSwitchButton() {
@@ -173,6 +179,7 @@ public class ProfilesPane extends JPanePlugin {
             switchButton.setText("Switch");
             switchButton.setToolTipText("Switch to the selected profile");
             switchButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     switchSelectedProfile();
                 }
@@ -183,7 +190,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes jButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getSetButton() {
@@ -194,6 +201,7 @@ public class ProfilesPane extends JPanePlugin {
             setButton.setText("Set");
             setButton.setToolTipText("Update the profile name and description");
             setButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     renameProfile();
                 }
@@ -204,13 +212,14 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes profileTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getProfileTextField() {
         if (profileTextField == null) {
             profileTextField = new JTextField();
             profileTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableSetButton();
                 }
@@ -221,7 +230,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes centerPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPane() {
@@ -229,6 +238,9 @@ public class ProfilesPane extends JPanePlugin {
             profileDescriptionLabel = new JLabel();
             profileDescriptionLabel.setText("Active Profile Description");
             profileDescriptionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            profileContestIdLabel = new JLabel();
+            profileContestIdLabel.setText("Active Contest Id");
+            profileContestIdLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             centerPane = new JPanel();
             centerPane.setLayout(new BorderLayout());
             centerPane.add(getProfilesListBox(), BorderLayout.CENTER);
@@ -238,7 +250,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -263,7 +275,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes newButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getNewButton() {
@@ -274,6 +286,7 @@ public class ProfilesPane extends JPanePlugin {
             newButton.setEnabled(true);
             newButton.setToolTipText("Create a new (blank) profile");
             newButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     newProfile();
                 }
@@ -284,7 +297,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes jButton2
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExportButton() {
@@ -295,6 +308,7 @@ public class ProfilesPane extends JPanePlugin {
             exportButton.setEnabled(false);
             exportButton.setToolTipText("Export profile information");
             exportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     exportProfile();
                 }
@@ -305,7 +319,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes cloneButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCloneButton() {
@@ -316,6 +330,7 @@ public class ProfilesPane extends JPanePlugin {
             cloneButton.setEnabled(true);
             cloneButton.setToolTipText("Create a copy of the active profile");
             cloneButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     cloneProfile();
                 }
@@ -329,7 +344,7 @@ public class ProfilesPane extends JPanePlugin {
     private String getProfileName() {
         return getContest().getProfile().getName();
     }
-    
+
     private String getProfileDescription(){
         return getContest().getProfile().getDescription();
     }
@@ -345,7 +360,7 @@ public class ProfilesPane extends JPanePlugin {
         getProfileSaveFrame().setSaveButtonName(ProfileSavePane.EXPORT_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }
-    
+
     public SwitchProfileConfirmFrame getSwitchFrame() {
         if (switchFrame == null){
             switchFrame = new SwitchProfileConfirmFrame();
@@ -363,7 +378,7 @@ public class ProfilesPane extends JPanePlugin {
 
         if (getContest().getContestTime().isContestRunning()){
             showMessage("Contest Clock/Time must be stopped");
-            
+
             return;  // ------------------------------------ RETURN
         }
 
@@ -384,7 +399,7 @@ public class ProfilesPane extends JPanePlugin {
                 return; // ------------------------------------ RETURN
             }
         }
-        
+
         getSwitchFrame().setProfile(selectedProfile);
         getSwitchFrame().setVisible(true);
     }
@@ -411,9 +426,11 @@ public class ProfilesPane extends JPanePlugin {
 
         String description = getProfileDescriptionTextField().getText().trim() + "";
 
+        String contestId = getProfileContestIdTextField().getText().trim() + "";
         Profile profile = getContest().getProfile();
         profile.setName(newProfileName);
         profile.setDescription(description);
+        profile.setContestId(contestId);
         getController().updateProfile(profile);
     }
 
@@ -430,7 +447,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes resetContestButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getResetContestButton() {
@@ -440,6 +457,7 @@ public class ProfilesPane extends JPanePlugin {
             resetContestButton.setText("Reset");
             resetContestButton.setToolTipText("Reset the active contest profile - clear runs, clars, reset contest time");
             resetContestButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     resetContest();
                 }
@@ -504,7 +522,7 @@ public class ProfilesPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
 
         initializePermissions();
-        
+
         getProfileSaveFrame().setContestAndController(inContest, inController);
         getSwitchFrame().setContestAndController(getContest(), getController());
 
@@ -512,6 +530,7 @@ public class ProfilesPane extends JPanePlugin {
         updateProfileInformation(profile);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 refreshProfilesList();
                 updateGUIperPermissions();
@@ -520,12 +539,12 @@ public class ProfilesPane extends JPanePlugin {
         });
 
         inContest.addProfileListener(new ProfileListenerImplementation());
-        
+
         inContest.addAccountListener(new AccountListenerImplementation());
-        
+
         inContest.addSiteListener(new SiteListenerImplementation());
     }
-    
+
     private void updateGUIperPermissions() {
 
         switchButton.setVisible(isAllowed(Permission.Type.SWITCH_PROFILE));
@@ -535,7 +554,7 @@ public class ProfilesPane extends JPanePlugin {
         cloneButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE));
         resetContestButton.setVisible(isAllowed(Permission.Type.RESET_CONTEST));
         reportButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE));
-        
+
         loadButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE) && Utilities.isDebugMode());
     }
 
@@ -555,7 +574,7 @@ public class ProfilesPane extends JPanePlugin {
                 getProfilesListBox().autoSizeAllColumns();
                 getSwitchButton().setEnabled(true);
             }
-            
+
             if (getContest().getSites().length > 1) {
                 // Bug 792
                 disableAllButtons();
@@ -595,7 +614,7 @@ public class ProfilesPane extends JPanePlugin {
         }
         c[1] = profile.getDescription();
         c[2] = formatter.format(profile.getCreateDate());
-        
+
         if (usingExtraColumns){
             c[3] = profile.getContestId();
             c[4] = profile.getProfilePath();
@@ -608,10 +627,12 @@ public class ProfilesPane extends JPanePlugin {
 
         if (profile != null) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     getProfileTextField().setText(profile.getName());
                     profileNameLabel.setToolTipText("Contest Profile Name " + profile.getContestId());
                     getProfileDescriptionTextField().setText(profile.getDescription());
+                    getProfileContestIdTextField().setText(profile.getContestId());
                     enableSetButton();
                 }
             });
@@ -620,32 +641,38 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * Profile Listener Implementation
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     protected class ProfileListenerImplementation implements IProfileListener {
 
+        @Override
         public void profileAdded(ProfileEvent event) {
             updateProfileRow(event.getProfile());
         }
 
+        @Override
         public void profileChanged(ProfileEvent event) {
             updateProfileRow(event.getProfile());
             Profile profile = getContest().getProfile();
             updateProfileInformation(profile);
         }
 
+        @Override
         public void profileRemoved(ProfileEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     refreshProfilesList();
                 }
             });
         }
 
+        @Override
         public void profileRefreshAll(ProfileEvent profileEvent) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     refreshProfilesList();
                 }
@@ -654,14 +681,33 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     /**
+     * This method initializes profileContestIdTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getProfileContestIdTextField() {
+        if (profileContestIdTextField == null) {
+            profileContestIdTextField = new JTextField();
+            profileContestIdTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableSetButton();
+                }
+            });
+        }
+        return profileContestIdTextField;
+    }
+
+    /**
      * This method initializes profileDescriptionTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getProfileDescriptionTextField() {
         if (profileDescriptionTextField == null) {
             profileDescriptionTextField = new JTextField();
             profileDescriptionTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableSetButton();
                 }
@@ -676,15 +722,18 @@ public class ProfilesPane extends JPanePlugin {
 
         String name = getProfileTextField().getText();
         String description = getProfileDescriptionTextField().getText();
+        String contestId = getProfileContestIdTextField().getText();
 
-        boolean enable = (!profile.getName().equals(name)) || (!profile.getDescription().equals(description));
+        boolean enable = (!profile.getName().equals(name)) ||
+                (!profile.getDescription().equals(description) ||
+                (!profile.getContestId().equals(contestId)));
 
         getSetButton().setEnabled(enable);
     }
 
     /**
      * This method initializes topPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getTopPanel() {
@@ -700,37 +749,53 @@ public class ProfilesPane extends JPanePlugin {
             gridBagConstraints3.gridx = 1;
             gridBagConstraints3.gridy = 2;
             gridBagConstraints3.ipadx = 244;
-            gridBagConstraints3.ipady = 9;
+            gridBagConstraints3.ipady = 5;
             gridBagConstraints3.weightx = 1.0;
-            gridBagConstraints3.insets = new Insets(10, 9, 16, 25);
+            gridBagConstraints3.insets = new Insets(6, 9, 6, 25);
             GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
             gridBagConstraints2.fill = GridBagConstraints.VERTICAL;
-            gridBagConstraints2.gridheight = 2;
+            gridBagConstraints2.gridheight = 1;
             gridBagConstraints2.gridx = 1;
             gridBagConstraints2.gridy = 0;
             gridBagConstraints2.ipadx = 244;
-            gridBagConstraints2.ipady = 10;
+            gridBagConstraints2.ipady = 5;
             gridBagConstraints2.weightx = 1.0;
-            gridBagConstraints2.insets = new Insets(25, 9, 10, 25);
+            gridBagConstraints2.insets = new Insets(6, 9, 6, 25);
             GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-            gridBagConstraints1.insets = new Insets(13, 51, 19, 8);
-            gridBagConstraints1.gridy = 2;
             gridBagConstraints1.ipadx = 46;
-            gridBagConstraints1.ipady = 7;
+            gridBagConstraints1.insets = new Insets(6, 51, 6, 8);
+            gridBagConstraints1.gridy = 2;
+            gridBagConstraints1.ipady = 5;
             gridBagConstraints1.gridx = 0;
             GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.insets = new Insets(29, 51, 1, 8);
+            gridBagConstraints.insets = new Insets(6, 51, 1, 8);
             gridBagConstraints.gridy = 0;
             gridBagConstraints.ipadx = 78;
-            gridBagConstraints.ipady = 7;
+            gridBagConstraints.ipady = 5;
             gridBagConstraints.gridx = 0;
+            GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
+            gridBagConstraints5.insets = new Insets(6, 51, 1, 8);
+            gridBagConstraints5.gridy = 1;
+            gridBagConstraints5.ipadx = 90;
+            gridBagConstraints5.ipady = 5;
+            gridBagConstraints5.gridx = 0;
+            GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
+            gridBagConstraints6.fill = GridBagConstraints.VERTICAL;
+            gridBagConstraints6.gridx = 1;
+            gridBagConstraints6.gridy = 1;
+            gridBagConstraints6.ipadx = 244;
+            gridBagConstraints6.ipady = 5;
+            gridBagConstraints6.weightx = 1.0;
+            gridBagConstraints6.insets = new Insets(6, 9, 6, 25);
             topPanel = new JPanel();
             topPanel.setLayout(new GridBagLayout());
             topPanel.setPreferredSize(new Dimension(120, 120));
             topPanel.add(profileNameLabel, gridBagConstraints);
             topPanel.add(profileDescriptionLabel, gridBagConstraints1);
+            topPanel.add(profileContestIdLabel, gridBagConstraints5);
             topPanel.add(getProfileTextField(), gridBagConstraints2);
             topPanel.add(getProfileDescriptionTextField(), gridBagConstraints3);
+            topPanel.add(getProfileContestIdTextField(), gridBagConstraints6);
             topPanel.add(getSetButton(), gridBagConstraints4);
         }
         return topPanel;
@@ -738,7 +803,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes profilesListBox
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.MCLB
      */
     private MCLB getProfilesListBox() {
@@ -771,16 +836,17 @@ public class ProfilesPane extends JPanePlugin {
         }
         return profilesListBox;
     }
-    
-    
+
+
     /**
      * Remove run from grid.
-     * 
+     *
      * @param run
      */
     private void removeProfilesRow(final Profile profile) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 int rowNumber = profilesListBox.getIndexByKey(profile.getProfilePath());
@@ -794,6 +860,7 @@ public class ProfilesPane extends JPanePlugin {
     public void updateProfileRow(final Profile profile) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (!profile.isActive() && !isShowHidden()) {
                     removeProfilesRow(profile);
@@ -815,7 +882,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes reportButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getReportButton() {
@@ -825,6 +892,7 @@ public class ProfilesPane extends JPanePlugin {
             reportButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
             reportButton.setToolTipText("Display Profiles Report");
             reportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     createReport(new ProfileCloneSettingsReport());
                 }
@@ -843,21 +911,23 @@ public class ProfilesPane extends JPanePlugin {
             JOptionPane.showMessageDialog(this, "Exception in report " + e.getLocalizedMessage());
         }
     }
-    
+
     /**
      * Account listener for permissions.
-     *  
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             // ignore doesn't affect this pane
         }
 
+        @Override
         public void accountModified(AccountEvent event) {
             // check if is this account
             Account account = event.getAccount();
@@ -868,6 +938,7 @@ public class ProfilesPane extends JPanePlugin {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         updateGUIperPermissions();
                     }
@@ -877,11 +948,13 @@ public class ProfilesPane extends JPanePlugin {
 
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             // ignore, this does not affect this class
 
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             for (Account account : accountEvent.getAccounts()) {
                 /**
@@ -889,6 +962,7 @@ public class ProfilesPane extends JPanePlugin {
                  */
                 if (getContest().getClientId().equals(account.getClientId())) {
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             initializePermissions();
                             updateGUIperPermissions();
@@ -898,22 +972,23 @@ public class ProfilesPane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             accountsModified(accountEvent);
         }
     }
-    
+
     public boolean isShowHidden() {
         return showHidden;
     }
-    
+
     public void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
     }
 
     /**
      * This method initializes showHiddenProfilesCheckbox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getShowHiddenProfilesCheckbox() {
@@ -921,6 +996,7 @@ public class ProfilesPane extends JPanePlugin {
             showHiddenProfilesCheckbox = new JCheckBox();
             showHiddenProfilesCheckbox.setText("Show Backups");
             showHiddenProfilesCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     toggleShowHiddenProfiles();
                 }
@@ -933,7 +1009,7 @@ public class ProfilesPane extends JPanePlugin {
 
         showHidden = getShowHiddenProfilesCheckbox().isSelected();
         refreshProfilesList();
-        
+
     }
 
     protected void cloneProfile() {
@@ -944,7 +1020,7 @@ public class ProfilesPane extends JPanePlugin {
 
     /**
      * This method initializes loadButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getLoadButton() {
@@ -953,6 +1029,7 @@ public class ProfilesPane extends JPanePlugin {
             loadButton.setText("Load");
             loadButton.setMnemonic(KeyEvent.VK_L);
             loadButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     quickLoad();
                 }
@@ -964,74 +1041,74 @@ public class ProfilesPane extends JPanePlugin {
     protected boolean isAdministrator(ClientId clientId) {
         return clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
-    
+
     /**
      * Add problems, languages and insure accounts.
      */
     protected void quickLoad() {
-        
+
         if (! isAdministrator(getContest().getClientId())){
 
             JOptionPane.showMessageDialog(this,"You must be an Administrator to use this feature");
             return;
         }
-        
+
         QuickLoad loader = new QuickLoad();
         loader.setContestAndController(getContest(), getController());
         loader = null;
-        
+
         JOptionPane.showMessageDialog(this,"Contest quick loaded");
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     public class SiteListenerImplementation implements ISiteListener {
 
         @Override
         public void siteAdded(SiteEvent event) {
-            refreshProfilesList();            
+            refreshProfilesList();
         }
 
         @Override
         public void siteRemoved(SiteEvent event) {
-            refreshProfilesList();            
+            refreshProfilesList();
             }
 
         @Override
         public void siteChanged(SiteEvent event) {
-            refreshProfilesList();            
+            refreshProfilesList();
         }
 
         @Override
         public void siteLoggedOn(SiteEvent event) {
             // ignored
-            
+
         }
 
         @Override
         public void siteLoggedOff(SiteEvent event) {
             // ignored
-            
+
         }
 
         @Override
         public void siteProfileStatusChanged(SiteEvent event) {
             // ignored
-            
+
         }
 
         @Override
         public void sitesRefreshAll(SiteEvent siteEvent) {
-            refreshProfilesList();            
+            refreshProfilesList();
         }
 
     }
-    
-    
- 
+
+
+
 } // @jve:decl-index=0:visual-constraint="25,9"

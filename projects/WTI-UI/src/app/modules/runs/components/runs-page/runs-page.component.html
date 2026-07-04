@@ -53,23 +53,49 @@
                 <th>Language</th>
                 <th>Problem</th>
                 <th>Judgement</th>
-                <th>Time</th>
-                <th></th>
+                
+				<!-- Display appropriate column header based on Scoreboard Type -->
+				<th>
+					<ng-container *ngIf="isPassFail">Time</ng-container>
+					<ng-container *ngIf="isPointScoring">Score</ng-container>
+				</th>
+
+				<th></th>
             </tr>
-            <tr *ngFor='let run of filteredRuns' [class.pending]='!run.judgement || run.isPreliminary'>
+            <tr *ngFor='let run of filteredRuns'>
             	<!-- Omit Run Type until Test Run capability is implemented -- see Issue #1031
                 <td>{{ run.isTestRun ? 'Test' : 'Judged' }}</td>
                 -->
                 <td>{{ run.id }}</td>
                 <td>{{ run.language }}</td>
                 <td>{{ run.problem }}</td>
-                <td>
-                    {{ run.judgement }}
+
+                <td class="judgement-cell" 
+                	[attr.title]="run.judgement || 'Pending'"
+                	[ngClass]="{'yes' : run.isSolved, 
+ 								'no' : !run.isSolved && run.judgement,
+ 								'pending' : !run.isSolved && !run.judgement
+ 								}">
+                
+					{{ run.judgement ? run.judgement : 'Pending' }}
+
                     <ng-container *ngIf='run.isPreliminary'>
                         (Preliminary)
                     </ng-container>
                 </td>
-                <td>{{ run.time }}</td>
+                
+				<td>
+					<ng-container *ngIf="isPassFail"> {{ run.time }} </ng-container>					
+					<ng-container *ngIf="isPointScoring"> 
+						<ng-container *ngIf="hasAcceptedJudgement(run); else noScore"> 
+							{{ run.score }}
+						</ng-container> 
+						<ng-template #noScore> 
+							<span title="Score shown only for accepted runs">--</span>
+						</ng-template>
+					</ng-container>
+				</td>
+                
                 <td>
                     <ng-container *ngIf='run.results'>
                         <button type='button' (click)='viewResults(run.problem, run.results)' class='textLink'>View Results</button>
