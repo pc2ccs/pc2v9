@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package controllers;
 
 import java.io.IOException;
@@ -12,12 +12,14 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.inject.Singleton;
+import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -25,7 +27,6 @@ import org.json.XML;
 import communication.WTIWebsocket;
 import config.ServerInit;
 import edu.csus.ecs.pc2.api.IClarification;
-import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IJudgement;
@@ -36,10 +37,13 @@ import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformation.ScoreboardType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -107,10 +111,13 @@ public class ContestController extends MainController {
 	//mutex to insure at most one browser client at a time can attempt to use the above DSA to update standings
 	private static Boolean updateStandingsMutex = new Boolean(false);
 	
+	//the current contest state information
+	private static ContestInformation contestInformation = null;
+	
 	/**
 	 * Constructs a ContestController for the WTI server. Construction includes
-	 * invoking the super-class {@link MainController}, constructor, which has the
-	 * following effects:
+	 * invoking the super-class {@link MainController} constructor; the super-class 
+	 * constructor has the following effects:
 	 * 
 	 * <pre>
 	 * <ol>
@@ -122,7 +129,7 @@ public class ContestController extends MainController {
 	 * subclass.
 	 * </pre>
 	 * 
-	 * In addition, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
+	 * Subsequently, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
 	 * the PC2 server using the scoreboard credentials specified in the WTI configuration (pc2v9.ini file).
 	 * 
 	 * @throws URISyntaxException    if a valid websocket could not be constructed in the {@link MainController} super-class from
@@ -178,6 +185,23 @@ public class ContestController extends MainController {
 			e.printStackTrace();
 			throw e;
 		}
+		
+		//fetch the current ContestInformation from the PC2 server
+		try {
+			contestInformation = scoreboardServerConn.getContest().getInternalContest().getContestInformation();
+
+			// force lazy initialization NOW (during WTI Server startup) rather than later during first browser access
+			// (we're not DOING anything with the result; we're just forcing the WTI code to completely initialize
+			//  PC2 java classes used by getScoreboardType() -- i.e., overcome "lazy initialization").
+			// This avoids seeing a delay on the first browser startup's call to /scoreboardType.
+			contestInformation.getScoreboardType();
+
+		} catch (Exception e) {
+			logger.severe("[ContestController] Exception while attempting to fetch ContestInformation from PC2 Server: " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
+
 	}
 
 	/***
@@ -837,7 +861,48 @@ public class ContestController extends MainController {
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 	}
- 
+
+
+	/***
+	 *  This method returns the Scoreboard Type for the current contest.
+	 *  The Scoreboard Type is obtained from the current cached copy of the {@link ContestInformation}; 
+	 *  the ContestInformation is obtained from the PC2 Server when the {@link ContestController} is constructed. 
+	 * 
+	 * @return Response object containing one of the following:
+	 * 				200 (OK) and a JSON string containing the current scoreboard type.
+	 * 				500 (INTERNAL_SERVER_ERROR) if the current ContestInformation is null or an error occurs
+	 * 					attempting to fetch ScoreboardType from it.
+	 */
+	@Path("/scoreboardType")
+	@GET
+	@ApiOperation(value = "Scoreboard Type",
+				notes = "Get the current Scoreboard Type for this contest.")
+	@ApiResponses({
+		@ApiResponse(code = 200, message = "Returns a string containing the contest scoreboard type", response = String.class), 
+	})
+	public Response scoreboardType() {
+		
+		if(contestInformation == null)
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Contest Information unavailable"))
+					.type(MediaType.APPLICATION_JSON).build();
+
+		try {
+			ScoreboardType scoreboardType = contestInformation.getScoreboardType();
+			return Response.ok()
+				    .entity(scoreboardType)
+				    .type(MediaType.APPLICATION_JSON)
+				    .build();
+		}
+		catch(Exception e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, 
+								"Exception attempting to fetch scoreboard type" + e.getMessage()))
+					.type(MediaType.APPLICATION_JSON).build();
+		}
+		
+	}
+	
 	/**
 	 * Logs to logger and stdout.
 	 * 
@@ -865,12 +930,118 @@ public class ContestController extends MainController {
 	 */
 	private String getJSONStandings(String xmlStandings) throws IOException, JSONException {
 		
-		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);;
+		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);
+	
+		changeScoresToStrings(jsonStandingsObject);
 		
-		return jsonStandingsObject.toString();
+		logger.fine("Standings JSON: " + jsonStandingsObject.toString(2));
 
+		return jsonStandingsObject.toString();
 	}
 
+    /**
+     * Scan the supplied JSONObject for problemSummaryInfo's that have numeric "score" properties and
+     * reformat them and put them back as Strings.  By default, the XML.toJSONObject() will attempt to determine
+     * what type a value is and create JSON that uses that type.  So, for example, an XML attribute such as:
+     * score="12.340000"
+     * would be converted to this JSON:
+     * "score": 12.34
+     *  
+     * The structure of the original XML we are interested in is:
+     * <contestStandings ...>
+     *  <standingsHeader ...>
+     *   <problem ...>
+     *  </standingsHeader>
+     *  <teamStanding ... >
+     *   <problemSummaryInfo ...>
+     *  </teamStanding>
+     *  <teamStanding ... >
+     *   <problemSummaryInfo ...>
+     *  </teamStanding>
+     *  ...
+     * </contestStandings>
+     *
+     * We will check the "probemSummaryInfo" json objects for "score" properties, fetch them, reformat them, and
+     * put them back in the json as Strings.
+     * 
+     * It should be noted that XML.toJSONObject() does have a mechansism to convert ALL values to Strings, but we
+     * do not want that.  We wish to keep other numeric properties as numbers and booleans and whatnot.
+     *
+     * @param xmlJSONObj The main JSONObject obtained from XML.toJSONObject()
+     */
+    private void changeScoresToStrings(JSONObject xmlJSONObj) {
+        JSONObject currentObj = xmlJSONObj;
+
+        String CONTEST_STANDINGS = "contestStandings";
+        String TEAM_STANDING = "teamStanding";
+
+        // Find top level
+        currentObj = currentObj.optJSONObject(CONTEST_STANDINGS);
+        if (currentObj == null) {
+            logger.warning(CONTEST_STANDINGS + " object not found in standings XML");
+            return;
+        }
+        Object teamStandings = currentObj.opt(TEAM_STANDING);
+        
+        // if there's more than one teamStanding, it's in a JSONArray
+        if(teamStandings instanceof JSONArray) {
+        	JSONArray jArray = (JSONArray)teamStandings;
+        	int nStandings = jArray.length();
+        	for(int idx = 0; idx < nStandings; idx++) {
+                fixProblemSummaryInfo(jArray.optJSONObject(idx));
+            }
+        } else if(teamStandings instanceof JSONObject){
+            // Only one teamStandings
+            fixProblemSummaryInfo((JSONObject) teamStandings);
+        }
+    }
+
+    /**
+     * Iterates through a (possible) array of a teamStanding's problemSummaryInfo's and change the "score" property
+     * to a string.
+     *
+     * @param teamStanding - use this teamStanding's problemSummaryInfo's
+     */
+    void fixProblemSummaryInfo(JSONObject teamStanding) {
+        String PROBLEM_SUMMARY_INFO = "problemSummaryInfo";
+
+        // The teamStanding record has the total score in it, so it has to be fixed as well
+        fixScore(teamStanding);
+        
+        // Find childElement that contains the itemElement
+        Object psis = teamStanding.opt(PROBLEM_SUMMARY_INFO);
+
+        if(psis instanceof JSONArray) {
+        	JSONArray jArray = (JSONArray)psis;
+        	int nStandings = jArray.length();
+        	for(int idx = 0; idx < nStandings; idx++) {
+                fixScore(jArray.optJSONObject(idx));
+            }
+        } else if(psis instanceof JSONObject) {
+            fixScore((JSONObject)psis);
+        }
+    }
+
+    /**
+     * Check if the supplied ProblemSummaryInfo contains a score key that is a double, if so,
+     * convert it to string.
+     * 
+     * @param psi - the ProblemSummaryInfo of interest
+     */
+    void fixScore(JSONObject psi) {
+        String SCORE_PROPERTY = "score";
+        
+        try {
+            double score = psi.getDouble(SCORE_PROPERTY);
+            String formattedScore = Utilities.formatScore(score);
+            // Overwrite existing property with string version for formatted score.
+            psi.put(SCORE_PROPERTY, formattedScore);
+        } catch(Exception e) {
+            // If any exception occurs, that is, the property isn't there, or it's not a double,
+            // just leave it as is - this would be the normal case for non-scoring contests.
+        } 
+    }
+    
 	/**
 	 * Returns the flag indicating whether the cached copy of the contest standings are current (true),
 	 * or instead that some event has occured which potentially makes the standings out of date (false).

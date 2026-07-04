@@ -53,6 +53,9 @@ public class HTTPSSecurity {
             SSLContext.setDefault(ctx);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            // This is for Kattis -- JB
+//            conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:221.0) Gecko/20100101 Firefox/31.0");
+
             if (conn instanceof HttpsURLConnection) {
                 ((HttpsURLConnection) conn).setHostnameVerifier(new AllHostnameVerifier());
                 ((HttpsURLConnection) conn).setSSLSocketFactory(ctx.getSocketFactory());

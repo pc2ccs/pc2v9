@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -33,6 +34,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountNameCaseComparator;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.core.list.StringToDoubleComparator;
 import edu.csus.ecs.pc2.core.list.StringToNumberComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -236,17 +238,38 @@ public class RunsTablePane extends JPanePlugin {
         try {
             boolean autoJudgedRun = isAutoJudgedRun(run);
 
+            boolean isScoring = getContest().getContestInformation().isScoreboardTypeScore();
             int cols = runTableModel.getColumnCount();
+            // Add another column for score
+            if(isScoring) {
+                cols++;
+            }
             Object[] s = new Object[cols];
+            ContestInformation contestInformation = getContest().getContestInformation();
+
+            // Figure out what goes in time "Time" / "Score" column
+            JudgementRecord jrec = run.getJudgementRecord();
+            String score = "0";
+
+            if(isScoring) {
+                if(jrec != null) {
+                    score = Utilities.formatScore(jrec.getScore());
+                } else {
+                    score = "0";
+                }
+            }
 
             int idx = 0;
 
             if (usingFullColumns) {
-//              Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS" };
+//              Object[] fullColumns = { "Site", "Team", "Run Id", "Time", ["Score",]"Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS" };
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = Integer.toString(run.getNumber());
                 s[idx++] = Long.toString(run.getElapsedMins());
+                if(isScoring) {
+                    s[idx++] = score;
+                }
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = isJudgementSuppressed(run);
                 s[idx++] = getProblemTitle(run.getProblemId());
@@ -255,11 +278,14 @@ public class RunsTablePane extends JPanePlugin {
                 s[idx++] = getLanguageTitle(run.getLanguageId());
                 s[idx++] = run.getSystemOS();
             } else if (showJudgesInfo) {
-//              Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS" };
+//              Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", ["Score",]"Status", "Problem", "Balloon", "Language", "OS" };
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = Integer.toString(run.getNumber());
                 s[idx++] = Long.toString(run.getElapsedMins());
+                if(isScoring) {
+                    s[idx++] = score;
+                }
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = getProblemTitle(run.getProblemId());
                 s[idx++] = getBalloonColor(run);
@@ -267,11 +293,14 @@ public class RunsTablePane extends JPanePlugin {
                 s[idx++] = run.getSystemOS();
 
             } else if (usingTeamColumns) {
-//              Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language" };
+//              Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", ["Score",]"Status", "Balloon", "Language" };
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = Integer.toString(run.getNumber());
                 s[idx++] = getProblemTitle(run.getProblemId());
                 s[idx++] = Long.toString(run.getElapsedMins());
+                if(isScoring) {
+                    s[idx++] = score;
+                }
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = getBalloonColor(run);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
@@ -788,14 +817,72 @@ public class RunsTablePane extends JPanePlugin {
         });
     }
 
+    /**
+     * Return headers for the run table for admins (everything).
+     *
+     * @param isPointScoring whether to include "Score" in the header.
+     * @return array of Object (Strings, really) for column headers
+     */
+    private Object[] getFullHeaders(boolean isPointScoring) {
+        Object[] headersPassFail = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS", "ElementID" };
+        Object[] headersPointScoring = { "Site", "Team", "Run Id", "Time", "Score", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS", "ElementID" };
+        Object[] headers;
+
+        if(isPointScoring) {
+            headers = headersPointScoring;
+        } else {
+            headers = headersPassFail;
+        }
+        return(headers);
+    }
+
+    /**
+     * Return headers for the run table for teams.
+     *
+     * @param isPointScoring whether to include "Score" in the header.
+     * @return array of Object (Strings, really) for column headers
+     */
+    private Object[] getTeamHeaders(boolean isPointScoring) {
+        Object[] headersPassFail = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language", "ElementID" };
+        Object[] headersPointScoring = { "Site", "Run Id", "Problem", "Time", "Score", "Status", "Balloon", "Language", "ElementID" };
+        Object[] headers;
+
+        if(isPointScoring) {
+            headers = headersPointScoring;
+        } else {
+            headers = headersPassFail;
+        }
+        return(headers);
+    }
+
+    /**
+     * Return headers for the run table for teams.
+     *
+     * @param isPointScoring whether to include "Score" in the header.
+     * @return array of Object (Strings, really) for column headers
+     */
+    private Object[] getNoJudgeInfoHeaders(boolean isPointScoring) {
+        Object[] headersPassFail = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS", "ElementID" };
+        Object[] headersPointScoring = { "Site", "Team", "Run Id", "Time", "Score", "Status", "Problem", "Balloon", "Language", "OS", "ElementID" };
+        Object[] headers;
+
+        if(isPointScoring) {
+            headers = headersPointScoring;
+        } else {
+            headers = headersPassFail;
+        }
+        return(headers);
+    }
+
     private void resetRunsListBoxColumns() {
 
         runTable.removeAll();
 
-        Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS", "ElementID" };
-        Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS", "ElementID" };
-        Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language", "ElementID" };
         Object[] columns;
+
+        boolean isPointScoring = getContest().getContestInformation().isScoreboardTypeScore();
+        // This is just a default since
+        int scoreColumn = -1;
 
         usingTeamColumns = false;
         usingFullColumns = false;
@@ -803,12 +890,21 @@ public class RunsTablePane extends JPanePlugin {
         // Determine which headers we want based on type of account making request.
         if (isTeam(getContest().getClientId())) {
             usingTeamColumns = true;
-            columns = teamColumns;
+            columns = getTeamHeaders(isPointScoring);
         } else if (!showJudgesInfo) {
-            columns = fullColumnsNoJudge;
+            columns = getNoJudgeInfoHeaders(isPointScoring);
         } else {
             usingFullColumns = true;
-            columns = fullColumns;
+            columns = getFullHeaders(isPointScoring);
+        }
+        // Figure out where the Score goes
+        if(isPointScoring) {
+            for(int iCol = 0; iCol < columns.length; iCol++) {
+                if(columns[iCol].toString().equals("Score")) {
+                    scoreColumn = iCol;
+                    break;
+                }
+            }
         }
         runTableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -837,32 +933,43 @@ public class RunsTablePane extends JPanePlugin {
         ((DefaultTableCellRenderer)runTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
         runTable.setRowHeight(runTable.getRowHeight() + VERT_PAD);
 
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
+        runTable.getColumnModel().getColumn(scoreColumn).setCellRenderer(rightRenderer);
 
         StringToNumberComparator numericStringSorter = new StringToNumberComparator();
         AccountNameCaseComparator accountNameSorter = new AccountNameCaseComparator();
 
-        int idx = 0;
+        int sortKeyOffset = 0;
+
+        if(isPointScoring) {
+            trs.setComparator(scoreColumn, new StringToDoubleComparator());
+            sortKeyOffset = 1;
+        }
 
         if (isTeam(getContest().getClientId())) {
 
-//            Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language" };
+//            Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", ["Score",]"Status", "Balloon", "Language" };
 
             // These are in column order - omitted ones are straight string compare
             trs.setComparator(0, accountNameSorter);
             trs.setComparator(1, numericStringSorter);
-            trs.setComparator(3, numericStringSorter);
+            trs.setComparator(3,  numericStringSorter);
             // These are in sort order
+            if(isPointScoring) {
+                sortList.add(new RowSorter.SortKey(scoreColumn, SortOrder.ASCENDING));
+            }
             sortList.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(6, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(4 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(5 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(6 + sortKeyOffset, SortOrder.ASCENDING));
 
         } else if (showJudgesInfo) {
 
-//            Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS" };
+//            Object[] fullColumns = { "Site", "Team", "Run Id", "Time",  ["Score",]"Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS" };
 
             // These are in column order - omitted ones are straight string compare
             trs.setComparator(0, accountNameSorter);
@@ -875,17 +982,20 @@ public class RunsTablePane extends JPanePlugin {
             sortList.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(6, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(7, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(8, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(9, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(10, SortOrder.ASCENDING));
+            if(isPointScoring) {
+                sortList.add(new RowSorter.SortKey(scoreColumn, SortOrder.ASCENDING));
+            }
+            sortList.add(new RowSorter.SortKey(4 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(5 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(6 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(7 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(8 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(9 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(10 + sortKeyOffset, SortOrder.ASCENDING));
 
         } else {
 
-//            Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS" };
+//            Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time",  ["Score",]"Status", "Problem", "Balloon", "Language", "OS" };
 
             // These are in column order - omitted ones are straight string compare
             trs.setComparator(0, accountNameSorter);
@@ -897,11 +1007,14 @@ public class RunsTablePane extends JPanePlugin {
             sortList.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(6, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(7, SortOrder.ASCENDING));
-            sortList.add(new RowSorter.SortKey(8, SortOrder.ASCENDING));
+            if(isPointScoring) {
+                sortList.add(new RowSorter.SortKey(scoreColumn, SortOrder.ASCENDING));
+            }
+            sortList.add(new RowSorter.SortKey(4 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(5 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(6 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(7 + sortKeyOffset, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(8 + sortKeyOffset, SortOrder.ASCENDING));
         }
         trs.setSortKeys(sortList);
         resizeColumnWidth(runTable);

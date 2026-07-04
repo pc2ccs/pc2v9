@@ -2,8 +2,10 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
@@ -61,10 +64,10 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     private boolean respectEOC = false;
 
-    private DefaultStandingsRecordComparator comparator = new DefaultStandingsRecordComparator();
-
     private PermissionList permissionList = new PermissionList();
 
+    private boolean isPointScoring = false;
+    
     /**
      * Return a list of regional winners.
      *
@@ -182,6 +185,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         }
 
         setContest(contest);
+        isPointScoring = contest.getContestInformation().isScoreboardTypeScore();
 
         /*
          * Get all the teams, then create a new vector of only those teams shown on the
@@ -213,7 +217,22 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         for (Account account : accounts) {
             accountList.add(account);
         }
-        comparator.setCachedAccountList(accountList);
+        Comparator<StandingsRecord> comparator;
+
+        // Note: each of DefaultStandingsRecordComparator and DefaultPointScoringStandingsRecordComparator
+        // implements the java.util.Comparator<?> interface.  However, we need additional information in the
+        // comparator for StandingsRecord, namely, the accountList (for looking up names).  This is why we
+        // instantiate each object separately, set the accountlist then assign to src. I suppose we could create
+        // another interface that extends java.util.Comparator<?> without our method to set the cached account list.
+        if(!isPointScoring) {
+            DefaultStandingsRecordComparator srcPassFailRecordComparator = new DefaultStandingsRecordComparator();
+            srcPassFailRecordComparator.setCachedAccountList(accountList);
+            comparator = srcPassFailRecordComparator;
+        } else {
+            DefaultPointScoringStandingsRecordComparator srcPointScoringRecordComparator = new DefaultPointScoringStandingsRecordComparator();
+            srcPointScoringRecordComparator.setCachedAccountList(accountList);
+            comparator = srcPointScoringRecordComparator;
+        }
 
         if (runs == null) {
             runs = ScoreboardUtilities.getGroupFilteredRuns(getContest(), wantedGroups);
@@ -357,14 +376,23 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      */
     boolean isTied(StandingsRecord standingsRecord, StandingsRecord standingsRecord2) {
 
-        if (standingsRecord2.getNumberSolved() != standingsRecord.getNumberSolved()) {
-            return false;
-        }
-        if (standingsRecord2.getPenaltyPoints() != standingsRecord.getPenaltyPoints()) {
-            return false;
-        }
-        if (standingsRecord2.getLastSolved() != standingsRecord.getLastSolved()) {
-            return false;
+        if(isPointScoring) {
+            if(standingsRecord.getScore() != standingsRecord2.getScore()) {
+                return false;
+            }
+            if(standingsRecord.getLastSolved() != standingsRecord2.getLastSolved()) {
+                return false;
+            }
+        } else {
+            if (standingsRecord2.getNumberSolved() != standingsRecord.getNumberSolved()) {
+                return false;
+            }
+            if (standingsRecord2.getPenaltyPoints() != standingsRecord.getPenaltyPoints()) {
+                return false;
+            }
+            if (standingsRecord2.getLastSolved() != standingsRecord.getLastSolved()) {
+                return false;
+            }
         }
         return true;
     }
@@ -482,15 +510,18 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                 ProblemSummaryInfo problemSummaryInfo = summaryRow.get(i + 1);
 
                 if (problemSummaryInfo != null) {
-                    long solveTime = problemSummaryInfo.getSolutionTime();
-                    if (fastestSolved[i] == 0 || solveTime < fastestSolved[i]) {
-                        fastestSolved[i] = solveTime;
-                    }
-                    if (solveTime > lastSolutionTime[i]) {
-                        lastSolutionTime[i] = solveTime;
-                    }
-                    if (problemSummaryInfo.isSolved()) {
-                        numberSolved[i]++;
+                    // Check if solved, even somewhat solved for PS
+                    if(!isPointScoring || problemSummaryInfo.getScore() == 0.0) {
+                        long solveTime = problemSummaryInfo.getSolutionTime();
+                        if (fastestSolved[i] == 0 || solveTime < fastestSolved[i]) {
+                            fastestSolved[i] = solveTime;
+                        }
+                        if (solveTime > lastSolutionTime[i]) {
+                            lastSolutionTime[i] = solveTime;
+                        }
+                        if (problemSummaryInfo.isSolved()) {
+                            numberSolved[i]++;
+                        }
                     }
                     numberAttempts[i] += problemSummaryInfo.getNumberSubmitted();
                 }
@@ -503,6 +534,8 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             IMemento problemMemento = summaryMememento.createChild("problem");
             problemMemento.putInteger("id", id);
             problemMemento.putString("title", problems[i].getDisplayName());
+            problemMemento.putString("color", problems[i].getColorName());
+            problemMemento.putString("rgb", problems[i].getColorRGB());
 
             problemMemento.putLong("attempts", numberAttempts[i]);
             grandTotals.incrementTotalAttempts(numberAttempts[i]);
@@ -533,7 +566,8 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
 
-        String teamVarDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
+        ContestInformation contestInformation = contest.getContestInformation();
+        String teamVarDisplayString = contestInformation.getTeamScoreboardDisplayFormat();
         Account account = contest.getAccount(standingsRecord.getClientId());
         HashSet<ElementId> groups = account.getGroupIds();
 
@@ -541,7 +575,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
         standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
 
-        standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
+        if(contestInformation.isScoreboardTypeScore()) {
+            standingsRecordMemento.putString("score", Utilities.formatScore(standingsRecord.getScore()));
+        } else {
+            standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
+        }
         standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
         standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
         standingsRecordMemento.putInteger("index", indexNumber);
@@ -633,7 +671,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                     // old ProblemScoreRecord problemScoreRecord = new ProblemScoreRecord(teamProblemRuns, problem, properties);
                     ProblemScoreRecord problemScoreRecord = createProblemScoreRecord(teamProblemRuns, problem, properties);
 
-                    standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemScoreRecord.getPoints());
+                    if(isPointScoring) {
+                        standingsRecord.setScore(standingsRecord.getScore() + problemScoreRecord.getScore());
+                    } else {
+                        standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemScoreRecord.getPoints());
+                    }
 
                     if (problemScoreRecord.getSolutionTime() > standingsRecord.getLastSolved()) {
                         standingsRecord.setLastSolved(problemScoreRecord.getSolutionTime());
@@ -659,10 +701,12 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                 }
                 problemNumber++;
             }
-            long penaltyPoints = standingsRecord.getPenaltyPoints();
-            int scoreAdjustment = account.getScoringAdjustment();
-            if (penaltyPoints > 0 && scoreAdjustment != 0) {
-                standingsRecord.setPenaltyPoints(Math.max(penaltyPoints+scoreAdjustment,0));
+            if(!isPointScoring) {
+                long penaltyPoints = standingsRecord.getPenaltyPoints();
+                int scoreAdjustment = account.getScoringAdjustment();
+                if (penaltyPoints > 0 && scoreAdjustment != 0) {
+                    standingsRecord.setPenaltyPoints(Math.max(penaltyPoints+scoreAdjustment,0));
+                }
             }
             standingsRecords[standRecCount] = standingsRecord;
             standRecCount++;
@@ -726,6 +770,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         int numberJudged = 0;
 
         boolean ignoreSub = false;
+        double score = 0;
 
         Arrays.sort(runs, new RunCompartorByElapsed());
 
@@ -742,11 +787,27 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                 numberPending++;
             }
 
-            if (run.isSolved() && solutionTime == 0) {
-                // set to solved, set solution time
-                solved = true;
-                solutionTime = run.getElapsedMins();
-                solvingRun = run;
+            if (run.isSolved()) {
+                if(isPointScoring) {
+                    // Point scoring works somewhat differently, in that there may be more than one
+                    // accepted solution.  We look for the one with the biggest score.
+                    JudgementRecord jr = run.getJudgementRecord();
+                    if(jr != null) {
+                        double dScore;
+                        dScore = jr.getScore();
+                        if(dScore > score) {
+                            score = dScore;
+                            solutionTime = run.getElapsedMins();
+                            solvingRun = run;
+                            solved = true;
+                        }
+                    }
+                } else if(solutionTime == 0) {
+                    // set to solved, set solution time
+                    solved = true;
+                    solutionTime = run.getElapsedMins();
+                    solvingRun = run;
+                }
             }
 
             if (run.isJudged() && (!solved)) {
@@ -785,8 +846,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                     (securityViolationBeforeYes * getSVPenalty(properties));
         }
 
-        return new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes, numberPending, numberJudged);
-
+        ProblemScoreRecord psr = new ProblemScoreRecord(solved, solvingRun, problem, points, solutionTime, numberSubmissions, submissionsBeforeYes, numberPending, numberJudged);
+        if(isPointScoring) {
+            psr.setScore(score);
+        }
+        return(psr);
     }
 
     private int getCEPenalty(Properties properties) {
@@ -822,6 +886,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         summaryInfoMemento.putString("shortName", summaryInfo.getShortName());
         summaryInfoMemento.putInteger("attempts", summaryInfo.getNumberSubmitted());
         summaryInfoMemento.putInteger("points", summaryInfo.getPenaltyPoints());
+        summaryInfoMemento.putString("score", Utilities.formatScore(summaryInfo.getScore()));
         summaryInfoMemento.putLong("solutionTime", summaryInfo.getSolutionTime());
         summaryInfoMemento.putBoolean("isSolved", summaryInfo.isSolved());
         summaryInfoMemento.putBoolean("isPending", summaryInfo.isUnJudgedRuns());
@@ -834,7 +899,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         summaryInfo.setNumberSubmitted(problemScoreRecord.getNumberSubmissions());
         summaryInfo.setJudgedRunCount(problemScoreRecord.getNumberJudgedSubmissions());
         summaryInfo.setPendingRunCount(problemScoreRecord.getNumberPendingSubmissions());
-        summaryInfo.setPenaltyPoints((int) problemScoreRecord.getPoints());
+        if(isPointScoring) {
+            summaryInfo.setScore(problemScoreRecord.getScore());
+        } else {
+            summaryInfo.setPenaltyPoints((int) problemScoreRecord.getPoints());
+        }
         summaryInfo.setSolutionTime(problemScoreRecord.getSolutionTime());
         summaryInfo.setUnJudgedRuns(false);
         summaryInfo.setSolved(problemScoreRecord.isSolved());
@@ -1006,6 +1075,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
         memento.putString("systemURL", versionInfo.getSystemURL());
         memento.putString("currentDate", new Date().toString());
+        memento.putString("scoreType", contestInformation.getScoreboardType().toString().toLowerCase());
         memento.putString("generatorId", "$Id$");
 
         return memento;

@@ -126,7 +126,7 @@ public class CLICSScoreboard {
         List<TeamStanding> standings = contestStandings.getTeamStandings();
         if(standings != null) {
             for (TeamStanding teamStanding : standings) {
-                rowsArray.add(new CLICSScoreboardRow(probEleToShortName, teamStanding));
+                rowsArray.add(new CLICSScoreboardRow(model, probEleToShortName, teamStanding));
             }
             rows = rowsArray.toArray(new CLICSScoreboardRow[0]);
         } else {

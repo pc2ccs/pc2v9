@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 
 /**
@@ -23,9 +24,8 @@ public class CLICSScore {
     @JsonProperty
     private int total_time;
 
-// Not used for pass/fail contest and we don't want it appearing in the json
-//    @JsonProperty
-//    private int score;
+    @JsonProperty
+    private Double score;
 
     @JsonProperty
     private int time;
@@ -44,14 +44,23 @@ public class CLICSScore {
      * @param teamStanding The team's scoring information
      * @throws NumberFormatException if bad scores are in the standings
      */
-    public CLICSScore(TeamStanding teamStanding) {
+    public CLICSScore(IInternalContest model, TeamStanding teamStanding) {
         num_solved = Utilities.nullSafeToInt(teamStanding.getSolved(), 0);
-        total_time = Integer.parseInt(teamStanding.getPoints());
+        total_time = Utilities.nullSafeToInt(teamStanding.getPoints(), 0);
+        boolean isPointScoring = model.getContestInformation().isScoreboardTypeScore();
         if(num_solved > 0) {
             // Problem solution time is in minutes.
             time = Integer.parseInt(teamStanding.getLastSolved());
+            if(isPointScoring) {
+                score = Double.parseDouble(teamStanding.getScore());
+            }
+        }
+        if(score == null && isPointScoring) {
+            // Required for point scoring
+            score = Double.valueOf(0);
         }
     }
+
 
     public int getNum_solved() {
         return num_solved;
@@ -64,5 +73,4 @@ public class CLICSScore {
     public int getTime() {
         return time;
     }
-
 }

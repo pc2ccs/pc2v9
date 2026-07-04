@@ -1,0 +1,69 @@
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+package edu.csus.ecs.pc2.imports.ccs;
+
+import java.io.Serializable;
+
+/**
+ * Information about a specific test case
+ *
+ * @author John Buck, PC^2 Team, pc2@ecs.csus.edu
+ */
+public class TestCaseInfo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    public static final String TEST_CASE_INPUT_EXTENSION = ".in";
+    public static final String TEST_CASE_ANSWER_EXTENSION = ".ans";
+
+    private String inputFileName;
+    private String answerFileName;
+    private TestDataGroup group;
+
+    public TestCaseInfo(String inFile, String ansFile, TestDataGroup group) {
+        inputFileName = inFile;
+        answerFileName = ansFile;
+        this.group = group;
+    }
+
+    @Override
+    public String toString() {
+        String groupName;
+        if(group == null) {
+            groupName = "None";
+        } else {
+            groupName = group.getGroupName();
+        }
+        return "group: " + groupName + "; inputFileName: " + inputFileName + "; answerFileName: " + answerFileName;
+    }
+    /**
+     * @return the inputFileName
+     */
+    public String getInputFileName() {
+        return inputFileName;
+    }
+    /**
+     * @param inputFileName the inputFileName to set
+     */
+    public void setInputFileName(String inputFileName) {
+        this.inputFileName = inputFileName;
+    }
+    /**
+     * @return the answerFileName
+     */
+    public String getAnswerFileName() {
+        return answerFileName;
+    }
+    /**
+     * @param answerFileName the answerFileName to set
+     */
+    public void setAnswerFileName(String answerFileName) {
+        this.answerFileName = answerFileName;
+    }
+
+    /**
+     * @return the TestDataGroup where this test case resides
+     */
+    public TestDataGroup getGroup() {
+        return group;
+    }
+}

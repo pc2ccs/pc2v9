@@ -70,6 +70,9 @@ public interface IContestLoader {
     final String CLICS_CONTEST_MEDAL_GOLD = "gold";
     final String CLICS_CONTEST_MEDAL_SILVER = "silver";
     final String CLICS_CONTEST_MEDAL_BRONZE = "bronze";
+    final String CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL = "pass-fail";
+    final String CLICS_CONTEST_SCOREBOARD_TYPE_SCORE = "score";
+
     // This is not currently used, but penalty_time SHOULD be used instead of
     // reading it from properties. It is here for completeness, and, it happens
     // to be a required value in the yaml, but we do not enforce that.
@@ -249,6 +252,8 @@ public interface IContestLoader {
     String SANDBOX_GRACE_TIME = "sandbox-grace-time-secs";
 
     String SANDBOX_INTERACTIVE_GRACE_MULTIPLIER = "sandbox-interactive-time-multiplier";
+
+    String REMOTE_CCS_SETTINGS_KEY = "remote-ccs-settings";
 
     /**
      *

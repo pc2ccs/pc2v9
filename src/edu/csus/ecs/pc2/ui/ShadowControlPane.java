@@ -53,7 +53,8 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.ShadowInformation;
+import edu.csus.ecs.pc2.core.model.RemoteCCSInformation;
+import edu.csus.ecs.pc2.core.model.RemoteCCSInformation.RemoteCCSType;
 import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.IShadowMonitorStatus;
 import edu.csus.ecs.pc2.shadow.MockContestAPIAdapter;
@@ -79,6 +80,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
 
+    // Apparently, for kattis, they want this "", but we're not doing kattis right now -- JB
     private static final String CCS_API_ENDPOINT = "/";
 
     private JPanel buttonPanel = null;
@@ -320,9 +322,10 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
         boolean shadowCheckboxEnabled = getShadowSettingsPane().getShadowModeCheckbox().isSelected();
         boolean shadowDataComplete = verifyShadowControls();
+        boolean shadowCombineScoreboards = getShadowSettingsPane().getCombineScoreboardsCheckbox().isSelected();
 
         if (shadowCheckboxEnabled && shadowDataComplete) {
-            shadowController = new ShadowController(this.getContest(), this.getController(), this, lastToken) ;
+            shadowController = new ShadowController(this.getContest(), this.getController(), this, lastToken, shadowCombineScoreboards) ;
             boolean success = shadowController.start();
             if (success) {
                 currentlyShadowing = true;
@@ -509,7 +512,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                 }
             };
             shadowSettingsPane.getShadowModeCheckbox().addActionListener(actionListener);
-
+            shadowSettingsPane.getCombineScoreboardsCheckbox().addActionListener(actionListener);
         }
         return shadowSettingsPane;
     }
@@ -654,9 +657,9 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private void enableButtons() {
 //        System.out.println ("EnableButtons() called");
 
-        ShadowInformation newChoice = getFromFields();
+        RemoteCCSInformation newChoice = getFromFields();
 
-        if (getCurrentShadowInformation(getContest().getContestInformation()).isSameAs(newChoice)) {
+        if (getCCSShadowInformation(getContest().getContestInformation()).isSameAs(newChoice)) {
             getUpdateButton().setEnabled(false);
             getStartStopButton().setEnabled(true);
             getTestConnectionButton().setEnabled(!currentlyShadowing);
@@ -674,16 +677,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      * @param contestInformation
      * @return
      */
-    private ShadowInformation getCurrentShadowInformation(ContestInformation contestInformation) {
-
-        ShadowInformation newShadowInfo = new ShadowInformation();
-
-        newShadowInfo.setShadowModeEnabled(contestInformation.isShadowMode());
-        newShadowInfo.setRemoteCCSURL(contestInformation.getPrimaryCCS_URL());
-        newShadowInfo.setRemoteCCSLogin(contestInformation.getPrimaryCCS_user_login());
-        newShadowInfo.setRemoteCCSPassword(contestInformation.getPrimaryCCS_user_pw());
-        newShadowInfo.setLastEventID(contestInformation.getLastShadowEventID());
-        return newShadowInfo;
+    private RemoteCCSInformation getCCSShadowInformation(ContestInformation contestInformation) {
+        return(contestInformation.getRemoteCCSInfo(getContest().getClientId().getName()));
     }
 
     private void setupConnectionStatusTable() {
@@ -742,13 +737,14 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
         ContestInformation contestInformation = getContest().getContestInformation();
 
-//        System.out.println ("UpdateGUI(): got the following shadow info:");
-//        System.out.println ("   Shadow Enabled: " + contestInformation.isShadowMode()
-//                          + "\n              URL: " + contestInformation.getPrimaryCCS_URL()
-//                          + "\n            login: " + contestInformation.getPrimaryCCS_user_login()
-//                          + "\n           passwd: " + contestInformation.getPrimaryCCS_user_pw()
-//                          + "\n        lastEvent: " + contestInformation.getLastShadowEventID() );
-//
+//      RemoteCCSInformation ccsInfo = contestInformation.getRemoteCCSInfo(getContest().getClientId().getName());
+//      System.out.println ("UpdateGUI(): got the following remote CCS info:");
+//      System.out.println ("          Enabled: " + ccsInfo.isEnabled()
+//                        + "\n             Type: " + ccsInfo.getType().toString()
+//                        + "\n              URL: " + ccsInfo.getCCS_URL()
+//                        + "\n            login: " + ccsInfo.getCCS_user_login()
+//                        + "\n           passwd: " + ccsInfo.getCCS_user_pw()
+//                        + "\n        lastEvent: " + ccsInfo.getLastEventID());
 
         getStartStopButton().setEnabled(true);
         getUpdateButton().setEnabled(false);
@@ -764,42 +760,45 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         }
 
         updateShadowSettingsPane(currentlyShadowing);
-        lastToken = contestInformation.getLastShadowEventID();
+        RemoteCCSInformation ccsInfo = contestInformation.getRemoteCCSInfo(getContest().getClientId().getName());
+        lastToken = ccsInfo.getLastEventID();
         lastEventTextfield.setText(lastToken);
     }
 
     private void updateShadowSettingsPane(boolean currentlyShadowing) {
 
-        ContestInformation contestInformation = getContest().getContestInformation();
+        RemoteCCSInformation info = getContest().getContestInformation().getRemoteCCSInfo(getContest().getClientId().getName());
 
-        getShadowSettingsPane().getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
-        getShadowSettingsPane().getRemoteCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
-        getShadowSettingsPane().getRemoteCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
-        getShadowSettingsPane().getRemoteCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
-
+        getShadowSettingsPane().getShadowModeCheckbox().setSelected(info.isEnabled());
+        getShadowSettingsPane().getRemoteCCSURLTextfield().setText(info.getCCS_URL());
+        getShadowSettingsPane().getRemoteCCSLoginTextfield().setText(info.getCCS_user_login());
+        getShadowSettingsPane().getRemoteCCSPasswdTextfield().setText(info.getCCS_user_pw());
+        getShadowSettingsPane().getCombineScoreboardsCheckbox().setSelected(info.getType() == RemoteCCSType.COMBINESCOREBOARD);
         // if Shadowing is currently on, do not allow these settings to be changed
         getShadowSettingsPane().getRemoteCCSURLTextfield().setEditable(!currentlyShadowing);
         getShadowSettingsPane().getRemoteCCSLoginTextfield().setEditable(!currentlyShadowing);
         getShadowSettingsPane().getRemoteCCSPasswdTextfield().setEditable(!currentlyShadowing);
-        lastEventTextfield.setEditable(!currentlyShadowing);
+        getShadowSettingsPane().getCombineScoreboardsCheckbox().setEnabled(!currentlyShadowing);
+        getShadowSettingsPane().setTeamIdOffset(info.getTeamOffset());
+       lastEventTextfield.setEditable(!currentlyShadowing);
     }
 
     /**
-     * Returns a new ShadowInformation object containing data fetched from this pane's fields.
-     * @return a ShadowInformation object
+     * Returns a new RemoteCCSInformation object containing data fetched from this pane's fields.
+     * @return a RemoteCCSInformation object
      */
-    protected ShadowInformation getFromFields() {
+    protected RemoteCCSInformation getFromFields() {
 
-        ShadowInformation newShadowInformation = new ShadowInformation();
-
-        //fill in Shadow Mode information from this pane
-        newShadowInformation.setShadowModeEnabled(getShadowSettingsPane().getShadowModeCheckbox().isSelected());
-        newShadowInformation.setRemoteCCSURL(getShadowSettingsPane().getRemoteCCSURLTextfield().getText());
-        newShadowInformation.setRemoteCCSLogin(getShadowSettingsPane().getRemoteCCSLoginTextfield().getText());
-        newShadowInformation.setRemoteCCSPassword(getShadowSettingsPane().getRemoteCCSPasswdTextfield().getText());
-        newShadowInformation.setLastEventID(lastEventTextfield.getText());
-
-        return (newShadowInformation);
+        RemoteCCSInformation newCCSInformation = new RemoteCCSInformation(
+                getContest().getClientId().getName(),
+                getShadowSettingsPane().getCombineScoreboardsCheckbox().isSelected() ? RemoteCCSType.COMBINESCOREBOARD : RemoteCCSType.SHADOW,
+                getShadowSettingsPane().getShadowModeCheckbox().isSelected(),
+                getShadowSettingsPane().getRemoteCCSURLTextfield().getText(),
+                getShadowSettingsPane().getRemoteCCSLoginTextfield().getText(),
+                getShadowSettingsPane().getRemoteCCSPasswdTextfield().getText(),
+                getShadowSettingsPane().getTeamIdOffset());
+        newCCSInformation.setLastEventID(lastEventTextfield.getText());
+        return (newCCSInformation);
     }
 
     /**
@@ -808,29 +807,30 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      *
      */
     private void updateContestInformation() {
-        ShadowInformation shadowInfo = getFromFields();
+        RemoteCCSInformation ccsInfo = getFromFields();
 
 //        System.out.println ("UpdateContestInformation(): got the following shadow info:");
-//        System.out.println ("   Shadow Enabled: " + shadowInfo.isShadowModeEnabled()
-//                          + "\n              URL: " + shadowInfo.getRemoteCCSURL()
-//                          + "\n            login: " + shadowInfo.getRemoteCCSLogin()
-//                          + "\n           passwd: " + shadowInfo.getRemoteCCSPassword()
-//                          + "\n        lastEvent: " + shadowInfo.getLastEventID());
+//        System.out.println ("          Enabled: " + ccsInfo.isEnabled()
+//                          + "\n             Type: " + ccsInfo.getType().toString()
+//                          + "\n              URL: " + ccsInfo.getCCS_URL()
+//                          + "\n            login: " + ccsInfo.getCCS_user_login()
+//                          + "\n           passwd: " + ccsInfo.getCCS_user_pw()
+//                          + "\n        lastEvent: " + ccsInfo.getLastEventID());
 //
-//        System.out.println ("UpdateContestInformation(): savedContestInformation contains the following shadow info:");
-//        System.out.println ("   Shadow Enabled: " + savedContestInformation.isShadowMode()
-//                          + "\n              URL: " + shadowInfo.getRemoteCCSURL()
-//                          + "\n            login: " + shadowInfo.getRemoteCCSLogin()
-//                          + "\n           passwd: " + shadowInfo.getRemoteCCSPassword()
-//                          + "\n        lastEvent: " + shadowInfo.getLastEventID());
-
+//      if(savedContestInformation!= null) {
+//      RemoteCCSInformation curInfo = savedContestInformation.getRemoteCCSInfo(getContest().getClientId().getName());
+//      System.out.println ("UpdateContestInformation(): savedContestInformation contains the following shadow info:");
+//      System.out.println ("          Enabled: " + curInfo.isEnabled()
+//                        + "\n             Type: " + curInfo.getType().toString()
+//                        + "\n              URL: " + curInfo.getCCS_URL()
+//                        + "\n            login: " + curInfo.getCCS_user_login()
+//                        + "\n           passwd: " + curInfo.getCCS_user_pw()
+//                        + "\n        lastEvent: " + curInfo.getLastEventID());
+//  } else {
+//      System.out.println ("UpdateContestInformation(): there is no saveContestInformation (null)");
+//  }
         ContestInformation contestInfo = getContest().getContestInformation();
-
-        contestInfo.setShadowMode(shadowInfo.isShadowModeEnabled());
-        contestInfo.setPrimaryCCS_URL(shadowInfo.getRemoteCCSURL());
-        contestInfo.setPrimaryCCS_user_login(shadowInfo.getRemoteCCSLogin());
-        contestInfo.setPrimaryCCS_user_pw(shadowInfo.getRemoteCCSPassword());
-        contestInfo.setLastShadowEventID(shadowInfo.getLastEventID());
+        contestInfo.setRemoteCCSInfo(getContest().getClientId().getName(), ccsInfo);
 
         getController().updateContestInformation(contestInfo);
     }
@@ -874,10 +874,10 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
     private JButton getCompareRunsButton() {
         if (compareRunsButton == null) {
-        	compareRunsButton = new JButton("Compare Runs");
-        	compareRunsButton.setMnemonic(KeyEvent.VK_R);
-        	compareRunsButton.setToolTipText("Display run comparison results");
-        	compareRunsButton.addActionListener(new java.awt.event.ActionListener() {
+            compareRunsButton = new JButton("Compare Runs");
+            compareRunsButton.setMnemonic(KeyEvent.VK_R);
+            compareRunsButton.setToolTipText("Display run comparison results");
+            compareRunsButton.addActionListener(new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (shadowController==null) {
@@ -910,9 +910,9 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
 
-                	SwingUtilities.invokeLater(new Runnable() {
+                    SwingUtilities.invokeLater(new Runnable() {
 
-                		@Override
+                        @Override
                         public void run() {
 
                             if (shadowController==null) {
@@ -927,8 +927,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                 shadowCompareScoreboardFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                                 shadowCompareScoreboardFrame.setVisible(true);
                             }
-                		}
-                	});
+                        }
+                    });
                 };
 
             });
@@ -950,11 +950,11 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
                                IRemoteContestAPIAdapter remoteContestAPIAdapter = null;
                                 try {
-                                    ShadowInformation shadowInfo = getCurrentShadowInformation(getContest().getContestInformation());
-                                    String remoteURLString = shadowInfo.getRemoteCCSURL();
+                                    RemoteCCSInformation ccsInfo = getCCSShadowInformation(getContest().getContestInformation());
+                                    String remoteURLString = ccsInfo.getCCS_URL();
                                     URL remoteURL = new URL(remoteURLString);
-                                    String remoteLogin = shadowInfo.getRemoteCCSLogin();
-                                    String remotePW = shadowInfo.getRemoteCCSPassword();
+                                    String remoteLogin = ccsInfo.getCCS_user_login();
+                                    String remotePW = ccsInfo.getCCS_user_pw();
                                     remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteURL, remoteLogin, remotePW);
                                     boolean isConnected = remoteContestAPIAdapter.testConnection();
                                     if (isConnected) {
@@ -968,7 +968,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                     // infoStr is supposed to be non-null all the time, but let's be sure
                                     if(infoStr != null && !infoStr.isEmpty()) {
                                         addConnectTableEntry(ShadowStatus.INFO, infoStr);
-                                        getController().getLog().info("Shadow EventFeed: " + infoStr);
+                                        getController().getLog().info(ccsInfo.getType().toString() + " EventFeed: " + infoStr);
                                     }
                                 } catch (Exception e) {
                                     showErrorMessage("Exception attempting to test connection to remote system:\n" + e, "Exception in connecting");

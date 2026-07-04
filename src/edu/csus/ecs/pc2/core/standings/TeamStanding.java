@@ -14,12 +14,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
- * This class defines an entry (one for each team) which appears in a List of TeamStandings in a {@link ContestStandings} object.  
+ * This class defines an entry (one for each team) which appears in a List of TeamStandings in a {@link ContestStandings} object.
  * (A {@link ContestStandings} consists of a single {@link StandingsHeader} followed by a List of {@link TeamStanding}s.)
  * This class is used as a target during conversion (deserialization) of an XML representation of a TeamStanding into a POJO.
- * 
- * Note that the @JsonIgnoreProperties(ignoreUnknown=true) annotation is supplied in the event the XML returned by the 
- * DefaultScoringAlgorithm class (which is frequently converted to a ContestStandings object using, for example, 
+ *
+ * Note that the @JsonIgnoreProperties(ignoreUnknown=true) annotation is supplied in the event the XML returned by the
+ * DefaultScoringAlgorithm class (which is frequently converted to a ContestStandings object using, for example,
  * the Jackson XMLMapper class), contains attributes which this class doesn't define.
  *
  * @author Douglas A. Lane, John Clevenger, <pc2@ecs.csus.edu>
@@ -49,6 +49,9 @@ public class TeamStanding {
 
     @XmlAttribute
     private String points;
+
+    @XmlAttribute
+    private String score;
 
     @XmlAttribute
     private String problemsAttempted;
@@ -266,8 +269,18 @@ public class TeamStanding {
     public void setTotalAttempts(String totalAttempts) {
         this.totalAttempts = totalAttempts;
     }
-    
 
+    /**
+     * @return the score
+     */
+    public String getScore() {
+        return score;
+    }
 
-
+    /**
+     * @param score the score to set
+     */
+    public void setScore(String score) {
+        this.score = score;
+    }
 }

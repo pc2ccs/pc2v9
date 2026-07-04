@@ -74,7 +74,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     // generica contest loader
     private IContestLoader loader = new ContestSnakeYAMLLoader();
-    
+
     // specific snake loader
     private ContestSnakeYAMLLoader snake = new ContestSnakeYAMLLoader();
 
@@ -88,6 +88,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        ensureStaticLog();
         super.setUp();
 
         // setDebugMode(true); // debug mode
@@ -129,7 +130,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     public void testLoaderMethods() throws Exception {
 
         String yamlFilename= getTestFilename("contest.jt.yaml");
-        
+
 //        editFile(yamlFilename);
 
         String[] contents = Utilities.loadFile(yamlFilename);
@@ -300,10 +301,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         IInternalContest contest = loader.fromYaml(null, lines, getDataDirectory());
 
         assertNotNull(contest);
-        
+
 //        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
         assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
-        
+
 
         Problem[] problems = contest.getProblems();
 
@@ -354,7 +355,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertJudgementTypes(problem2, false, true, true);
     }
-    
+
 
 
     /**
@@ -428,7 +429,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
          * Test the start number for site 3 starts at 300.
          */
         Vector<Account> site3teams = contest.getAccounts(Type.TEAM, 3);
-        Account[] account3 = (Account[]) site3teams.toArray(new Account[site3teams.size()]);
+        Account[] account3 = site3teams.toArray(new Account[site3teams.size()]);
         for (Account account : account3) {
             assertTrue("Expecting team numbers above 299 on site 3", account.getClientId().getClientNumber() > 299);
         }
@@ -439,7 +440,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
 //        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
-        
+
         Problem[] problems = contest.getProblems();
 
         assertEquals("Number of problems", 5, problems.length);
@@ -470,7 +471,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     }
 
     /**
-     * 
+     *
      * @param date
      * @return empty string if date is null, other wise
      */
@@ -559,7 +560,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
          * Test the start number for site 3 starts at 300.
          */
         Vector<Account> site3teams = contest.getAccounts(Type.TEAM, 3);
-        Account[] account3 = (Account[]) site3teams.toArray(new Account[site3teams.size()]);
+        Account[] account3 = site3teams.toArray(new Account[site3teams.size()]);
         for (Account account : account3) {
             assertTrue("Expecting team numbers above 299 on site 3", account.getClientId().getClientNumber() > 299);
         }
@@ -567,7 +568,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Number of accounts", 85, accounts.length);
 
         checkPermissions(accounts);
-        
+
         assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
 //        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
@@ -676,7 +677,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // startExplorer(getDataDirectory());
 
          // editFile(getDataDirectory()+"/"+IContestLoader.DEFAULT_CONTEST_YAML_FILENAME);
-        
+
         assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
 //        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
@@ -734,11 +735,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        editFile(getDataDirectory() + "/" + firstProblem.getShortName() + "/" + IContestLoader.DEFAULT_PROBLEM_YAML_FILENAME);
 
         assertTrue ("Expecting problem "+firstProblem.getShortName()+" set stopOnFirstFailedTestCase", firstProblem.isStopOnFirstFailedTestCase());
-        
+
         assertFalse ("Expecting problem "+problems[3].getShortName()+" set stopOnFirstFailedTestCase", problems[3].isStopOnFirstFailedTestCase());
 
         String[] basenames = { "bozo", "smart", "sumit" };
-        
+
         assertEquals("Judge's config path ",getDataDirectory(), contest.getContestInformation().getJudgeCDPBasePath());
 //        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
@@ -811,33 +812,33 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
 
     }
-    
+
     public void testCCSLanguageLoad() throws Exception {
-        
+
         String sampleContestDirName = "ccs1";
         String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
-        
+
         IInternalContest contest = snake.fromYaml(null, dirname, false);
 
 //        from ccs 1:
 //        languages:
 //            - name: C++
-//              compiler: /usr/bin/g++  
-//              compiler-args: -O2 -Wall -o a.out -static {files} 
+//              compiler: /usr/bin/g++
+//              compiler-args: -O2 -Wall -o a.out -static {files}
 //
 //            - name: C
 //              compiler: /usr/bin/gcc
 //              compiler-args: -O2 -Wall -std=gnu99 -o a.out -static {files} -lm
-//            
+//
 //            - name: Java
 //              compiler: /usr/bin/javac
 //              compiler-args: -O {files}
 //              runner: /usr/bin/java
 //              runner-args:
-        
+
         Language[] languages = contest.getLanguages();
         assertEquals("Expected 3 languages", 3, languages.length);
-        
+
         for (Language language : languages) {
             switch (language.getDisplayName()){
                 case "Java":
@@ -929,7 +930,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         SampleContest sample = new SampleContest();
         IInternalContest contest = sample.createContest(1, 1, 12, 22, true);
-        
+
         assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
         Problem[] contestProblems = contest.getProblems();
@@ -1109,18 +1110,18 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         ensureDirectory(getDataDirectory(this.getName()));
         // startExplorer(getDataDirectory(this.getName()));
 
-        
-        Map<String, Object> map = snake.loadYaml(contestYamlFilename);
+
+        Map<String, Object> map = ContestImportUtilities.loadYaml(contestYamlFilename);
 
         // System.out.println("object is type "+out.getClass().getName());
 
         assertNotNull("Expecting loaded map", map);
 
         Set<String> set = map.keySet();
-        String[] list = (String[]) set.toArray(new String[set.size()]);
+        String[] list = set.toArray(new String[set.size()]);
 
         assertTrue("Expecting more than one element ", list.length > 9);
-        
+
     }
 
     public void testReplayLoad() throws Exception {
@@ -1204,9 +1205,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         // Load data files
         try {
-            
+
             contest = loader.fromYaml(null, dirname, true);
-        
+
         } catch (YamlLoadException e) {
 //            System.out.println("failed loading in file "+e.getFilename());
 //            editFile(e.getFilename());
@@ -1220,11 +1221,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             assertEquals("Expecting loaded answer files ", 12, dataFiles.getJudgesAnswerFiles().length);
             assertEquals("Expecting loaded data files ", 12, dataFiles.getJudgesDataFiles().length);
             SerializedFile[] ansfiles = dataFiles.getJudgesAnswerFiles();
-            
+
             for (SerializedFile serializedFile : ansfiles) {
                 assertTrue("Expecting Loaded filee", serializedFile.getBuffer().length != 0);
             }
-            
+
         }
 
         // Do not load data files
@@ -1238,9 +1239,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             for (SerializedFile serializedFile : ansfiles) {
                 assertTrue("Expecting external answer file ", serializedFile.getBuffer().length == 0);
             }
-            
+
         }
-        
+
         assertNoAutoStart(contest);
     }
 
@@ -1288,7 +1289,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             assertEquals("Problem letter ", letterList[idx], shortName);
             idx++;
         }
-        
+
         assertAutoStart(contest, "2011-02-04 01:23", false);
 
     }
@@ -1296,7 +1297,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     /**
      * Tests that the input_validator keys "defaultInputValidator", "vivaPattern", customInputValidatorProg", and
      * "customInputValidatorCmd" correctly assign the values specified in the problem.yaml file to a problem.
-     * 
+     *
     * @throws Exception if the value associated with any of the above keys is not properly loaded into the problem.
      */
     public void testInputValidatorKeys() throws Exception {
@@ -1311,7 +1312,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         //check that the "defaultInputValidator" key worked
          assertEquals("Default custom validator setting: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
-         
+
          //check that the "vivaPattern" key worked
          String expectedPattern = "{x;}";
          String [] pattern = prob.getVivaInputValidatorPattern();
@@ -1321,24 +1322,24 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
          }
          String actualPattern = sb.toString();
          assertEquals("Viva Pattern: ", expectedPattern, actualPattern);
-         
+
          //check that the "customInputValidatorProg" key worked
          assertEquals("Custom Input Validator program: ", "SumitInputValidator.class", prob.getCustomInputValidatorProgramName());
 
          //check that the "customInputValidatorCmd" key worked
          assertEquals("Custom Input Validator command: ", "java {:basename}", prob.getCustomInputValidatorCommandLine());
-         
+
          //extra checks:  that the Problem Name and Letter got assigned correctly
          assertEquals("Problem letter: ", "S", prob.getLetter());
          assertEquals("Problem name: ", "sumit", prob.getShortName());
-        
+
     }
-    
+
     /**
      * Tests that if no "customInputValidatorProg" key is present in the problem.yaml file, but there is an "input_format_validators"
-     * folder in the problem description and it contains an Input Validator file, that a custom input validator is loaded from the 
+     * folder in the problem description and it contains an Input Validator file, that a custom input validator is loaded from the
      * "input_format_validators" folder.
-     * 
+     *
      * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
      */
     public void testLoadInputValidatorFromInputFormatValidatorsFolder() throws Exception {
@@ -1353,23 +1354,23 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         //check that the "defaultInputValidator" key worked
          assertEquals("Default custom validator setting: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
-         
+
          //check that no "vivaPattern" has been set
          assertFalse("Problem has Viva Pattern: ", prob.isProblemHasVivaInputValidatorPattern());
-         
+
          //check that the "valid.bat" file in the "input_format_validators" folder was loaded
          assertEquals("Custom Input Validator program: ", "valid.bat", prob.getCustomInputValidatorProgramName());
-         
+
          //extra checks:  that the Problem Name and Letter got assigned correctly
          assertEquals("Problem letter: ", "S", prob.getLetter());
          assertEquals("Problem name: ", "sumit", prob.getShortName());
-        
+
     }
-    
+
     /**
      * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
      * the problem gets assigned IV type "NONE" even if there is a Viva pattern defined.
-     * 
+     *
      * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
      */
     public void testLoadDefaultInputValidatorTypeNONEOverridesVivaPattern() throws Exception {
@@ -1391,16 +1392,16 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
         String actualPattern = sb.toString();
         assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
-         
+
         //check that the "defaultInputValidator" key worked
          assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
-                
+
     }
-    
+
     /**
      * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
      * the problem gets assigned IV type "NONE" even if there is a Custom Input Validator defined.
-     * 
+     *
      * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
      */
     public void testLoadDefaultInputValidatorTypeNONEOverridesCustomIV() throws Exception {
@@ -1414,15 +1415,15 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem prob = problems[0];
 
         assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
-         
+
         //check that the "defaultInputValidator" key worked
          assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
     }
-    
+
     /**
      * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
      * the problem gets assigned IV type "NONE" even if there is a Custom Input Validator and a Viva Pattern defined.
-     * 
+     *
      * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
      */
     public void testLoadDefaultInputValidatorTypeNONEOverridesVivaAndCustomIV() throws Exception {
@@ -1444,17 +1445,17 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
         String actualPattern = sb.toString();
         assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
-        
+
         assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
-         
+
         //check that the "defaultInputValidator" key worked
          assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
     }
-    
+
     /**
      * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "VIVA",
      * the problem gets assigned IV type "VIVA" even if there is a Custom Input Validator defined.
-     * 
+     *
      * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
      */
     public void testLoadDefaultInputValidatorTypeVIVAOverridesCustomIV() throws Exception {
@@ -1476,17 +1477,17 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
         String actualPattern = sb.toString();
         assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
-        
+
         assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
-         
+
         //check that the "defaultInputValidator" key worked
          assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.VIVA, prob.getCurrentInputValidatorType());
     }
-    
+
     /**
      * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "CUSTOM",
      * the problem gets assigned IV type "CUSTOM" even if there is a Viva Input Validator Pattern defined.
-     * 
+     *
      * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
      */
     public void testLoadDefaultInputValidatorTypeCUSTOMOverridesViva() throws Exception {
@@ -1508,18 +1509,18 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
         String actualPattern = sb.toString();
         assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
-        
+
         assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
-         
+
         //check that the "defaultInputValidator" key worked
          assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
     }
-    
+
     /**
-     * Tests that the proper Input Validator default settings are set if there is no "input_validator:" section in the problem.yaml 
+     * Tests that the proper Input Validator default settings are set if there is no "input_validator:" section in the problem.yaml
      * file and also there is no "input_format_validators" folder in the problem.  Specifically, this condition should result
      * in no Viva pattern, no Custom Input Validator, and a default setting of "NONE" for the Input Validator.
-     * 
+     *
      * @throws Exception if the correct default Input Validator settings are not loaded into the problem.
      */
     public void testInputValidatorDefaultSettingsWithNoIVSectionAndNoDefaultCustomValidator() throws Exception {
@@ -1533,13 +1534,13 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem prob = problems[0];
 
         assertFalse("Problem has Viva Pattern: ", prob.isProblemHasVivaInputValidatorPattern());
-        
+
         assertFalse("Problem has Custom Input Validator: ", prob.isProblemHasCustomInputValidator());
-        
+
         //check that the "defaultInputValidator" key worked
          assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
     }
-    
+
   // SOMEDAY get this JUnit working
     public void aTestOverRideValidator() throws Exception {
 
@@ -1577,7 +1578,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         // startExplorer(dirname);
         // editFile(yamlFileName);
-        
+
 
         assertFileExists(yamlFileName);
 
@@ -1586,7 +1587,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         IInternalContest contest = loader.fromYaml(null, lines, dirname);
 
         Problem[] problems = contest.getProblems();
-        
+
         assertEquals("Judge's config path ",dirname, contest.getContestInformation().getJudgeCDPBasePath());
 //        assertNull("Judge's config path ",contest.getContestInformation().getJudgeCDPBasePath());
 
@@ -1597,7 +1598,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             loader.loadCCSProblemFiles(contest, secretDataDir, problem, problemDataFiles);
 
             assertTrue("Expecting more than one data set in " + secretDataDir, problemDataFiles.getJudgesDataFiles().length > 1);
-            assertTrue("Expecting more than on data set in " + secretDataDir, problemDataFiles.getJudgesAnswerFiles().length > 1);
+            assertTrue("Expecting more than one data set in " + secretDataDir, problemDataFiles.getJudgesAnswerFiles().length > 1);
         }
     }
 
@@ -1631,7 +1632,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // dumpLines ("", lines, true);
 
         assertEquals("expected number of lines ", 51, lines.length);
-        
+
     }
 
     /**
@@ -1737,7 +1738,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // editFile(inputYamlFilename);
 
         assertFileExists(inputYamlFilename);
-        
+
         String[] contents = Utilities.loadFile(getProblemSetYamlTestFileName());
 
         assertFileExists(getProblemSetYamlTestFileName());
@@ -1748,7 +1749,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         IInternalContest contest = loader.fromYaml(null, contents, getDataDirectory(), true);
 
         assertNotNull(contest);
-        
+
         assertNoAutoStart (contest);
 
         Problem[] problems = contest.getProblems();
@@ -1875,34 +1876,34 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Test auto start settings.
-     * 
+     *
      * @param contest
      * @param expectedTimeString - time string in format: "yyyy-MM-dd HH:mm"
      * @param shouldAutoStart - set true if expecting to auto start contest
      */
     private void assertAutoStart(IInternalContest contest,  String expectedTimeString, boolean shouldAutoStart) {
-        
+
         String scheduledStart = null;
         Boolean actualShouldAutoStart = new Boolean(false);
         ContestInformation info = contest.getContestInformation();
         if (info != null){
             // start-time:        2011-02-04 01:23Z
             //   2011-02-04 01:23Z
-//            
+//
             SimpleDateFormat formatter = new SimpleDateFormat(YYYY_MM_DD_FORMAT1);
             if (info.getScheduledStartDate() != null){
-                
+
                 scheduledStart = formatter.format(info.getScheduledStartDate());
                 actualShouldAutoStart = info.isAutoStartContest();
             }
         }
-        
+
 //        System.out.println("Auto start at: "+scheduledStart);
 //        System.out.println("Will auto start: "+actualShouldAutoStart);
-        
+
         assertEquals("Expecting auto start time ", expectedTimeString, scheduledStart);
         assertEquals("Expecting auto start ",  new Boolean( shouldAutoStart), actualShouldAutoStart);
-        
+
     }
 
     public void testYamlWriteAndLoad() throws Exception {
@@ -1921,10 +1922,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         // TODO fix exportFiles to export properly Python spaced YAML.
         exportYAML.exportFiles(testDirectory, originalContest);
-        
+
          String filename = testDirectory + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 //         editFile(filename);
-         
+
          validateYamlFile(filename);
 
         exportYAML = null;
@@ -1962,7 +1963,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected validator command ", Constants.DEFAULT_CLICS_VALIDATOR_COMMAND, problem.getOutputValidatorCommandLine());
 
     }
-    
+
     String getSnakeParserDetails(MarkedYAMLException markedYAMLException) {
         // from ContetYamlLoader
 
@@ -1976,12 +1977,12 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * validates yaml.
-     *  
+     *
      * @param filename
      * @throws YamlLoadException
      */
     private void validateYamlFile(String filename) throws YamlLoadException {
-        
+
         try {
             Yaml yaml = new Yaml();
             @SuppressWarnings("unchecked")
@@ -1992,7 +1993,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         } catch (FileNotFoundException e) {
             throw new YamlLoadException("File not found " + filename);
         }
-        
+
     }
 
     public void testUnQuote() throws Exception {
@@ -2221,39 +2222,39 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             fail();
         }
     }
-    
+
     /**
      * Test load sample CCS contest.
-     * 
+     *
      * @throws Exception
      */
     public void testCCS1Load() throws Exception {
-        
+
         String entryLocation = "ccs1";
-        
+
         InternalContest contest = new InternalContest();
         ensureStaticLog();
 
         loader.initializeContest(contest, new File(entryLocation));
-        
+
 //        System.out.println("Loaded CDP/config values from " + entryLocation);
-        
+
 //        File cdpConfigDir = loader.findCDPConfigDirectory(new File(entryLocation));
-//        String yamlFilename =cdpConfigDir.getAbsolutePath() + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME; 
+//        String yamlFilename =cdpConfigDir.getAbsolutePath() + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 //        editFile(yamlFilename);
 //        System.out.println("cds config dir = "+cdpConfigDir);
-        
+
         assertAutoStart(contest, "2060-02-04 01:23", true);
-        
+
         Language[] languages = contest.getLanguages();
         assertEquals("Number of languages", 3, languages.length);
-        
+
         Account[] accounts = contest.getAccounts();
         assertEquals("Number of accounts", 80, accounts.length);
 
         Site[] sites = contest.getSites();
         assertEquals("Number of sites", 1, sites.length);
-        
+
         Problem[] problems = contest.getProblems();
         assertEquals("Number of problems", 5, problems.length);
 
@@ -2272,17 +2273,17 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertJudgementTypes(problem, true, false, false);
 
-        
+
     }
-    
-    
+
+
     /**
      * Test testFindCDPPaths.
-     * 
+     *
      * @throws Exception
      */
     public void testFindCDPPaths() throws Exception {
-        
+
         ContestSnakeYAMLLoader snake = new ContestSnakeYAMLLoader();
 
         String [] dirs = {
@@ -2291,38 +2292,38 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "ccs2", //
                 "sumithello", //
 //                "valtest", //
-                
+
 // Doug's Local test directories
 //                "c:\\test\\cdps\\sum1\\config\\contest.yaml", //
 //                "/test/cdps/spring2015/config/contest.yaml", //
 //                "c:\\test\\cdps\\spring2015\\config\\contest.yaml", //
 //                "c:\\test\\cdps\\spring2015", //
         };
-        
+
         for (String name : dirs) {
-            
+
             File actual = snake.findCDPConfigDirectory(new File(name));
-            
+
             if (actual == null){
                 System.err.println("For "+name+" expected to find file "+snake.getSampleContesYaml(name));
                 System.err.println("CWD is "+Utilities.getCurrentDirectory());
             }
-            
+
             assertNotNull(actual);
             assertTrue("Is a config directory? ", actual.isDirectory());
 //            System.out.println("For "+name+" found "+actual);
         }
     }
-    
+
     /**
      * Test non-existent CDP directories.
-     * 
+     *
      * @throws Exception
      */
     public void testFindCDPPathsNegatives() throws Exception {
 
         String[] dirs = { //
-                "/home/pc2/bad", // 
+                "/home/pc2/bad", //
                 "/fargo", //
                 "/tmp2", //
         };
@@ -2331,31 +2332,31 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
             File actual = loader.findCDPConfigDirectory(new File(name));
 //            System.out.println("For "+name+" found "+actual);
-            
+
             assertNull(actual);
         }
     }
-    
+
     public void testBeforeNow() throws Exception {
 
         Date date  = new Date();
-        
+
         // Not before now, just after now.
         assertFalse ("Expected not to be before date "+date,snake.isBeforeNow(date));
-        
-        // very much after now 
+
+        // very much after now
         date.setTime(date.getTime() + 30000);
         assertTrue ("Expected not to be before date "+date,snake.isBeforeNow(date));
 
         // very much before now
         date.setTime(date.getTime() - 60000);
         assertFalse ("Expected not to be before date "+date,snake.isBeforeNow(date));
-        
+
     }
-    
+
     /**
      * Test data parsers.
-     * 
+     *
      * @throws Exception
      */
     public void testDateParsers() throws Exception {
@@ -2376,13 +2377,13 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        assertEquals(expected, d.getTime());
 
     }
-    
+
     /**
      * Test ISO Start time
      * Bug 1122 - Import contest yaml does not support start-time in ISO 8601 format
      * @throws Exception
      */
-    
+
     public void testISO8601StartTime() throws Exception {
 
         String testDirectoryName = getDataDirectory(this.getName());
@@ -2404,12 +2405,12 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         long expected = 1477713600000L;
         assertEquals(expected, date.getTime());
     }
-    
+
     /**
      * Using problem key for problems unit test.
-     * 
+     *
      * Bug 1177 - When loading yaml allow problems or problemset (key).
-     * 
+     *
      * @throws Exception
      */
     public void testProblemsYamlKey() throws Exception {
@@ -2439,13 +2440,13 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Problem short name apl", "apl", problems[0].getShortName());
         assertEquals("Problem short name barcode", "barcodes", problems[1].getShortName());
     }
-    
+
     public void testProblemsYamlKeyFromFile() throws Exception {
 
         String dirname = getDataDirectory(this.getName());
 //        ensureDirectory(dirname);
 //        startExplorer(dirname);;
-        
+
         String yamlFilename= dirname + File.separator + "contest.ps.yaml";
 //        editFile(yamlFilename);
 
@@ -2461,13 +2462,13 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Problem short name apl", "apl", problems[0].getShortName());
         assertEquals("Problem short name barcode", "barcodes", problems[1].getShortName());
     }
-    
+
     /**
-     * Test loading of 
+     * Test loading of
      * @throws Exception
      */
     public void testCLICSJudgementOptionsLoad() throws Exception {
-        
+
         String dir = getDataDirectory(this.getName());
 
         String problemShortName = "prob1";
@@ -2491,10 +2492,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         boolean overrideUsePc2Validator = false;
 
         loader.loadProblemInformationAndDataFiles(contest, dir, problem, overrideUsePc2Validator);
-        
+
         Problem problemDos = new Problem("Le Deux");
         problemDos.setShortName("prob2");
-        
+
         loader.loadProblemInformationAndDataFiles(contest, dir, problemDos, overrideUsePc2Validator);
 
         Problem[] problems = contest.getProblems();
@@ -2507,7 +2508,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         // validator_flags: float_tolerance 1e-6
         String expecting = "float_absolute_tolerance 1.0E-6 float_relative_tolerance 1.0E-6";
-        
+
         assertEquals(expecting, problem1.getClicsValidatorSettings().toString());
 
         ClicsValidatorSettings settings = problem1.getClicsValidatorSettings();
@@ -2515,10 +2516,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertTrue("float_absolute_tolerance specified", settings.isFloatAbsoluteToleranceSpecified());
         assertTrue("float_relative_tolerance", settings.isFloatRelativeToleranceSpecified());
         assertFalse("space_change_sensitive ", settings.isSpaceSensitive());
-        
+
         assertEquals(1.0E-6, settings.getFloatAbsoluteTolerance());
         assertEquals(1.0E-6, settings.getFloatRelativeTolerance());
-        
+
 
         Problem prob2 = problems[1];
 
@@ -2533,29 +2534,29 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertTrue("float_absolute_tolerance specified", settings.isFloatAbsoluteToleranceSpecified());
         assertTrue("float_relative_tolerance", settings.isFloatRelativeToleranceSpecified());
         assertTrue("space_change_sensitive ", settings.isSpaceSensitive());
-        
+
         assertEquals(4.0011122, settings.getFloatAbsoluteTolerance());
         assertEquals(4.0042354, settings.getFloatRelativeTolerance());
     }
-    
+
     /**
-     * Test load input validator command line and validator. 
-     * 
+     * Test load input validator command line and validator.
+     *
      * @throws Exception
      */
     @Test
     public void testLoadInputValidator() throws Exception {
-        
+
 //        String inputYamlFilenameOld = getProblemSetYamlTestFileName();
 //        editFile(inputYamlFilenameOld);
-        
+
 //        String datadir = getDataDirectory();
 //        startExplorer(datadir);
-        
+
         String inputDir = getDataDirectory(this.getName());
         ensureDirectory(inputDir);
 //        startExplorer(inputDir);
-        
+
 //        short-name: apl
 //        short-name: barcodes
 //        short-name: biobots
@@ -2563,9 +2564,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        short-name: channel
 
         String configDir = inputDir + File.separator + IContestLoader.CONFIG_DIRNAME;
-        
+
 //        startExplorer(configDir);
-        
+
         IInternalContest contest = loader.fromYaml(null, configDir);
         assertNotNull(contest);
 
@@ -2574,7 +2575,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         String[] validatorNames = { //
                 //
-                
+
                 "", //
                 "", //
                 "", //
@@ -2582,7 +2583,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "", //
                 "", //
         };
-        
+
         String[] validatorCommandLine = {
                 //
                 "", //
@@ -2592,53 +2593,53 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "", //
                 "", //
         };
-        
+
 //        String INPUT_VALIDATOR_NAME_KEY = "inputValidatorName";
 //        String INPUT_VALIDATOR_COMMAND_LINE_KEY = "inputValidatorCommandLine";
-        
+
         int idx = 0;
         for (Problem problem2 : problems) {
             assertNotNull("Expected problem short name ", problem2.getShortName());
-            
+
             String expectedInputValidatorName = validatorNames[idx];
             String expectedInputValidatorCommandLine = validatorCommandLine[idx];
             idx ++;
-           
+
             assertEquals("Expected input validator name ", expectedInputValidatorName, problem2.getCustomInputValidatorProgramName());
             assertEquals("Expected input validator command ", expectedInputValidatorCommandLine, problem2.getCustomInputValidatorCommandLine());
         }
     }
-    
+
     public void testfindInputValidator() throws Exception {
-        
+
         String dataDir = getDataDirectory(this.getName());
         ensureDirectory(dataDir);
-        
+
         String shortDirName = "one";
         Problem problem = new Problem("Title 1");
         problem.setShortName(shortDirName);
-        
-        String inputFormatValidatorDir =  snake.getInputValidatorDir(dataDir, problem  ); 
+
+        String inputFormatValidatorDir =  snake.getInputValidatorDir(dataDir, problem  );
         ensureDirectory(inputFormatValidatorDir);
 //        startExplorer(inputFormatValidatorDir);
-        
+
         String validatorProgramName = snake.findInputValidator(dataDir, problem);
-        
+
         String expected = "testdata/ContestSnakeYAMLLoaderTest/testfindInputValidator/one/input_format_validators/one.sh";
-        
+
         assertEquals("Expecting input dir name ", expected, toUnixFS(validatorProgramName));
-        
+
     }
 
     /**
      * Test loading all sample contests, a type of smoke test.
-     * 
+     *
      * @throws Throwable
      */
     public void testLoadAllSampleCDPS() throws Throwable {
 
         String[] contestDirs = getSampleContestsDirs();
-        
+
         assertDirectoryExists(Utilities.getCurrentDirectory() + File.separator + getSampleContestsDirectory());
 
         assertTrue("Expecting at least one sample contest directory at " + getSampleContestsDirectory(), contestDirs.length > 0);
@@ -2646,16 +2647,16 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         for (String directoryName : contestDirs) {
 
             assertDirectoryExists(directoryName);
-            
+
             if (directoryName.endsWith("valtest")){
 
                 // Need not test valtest, that is tested in a number of other junit methods
                 // besides one must load groups.tsv before loading yaml for it to work.
                 continue;
             }
-            
+
             try {
-                
+
                 IInternalContest contest = null;
 
                 String teamsTSVFilename = directoryName + File.separator + IContestLoader.CONFIG_DIRNAME + //
@@ -2682,16 +2683,16 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
 
     }
-    
+
     public void testSampleCDP() throws Throwable {
-        
+
         String directoryName = getRootInputTestDataDirectory() + File.separator + "samplecdp";
-        
+
         assertDirectoryExists(directoryName);
 //        startExplorer(directoryName);
-        
+
         IInternalContest contest;
-        
+
         try {
             contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
 
@@ -2702,24 +2703,24 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             System.err.println("Failed to load config from " + directoryName + " " + e.getCause().getMessage());
             throw e.getCause();
         }
-        
+
         Vector<Account> accounts = contest.getAccounts(Type.TEAM);
         Collections.sort(accounts, new AccountComparator());
-        
+
         int teamAccountNumber = 1;
         for (Account account : accounts) {
             assertEquals("Account number ", teamAccountNumber, account.getClientId().getClientNumber());
             teamAccountNumber++;
         }
     }
-    
-    
+
+
     /**
      * Test pc2 validator section: validator
      * @throws Exception
      */
     public void testpc2ValidatorSection() throws Exception {
-        
+
         String [] section = {
                 IContestLoader.VALIDATOR_KEY + ":", //
                 "   validatorProg: pc2.jar edu.csus.ecs.pc2.validator.Validator", //
@@ -2727,60 +2728,60 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "   usingInternal: true", //
                 "   validatorOption: 1", //
         };
-        
-        
-        Map<String, Object> content = snake.loadYaml(null, section);
+
+
+        Map<String, Object> content = ContestImportUtilities.loadYaml(null, section);
 
         Problem problem = createNewProblem(this.getName());
         snake.assignValidatorSettings(content, problem);
-        
+
         assertEquals("validator type",  VALIDATOR_TYPE.PC2VALIDATOR, problem.getValidatorType());
         assertEquals("validator program name", Constants.PC2_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
     }
-    
+
 
     /**
      * Test pc2 validator key: validator_flags
      * @throws Exception
      */
     public void test3pc2ValidatorFlags() throws Exception {
-        
+
         String [] section = {
                 IContestLoader.VALIDATOR_FLAGS_KEY + ": float_tolerance 1e-6", //
         };
-        
-        Map<String, Object> content = snake.loadYaml(null, section);
+
+        Map<String, Object> content = ContestImportUtilities.loadYaml(null, section);
 
         Problem problem = createNewProblem(this.getName());
         snake.assignValidatorSettings(content, problem);
-        
+
         assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
         assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
-        
+
         // huh
     }
-    
+
     /**
      * Test CLICS validator key: validator
      * @throws Exception
      */
     public void testCLICSValidatorOptions() throws Exception {
-        
+
         String [] section = {
                 IContestLoader.VALIDATOR_KEY + ": float_tolerance 1e-6", //
         };
-        
-        Map<String, Object> content = snake.loadYaml(null, section);
+
+        Map<String, Object> content = ContestImportUtilities.loadYaml(null, section);
 
         Problem problem = createNewProblem(this.getName());
         snake.assignValidatorSettings(content, problem);
-        
+
         assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
 
         assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
-        
+
     }
-    
+
     private Problem createNewProblem(String name) {
         Problem problem = new Problem(name);
         problem.setShortName(name);
@@ -2790,7 +2791,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
 
     /**
-     * 
+     *
      * @param directoryName
      * @param extension
      * @return
@@ -2812,7 +2813,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
 
-        return (String[]) list.toArray(new String[list.size()]);
+        return list.toArray(new String[list.size()]);
     }
 
     public String[] getDirNames(String directoryName) {
@@ -2831,7 +2832,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
 
-        return (String[]) list.toArray(new String[list.size()]);
+        return list.toArray(new String[list.size()]);
     }
 
     /**
@@ -2839,14 +2840,14 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      * @return list of directory names.
      */
     private String[] getSampleContestsDirs() {
-        
+
         String sampContestDir = getSampleContestsDirectory();
         String[] sampContestDirNames = getDirNames(sampContestDir);
         return sampContestDirNames;
     }
-    
+
     public void testCLICSLanguageLoad() throws Exception {
-        
+
         String [] section = {
                 //
                 "languages:", //
@@ -2857,52 +2858,52 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "", //
 
         };
-        
+
         IInternalContest contest = loader.fromYaml(null, section, null, false);
         Language[] languages = contest.getLanguages();
-        
+
         assertEquals(1,languages.length);
-        
+
     }
-    
+
     /**
      * Test max-output-size-K.
-     *  
+     *
      * Bug 1149.
-     * 
+     *
      * @throws Exception
      */
     public void testImportMayFileSize() throws Exception {
-        
+
         String [] section = {
                 //
                 "max-output-size-K:  128",
                 "", //
         };
-        
+
         IInternalContest contest = loader.fromYaml(null, section, null, false);
-        
+
         ContestInformation info = contest.getContestInformation();
         assertNotNull("Expecting ContestInformation ", info);
         assertEquals("Expected max file size ",128*1024,info.getMaxOutputSizeInBytes());
     }
 
-    
+
     /**
      * Test invalid max-output-size-K.
-     *  
+     *
      * Bug 1149.
-     * 
+     *
      * @throws Exception
      */
     public void testImportMayFileSizeErrorHandling() throws Exception {
-        
+
         String [] data = //
             {
                 "max-output-size-K:  0", //
                 "max-output-size-K:  -21",
             };
-        
+
         for (String line : data) {
             String [] section = { line };
             try {
@@ -2914,10 +2915,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
     }
-    
+
     /**
      * Test load of input format validator using sumitMTC sample.
-     * 
+     *
      * @throws Exception
      */
     public void testLoadInputFormatValidator() throws Exception {
@@ -2929,7 +2930,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         Problem[] problems = con.getProblems();
         assertEquals("Problem count ", 1, problems.length);
-        
+
         String valiatorFileName = "valid.bat";
 
         String ifvfilename = "samps/contests/sumitMTC/config/sumit/input_format_validators/"+valiatorFileName;
@@ -2962,12 +2963,12 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             throw e;
         }
     }
-    
+
     /**
      * Validate and test contents for valtest sample contest.
-     * 
+     *
      * <li>Tests groups: in problem.yaml
-     * 
+     *
      * @throws Exception
      */
     public void testLoadValidatorTestSampleContest() throws Exception {
@@ -2976,60 +2977,60 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
          * Contest to use as input
          */
         String sampleContestDirName = "valtest";
-        
+
         IInternalContest contest = new InternalContest();
-        
+
         /**
          * Load groups data.
          */
         loadGroupsFromSampContest(contest, sampleContestDirName);
         assertEquals("Number ground",12,contest.getGroups().length);
-        
-//        
+
+//
 //        LoadICPCData loadICPCData = new LoadICPCData();
 //        loadICPCData.setContestAndController(contest, controller);
-//        
-        
+//
+
         loadSampleContest(contest, sampleContestDirName);
-        
+
         assertNotNull(contest);
-        
+
         Problem[] problems = contest.getProblems();
         assertEquals("Problem count ", 6, problems.length);
-        
+
         for (Problem problem : problems) {
             assertTrue("Expecting using validator for "+problem, problem.isValidatedProblem());
         }
-        
+
         Language[] langs = contest.getLanguages();
         assertEquals("Language count ", 6, problems.length);
-        
+
         String [] langnames = {
-                // 
-                "Java", // 
-                "GNU C", // 
-                "GNU C++", // 
-                "Python2", // 
-                "Python3", // 
-                "C#", // 
+                //
+                "Java", //
+                "GNU C", //
+                "GNU C++", //
+                "Python2", //
+                "Python3", //
+                "C#", //
         };
-        
+
         int i = 0;
         for (Language language : langs) {
             assertEquals(langnames[i], language.getDisplayName());
             i++;
         }
-        
-        String [] validatorNames = { 
+
+        String [] validatorNames = {
                 //
-                "edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator", // 
-                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
-                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
-                "edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator", // 
-                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
-                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
+                "edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator", //
+                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", //
+                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", //
+                "edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator", //
+                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", //
+                "edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", //
         };
-        
+
         int totalProblemFiles = 0;
         i = 0;
         for (Problem problem : problems) {
@@ -3042,18 +3043,18 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
 
         assertEquals("All problems data files count ", 36, totalProblemFiles );
-        
+
         String title = "Mini Contest Validator Combos";
         assertEquals("contest title", title, contest.getContestInformation().getContestTitle());
-        
+
     }
 
     /**
      * Load groups from samps contest.
-     * 
+     *
      * @param contest
      * @param contestDirName
-     * @throws Exception 
+     * @throws Exception
      */
     private void loadGroupsFromSampContest(IInternalContest contest, String contestDirName) throws Exception {
         String groupFile = getTestSampleContestDirectory(contestDirName) +File.separator+ IContestLoader.CONFIG_DIRNAME + File.separator + LoadICPCTSVData.GROUPS_FILENAME;
@@ -3065,7 +3066,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     /**
      * Quote string, output string for use in String [].
-     * 
+     *
      * @param string
      * @return output: "string", //
      */
@@ -3076,64 +3077,64 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     private String toUnixFS(String path) {
         return path.replace('\\', '/');
     }
-    
+
     /**
      * Test with halt at end set.
      * @throws Exception
      */
     public void testHaltAtEnd() throws Exception {
 
-        String[] lines = { // 
+        String[] lines = { //
         //
-                "# Contest configuration with auto stop example", // 
-                "# $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $", // 
-                "---", // 
-                "name:              ACM-ICPC World Finals 2011", // 
-                "short-name:        ICPC WF 2011", // 
-                "start-time:        2011-02-04 01:23Z", // 
-                "duration:          5:00:00", // 
-                "scoreboard-freeze: 4:00:00", // 
-                "", // 
-                "auto-stop-clock-at-end: true", // 
-                "", // 
-                "default-clars:", // 
-                "  - No comment, read problem statement.", // 
-                "  - This will be answered during the answers to questions session.", // 
-                "", // 
-                "clar-categories:", // 
-                "  - General", // 
-                "  - SysOps", // 
+                "# Contest configuration with auto stop example", //
+                "# $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $", //
+                "---", //
+                "name:              ACM-ICPC World Finals 2011", //
+                "short-name:        ICPC WF 2011", //
+                "start-time:        2011-02-04 01:23Z", //
+                "duration:          5:00:00", //
+                "scoreboard-freeze: 4:00:00", //
+                "", //
+                "auto-stop-clock-at-end: true", //
+                "", //
+                "default-clars:", //
+                "  - No comment, read problem statement.", //
+                "  - This will be answered during the answers to questions session.", //
+                "", //
+                "clar-categories:", //
+                "  - General", //
+                "  - SysOps", //
                 "  - Operations", //
         };
 
         IInternalContest contest = loader.fromYaml(null, lines, null, false);
         assertTrue("Expecting halt at end to be set ", contest.getContestInformation().isAutoStopContest());
     }
-    
+
     /**
      * Test with no halt at end
      * @throws Exception
      */
     public void testHaltAtEndMissing() throws Exception {
 
-        String[] lines = { // 
+        String[] lines = { //
         //
-                "# Contest configuration with auto stop example", // 
-                "# $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $", // 
-                "---", // 
-                "name:              ACM-ICPC World Finals 2011", // 
-                "short-name:        ICPC WF 2011", // 
-                "start-time:        2011-02-04 01:23Z", // 
-                "duration:          5:00:00", // 
-                "scoreboard-freeze: 4:00:00", // 
-                "", // 
-                "default-clars:", // 
-                "  - No comment, read problem statement.", // 
-                "  - This will be answered during the answers to questions session.", // 
-                "", // 
-                "clar-categories:", // 
-                "  - General", // 
-                "  - SysOps", // 
+                "# Contest configuration with auto stop example", //
+                "# $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $", //
+                "---", //
+                "name:              ACM-ICPC World Finals 2011", //
+                "short-name:        ICPC WF 2011", //
+                "start-time:        2011-02-04 01:23Z", //
+                "duration:          5:00:00", //
+                "scoreboard-freeze: 4:00:00", //
+                "", //
+                "default-clars:", //
+                "  - No comment, read problem statement.", //
+                "  - This will be answered during the answers to questions session.", //
+                "", //
+                "clar-categories:", //
+                "  - General", //
+                "  - SysOps", //
                 "  - Operations", //
         };
 
@@ -3141,42 +3142,42 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         assertFalse("Expecting no halt at end", contest.getContestInformation().isAutoStopContest());
     }
-    
-    
+
+
     /**
      * Test default setting for using judge command line.
-     * 
+     *
      * Tests for languages that do not have a   use-judge-cmd: true
-     * 
+     *
      * Bug 1278 test.
-     * 
+     *
      * @throws Exception
      */
     public void testLanguageLoadJudgeCmdLine() throws Exception {
-        
+
 //        String configDir = getTestSampleContestDirectory( "sumitMTC") + File.separator + IContestLoader.CONFIG_DIRNAME;
 //        String yamlFile = configDir + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 //        editFile(yamlFile);
 
         IInternalContest contest = loadSampleContest(null, "sumitMTC");
         assertNotNull(contest);
-        
+
         Language[] languages = contest.getLanguages();
-        
+
         assertEquals("Expecting language count ", 7, languages.length);
-        
+
         for (Language language : languages) {
             if ("Perl".equals(language.getDisplayName())){
                 assertFalse ("Expect NOT Using judges command line boolean  "+language, language.isUsingJudgeProgramExecuteCommandLine());
             }
         }
     }
-    
+
     /**
      * Test default value for isUsingJudgeProgramExecuteCommandLine.
-     * 
+     *
      * Bug 1278 test.
-     * 
+     *
      * @throws Exception
      */
     public void testLanguageLoad() throws Exception {
@@ -3194,18 +3195,18 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         };
 
         Language[] languages = loader.getLanguages(yamlLines);
-        
+
         for (Language language : languages) {
-            
+
             // Default should be isUsingJudgeProgramExecuteCommandLine is false.
-            
+
             assertFalse ("Expect NOT Using judges command line boolean  "+language, language.isUsingJudgeProgramExecuteCommandLine());
         }
     }
 
-    
+
     public void testLoadDefaultTitle() throws Exception {
-        
+
         String [] section = {
                 IContestLoader.VALIDATOR_KEY + ":", //
                 "   validatorProg: pc2.jar edu.csus.ecs.pc2.validator.Validator", //
@@ -3213,19 +3214,19 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 "   usingInternal: true", //
                 "   validatorOption: 1", //
         };
-        
-        
+
+
         IInternalContest contest = snake.fromYaml(null, section, null);
-        
+
         ContestInformation info = contest.getContestInformation();
-        
+
         assertNull("Expecting null for title ", info.getContestTitle());
-        
+
     }
-    
+
     /**
      * test judging-typ in contest yaml.
-     * 
+     *
      * @throws Exception
      */
     public void testJudgingTypeSectionProblemSet() throws Exception {
@@ -3233,7 +3234,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String[] yamlLines = { //
                 IContestLoader.JUDGING_TYPE_KEY + ":", //
                 "    computer-judged: false", //
-                "    manual-review: true", // 
+                "    manual-review: true", //
                 "    send-prelim-judgement: false", //
                 "problemset:", //
                 "  - letter:     A", //
@@ -3246,33 +3247,33 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         int problemIndex = 0;
 
         Problem problem = problems[problemIndex++];
-        
+
 //        dumpJudgingTypes(this.getName(), problem);
-        
-        assertFalse("For problem "+problem+" expecting NOT isComputerJudged", problem.isComputerJudged());  
-        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());  
-        assertFalse("For problem "+problem+" expecting NOT isPrelimaryNotification", problem.isPrelimaryNotification());  
+
+        assertFalse("For problem "+problem+" expecting NOT isComputerJudged", problem.isComputerJudged());
+        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());
+        assertFalse("For problem "+problem+" expecting NOT isPrelimaryNotification", problem.isPrelimaryNotification());
     }
-    
+
     /**
      * test judging-typ in problem yaml.
      */
     public void testJudgingTypeProblmYaml() throws Exception {
-        
+
         String dataDir = getDataDirectory(this.getName());
-        
+
 //        String inputYamlFile = getDataDirectory("contest.yaml");
 //      System.out.println("input Filename: "+inputYamlFile);
-        
+
 //        ensureDirectory(dataDir);
 //        startExplorer(dataDir);
 
       IInternalContest contest = loader.fromYaml(null, dataDir);
-        
+
 //        String[] yamlLines = { //
 //                IContestLoader.JUDGING_TYPE_KEY + ":", //
 //                "    computer-judged: false", //
-//                "    manual-review: true", // 
+//                "    manual-review: true", //
 //                "    send-prelim-judgement: false", //
 //        };
 
@@ -3282,16 +3283,16 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem problem = problems[problemIndex++];
 
 //        dumpJudgingTypes (this.getName(), problem);
-        
-        assertTrue("For problem "+problem+" expecting isComputerJudged", problem.isComputerJudged());  
-        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());  
-        assertTrue("For problem "+problem+" expecting isPrelimaryNotification", problem.isPrelimaryNotification());  
+
+        assertTrue("For problem "+problem+" expecting isComputerJudged", problem.isComputerJudged());
+        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());
+        assertTrue("For problem "+problem+" expecting isPrelimaryNotification", problem.isPrelimaryNotification());
 
         problem = problems[problemIndex++];
-        
-        assertFalse("For problem "+problem+" expecting NOT isComputerJudged", problem.isComputerJudged());  
-        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());  
-        assertFalse("For problem "+problem+" expecting NOT isPrelimaryNotification", problem.isPrelimaryNotification());  
+
+        assertFalse("For problem "+problem+" expecting NOT isComputerJudged", problem.isComputerJudged());
+        assertTrue("For problem "+problem+" expecting isManualReview", problem.isManualReview());
+        assertFalse("For problem "+problem+" expecting NOT isPrelimaryNotification", problem.isPrelimaryNotification());
     }
 
     void dumpJudgingTypes(String message, Problem problem) {
@@ -3300,44 +3301,44 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 " manual " + problem.isManualReview() + //
                 " notify " + problem.isPrelimaryNotification());
     }
-    
+
     /**
      * Test loading groups into Problem.
-     * 
+     *
      * @throws Exception
      */
     public void testLoadProblemGroups() throws Exception {
-        
+
         /**
          * Contest to use as input
          */
         String sampleContestDirName = "valtest";
-        
+
         IInternalContest contest = new InternalContest();
-        
+
         /**
          * Load groups data.
          */
         loadGroupsFromSampContest(contest, sampleContestDirName);
         assertEquals("Number ground",12,contest.getGroups().length);
-        
+
         loadSampleContest(contest, sampleContestDirName);
-        
+
         Problem[] problems = contest.getProblems();
         assertEquals("Expecting problems ",6,problems.length);
-        
+
         for (Problem problem : problems) {
             List<Group> groups = problem.getGroups();
-            
+
             if ("sumit2".equals(problem.getShortName())){
                 assertEquals("Expecting number of groups for problem ", 5, groups.size());
             }
         }
     }
-    
+
     /**
      * Test override settings to assign passwords.
-     * 
+     *
      * @throws Exception
      */
     public void testTeamYamlPasswordsOverride() throws Exception {
@@ -3363,28 +3364,28 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //         editFile(yamlFileName);
 
         IInternalContest contest = loader.fromYaml(null, yamlLines, dirname);
-        
+
         Account[] teams = getTeamAccounts(contest);
-        
+
         assertEquals("Team count", 80, teams.length);
-        
+
         for (Account account : teams) {
             assertFalse("Not expecting joe password "+account.getPassword(), account.getClientId().getName().equals(account.getPassword()));
             assertEquals("Expecting password with length 12", 12, account.getPassword().length());
             assertEquals("Expecting password with prefix bark", "bark",  account.getPassword().substring(0,4));
         }
     }
-    
+
     /**
      * Test default password generation and assignment.
-     * 
+     *
      * @throws Exception
      */
     public void testTeamYamlPasswordsDefault() throws Exception {
-        
+
         String dirname = getOutputDataDirectory(getName());
         ensureDirectory(dirname);
-        
+
         String[] yamlLines = { //
                 "passwords:", //
                 "#   length: 12", //
@@ -3404,11 +3405,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //         editFile(yamlFileName);
 
         IInternalContest contest = loader.fromYaml(null, yamlLines, dirname);
-        
+
         Account[] teams = getTeamAccounts(contest);
-        
+
         assertEquals("Team count", 80, teams.length);
-        
+
         for (Account account : teams) {
             assertFalse("Not expecting joe password "+account.getPassword(), account.getClientId().getName().equals(account.getPassword()));
             assertEquals("Expecting password with length 8", 8, account.getPassword().length());
@@ -3416,7 +3417,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
 
-    
+
     public void testGroupLookup() throws Exception {
 
         // TODO write unit test
@@ -3425,19 +3426,19 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //# groups: 'Canada - University of British Columbia D1;Puget Sound - University of Puget Sound D1; N. California - UC Berkeley D1; Hawaii - BYUH, Laie, Oahu D2; Northeast - EWU, Cheney/Spokane D2;'
 //
 //# no commas, delimit ,
-//# groups: 'Canada - University of British Columbia D1,Puget Sound - University of Puget Sound D1, N. California - UC Berkeley D1' 
+//# groups: 'Canada - University of British Columbia D1,Puget Sound - University of Puget Sound D1, N. California - UC Berkeley D1'
 //
 //# bad group id 334 for groups: 312544,312545,312546,312547, 334
 //# groups: 312544,312545,312546,312547
 //# groups: 312544;312545;312546;312547
-        
+
     }
-    
+
     /**
-     * Tests that YAML files correctly support allowing multiple logins by a given team using {@link IContestLoader#ALLOW_MULTIPLE_TEAM_LOGINS_KEY}. 
+     * Tests that YAML files correctly support allowing multiple logins by a given team using {@link IContestLoader#ALLOW_MULTIPLE_TEAM_LOGINS_KEY}.
      */
     public void testMultipleLoginSupport() throws Exception {
-        
+
         // make sure we have a valid data directory for this test
         String dataDirName = getDataDirectory(getName());
         Utilities.insureDir(dataDirName);
@@ -3450,7 +3451,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         IInternalContest contest = loader.fromYaml(null, contents, dataDirName);
         assertNotNull(contest);
-        
+
         boolean defaultAllow = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
         assertFalse("Loading YAML file with no 'allow-multiple-logins' flag failed to default to 'do not allow'", defaultAllow);
 
@@ -3461,10 +3462,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         contest = loader.fromYaml(null, contents, dataDirName);
         assertNotNull(contest);
-        
+
         boolean explicitlySetFalse = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
         assertFalse("Loading YAML file with explicit 'allow-multiple-logins: false' flag failed to set 'do not allow multiple logins'", explicitlySetFalse);
-        
+
         //test that if the contest.yaml file specifies "allow-multiple-team-logins: true", multiple logins are allowed
         yamlFilename = getTestFilename(getName() + File.separator + "contest.allowMultipleFlagTrue.yaml");
         contents = Utilities.loadFile(yamlFilename);
@@ -3472,12 +3473,12 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         contest = loader.fromYaml(null, contents, dataDirName);
         assertNotNull(contest);
-        
+
         boolean explicitlySetTrue = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
         assertTrue("Loading YAML file with explicit 'allow-multiple-logins: true' flag failed to set 'allow multiple logins'", explicitlySetTrue);
-        
+
     }
-    
+
     public void testScoreboardHTMLLocations() throws Exception {
 
         String dataDirName = getDataDirectory(getName());
@@ -3514,12 +3515,12 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Public HTML Directory", "public_html_dir", publicDir);
 
     }
-    
+
     public void testLoadDisplay() throws Exception {
-        
+
         String dirname = getOutputDataDirectory(getName());
         ensureDirectory(dirname);
-        
+
         String[] yamlLines = { //
                 "",
                 "team-scoreboard-display-format-string : '{:teamname}'", //
@@ -3532,15 +3533,15 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
 
         IInternalContest contest = loader.fromYaml(null, yamlLines, dirname);
-        
+
         Account[] teams = getTeamAccounts(contest);
         assertEquals("Team count", 22, teams.length);
 
         String displayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
         assertEquals("Team getTeamDisplayOnScoreboard", "{:teamname}", displayString);
-        
+
         /**
-         * 
+         *
      * Client/Team number - {:clientnumber} = 514
      * Country Code - {:countrycode} = CAN
      * CMS/External ID - {:externalid} = 309407
@@ -3557,23 +3558,23 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         String teamDisplayString = ScoreboardVariableReplacer.substituteDisplayNameVariables(displayString, contest, account20);
         assertEquals("Expected display ", "team21", teamDisplayString);
-        
+
         yamlTestTeamDisplayOnBoard(dirname, teamDisplayString, "team21");
     }
-    
+
     public void testOne() throws Exception {
-        
+
         String dataDirName = getDataDirectory(getName());
 //        Utilities.insureDir(dataDirName);
 //        assertDirectoryExists(dataDirName);
-        
+
         String teamDisplayString = "{:clientnumber} {:countrycode} {:groupid} {:groupname} {:externalid}";
         String expected = "21 XXX {:groupid} {:groupname} 1021";
         yamlTestTeamDisplayOnBoard(dataDirName, teamDisplayString, expected);
     }
-    
+
     void yamlTestTeamDisplayOnBoard (String dirname, String teamDisplayString, String expectedString) {
-        
+
         String[] yamlLines = { //
                 "",
                 "team-scoreboard-display-format-string : '"+teamDisplayString+"'", //
@@ -3586,7 +3587,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
 
         IInternalContest contest = loader.fromYaml(null, yamlLines, dirname);
-        
+
         Account[] teams = getTeamAccounts(contest);
         assertEquals("Team count", 22, teams.length);
 
@@ -3599,15 +3600,15 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected display string for "+ciDisplayString, expectedString, actual);
 
     }
-    
+
     public void testAllSubstitutions() throws Exception {
-        
+
         IInternalContest contest = loadFullSampleContest(null, "tenprobs");
         assertNotNull(contest);
-        
+
         Account[] teams = getTeamAccounts(contest);
         assertEquals("Team count", 80, teams.length);
-        
+
         String teamDisplayString = "Team {:clientnumber}  {:teamname} and login: {:teamloginname} {:groupid}:{:groupname} long: {:longschoolname} short: {:shortschoolname} cms id: {:externalid}";
 
         String ciDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
@@ -3618,7 +3619,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String expectedString = "Team 21  Team21 and login: team21 100:North long: Long21 short: Short21 cms id: 1021";
         String actual = ScoreboardVariableReplacer.substituteDisplayNameVariables(ciDisplayString, contest, account20);
         assertEquals("Expected display string for "+ciDisplayString, expectedString, actual);
-        
+
     }
 
     private Account[] getSortedTeamAccounts(IInternalContest contest) {
@@ -3626,80 +3627,80 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Arrays.sort(accounts, new AccountComparator());
         return accounts;
     }
-    
-    
+
+
     public void testTenProbsisStopOnFirstFailedTestCase() throws Exception {
-        
+
         String sampleName = "tenprobs";
         IInternalContest contest  = fullLoadSampleContest(sampleName);
         assertNotNull(contest);
 
         Problem[] problems = contest.getProblems();
         assertEquals("Num problems ",10, problems.length);
-        
+
         for (Problem problem : problems) {
             assertTrue(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
         }
-        
+
     }
-    
+
     public void testisStopOnFirstFailedTestCase() throws Exception {
-        
+
         String sampleName = "problemflagtest"; // use CDP sample problemflagtest
         IInternalContest contest  = fullLoadSampleContest(sampleName);
         assertNotNull(contest);
 
         Problem[] problems = contest.getProblems();
         assertEquals("Num problems ", 8, problems.length);
-        
+
         for (Problem problem : problems) {
             assertTrue(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
         }
-        
+
     }
-    
-    
-    
+
+
+
     /**
      * Test load problem.yaml isStopOnFirstFailedTestCase.
-     * 
+     *
      * @throws Exception
      */
     public void testvaltesttStopOnFirstFailedTestCase() throws Exception {
-        
+
         String sampleName = "valtest";
         IInternalContest contest  = fullLoadSampleContest(sampleName);
- 
+
         assertNotNull(contest);
 
         Problem[] problems = contest.getProblems();
         assertEquals("Num problems ",6, problems.length);
-        
+
         for (Problem problem : problems) {
             assertFalse(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
         }
-        
+
     }
-    
-    
+
+
     /**
      * Test yaml import for memory-limit-in-Meg and sandbox.
-     * 
+     *
      * @throws Exception
      */
-    
+
     public void testLoadSandboxAndMemoryLimit() throws Exception {
 
         /**
          * Contest to use as input
          */
         String sampleContestDirName = "sumitMTC";
-        
+
         IInternalContest contest = new InternalContest();
-        
-        
+
+
         loadSampleContest(contest, sampleContestDirName);
-        
+
         assertNotNull(contest);
 
         ContestInformation info = contest.getContestInformation();
@@ -3714,9 +3715,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         String expected = "{:sandboxprogramname} {:memlimit} {:timelimit}";
         assertEquals("Sandbox command", expected, problem.getSandboxCmdLine());
-        
-        
-   
+
+
+
     }
 
     private IInternalContest fullLoadSampleContest(String sampleName) throws Exception {
@@ -3725,43 +3726,43 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         contest = loadSampleContest(contest, sampleName);
         return contest;
     }
-    
-    
+
+
     /**
      * Test halt-contest-clock-at-set to true.
-     * 
+     *
      * @throws Exception
      */
     public void testisHaltContestAtTimeZero() throws Exception {
         String sampleContestDirName = "ccs1";
         String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
-        
+
         IInternalContest contest = snake.fromYaml(null, dirname, false);
         assertNotNull("Expecting to load ccs1 contest",contest);
         assertTrue("Expected halt at end of contest ", contest.getContestInformation().isAutoStopContest());
     }
-    
-    /** 
+
+    /**
      * Test halt-contest-clock-at-end value, for when missing key/value
      * @throws Exception
      */
     public void testisHaltContestAtTimeZeroNegative() throws Exception {
         String sampleContestDirName = "ccs2";
         String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
-        
+
         IInternalContest contest = snake.fromYaml(null, dirname, false);
         assertNotNull("Expecting to load ccs2 contest",contest);
         assertFalse("Expected NO halt at end of contest ", contest.getContestInformation().isAutoStopContest());
     }
-    
+
     public String getTestDataDirname(String dirname) {
         String contestConfigDir = getRootInputTestDataDirectory() +File.separator + dirname +File.separator+ IContestLoader.CONFIG_DIRNAME;
         return contestConfigDir;
     }
-    
+
     /**
      * Test loading problem title from problem.en.tex.
-     * 
+     *
      * @throws Exception
      */
     public void testProblemNameENTex() throws Exception {
@@ -3792,7 +3793,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
     }
-   
+
     /**
      * Find/match problem in contest by problem letter
      * @param inContest
@@ -3801,21 +3802,21 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     // TODO REFACTOR proomote/move getProblemByLetter into AbstractTestCase
     private Problem getProblemByLetter(IInternalContest inContest, String letter) {
-        
+
         Problem[] problems = inContest.getProblems();
         for (Problem problem : problems) {
             if (letter.equalsIgnoreCase(problem.getLetter())) {
                 return problem;
             }
-            
+
         }
         return null;
     }
-    
-    
+
+
     /**
      * Test loading of output validator.
-     * 
+     *
      * @throws Exception
      */
     public void testaddClicsOutputValidator() throws Exception {
@@ -3856,7 +3857,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
     }
-    
+
     /**
      * Test loading both sample and secret files.
      * @throws Exception
@@ -3880,53 +3881,53 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
 
     }
-    
+
     /**
      * Test creating and loading accounts from tsv file.
-     * 
+     *
      * @throws Exception
      */
     public void testloadAccountLoadFile() throws Exception {
-        
+
         String dataDir = getDataDirectory(this.getName());
-      
+
       ensureDirectory(dataDir);
 //      startExplorer(dataDir);
-      
+
       ensureStaticLog();
 
       IInternalContest contest = loadFullSampleContest(null, "mini");
       assertNotNull(contest);
-      
+
       assertEquals("Team accounts ", 151, contest.getAccounts(ClientType.Type.TEAM).size());
 
       ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
       assertNotNull(loader);
-      
+
       String accountLoadFilename = dataDir + File.separator + "mini.load.accounts.up.tsv";
 //      editFile(accountLoadFilename);
 
       loader.loadAccountLoadFile(contest, accountLoadFilename);
       assertEquals("Team accounts ", 201, contest.getAccounts(ClientType.Type.TEAM).size());
-      
+
       Vector<Account> teams = contest.getAccounts(ClientType.Type.TEAM);
-      Account[] teamArr = (Account[]) teams.toArray(new Account[teams.size()]);
-      
+      Account[] teamArr = teams.toArray(new Account[teams.size()]);
+
       // Test all added accounts from mini.load.accounts.up.tsv
-      
+
       for (Account account : teamArr) {
-          
+
           int num = account.getClientId().getClientNumber();
-          
+
           if ( num < 51 ) {
               // teams 1 - 50 loaded from mini.load.accounts.up.tsv, only test those accounts
-              
+
               assertEquals("TeamName " + num, account.getDisplayName());
               assertEquals("USA", account.getCountryCode());
               assertEquals("pass" + num, account.getPassword());
               num++;
           }
       }
-        
+
     }
 }

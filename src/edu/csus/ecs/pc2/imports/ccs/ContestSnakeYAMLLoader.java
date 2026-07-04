@@ -1,13 +1,9 @@
 // Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,10 +18,6 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import javax.xml.bind.DatatypeConverter;
-
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.Mark;
-import org.yaml.snakeyaml.error.MarkedYAMLException;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.JudgementLoader;
@@ -60,6 +52,8 @@ import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.RemoteCCSInformation;
+import edu.csus.ecs.pc2.core.model.RemoteCCSInformation.RemoteCCSType;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -77,57 +71,12 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
  */
 public class ContestSnakeYAMLLoader implements IContestLoader {
 
-    /**
-     * Full content of yaml file.
-     */
-    private Map<String, Object> fullYamlContent = null;
+    private String judgesCDPDataPath = null;
 
     /**
      * Load Problem Data File Contents
      */
     private boolean loadProblemDataFiles = true;
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> loadYaml(String filename) {
-        try {
-            Yaml yaml = new Yaml();
-            return (Map<String, Object>) yaml.load(new FileInputStream(filename));
-        } catch (MarkedYAMLException e) {
-            throw new YamlLoadException(getSnakeParserDetails(e), e, filename);
-        } catch (FileNotFoundException e) {
-            throw new YamlLoadException("File not found " + filename, e, filename);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> loadYaml(String filename, String[] yamlLines) {
-        try {
-            Yaml yaml = new Yaml();
-            String fullString = StringUtilities.join("\n", yamlLines);
-            InputStream stream = new ByteArrayInputStream(fullString.getBytes(StandardCharsets.UTF_8));
-            return (Map<String, Object>) yaml.load(stream);
-        } catch (MarkedYAMLException e) {
-            throw new YamlLoadException(getSnakeParserDetails(e), e, filename);
-        }
-    }
-
-    /**
-     * Create a simple string with parse info.
-     *
-     * @param markedYAMLException
-     * @return
-     */
-
-    String getSnakeParserDetails(MarkedYAMLException markedYAMLException) {
-
-        Mark mark = markedYAMLException.getProblemMark();
-
-        int lineNumber = mark.getLine() + 1; // starts at zero
-        int columnNumber = mark.getColumn() + 1; // starts at zero
-
-        return "Parse error at line=" + lineNumber + " column=" + columnNumber + " message=" + markedYAMLException.getProblem();
-
-    }
 
     @Override
     public IInternalContest fromYaml(IInternalContest contest, String directoryName) {
@@ -220,34 +169,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         File contestYaml = new File(contestYamlFilename);
 
         // Try CLICS name first.  Fun fact: CLICS_CONTEST_NAME == CONTEST_NAME_KEY, but may not someday
-        String contestTitle = fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_NAME);
+        String contestTitle = ContestImportUtilities.fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_NAME);
         // only if the CLICS name isn't there do we try the old one.  non-null means it is there.
         if(contestTitle == null) {
-            contestTitle = fetchValue(contestYaml, IContestLoader.CONTEST_NAME_KEY);
+            contestTitle = ContestImportUtilities.fetchValue(contestYaml, IContestLoader.CONTEST_NAME_KEY);
         }
         return(contestTitle);
     }
 
-    protected String fetchValue(File file, String key) {
-        Map<String, Object> content = getContent(file.getAbsolutePath());
-        return (String) content.get(key);
-    }
-
-    private Map<String, Object> getContent(String filename) {
-        if (fullYamlContent == null) {
-            fullYamlContent = loadYaml(filename);
-        }
-
-        return fullYamlContent;
-    }
-
     @Override
     public String getJudgesCDPBasePath(String contestYamlFilename) throws IOException {
-        return fetchFileValue(contestYamlFilename, JUDGE_CONFIG_PATH_KEY);
-    }
-
-    private String fetchFileValue(String filename, String key) {
-        return fetchValue(new File(filename), key);
+        if(judgesCDPDataPath == null) {
+            judgesCDPDataPath = ContestImportUtilities.fetchFileValue(contestYamlFilename, JUDGE_CONFIG_PATH_KEY);
+        }
+        return(judgesCDPDataPath);
     }
 
     /**
@@ -425,6 +360,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contestInformation.setAutoStartContest(isBeforeNow(date));
     }
 
+    private void setContestScoreboardType(IInternalContest contest, String type) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setScoreboardType(type);
+    }
+
     /**
      * Input date before now, aka current date/time.
      *
@@ -445,7 +385,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         String contestFileName = getContestYamlFilename(directoryName);
 
-        Map<String, Object> content = loadYaml(contestFileName, yamlLines);
+        Map<String, Object> content = ContestImportUtilities.loadYaml(contestFileName, yamlLines);
 
         if (content == null) {
             return contest;
@@ -453,20 +393,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         setTitle(contest, null);
 
-        String contestTitle = fetchValue(content, CONTEST_NAME_KEY);
+        String contestTitle = ContestImportUtilities.fetchValue(content, CONTEST_NAME_KEY);
         if (contestTitle != null) {
             setTitle(contest, contestTitle);
         }
 
-        boolean ccsTestMode = fetchBooleanValue(content, CCS_TEST_MODE, false);
+        boolean ccsTestMode = ContestImportUtilities.fetchBooleanValue(content, CCS_TEST_MODE, false);
         if (ccsTestMode) {
             setCcsTestMode(contest, ccsTestMode);
         }
 
-        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
+        boolean loadSamples = ContestImportUtilities.fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
         setLoadSampleJudgesData(contest, loadSamples);
 
-        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
+        boolean stopOnFirstFail = ContestImportUtilities.fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
         setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
 
         /**
@@ -476,73 +416,76 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ContestInformation contestInformation = getContestInformation(contest);
 
         //set allow-multiple-team-logins mode
-        boolean allowMultipleTeamLogins = fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
+        boolean allowMultipleTeamLogins = ContestImportUtilities.fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
 
         //set allow-zero-length-submission-files mode
-        boolean allowZeroLengthSubmissionFiles = fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
+        boolean allowZeroLengthSubmissionFiles = ContestImportUtilities.fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
         contestInformation.setAllowZeroLengthSubmissionFiles(allowZeroLengthSubmissionFiles);
 
         // Load team scoreboard string (the one with variables)
-        String teamScoreboadDisplayString = fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
+        String teamScoreboadDisplayString = ContestImportUtilities.fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
 
         // control submission throttling
-        boolean submissionThrottling = fetchBooleanValue(content, SUBMISSION_THROTTLING_KEY, contestInformation.isSubmissionThrottling());
+        boolean submissionThrottling = ContestImportUtilities.fetchBooleanValue(content, SUBMISSION_THROTTLING_KEY, contestInformation.isSubmissionThrottling());
         contestInformation.setSubmissionThrottling(submissionThrottling);
 
         // enable shadow mode
-        boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
+        boolean shadowMode = ContestImportUtilities.fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
         contestInformation.setShadowMode(shadowMode);
 
-        String altAccountsLoadFilename = fetchValue(content, LOAD_ACCOUNTS_FILE_KEY, null);
+        String altAccountsLoadFilename = ContestImportUtilities.fetchValue(content, LOAD_ACCOUNTS_FILE_KEY, null);
         contestInformation.setOverrideLoadAccountsFilename(altAccountsLoadFilename);
 
         // base URL for CCS REST service
-        String  ccsUrl= fetchValue(content, CCS_URL_KEY, contestInformation.getPrimaryCCS_URL());
+        String  ccsUrl= ContestImportUtilities.fetchValue(content, CCS_URL_KEY, contestInformation.getPrimaryCCS_URL());
         contestInformation.setPrimaryCCS_URL(ccsUrl);
 
         // CCS REST login
-        String ccsLogin = fetchValue(content, CCS_LOGIN_KEY, contestInformation.getPrimaryCCS_user_login());
+        String ccsLogin = ContestImportUtilities.fetchValue(content, CCS_LOGIN_KEY, contestInformation.getPrimaryCCS_user_login());
         contestInformation.setPrimaryCCS_user_login(ccsLogin);
 
         // CCS REST password
-        String ccsPassoword = fetchValue(content, CCS_PASSWORD_KEY, contestInformation.getPrimaryCCS_user_pw());
+        String ccsPassoword = ContestImportUtilities.fetchValue(content, CCS_PASSWORD_KEY, contestInformation.getPrimaryCCS_user_pw());
         contestInformation.setPrimaryCCS_user_pw(ccsPassoword);
 
-        String lastEventId = fetchValue(content, CCS_LAST_EVENT_ID_KEY, contestInformation.getLastShadowEventID());
+        String lastEventId = ContestImportUtilities.fetchValue(content, CCS_LAST_EVENT_ID_KEY, contestInformation.getLastShadowEventID());
         contestInformation.setLastShadowEventID(lastEventId);
 
-        String executeDir = fetchValue(content, EXECUTE_FOLDER, contestInformation.getExecuteFolder());
+        String executeDir = ContestImportUtilities.fetchValue(content, EXECUTE_FOLDER, contestInformation.getExecuteFolder());
         contestInformation.setExecuteFolder(executeDir);
+
+        // per-account ccs settings (overrides the above)
+        getRemoteCCSSettings(contestInformation, content);
 
         // save ContesInformation to model
         contest.updateContestInformation(contestInformation);
 
 
-        String judgeCDPath = fetchValue(content, JUDGE_CONFIG_PATH_KEY);
+        String judgeCDPath = ContestImportUtilities.fetchValue(content, JUDGE_CONFIG_PATH_KEY);
         if (judgeCDPath != null) {
             setCDPPath(contest, judgeCDPath);
         } else {
             setCDPPath(contest, directoryName);
         }
 
-        Integer defaultTimeout = fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
+        Integer defaultTimeout = ContestImportUtilities.fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
 
         int currentGlobalMemoryLimit = getMemoryLimitMB(contest);
-        Integer globalMemoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, currentGlobalMemoryLimit);
+        Integer globalMemoryLimit = ContestImportUtilities.fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, currentGlobalMemoryLimit);
         if(currentGlobalMemoryLimit != globalMemoryLimit) {
             setMemoryLimitMB(contest, globalMemoryLimit);
         }
 
         int currentSandboxGraceTime = getSandboxGraceTimeSecs(contest);
-        Integer sandboxGraceTime = fetchIntValue(content, SANDBOX_GRACE_TIME, currentSandboxGraceTime);
+        Integer sandboxGraceTime = ContestImportUtilities.fetchIntValue(content, SANDBOX_GRACE_TIME, currentSandboxGraceTime);
         if(currentSandboxGraceTime != sandboxGraceTime) {
             setSandboxGraceTimeSecs(contest, sandboxGraceTime);
         }
 
         int currentSandboxIntMult = getSandboxInteractiveTimeMultiplier(contest);
-        Integer sandboxIntMult = fetchIntValue(content, SANDBOX_INTERACTIVE_GRACE_MULTIPLIER, currentSandboxIntMult);
+        Integer sandboxIntMult = ContestImportUtilities.fetchIntValue(content, SANDBOX_INTERACTIVE_GRACE_MULTIPLIER, currentSandboxIntMult);
         if(currentSandboxIntMult != sandboxIntMult) {
             setSandboxInteractiveTimeMultiplier(contest, sandboxIntMult);
         }
@@ -554,9 +497,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        loadDataFileContents = fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
+        loadDataFileContents = ContestImportUtilities.fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
 
-        String shortContestName = fetchValue(content, CLICS_CONTEST_ID);
+        String shortContestName = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_ID);
 
         // Check if id is CLICS compliant
         if (!StringUtilities.isEmpty(shortContestName)) {
@@ -572,13 +515,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         } else {
             // only if CLICS id is not present do we try older key `short-name`
-            shortContestName = fetchValue(content, SHORT_NAME_KEY);
+            shortContestName = ContestImportUtilities.fetchValue(content, SHORT_NAME_KEY);
             shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
         }
 
         // only if both CLICS id and `short-name` is not present do we try the key `name`
         if (StringUtilities.isEmpty(shortContestName)) {
-            shortContestName = fetchValue(content, CLICS_CONTEST_NAME);
+            shortContestName = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_NAME);
             shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
         }
         // only set short name if string is present AND not empty
@@ -588,25 +531,25 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             StaticLog.warning("None of CLICS id, name and short-name is present. Contest Identifier will be set as Default-{:random_number}.");
         }
 
-        if (null != fetchValue(content, AUTO_STOP_CLOCK_AT_END_KEY)) {
+        if (null != ContestImportUtilities.fetchValue(content, AUTO_STOP_CLOCK_AT_END_KEY)) {
             // only set value if key present
 
-            boolean autoStopClockAtEnd = fetchBooleanValue(content, AUTO_STOP_CLOCK_AT_END_KEY, false);
+            boolean autoStopClockAtEnd = ContestImportUtilities.fetchBooleanValue(content, AUTO_STOP_CLOCK_AT_END_KEY, false);
             setAutoStopClockAtEnd(contest, autoStopClockAtEnd);
         }
 
-        String contestLength = fetchValue(content, CLICS_CONTEST_DURATION);
+        String contestLength = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_DURATION);
         // if CLICS duration not present, try old duration.
         // note as of CLICS spec 2022-07, the CLICS key is the same as the old one
         // we leave the old test here in case the CLICS key changes at some point.
         if(contestLength == null) {
-            contestLength = fetchValue(content, CONTEST_DURATION_KEY);
+            contestLength = ContestImportUtilities.fetchValue(content, CONTEST_DURATION_KEY);
         }
         if (contestLength != null) {
             setContestLength(contest, contestLength);
         }
 
-        boolean isRunning  = fetchBooleanValue(content, "running", false);
+        boolean isRunning  = ContestImportUtilities.fetchBooleanValue(content, "running", false);
         if (isRunning){
             ContestTime time = contest.getContestTime();
             if (time == null) {
@@ -620,16 +563,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // There are several ways to specify the freeze length.  We try them here
         // in order of preference: CLICS, old, new  (does that make sense? shouldn't
         // new be tried before old? -- JB)
-        String scoreboardFreezeTime = fetchValue(content, CLICS_CONTEST_FREEZE_DURATION);
+        String scoreboardFreezeTime = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_FREEZE_DURATION);
 
         // This is absolutely ridiculous, but backward compatible *sigh*
         if(scoreboardFreezeTime == null) {
             // Old yaml name
-            scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
+            scoreboardFreezeTime = ContestImportUtilities.fetchValue(content, SCOREBOARD_FREEZE_KEY);
 
             if(scoreboardFreezeTime == null) {
                 // New yaml name
-                scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_LENGTH_KEY);
+                scoreboardFreezeTime = ContestImportUtilities.fetchValue(content, SCOREBOARD_FREEZE_LENGTH_KEY);
             }
         }
         // Only set time if not null or empty
@@ -637,10 +580,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setScoreboardFreezeTime(contest, scoreboardFreezeTime);
         }
 
-        Object startTimeObject = fetchObjectValue(content, CLICS_CONTEST_START_TIME);
+        Object startTimeObject = ContestImportUtilities.fetchObjectValue(content, CLICS_CONTEST_START_TIME);
         // if clics start time not present(!), try the old one
         if(startTimeObject == null) {
-            startTimeObject = fetchObjectValue(content, CONTEST_START_TIME_KEY);
+            startTimeObject = ContestImportUtilities.fetchObjectValue(content, CONTEST_START_TIME_KEY);
         }
 
         Date date = null;
@@ -648,10 +591,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setContestStartDateTime(contest, (Date) startTimeObject);
         } else {
 
-            String startTime = fetchValue(content, CLICS_CONTEST_START_TIME);
+            String startTime = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_START_TIME);
             // only if CLICS start time is NOT there do we try the old one
             if(startTime == null) {
-                startTime = fetchValue(content, CONTEST_START_TIME_KEY);
+                startTime = ContestImportUtilities.fetchValue(content, CONTEST_START_TIME_KEY);
             }
 
             if (startTime != null) {
@@ -689,9 +632,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         // If the contest type is present in contest.yaml, verify it
-        String scoreType = fetchValue(content, CLICS_CONTEST_SCOREBOARD_TYPE);
-        if(scoreType != null && !scoreType.equals("pass-fail")) {
-            throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": " + scoreType + ", expected pass-fail");
+        String scoreType = ContestImportUtilities.fetchValue(content, CLICS_CONTEST_SCOREBOARD_TYPE);
+        if(scoreType != null) {
+            if(!scoreType.equals(CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL)
+                && !scoreType.equals(CLICS_CONTEST_SCOREBOARD_TYPE_SCORE)) {
+                throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": "
+                    + scoreType + ", expected "
+                    + CLICS_CONTEST_SCOREBOARD_TYPE_PASSFAIL
+                    + " or "
+                    + CLICS_CONTEST_SCOREBOARD_TYPE_SCORE);
+            }
+            setContestScoreboardType(contest, scoreType);
         }
 
         //get the map (if any) of the CLICS "medals" section in the contest.yaml file
@@ -746,7 +697,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             contest.setFinalizeData(finalizeData);
         }
 
-        Object privatehtmlOutputDirectory = fetchObjectValue(content, OUTPUT_PRIVATE_SCORE_DIR_KEY);
+        Object privatehtmlOutputDirectory = ContestImportUtilities.fetchObjectValue(content, OUTPUT_PRIVATE_SCORE_DIR_KEY);
         if (privatehtmlOutputDirectory != null) {
             if (privatehtmlOutputDirectory instanceof String) {
                 setScoringPropertyValue(contest, DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR, (String) privatehtmlOutputDirectory);
@@ -755,7 +706,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        Object publichtmlOutputDirectory = fetchObjectValue(content, OUTPUT_PUBLIC_SCORE_DIR_KEY);
+        Object publichtmlOutputDirectory = ContestImportUtilities.fetchObjectValue(content, OUTPUT_PUBLIC_SCORE_DIR_KEY);
         if (publichtmlOutputDirectory != null) {
             if (publichtmlOutputDirectory instanceof String) {
                 setScoringPropertyValue(contest, DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR, (String) publichtmlOutputDirectory);
@@ -764,7 +715,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        Object maxOutputSize = fetchObjectValue(content, MAX_OUTPUT_SIZE_K_KEY);
+        Object maxOutputSize = ContestImportUtilities.fetchObjectValue(content, MAX_OUTPUT_SIZE_K_KEY);
         if (maxOutputSize != null) {
 
             if (maxOutputSize instanceof Integer) {
@@ -779,7 +730,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        Object maxSourceSize = fetchObjectValue(content, MAX_SOURCE_SIZE_K_KEY);
+        Object maxSourceSize = ContestImportUtilities.fetchObjectValue(content, MAX_SOURCE_SIZE_K_KEY);
         if (maxSourceSize != null) {
 
             if (maxSourceSize instanceof Integer) {
@@ -800,9 +751,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             contest.addLanguage(language);
         }
 
-        String defaultValidatorCommandLine = fetchValue(content, DEFAULT_VALIDATOR_KEY);
+        String defaultValidatorCommandLine = ContestImportUtilities.fetchValue(content, DEFAULT_VALIDATOR_KEY);
 
-        String overrideValidatorCommandLine = fetchValue(content, OVERRIDE_VALIDATOR_KEY);
+        String overrideValidatorCommandLine = ContestImportUtilities.fetchValue(content, OVERRIDE_VALIDATOR_KEY);
         if (overrideValidatorCommandLine == null) {
 
             // if no override defined, then maybe use mtsv
@@ -817,7 +768,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         boolean overrideUsePc2Validator = false;
-        String usingValidator = fetchValue(content, IContestLoader.USING_PC2_VALIDATOR);
+        String usingValidator = ContestImportUtilities.fetchValue(content, IContestLoader.USING_PC2_VALIDATOR);
 
         if (usingValidator != null && usingValidator.equalsIgnoreCase("true")) {
             overrideUsePc2Validator = true;
@@ -831,9 +782,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         @SuppressWarnings("unchecked")
         LinkedHashMap<String, Object> judgingTypeContent = (LinkedHashMap<String, Object>) content.get(JUDGING_TYPE_KEY);
         if (judgingTypeContent != null) {
-            manualReviewOverride = fetchBooleanValue(judgingTypeContent, MANUAL_REVIEW_KEY, false);
+            manualReviewOverride = ContestImportUtilities.fetchBooleanValue(judgingTypeContent, MANUAL_REVIEW_KEY, false);
         } else {
-            manualReviewOverride = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
+            manualReviewOverride = ContestImportUtilities.fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
         }
 
         //get the current default global output size for the contest so getProblems() can use it if no
@@ -890,17 +841,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Account[] accounts = getAccounts(yamlLines);
 
-        Map<String, Object> passwordYamlMap = fetchMap(content, "passwords");
+        Map<String, Object> passwordYamlMap = ContestImportUtilities.fetchMap(content, "passwords");
 
         if (passwordYamlMap != null) {
 
-            String passTypeString = fetchValueDefault(passwordYamlMap, "type", PasswordType2.LETTERS_AND_DIGITS.toString());
+            String passTypeString = ContestImportUtilities.fetchValueDefault(passwordYamlMap, "type", PasswordType2.LETTERS_AND_DIGITS.toString());
             PasswordType2 passwordType = PasswordType2.valueOf(passTypeString.toUpperCase());
 
-            String lengthString = fetchValueDefault(passwordYamlMap, "length", "8");
+            String lengthString = ContestImportUtilities.fetchValueDefault(passwordYamlMap, "length", "8");
             int length = getIntegerValue(lengthString, 8);
 
-            String prefix = fetchValueDefault(passwordYamlMap, "prefix", "");
+            String prefix = ContestImportUtilities.fetchValueDefault(passwordYamlMap, "prefix", "");
 
             /**
              * Assign team passwords
@@ -915,9 +866,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             /**
              * Override output directory for files
              */
-            targetDirectory = fetchValueDefault(passwordYamlMap, "outdirname", targetDirectory);
+            targetDirectory = ContestImportUtilities.fetchValueDefault(passwordYamlMap, "outdirname", targetDirectory);
 
-            String passfilename = fetchValueDefault(passwordYamlMap, "passfile", targetDirectory + File.separator + MailMergeFile.PASSWORD_LIST_FILENNAME);
+            String passfilename = ContestImportUtilities.fetchValueDefault(passwordYamlMap, "passfile", targetDirectory + File.separator + MailMergeFile.PASSWORD_LIST_FILENNAME);
 
             /**
              * Write OS login passwords file (just a list of passwords in a text file)
@@ -925,7 +876,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             generateOSPasswords(passfilename, updatedAccounts.length, passwordType, length, prefix);
 
-            String mergefilename = fetchValueDefault(passwordYamlMap, "mergefile", targetDirectory + File.separator + MailMergeFile.DEFAULT_MERGE_OUTPUT_FILENAME);
+            String mergefilename = ContestImportUtilities.fetchValueDefault(passwordYamlMap, "mergefile", targetDirectory + File.separator + MailMergeFile.DEFAULT_MERGE_OUTPUT_FILENAME);
 
             try {
                 /**
@@ -975,7 +926,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     contest.updateAccount(account);
 //                    System.out.println("debug  Added proxy account "+account.getClientId().toString());
                 } else {
-                    syntaxError("No such account for proxy of " + clientId.getClientType().toString() + " " + clientId.getClientNumber() + " at site " + clientId.getSiteNumber());
+                    ContestImportUtilities.syntaxError("No such account for proxy of " + clientId.getClientType().toString() + " " + clientId.getClientNumber() + " at site " + clientId.getSiteNumber());
                     ;
                 }
             }
@@ -1159,7 +1110,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (scoreboardFreezeTime.length() > 2) {
             long seconds = parseTimeIntoSeconds(scoreboardFreezeTime, -1);
             if(seconds == -1) {
-                syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds or HH:MM:SS");
+                ContestImportUtilities.syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds or HH:MM:SS");
             }
             scoreboardFreezeTime = ContestTime.formatTime(seconds);
         }
@@ -1218,29 +1169,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.setContestIdentifier(shortContestName);
     }
 
-    /**
-     * Get boolean value for input key in map.
-     *
-     * Returns defaultVaue if no entry matches key.
-     *
-     * @param content
-     * @param key
-     * @param defaultValue
-     * @return defaultValue or value from item in map.
-     */
-    private boolean fetchBooleanValue(Map<String, Object> content, String key, boolean defaultValue) {
-        Object object = content.get(key);
-        Boolean value = false;
-        if (object == null) {
-            return defaultValue;
-        } else if (object instanceof Boolean) {
-            value = (Boolean) content.get(key);
-        } else if (object instanceof String) {
-            value = getBooleanValue((String) content.get(key), defaultValue);
-        }
-        return value;
-    }
-
     private void addAutoJudgeSetting(IInternalContest contest, AutoJudgeSetting auto) {
 
         Account account = contest.getAccount(auto.getClientId());
@@ -1266,21 +1194,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Vector<Account> accountVector = new Vector<Account>();
         AccountList accountList = new AccountList();
 
-        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, ACCOUNTS_KEY);
+        Map<String, Object> yamlContent = ContestImportUtilities.loadYaml(null, yamlLines);
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, ACCOUNTS_KEY);
 
         if (list != null) {
             for (Object object : list) {
 
                 Map<String, Object> map = (Map<String, Object>) object;
 
-                String accountType = fetchValue(map, "account");
+                String accountType = ContestImportUtilities.fetchValue(map, "account");
                 checkField(accountType, "Account Type");
 
                 ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
-                Integer startNumber = fetchIntValue(map, "start", 1);
-                Integer count = fetchIntValue(map, "count", 1);
-                Integer siteNumber = fetchIntValue(map, "site", 1);
+                Integer startNumber = ContestImportUtilities.fetchIntValue(map, "start", 1);
+                Integer count = ContestImportUtilities.fetchIntValue(map, "count", 1);
+                Integer siteNumber = ContestImportUtilities.fetchIntValue(map, "site", 1);
 
                 /**
                  * <pre>
@@ -1308,56 +1236,60 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return(accountVector.toArray(new Account[accountVector.size()]));
     }
 
-    private Object fetchObjectValue(Map<String, Object> content, String key) {
-        if (content == null) {
-            return null;
-        }
-        Object value = content.get(key);
-        return value;
-    }
+    @SuppressWarnings("unchecked")
+    private boolean getRemoteCCSSettings(ContestInformation contestInfo, Map<String, Object> yamlContent) {
 
-    /**
-     * Fetch value from a map.
-     *
-     * @param content
-     * @param key
-     * @return null if content does not contain a value for the key, else the value for the key.
-     */
-    private String fetchValue(Map<String, Object> content, String key) {
-        if (content == null) {
-            return null;
-        }
-        Object value = content.get(key);
-        if (value == null) {
-            return null;
-        } else if (value instanceof String) {
-            return (String) content.get(key);
-        } else {
-            return content.get(key).toString();
-        }
-    }
+        Vector<RemoteCCSInformation> ccsVector = new Vector<RemoteCCSInformation>();
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, REMOTE_CCS_SETTINGS_KEY);
 
-    private String fetchValue(Map<String, Object> content, String key, String defaultValue) {
-        if (content == null) {
-            return null;
-        }
-        Object value = content.get(key);
-        if (value == null) {
-            return defaultValue;
-        } else if (value instanceof String) {
-            return (String) content.get(key);
-        } else {
-            return content.get(key).toString();
-        }
-    }
+        if (list != null) {
+            for (Object object : list) {
 
+                Map<String, Object> map = (Map<String, Object>) object;
 
-    private boolean isValuePresent(Map<String, Object> content, String key) {
-        if (content == null) {
-            return false;
+                /**
+                 * <pre>
+                 * remote-ccs-settings:
+                 *
+                 *   - account: feeder1
+                 *     type: shadow
+                 *     enable: true
+                 *     url: https://icpc.displayadmin.com:50443/cgi-bin/GNY2024Real
+                 *     login: pc2
+                 *     password: GNY123
+                 *     team-offset: 1000
+                 *
+                 *   - account: feeder2
+                 *     type: combinescoreboard
+                 *     enable: true
+                 *     url: https://kattis.com/api/contests/ecna
+                 *     login: pc2
+                 *     password: Abcd1234
+                 * </pre>
+                 */
+                String accountName = ContestImportUtilities.fetchValue(map, "account");
+                checkField(accountName, "RemoteCCS account");
+                String feederType = ContestImportUtilities.fetchValue(map, "type");
+                checkField(feederType, "RemoteCCS type");
+                RemoteCCSType type = RemoteCCSType.valueOf(feederType.toUpperCase());
+                boolean enabled = ContestImportUtilities.fetchBooleanValue(map,  "enable", true);
+                String url = ContestImportUtilities.fetchValue(map, "url");
+                checkField(url, "RemoteCCS url");
+                String login = ContestImportUtilities.fetchValue(map, "login");
+                checkField(login, "RemoteCCS login");
+                String password = ContestImportUtilities.fetchValue(map, "password");
+                checkField(password, "RemoteCCS password");
+                int teamOffset = ContestImportUtilities.fetchIntValue(map,  "team-offset", 0);
+
+                ccsVector.add(new RemoteCCSInformation(accountName, type, enabled, url, login, password, teamOffset));
+            }
         }
-        Object value = content.get(key);
-        return value != null;
+        if(ccsVector.size() > 0) {
+            RemoteCCSInformation [] remoteInfo = ccsVector.toArray(new RemoteCCSInformation[ccsVector.size()]);
+            contestInfo.setRemoteCCSInfo(remoteInfo);
+        }
+        return true;
+
     }
 
     @SuppressWarnings("unchecked")
@@ -1366,23 +1298,23 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         PlaybackInfo info = new PlaybackInfo();
 
-        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, REPLAY_KEY);
+        Map<String, Object> yamlContent = ContestImportUtilities.loadYaml(null, yamlLines);
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, REPLAY_KEY);
 
         if (list != null) {
             Map<String, Object> map = list.get(0);
 
-            String siteTitle = fetchValue(map, "title");
+            String siteTitle = ContestImportUtilities.fetchValue(map, "title");
 
-            String filename = fetchValue(map, "file");
+            String filename = ContestImportUtilities.fetchValue(map, "file");
 
-            boolean started = fetchBooleanValue(map, "auto_start", false);
+            boolean started = ContestImportUtilities.fetchBooleanValue(map, "auto_start", false);
 
-            Integer waitTimeBetweenEventsMS = fetchIntValue(map, "pacingMS", 1000);
+            Integer waitTimeBetweenEventsMS = ContestImportUtilities.fetchIntValue(map, "pacingMS", 1000);
 
-            Integer minEvents = fetchIntValue(map, "minevents", 1);
+            Integer minEvents = ContestImportUtilities.fetchIntValue(map, "minevents", 1);
 
-            Integer siteNumber = fetchIntValue(map, "site");
+            Integer siteNumber = ContestImportUtilities.fetchIntValue(map, "site");
 
             // Site site = new Site(siteTitle, siteNumber);
 
@@ -1398,17 +1330,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
-    @SuppressWarnings("unused")
-    private boolean fetchBooleanValue(Map<String, Object> content, String key) {
-        return fetchBooleanValue(content, key, false);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public Site[] getSites(String[] yamlLines) {
 
-        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, SITES_KEY);
+        Map<String, Object> yamlContent = ContestImportUtilities.loadYaml(null, yamlLines);
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, SITES_KEY);
         ArrayList<Site> sitesVector = new ArrayList<Site>();
 
         if (list != null) {
@@ -1419,16 +1346,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                  * <pre> sites: - number: 1 name: Site 1 IP: localhost port: 50002 </pre>
                  */
 
-                String siteTitle = fetchValue(map, "name");
+                String siteTitle = ContestImportUtilities.fetchValue(map, "name");
 
-                Integer siteNumber = fetchIntValue(map, "number");
+                Integer siteNumber = ContestImportUtilities.fetchIntValue(map, "number");
 
                 Site site = new Site(siteTitle, siteNumber);
 
-                String hostName = fetchValueDefault(map, "IP", "");
-                Integer portString = fetchIntValue(map, "port");
+                String hostName = ContestImportUtilities.fetchValueDefault(map, "IP", "");
+                Integer portString = ContestImportUtilities.fetchIntValue(map, "port");
 
-                String password = fetchValue(map, "password");
+                String password = ContestImportUtilities.fetchValue(map, "password");
                 if (password == null) {
                     password = "site" + siteNumber.toString();
                 }
@@ -1450,96 +1377,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
-    private String fetchValueDefault(Map<String, Object> map, String key, String defaultValue) {
-        String value = fetchValue(map, key);
-        if (value == null) {
-            value = defaultValue;
-        }
-        return value;
-    }
-
-    private Integer fetchIntValue(Map<String, Object> map, String key, int defaultValue) {
-        Integer value = null;
-        if (map != null) {
-            value = (Integer) map.get(key);
-        }
-        if (value != null) {
-            try {
-                return value;
-            } catch (Exception e) {
-                syntaxError("Expecting number after " + key + ": field, found '" + value + "'");
-            }
-        }
-        return defaultValue;
-    }
-
-    private Long fetchLongValue(Map<String, Object> map, String key, long defaultValue) {
-        Long value = null;
-        if (map != null) {
-            value = (Long) map.get(key);
-        }
-        if (value != null) {
-            try {
-                return value;
-            } catch (Exception e) {
-                syntaxError("Expecting number after " + key + ": field, found '" + value + "'");
-            }
-        }
-        return defaultValue;
-    }
-
-    private Integer fetchIntValue(Map<String, Object> map, String key) {
-        if (map == null) {
-            // SOMEDAY figure out why map would every be null
-            return null;
-        }
-        Integer value = (Integer) map.get(key);
-        if (value != null) {
-            try {
-                return value;
-            } catch (Exception e) {
-                syntaxError("Expecting number after " + key + ": field, found '" + value + "'");
-            }
-        }
-        return null;
-    }
-
-    private Double fetchDoubleValue(Map<String, Object> map, String key) {
-        if (map == null) {
-            // SOMEDAY figure out why map would every be null
-            return null;
-        }
-        // So, the value may be a double (IE contains a decimal pt), or an integer.
-        Object oValue = map.get(key);
-        Double value = null;
-        if (oValue != null) {
-            try {
-                if(oValue instanceof Double) {
-                    value = (Double) oValue;
-                } else {
-                    value = Double.valueOf(((Integer)oValue).doubleValue());
-                }
-                return value;
-            } catch (Exception e) {
-                syntaxError("Expecting double number after " + key + ": field, found '" + oValue + "'");
-            }
-        }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> fetchMap(Map<String, Object> content, String key) {
-        Object object = content.get(key);
-        if (object != null) {
-            if (object instanceof Map) {
-                return (Map<String, Object>) content.get(key);
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
 
     @Override
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator) {
@@ -1559,11 +1396,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         String problemYamlFilename = problemDirectory + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
 
-        Map<String, Object> content = loadYaml(problemYamlFilename);
+        Map<String, Object> content = ContestImportUtilities.loadYaml(problemYamlFilename);
 
         String problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_PROBLEM_LATEX_FILENAME;
 
-        String problemTitle = fetchValue(content, PROBLEM_NAME_KEY);
+        String problemTitle = ContestImportUtilities.fetchValue(content, PROBLEM_NAME_KEY);
 
         if (new File(problemLaTexFilename).isFile()) {
             problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
@@ -1575,14 +1412,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         boolean usingCustomValidator = false;
-        Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
+        Map<String, Object> validatorContent = ContestImportUtilities.fetchMap(content, VALIDATOR_KEY);
         if (validatorContent != null) {
-            usingCustomValidator = fetchBooleanValue(validatorContent, IContestLoader.USING_CUSTOM_VALIDATOR, false);
+            usingCustomValidator = ContestImportUtilities.fetchBooleanValue(validatorContent, IContestLoader.USING_CUSTOM_VALIDATOR, false);
         }
 
         // check for CLICS "validation" property; provides an alternate way to specify a customer validator and,
         // the ONLY way to specify if the problem is interactive.
-        String validationType = fetchValue(content, VALIDATION_TYPE);
+        String validationType = ContestImportUtilities.fetchValue(content, VALIDATION_TYPE);
         boolean isInteractive = false;
         if (validationType != null) {
             // validationType is a list of validation options
@@ -1597,21 +1434,26 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                             // Note that interactive problems require a custom validator
                             isInteractive = true;
                         } else if(valOpts[1].equals(Constants.VALIDATION_SCORE)) {
-                            syntaxError("Unsupported validation type: custom score");
+//                            ContestImportUtilities.syntaxError("Unsupported validation type: custom score");
+                            if(problemTitle == null) {
+                                System.out.println("Custom validation type 'score' specified for untitled problem");
+                            } else {
+                                System.out.println("Custom validation type 'score' specified for problem " + problemTitle);
+                            }
                         } else {
-                            syntaxError("Unknown valudation type: custom " + valOpts[1]);
+                            ContestImportUtilities.syntaxError("Unknown valudation type: custom " + valOpts[1]);
                         }
                     }
                 } else if(!valOpts[0].equals(Constants.VALIDATION_DEFAULT)) {
-                    syntaxError("Unknown validation type " + valOpts[0] + " specified");
+                    ContestImportUtilities.syntaxError("Unknown validation type " + valOpts[0] + " specified");
                 }
             } else {
-                syntaxError(VALIDATION_TYPE + " property found but no type was specified");
+                ContestImportUtilities.syntaxError(VALIDATION_TYPE + " property found but no type was specified");
             }
         }
 
         boolean pc2FormatProblemYamlFile = false;
-        String usingValidator = fetchValue(validatorContent, IContestLoader.USING_PC2_VALIDATOR);
+        String usingValidator = ContestImportUtilities.fetchValue(validatorContent, IContestLoader.USING_PC2_VALIDATOR);
 
         if (usingValidator != null && usingValidator.equalsIgnoreCase("true")) {
             pc2FormatProblemYamlFile = true;
@@ -1623,24 +1465,24 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         // TODO: I am not sure why this test is contingent on pc2FormatProblemYamlFile. (JB)
         if (problemTitle == null && (pc2FormatProblemYamlFile)) {
-            problemTitle = fetchValue(content, "name");
+            problemTitle = ContestImportUtilities.fetchValue(content, "name");
         }
 
         if (problemTitle == null) {
-            syntaxError("No problem name found for " + problem.getShortName() + " in " + problemLaTexFilename);
+            ContestImportUtilities.syntaxError("No problem name found for " + problem.getShortName() + " in " + problemLaTexFilename);
         }
 
         problem.setDisplayName(problemTitle);
 
-        String dataFileBaseDirectory = problemDirectory + File.separator + "data" + File.separator + "secret";
+        String dataFileBaseDirectory = problemDirectory + File.separator + "data";
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
         if (pc2FormatProblemYamlFile) {
-            String dataFileName = fetchValue(content, "datafile");
-            String answerFileName = fetchValue(content, "answerfile");
+            String dataFileName = ContestImportUtilities.fetchValue(content, "datafile");
+            String answerFileName = ContestImportUtilities.fetchValue(content, "answerfile");
 
-            loadPc2ProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles, dataFileName, answerFileName);
+            loadPc2ProblemFiles(contest, dataFileBaseDirectory + File.separator + "secret", problem, problemDataFiles, dataFileName, answerFileName);
         } else {
             loadCCSProblemFiles(contest, dataFileBaseDirectory, problem, problemDataFiles);
         }
@@ -1681,25 +1523,25 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         //read any PC2-format limits specified at the top level of the problem.yaml file
-        Integer timeoutSecs = fetchIntValue(content, TIMEOUT_KEY);
+        Integer timeoutSecs = ContestImportUtilities.fetchIntValue(content, TIMEOUT_KEY);
         if (timeoutSecs != null) {
             problem.setTimeOutInSeconds(timeoutSecs);
         }
-        Integer maxOutputPC2 = fetchIntValue(content, MAX_OUTPUT_SIZE_K_KEY);
+        Integer maxOutputPC2 = ContestImportUtilities.fetchIntValue(content, MAX_OUTPUT_SIZE_K_KEY);
         if (maxOutputPC2 != null) {
             problem.setMaxOutputSizeKB(maxOutputPC2);
         }
 
-        Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, contest.getContestInformation().getMemoryLimitInMeg());
+        Integer memoryLimit = ContestImportUtilities.fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
         problem.setMemoryLimitMB(memoryLimit);
 
-        String sandboxCommandLine = fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");
+        String sandboxCommandLine = ContestImportUtilities.fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");
         problem.setSandboxCmdLine(sandboxCommandLine);
 
-        String sandboxProgramName = fetchValue(content, SANDBOX_PROGRAM_NAME_KEY, "");
+        String sandboxProgramName = ContestImportUtilities.fetchValue(content, SANDBOX_PROGRAM_NAME_KEY, "");
         problem.setSandboxProgramName(sandboxProgramName);
 
-        String sandboxTypeString = fetchValue(content, SANDBOX_TYPE_KEY);
+        String sandboxTypeString = ContestImportUtilities.fetchValue(content, SANDBOX_TYPE_KEY);
         if (sandboxTypeString != null) {
 
             try {
@@ -1715,7 +1557,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         //get the map (if any) of the CLICS "limits" section in the problem.yaml file
-        Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
+        Map<String, Object> limitsContent = ContestImportUtilities.fetchMap(content, LIMITS_KEY);
 
         //if there is a CLICS "limits" section in the problem.yaml, read any values in that section and use
         // them to override any PC2-formatted values (just read in, above)
@@ -1735,12 +1577,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             // which DO have CLICS "time_multiplier" and/or "time_saftety_margin" entries in them (even though PC2 doesn't currently
             // support those attibutes).  The problem is that the presence of those attributes in these JUnit test files results
             // in those JUnits throwing YamlLoadExceptions.
-//            Integer clics_time_multiplier = fetchIntValue(limitsContent, CLICS_TIME_MULTIPLIER_KEY);
+//            Integer clics_time_multiplier = ContestImportUtilities.fetchIntValue(limitsContent, CLICS_TIME_MULTIPLIER_KEY);
 //            if (clics_time_multiplier != null) {
 //                //TODO: replace the following exception with code to properly handle the CLICS time_multiplier value.
 //                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_MULTIPLIER_KEY);
 //            }
-//            Integer clics_time_safety_margin = fetchIntValue(limitsContent, CLICS_TIME_SAFETY_MARGIN_KEY);
+//            Integer clics_time_safety_margin = ContestImportUtilities.fetchIntValue(limitsContent, CLICS_TIME_SAFETY_MARGIN_KEY);
 //            if (clics_time_safety_margin != null) {
 //                //TODO: replace the following exception with code to properly handle the CLICS time_safety_margin value.
 //                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_SAFETY_MARGIN_KEY);
@@ -1749,18 +1591,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             //check for a timeout limit within the CLICS "limits:" section.
             // Note that the presence of a "timeout:" entry within a CLICS
             // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
-            Double clicsTimeout = fetchDoubleValue(limitsContent, TIMEOUT_KEY);
+            Double clicsTimeout = ContestImportUtilities.fetchDoubleValue(limitsContent, TIMEOUT_KEY);
             if (clicsTimeout != null) {
                 problem.setTimeOutInSeconds(clicsTimeout.intValue());
             }
 
             //check for a CLICS maxoutput limit - the value is in MiB
-            Integer clicsMaxOutput = fetchIntValue(limitsContent, CLICS_MAX_OUTPUT_KEY);
+            Integer clicsMaxOutput = ContestImportUtilities.fetchIntValue(limitsContent, CLICS_MAX_OUTPUT_KEY);
             if (clicsMaxOutput != null) {
                 problem.setMaxOutputSizeKB(clicsMaxOutput * Constants.KIBIBYTE_PER_MEBIBYTE);
             }
 
-            Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, memoryLimit.intValue());
+            Integer clicsMemoryLimit = ContestImportUtilities.fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
             problem.setMemoryLimitMB(clicsMemoryLimit);
         }
 
@@ -1783,7 +1625,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         } else {
             // using Custom Output Validator
-            String outputValidatorNameFromYaml = fetchValue(validatorContent, "validatorProg");
+            String outputValidatorNameFromYaml = ContestImportUtilities.fetchValue(validatorContent, "validatorProg");
 
             if (outputValidatorNameFromYaml != null) {
                 Problem cleanProblem = contest.getProblem(problem.getElementId());
@@ -1810,7 +1652,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         contest.updateProblem(cleanProblem, problemDataFile);
                     } else {
                         // Halt loading and throw YamlLoadException
-                        syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + outputValidatorFile.getErrorMessage());
+                        ContestImportUtilities.syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + outputValidatorFile.getErrorMessage());
                     }
                 }
 
@@ -1819,21 +1661,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         boolean globlStopOnFirstFail = contest.getContestInformation().isStopOnFirstFailedtestCase();
 
-        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, globlStopOnFirstFail);
+        boolean stopOnFirstFail = ContestImportUtilities.fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, globlStopOnFirstFail);
         problem.setStopOnFirstFailedTestCase(stopOnFirstFail);
 
         assignJudgingType(content, problem, overrideManualReview);
 
-        boolean showOutputWindow = fetchBooleanValue(content, SHOW_OUTPUT_WINDOW, true);
+        boolean showOutputWindow = ContestImportUtilities.fetchBooleanValue(content, SHOW_OUTPUT_WINDOW, true);
         problem.setHideOutputWindow(!showOutputWindow);
 
-        boolean showCompareWindow = fetchBooleanValue(content, SHOW_COMPARE_WINDOW, false);
+        boolean showCompareWindow = ContestImportUtilities.fetchBooleanValue(content, SHOW_COMPARE_WINDOW, false);
         problem.setShowCompareWindow(showCompareWindow);
 
-        boolean hideProblem = fetchBooleanValue(content, HIDE_PROBLEM, false);
+        boolean hideProblem = ContestImportUtilities.fetchBooleanValue(content, HIDE_PROBLEM, false);
         problem.setActive(!hideProblem);
 
-        boolean showValidationResults = fetchBooleanValue(content, SHOW_VALIDATION_RESULTS, true);
+        boolean showValidationResults = ContestImportUtilities.fetchBooleanValue(content, SHOW_VALIDATION_RESULTS, true);
         problem.setShowValidationToJudges(showValidationResults);
 
         @SuppressWarnings("unchecked")
@@ -1843,17 +1685,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         // override CCS standard read input data from stdin
-        Map<String, Object> problemInputContent = fetchMap(content, PROBLEM_INPUT_KEY);
+        Map<String, Object> problemInputContent = ContestImportUtilities.fetchMap(content, PROBLEM_INPUT_KEY);
         if (problemInputContent != null) {
-            boolean readFromSTDIN = fetchBooleanValue(problemInputContent, READ_FROM_STDIN_KEY, true);
+            boolean readFromSTDIN = ContestImportUtilities.fetchBooleanValue(problemInputContent, READ_FROM_STDIN_KEY, true);
             problem.setReadInputDataFromSTDIN(readFromSTDIN);
         }
 
-        String groupListString = fetchValue(content, GROUPS_KEY);
+        String groupListString = ContestImportUtilities.fetchValue(content, GROUPS_KEY);
         if (groupListString != null) {
 
             if (groupListString.trim().length() == 0) {
-                syntaxError("Empty group list");
+                ContestImportUtilities.syntaxError("Empty group list");
             }
 
             String[] fields = groupListString.split(";");
@@ -1866,9 +1708,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 Group group = lookupGroupInfo(groups, groupInfo);
                 if (group == null) {
                     if (groups == null || groups.length == 0) {
-                        syntaxError("For "+problem.getShortName()+" ERROR No groups defined. (groups.tsv not loaded?), error when trying to find group for '" + groupInfo + "' from yaml value '" + groupListString + "' ");
+                        ContestImportUtilities.syntaxError("For "+problem.getShortName()+" ERROR No groups defined. (groups.tsv not loaded?), error when trying to find group for '" + groupInfo + "' from yaml value '" + groupListString + "' ");
                     } else {
-                        syntaxError("Undefined group '" + groupInfo + "' for group list '" + groupListString + "' ");
+                        ContestImportUtilities.syntaxError("Undefined group '" + groupInfo + "' for group list '" + groupListString + "' ");
                     }
                 }
 
@@ -1877,7 +1719,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         // SOMEDAY CCS - send preliminary - add bug - fix.
-        // boolean sendPreliminary = fetchBooleanValue(content, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
+        // boolean sendPreliminary = ContestImportUtilities.fetchBooleanValue(content, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
         // if (sendPreliminary){
         // problem.setPrelimaryNotification(true);
         // }
@@ -1908,16 +1750,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             @SuppressWarnings("unchecked")
             LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) object; // fetchList(content, VALIDATOR_KEY);
 
-            boolean customType = fetchBooleanValue(map, IContestLoader.USING_CUSTOM_VALIDATOR, false);
-            // boolean pc2Type = fetchBooleanValue(map, IContestLoader.USING_PC2_VALIDATOR, false);
-            String validatorProg = fetchValue(map, "validatorProg");
+            boolean customType = ContestImportUtilities.fetchBooleanValue(map, IContestLoader.USING_CUSTOM_VALIDATOR, false);
+            // boolean pc2Type = ContestImportUtilities.fetchBooleanValue(map, IContestLoader.USING_PC2_VALIDATOR, false);
+            String validatorProg = ContestImportUtilities.fetchValue(map, "validatorProg");
 
-            String validatorCmd = fetchValue(map, "validatorCmd");
+            String validatorCmd = ContestImportUtilities.fetchValue(map, "validatorCmd");
             // junit does not expect NONE to be set....
             // if (pc2Type) {
             problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
             problem.setOutputValidatorProgramName(validatorProg);
-            String validatorOption = fetchValue(map, "validatorOption");
+            String validatorOption = ContestImportUtilities.fetchValue(map, "validatorOption");
 
             PC2ValidatorSettings settings = new PC2ValidatorSettings();
             if (validatorOption != null) {
@@ -1935,7 +1777,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
                 problem.setOutputValidatorProgramName(validatorProg);
                 CustomValidatorSettings customSettings = new CustomValidatorSettings();
-                boolean clicsMode = fetchBooleanValue(map, IContestLoader.USE_CLICS_CUSTOM_VALIDATOR_INTERFACE, true);
+                boolean clicsMode = ContestImportUtilities.fetchBooleanValue(map, IContestLoader.USE_CLICS_CUSTOM_VALIDATOR_INTERFACE, true);
                 if (clicsMode) {
                     customSettings.setUseClicsValidatorInterface();
                 } else {
@@ -1952,7 +1794,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 customSettings.setValidatorProgramName(validatorProg);
                 problem.setCustomOutputValidatorSettings(customSettings);
             }
-            // String usingInternal = fetchValue(map, "usingInternal");
+            // String usingInternal = ContestImportUtilities.fetchValue(map, "usingInternal");
 
             return; // =================== RETURN
         }
@@ -1961,7 +1803,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // validator_flags: options are: [case_sensitive] [space_change_sensitive] [float_absolute_tolerance FLOAT] [float_tolerance FLOAT]
         // ex. validator_flags: float_tolerance 1e-6
 
-        String validatorFlags = fetchValue(content, IContestLoader.VALIDATOR_FLAGS_KEY);
+        String validatorFlags = ContestImportUtilities.fetchValue(content, IContestLoader.VALIDATOR_FLAGS_KEY);
         if (validatorFlags != null && validatorFlags.trim().length() > 0) {
 
             try {
@@ -1978,7 +1820,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // validator: options are: [case_sensitive] [space_change_sensitive] [float_absolute_tolerance FLOAT] [float_tolerance FLOAT]
         // ex. validator: float_tolerance 1e-6
 
-        String validatorParameters = fetchValue(content, IContestLoader.VALIDATOR_KEY);
+        String validatorParameters = ContestImportUtilities.fetchValue(content, IContestLoader.VALIDATOR_KEY);
         if (validatorParameters != null && validatorParameters.trim().length() > 0) {
             try {
                 ClicsValidatorSettings settings = new ClicsValidatorSettings(validatorParameters);
@@ -2014,40 +1856,24 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public String[] loadGeneralClarificationAnswers(String[] yamlLines) {
-        return fetchStringList(yamlLines, CLAR_CATEGORIES_KEY);
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public String[] fetchStringList(String[] yamlLines, String key) {
-        Map<String, Object> content = loadYaml(null, yamlLines);
-        ArrayList list = fetchList(content, key);
-        if (list == null) {
-            return new String[0];
-        } else {
-            return (String[]) list.toArray(new String[list.size()]);
-        }
+        return ContestImportUtilities.fetchStringList(yamlLines, CLAR_CATEGORIES_KEY);
     }
 
     @Override
     public String[] getGeneralAnswers(String[] yamlLines) {
-        return fetchStringList(yamlLines, DEFAULT_CLARS_KEY);
+        return ContestImportUtilities.fetchStringList(yamlLines, DEFAULT_CLARS_KEY);
     }
 
     @Override
     public String[] getClarificationCategories(String[] yamlLines) {
-        return fetchStringList(yamlLines, CLAR_CATEGORIES_KEY);
-    }
-
-    @SuppressWarnings("rawtypes")
-    private ArrayList fetchList(Map<String, Object> content, String key) {
-        return (ArrayList) content.get(key);
+        return ContestImportUtilities.fetchStringList(yamlLines, CLAR_CATEGORIES_KEY);
     }
 
     public ClientId [] getShadowProxyClientIds(String[] yamlLines) {
         ArrayList<ClientId> clientIdList = new ArrayList<ClientId>();
-        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
+        Map<String, Object> yamlContent = ContestImportUtilities.loadYaml(null, yamlLines);
         @SuppressWarnings("unchecked")
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, "team-proxy-accounts");
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, "team-proxy-accounts");
 
         if (list != null) {
             for (Object object : list) {
@@ -2055,12 +1881,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> map = (Map<String, Object>) object;
 
-                String accountType = fetchValue(map, "account");
+                String accountType = ContestImportUtilities.fetchValue(map, "account");
                 checkField(accountType, "Account Type");
 
                 ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
-                Integer siteNumber = fetchIntValue(map, "site", 1);
-                String numberString = fetchValue(map, "number");
+                Integer siteNumber = ContestImportUtilities.fetchIntValue(map, "site", 1);
+                String numberString = ContestImportUtilities.fetchValue(map, "number");
 
                 int[] clientNumbers = getNumberList(numberString.trim());
 
@@ -2083,24 +1909,24 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         // System.out.println(Utilities.join("\n", yamlLines));
 
-        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, LANGUAGE_KEY);
+        Map<String, Object> yamlContent = ContestImportUtilities.loadYaml(null, yamlLines);
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, LANGUAGE_KEY);
 
         if (list != null) {
             for (Object object : list) {
 
                 Map<String, Object> map = (Map<String, Object>) object;
 
-                String name = fetchValue(map, "name");
+                String name = ContestImportUtilities.fetchValue(map, "name");
 
                 if (name == null) {
-                    syntaxError("Language name field missing in languages section");
+                    ContestImportUtilities.syntaxError("Language name field missing in languages section");
                 } else {
                     Language language = new Language(name);
 
                     Language lookedupLanguage = LanguageAutoFill.languageLookup(name);
-                    String compilerName = fetchValue(map, "compiler");
-                    String pc2CompilerCommandLine = fetchValue(map, PC2_COMPILER_CMD);
+                    String compilerName = ContestImportUtilities.fetchValue(map, "compiler");
+                    String pc2CompilerCommandLine = ContestImportUtilities.fetchValue(map, PC2_COMPILER_CMD);
 
 
 
@@ -2109,10 +1935,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     if (compilerName != null) {
 
                         // CLICS Language
-                        compilerName = fetchValue(map, "compiler");
-                        String compilerArgs = fetchValue(map, "compiler-args");
-                        String runner = fetchValue(map, "runner");
-                        String runnerArgs = fetchValue(map, "runner-args");
+                        compilerName = ContestImportUtilities.fetchValue(map, "compiler");
+                        String compilerArgs = ContestImportUtilities.fetchValue(map, "compiler-args");
+                        String runner = ContestImportUtilities.fetchValue(map, "runner");
+                        String runnerArgs = ContestImportUtilities.fetchValue(map, "runner-args");
 
                         checkField(compilerName, "Language \"" + name + "\" missing compiler key/value");
 
@@ -2150,43 +1976,43 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                         language.setCompileCommandLine(pc2CompilerCommandLine);
 
-                        String programExecuteCommandLine = fetchValue(map, PC2_EXEC_CMD);
+                        String programExecuteCommandLine = ContestImportUtilities.fetchValue(map, PC2_EXEC_CMD);
                         language.setProgramExecuteCommandLine(programExecuteCommandLine);
 
-                        String exeMask = fetchValue(map, "exemask");
+                        String exeMask = ContestImportUtilities.fetchValue(map, "exemask");
                         language.setExecutableIdentifierMask(exeMask);
 
                     } else if (lookedupLanguage != null) {
                         language = lookedupLanguage;
                     } else {
-                        syntaxError("Language \"" + name + "\" missing language definition (compiler command line and program execution command line)");
+                        ContestImportUtilities.syntaxError("Language \"" + name + "\" missing language definition (compiler command line and program execution command line)");
                     }
 
                     checkField(language.getCompileCommandLine(), "Language \"" + name + "\" missing compiler command line");
                     checkField(language.getProgramExecuteCommandLine(), "Language \"" + name + "\" missing programm execution command line");
 
-                    boolean active = fetchBooleanValue(map, "active", true);
+                    boolean active = ContestImportUtilities.fetchBooleanValue(map, "active", true);
                     language.setActive(active);
 
-                    boolean useJudgeCommand = fetchBooleanValue(map, USE_JUDGE_COMMAND_KEY, false);
+                    boolean useJudgeCommand = ContestImportUtilities.fetchBooleanValue(map, USE_JUDGE_COMMAND_KEY, false);
                     language.setUsingJudgeProgramExecuteCommandLine(useJudgeCommand);
 
-                    boolean isInterpreted = fetchBooleanValue(map, INTERPRETED_LANGUAGE_KEY, language.isInterpreted());
+                    boolean isInterpreted = ContestImportUtilities.fetchBooleanValue(map, INTERPRETED_LANGUAGE_KEY, language.isInterpreted());
                     language.setInterpreted(isInterpreted);
 
-                    String judgeExecuteCommandLine = fetchValue(map, JUDGE_EXECUTE_COMMAND_KEY);
+                    String judgeExecuteCommandLine = ContestImportUtilities.fetchValue(map, JUDGE_EXECUTE_COMMAND_KEY);
                     if (judgeExecuteCommandLine != null) {
                         language.setJudgeProgramExecuteCommandLine(judgeExecuteCommandLine);
                     } else {
                         language.setUsingJudgeProgramExecuteCommandLine(false);
                     }
 
-                    String clicsLanguageId = fetchValue(map, CLICS_LANG_ID);
+                    String clicsLanguageId = ContestImportUtilities.fetchValue(map, CLICS_LANG_ID);
                     if (clicsLanguageId != null){
                         language.setID(clicsLanguageId);
                     }
 
-                    Object exts = fetchObjectValue(map, LANG_EXTENSIONS);
+                    Object exts = ContestImportUtilities.fetchObjectValue(map, LANG_EXTENSIONS);
                     if(exts != null && exts instanceof ArrayList<?>) {
                         language.setExtensions((ArrayList<String>)exts);
                     }
@@ -2211,13 +2037,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Vector<Problem> problemList = new Vector<Problem>();
 
-        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
+        Map<String, Object> yamlContent = ContestImportUtilities.loadYaml(null, yamlLines);
         // use problemset yaml key
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, PROBLEMS_KEY);
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, PROBLEMS_KEY);
 
         if (list == null) {
             // use problems yaml key
-            list = fetchList(yamlContent, PROBLEMSET_PROBLEMS_KEY);
+            list = ContestImportUtilities.fetchList(yamlContent, PROBLEMSET_PROBLEMS_KEY);
         }
 
         //at this point if "list" is not null then it should contain an entry for each problem defined in
@@ -2232,9 +2058,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 Map<String, Object> problemMap = (Map<String, Object>) object;
 
                 //make sure the problem has a "short-name"
-                String problemKeyName = fetchValue(problemMap, SHORT_NAME_KEY);
+                String problemKeyName = ContestImportUtilities.fetchValue(problemMap, SHORT_NAME_KEY);
                 if (problemKeyName == null) {
-                    syntaxError("Missing " + SHORT_NAME_KEY + " in probset section");
+                    ContestImportUtilities.syntaxError("Missing " + SHORT_NAME_KEY + " in probset section");
                 }
 
                 /**
@@ -2250,7 +2076,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                  */
 
                 //get the problem name
-                String problemTitle = fetchValue(problemMap, PROBLEM_NAME_KEY);
+                String problemTitle = ContestImportUtilities.fetchValue(problemMap, PROBLEM_NAME_KEY);
                 if (problemTitle == null) {
                     problemTitle = problemKeyName;
                 }
@@ -2262,12 +2088,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 //set problem time limit.  If the problem.yaml file for the current problem (codified in the "problemMap")
                 // contains a "TIMEOUT_KEY", use the timeout value from the problem.yaml; otherwise use the passed-in default.
-                int actSeconds = fetchIntValue(problemMap, TIMEOUT_KEY, seconds);
+                int actSeconds = ContestImportUtilities.fetchIntValue(problemMap, TIMEOUT_KEY, seconds);
                 problem.setTimeOutInSeconds(actSeconds);
 
                 //set problem output limit.  If the problem.yaml file for the current problem (codified in the "problemMap")
                 // contains an "OUTPUT" key, use the timeout value from the problem.yaml; otherwise use the passed-in default.
-                Long actualMaxOutputBytes = fetchLongValue(problemMap, MAX_OUTPUT_SIZE_K_KEY, maxOutputBytes);
+                Long actualMaxOutputBytes = ContestImportUtilities.fetchLongValue(problemMap, MAX_OUTPUT_SIZE_K_KEY, maxOutputBytes);
                 problem.setMaxOutputSizeKB(actualMaxOutputBytes/Constants.BYTES_PER_KIBIBYTE);
 
                 //TODO:  add code to check for the CLICS-compliant key "output:" in the "limits: section
@@ -2280,9 +2106,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     throw new YamlLoadException("Invalid short problem name '" + problemKeyName + "'");
                 }
 
-                String problemLetter = fetchValue(problemMap, "letter");
-                String colorName = fetchValue(problemMap, "color");
-                String colorRGB = fetchValue(problemMap, "rgb");
+                String problemLetter = ContestImportUtilities.fetchValue(problemMap, "letter");
+                String colorName = ContestImportUtilities.fetchValue(problemMap, "color");
+                String colorRGB = ContestImportUtilities.fetchValue(problemMap, "rgb");
 
                 // SOMEDAY CCS assign Problem variables for color and letter
                 problem.setLetter(problemLetter);
@@ -2303,12 +2129,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 //if the problem.yaml file for the current problem (codified in the "problemMap") has a "load-data-files"
                 // key, use that to set the "loadFilesFlag"; if not, use the passed-in default.
-                boolean loadFilesFlag = fetchBooleanValue(problemMap, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
+                boolean loadFilesFlag = ContestImportUtilities.fetchBooleanValue(problemMap, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
                 problem.setUsingExternalDataFiles(!loadFilesFlag);
 
                 //if the problem.yaml file for the current problem (codified in the "problemMap") has a VALIDATOR_KEY
                 // key, use that to obtain the "outputValidatorCommandLine"; if not, use the passed-in defaults.
-                String outputValidatorCommandLine = fetchValue(problemMap, VALIDATOR_KEY);
+                String outputValidatorCommandLine = ContestImportUtilities.fetchValue(problemMap, VALIDATOR_KEY);
 
                 if (outputValidatorCommandLine == null) {
                     outputValidatorCommandLine = defaultValidatorCommand;
@@ -2361,10 +2187,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             //get the entire problem.yaml file as a YAML map
             String problemYamlFileName = probDir + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
-            Map<String, Object> problemYamlMap = loadYaml(problemYamlFileName);
+            Map<String, Object> problemYamlMap = ContestImportUtilities.loadYaml(problemYamlFileName);
 
             //get the "input_validator" section from the problem.yaml file map
-            Map<String, Object> inputValidatorMap = fetchMap(problemYamlMap, INPUT_VALIDATOR_KEY);
+            Map<String, Object> inputValidatorMap = ContestImportUtilities.fetchMap(problemYamlMap, INPUT_VALIDATOR_KEY);
 
             //we haven't (yet) set the default Input Validator type
             boolean defaultInputValidatorTypeHasBeenSet = false;
@@ -2381,7 +2207,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 //yes; process the "input_validator" section settings, assigning defaults for unspecified settings
 
                 // if there is a default Input Validator type (NONE, VIVA, or CUSTOM) specified, set that in the problem
-                String defaultIVType = fetchValue(inputValidatorMap, DEFAULT_INPUT_VALIDATOR_KEY);
+                String defaultIVType = ContestImportUtilities.fetchValue(inputValidatorMap, DEFAULT_INPUT_VALIDATOR_KEY);
                 if (defaultIVType != null) {
                     String defaultIVTypeIgnoreCase = defaultIVType.toLowerCase();
                     switch (defaultIVTypeIgnoreCase) {
@@ -2395,14 +2221,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                             problem.setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.CUSTOM);
                             break;
                         default:
-                            syntaxError("Unknown value for " + DEFAULT_INPUT_VALIDATOR_KEY + ": " + defaultIVType);
+                            ContestImportUtilities.syntaxError("Unknown value for " + DEFAULT_INPUT_VALIDATOR_KEY + ": " + defaultIVType);
                     }
                     defaultInputValidatorTypeHasBeenSet = true;
 
                 }
 
                 // if there is a custom input validator command specified in the YAML map, set it in the problem
-                String customInputValidatorCommandLine = fetchValue(inputValidatorMap, CUSTOM_INPUT_VALIDATOR_COMMAND_LINE_KEY);
+                String customInputValidatorCommandLine = ContestImportUtilities.fetchValue(inputValidatorMap, CUSTOM_INPUT_VALIDATOR_COMMAND_LINE_KEY);
                 if (customInputValidatorCommandLine != null) {
                     problem.setCustomInputValidatorCommandLine(customInputValidatorCommandLine);
                 } else {
@@ -2410,7 +2236,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
 
                 // if there is a custom input validator program specified in the YAML map, attempt to read the file into a SerializedFile
-                String customInputValidatorProgName = fetchValue(inputValidatorMap, CUSTOM_INPUT_VALIDATOR_PROGRAM_NAME_KEY);
+                String customInputValidatorProgName = ContestImportUtilities.fetchValue(inputValidatorMap, CUSTOM_INPUT_VALIDATOR_PROGRAM_NAME_KEY);
                 if (customInputValidatorProgName != null) {
                     String pathToCustomProg = getInputValidatorDir(problemsBaseDir, problem) + File.separator
                             + customInputValidatorProgName;
@@ -2446,16 +2272,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 // if there is a VIVA pattern file specified in the YAML map, attempt to read the file into a SerializedFile
 
-                String vivaPatternFileName = fetchValue(inputValidatorMap, VIVA_PATTERN_FILE_KEY);
+                String vivaPatternFileName = ContestImportUtilities.fetchValue(inputValidatorMap, VIVA_PATTERN_FILE_KEY);
                 if (vivaPatternFileName != null) {
                     SerializedFile vivaPatternSF = new SerializedFile(vivaPatternFileName);
                     // check for errors/exceptions during file loading
                     try {
                         if (Utilities.serializedFileError(vivaPatternSF)) {
-                            syntaxError("Unable to load VIVA pattern file '" + vivaPatternFileName + "': " + vivaPatternSF.getErrorMessage());
+                            ContestImportUtilities.syntaxError("Unable to load VIVA pattern file '" + vivaPatternFileName + "': " + vivaPatternSF.getErrorMessage());
                         }
                     } catch (Exception e) {
-                        syntaxError("Exception loading VIVA pattern file '" + vivaPatternFileName + "': " + e.getMessage());
+                        ContestImportUtilities.syntaxError("Exception loading VIVA pattern file '" + vivaPatternFileName + "': " + e.getMessage());
                     }
                     // the Viva pattern file was successfully loaded; add it to the problem
                     String[] patternLines = new String(vivaPatternSF.getBuffer()).split("\n");
@@ -2467,7 +2293,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // Note that this means a pattern directly specified in the YAML file supersedes any
                 // reference to a pattern FILE also in the YAML (since that would have been loaded above and
                 // this will override it).
-                String vivaPattern = fetchValue(inputValidatorMap, VIVA_PATTTERN_KEY);
+                String vivaPattern = ContestImportUtilities.fetchValue(inputValidatorMap, VIVA_PATTTERN_KEY);
                 if (vivaPattern != null) {
                     // a Viva pattern was found in the YAML file; add it to the problem
                     String[] patternLines = vivaPattern.split("\n");
@@ -2619,8 +2445,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         ArrayList<AutoJudgeSetting> ajList = new ArrayList<AutoJudgeSetting>();
 
-        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
-        ArrayList<Map<String, Object>> list = fetchList(yamlContent, AUTO_JUDGE_KEY);
+        Map<String, Object> yamlContent = ContestImportUtilities.loadYaml(null, yamlLines);
+        ArrayList<Map<String, Object>> list = ContestImportUtilities.fetchList(yamlContent, AUTO_JUDGE_KEY);
 
         if (list != null) {
 
@@ -2631,18 +2457,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 Map<String, Object> map = (Map<String, Object>) object;
 
-                String accountType = fetchValue(map, "account");
+                String accountType = ContestImportUtilities.fetchValue(map, "account");
                 ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
 
-                int siteNumber = fetchIntValue(map, "site", 1);
+                int siteNumber = ContestImportUtilities.fetchIntValue(map, "site", 1);
 
                 // SOMEDAY 669 check for syntax errors
-                // syntaxError(AUTO_JUDGE_KEY + " name field missing in languages section");
+                // ContestImportUtilities.syntaxError(AUTO_JUDGE_KEY + " name field missing in languages section");
 
-                String numberString = fetchValue(map, "number");
-                String problemLettersString = fetchValue(map, "letters");
+                String numberString = ContestImportUtilities.fetchValue(map, "number");
+                String problemLettersString = ContestImportUtilities.fetchValue(map, "letters");
 
-                boolean active = fetchBooleanValue(map, "active", true);
+                boolean active = ContestImportUtilities.fetchBooleanValue(map, "active", true);
 
                 int[] judgeClientNumbers = null;
                 if ("all".equalsIgnoreCase(numberString)) {
@@ -2851,11 +2677,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         } else {
             return string;
         }
-    }
-
-    private void syntaxError(String string) {
-        YamlLoadException exception = new YamlLoadException("Syntax error: " + string);
-        throw exception;
     }
 
     /**
@@ -3106,11 +2927,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
         if (dataFileName == null) {
-            syntaxError("Missing datafile for pc2 problem " + problem.getShortName());
+            ContestImportUtilities.syntaxError("Missing datafile for pc2 problem " + problem.getShortName());
         }
 
         if (answerFileName == null) {
-            syntaxError("Missing answerfile for pc2 problem " + problem.getShortName());
+            ContestImportUtilities.syntaxError("Missing answerfile for pc2 problem " + problem.getShortName());
         }
 
         addDataFiles(problem, problemDataFiles, dataFileBaseDirectory, dataFileName, answerFileName);
@@ -3124,7 +2945,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public String getCCSDataFileDirectory(String yamlDirectory, String shortDirName) {
-        return yamlDirectory + File.separator + shortDirName + File.separator + "data" + File.separator + "secret";
+        return yamlDirectory + File.separator + shortDirName + File.separator + "data";
     }
 
     @Override
@@ -3139,68 +2960,77 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
          */
         boolean loadExternalFile = problem.isUsingExternalDataFiles();
 
-        boolean loadSamples = contest.getContestInformation().isLoadSampleJudgesData();
-
-        String sampleDataDirectory = dataFileBaseDirectory.replaceAll("secret$", "sample");
-
-        String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
-
-        String[] answerFileNames = getFileNames(dataFileBaseDirectory, ".ans");
-
-        if (inputFileNames.length == 0) {
-            throw new YamlLoadException("No input (.in) file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
+        TestDataGroup mainDataGroup = new TestDataGroup("data", dataFileBaseDirectory, null);
+        if(mainDataGroup.readTestCases(StaticLog.getLog()) == false) {
+            throw new YamlLoadException("Could not read test cases for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
         }
 
-        if (answerFileNames.length == 0) {
-            throw new YamlLoadException("No answer (.ans) file names found for " + problem.getDisplayName() + " in dir " + dataFileBaseDirectory);
-        }
+        // Pretty much the same as the original code for now
+        ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
+        ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
+        ArrayList<TestDataGroup> dataGroups = new ArrayList<TestDataGroup>();
 
-        if (inputFileNames.length == answerFileNames.length) {
+        loadDataFiles(problem, dataFiles, answerFiles, dataGroups, mainDataGroup, loadExternalFile);
 
-            ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
-            ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
 
-            if (loadSamples) {
-                loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
-            }
+        if (dataFiles.size() > 0) {
 
-            // Load all secret files
-            loadDataFiles(problem, dataFiles, answerFiles, dataFileBaseDirectory, loadExternalFile);
+            SerializedFile[] data = dataFiles.toArray(new SerializedFile[dataFiles.size()]);
+            SerializedFile[] answer = answerFiles.toArray(new SerializedFile[answerFiles.size()]);
 
-            if (dataFiles.size() > 0) {
+            // dumpSerialzedFileList (problem, "Judges data", data);
+            // dumpSerialzedFileList (problem, "Judges answer", answer);
 
-                SerializedFile[] data = dataFiles.toArray(new SerializedFile[dataFiles.size()]);
-                SerializedFile[] answer = answerFiles.toArray(new SerializedFile[answerFiles.size()]);
+            problemDataFiles.setJudgesDataFiles(data);
+            problemDataFiles.setJudgesAnswerFiles(answer);
+            problemDataFiles.setJudgesDataGroups(dataGroups);
 
-                // dumpSerialzedFileList (problem, "Judges data", data);
-                // dumpSerialzedFileList (problem, "Judges answer", answer);
-
-                problemDataFiles.setJudgesDataFiles(data);
-                problemDataFiles.setJudgesAnswerFiles(answer);
-
-                problem.setDataFileName(inputFileNames[0]);
-                problem.setAnswerFileName(inputFileNames[0].replaceAll(".in$", ".ans"));
-            } else {
-                syntaxWarning("There were no data files found/loaded for " + problem.getShortName());
-            }
-
-            problem.setReadInputDataFromSTDIN(true);
-
+            // this is farce - I think it's just for the problem editor gui
+            problem.setDataFileName(problem.getDataFileName(1));
+            problem.setAnswerFileName(problem.getAnswerFileName(1));
         } else {
-            throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
-                    answerFileNames.length + " .ans files " + " in " + dataFileBaseDirectory);
+            syntaxWarning("There were no data files found/loaded for " + problem.getShortName());
         }
 
-        if (inputFileNames.length == 0) {
-            throw new YamlLoadException("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
-                    answerFileNames.length + " .ans files " + " in " + dataFileBaseDirectory);
-        }
+        problem.setReadInputDataFromSTDIN(true);
 
         contest.addProblem(problem, problemDataFiles);
 
         validateCCSData(contest, problem);
 
         return problem;
+    }
+
+    /**
+     * Per problem, add files names into datafiles and answerfiles from the TestDataGroup.
+     *
+     * @param problem
+     * @param dataFiles input data files
+     * @param answerFiles input answer files
+     * @param dataGroups input data groups
+     * @param testDataGroup - main test data group (top level)
+     * @param loadExternalFile - load as external data fils
+     */
+    protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, ArrayList<TestDataGroup> dataGroups, TestDataGroup testDataGroup, boolean loadExternalFile) {
+
+        ArrayList<TestCaseInfo> testCases = testDataGroup.getAllTestCaseInfo();
+        if(testCases == null || testCases.size() == 0) {
+            throw new YamlLoadException("No test data available for " + problem.getDisplayName() + " in dir " + testDataGroup.getDataDirectoryName());
+        }
+
+        problem.addTestCaseFilenames(testCases);
+        for (TestCaseInfo testCase : testCases) {
+
+            String dataFileName = testCase.getInputFileName();
+            String answerFileName = testCase.getAnswerFileName();
+
+            checkForFile(dataFileName, "Missing " + dataFileName + " file for " + problem.getShortName());
+            checkForFile(answerFileName, "Missing " + answerFileName + " file for " + problem.getShortName());
+
+            dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
+            answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
+            dataGroups.add(testCase.getGroup());
+        }
     }
 
     /**
@@ -3342,14 +3172,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      */
     private void checkField(String value, String fieldName) {
         if (value == null) {
-            syntaxError("Missing " + fieldName);
+            ContestImportUtilities.syntaxError("Missing " + fieldName);
         } else if (value.trim().length() == 0) {
-            syntaxError("Missing " + fieldName);
+            ContestImportUtilities.syntaxError("Missing " + fieldName);
         }
     }
 
     public void assignJudgingType(String[] yaml, Problem problem, boolean overrideManualReviewFlag) {
-        Map<String, Object> map = loadYaml(null, yaml);
+        Map<String, Object> map = ContestImportUtilities.loadYaml(null, yaml);
         assignJudgingType(map, problem, overrideManualReviewFlag);
     }
 
@@ -3364,20 +3194,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // System.out.println("debug problem "+problem.getShortName()+" "+map);
         // }
 
-        if (isValuePresent(map, SEND_PRELIMINARY_JUDGEMENT_KEY)) {
-            boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
+        if (ContestImportUtilities.isValuePresent(map, SEND_PRELIMINARY_JUDGEMENT_KEY)) {
+            boolean sendPreliminary = ContestImportUtilities.fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
             problem.setPrelimaryNotification(sendPreliminary);
         }
 
-        if (isValuePresent(map, COMPUTER_JUDGING_KEY)) {
-            boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, false);
+        if (ContestImportUtilities.isValuePresent(map, COMPUTER_JUDGING_KEY)) {
+            boolean computerJudged = ContestImportUtilities.fetchBooleanValue(map, COMPUTER_JUDGING_KEY, false);
             problem.setComputerJudged(computerJudged);
         }
 
         boolean manualReview = problem.isManualReview();
 
-        if (isValuePresent(map, MANUAL_REVIEW_KEY)) {
-            manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
+        if (ContestImportUtilities.isValuePresent(map, MANUAL_REVIEW_KEY)) {
+            manualReview = ContestImportUtilities.fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
         }
 
         if (overrideManualReviewFlag) {

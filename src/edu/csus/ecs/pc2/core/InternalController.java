@@ -224,7 +224,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Load and Save configuration to disk
      */
-    private boolean saveCofigurationToDisk = true;
+    private boolean saveConfigurationToDisk = true;
 
     /**
      * Evaluations log (evals.log).
@@ -636,7 +636,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
             sendToLocalServer(packet);
         } else {
-            throw new SubmissionRejectedException("Submission threshold exceeded - wait a minute and try again", 
+            throw new SubmissionRejectedException("Submission threshold exceeded - wait a minute and try again",
                                                     SubmissionRejectedException.SubmissionRejectionReason.THROTTLE_EXCEEDED);
         }
     }
@@ -786,7 +786,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         return s;
     }
-    
+
     /**
      * Check INI file settings specific sub-systems.  These settings may not actually be
      * used until the system is up, so we have to validate them at startup time.
@@ -800,14 +800,28 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // No return
         }
     }
-    
+
     /**
      * Validate the settings for throttling strategies
      */
     private boolean validateThrottleStrategySettings() {
         return MaxSubmissionsPerMinuteStrategy.validateConfigurationSettings();
     }
-    
+
+
+    /**
+     * If there are any DecimalFormats defined in the ini file(s) for scores, eg. for formatting scoreboard, runs, etc then
+     * Make sure those formats are valid, if not it's a fatal error.  We do this by simply trying to format a value
+     * and checking for an exception.
+     */
+    private void validateScoreFormats() {
+        try {
+            String szTestFormat = Utilities.formatScore(3.14159265358979);
+        } catch(Exception e) {
+            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR - Invalid scoring format in INI file", e);
+            fatalError("The scoring format specified in the INI file is invalid: " + e.getMessage());
+        }
+    }
 
     /**
      * Login to contest server.
@@ -1182,7 +1196,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             inContest.storeConfiguration(getLog());
         } else {
-            if (saveCofigurationToDisk) {
+            if (saveConfigurationToDisk) {
                 inContest.initializeSubmissions(inContest.getSiteNumber());
             }
             info("Loaded configuration from disk");
@@ -1193,7 +1207,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 logException(e);
             }
 
-            if (saveCofigurationToDisk) {
+            if (saveConfigurationToDisk) {
                 // save newly merged profiles
                 inContest.storeConfiguration(getLog());
             }
@@ -3026,7 +3040,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
 
 
-                    if (saveCofigurationToDisk) {
+                    if (saveConfigurationToDisk) {
                         // save newly merged profiles
                         contest.storeConfiguration(getLog());
                     }
@@ -3264,11 +3278,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // Check specific settings for sub-systems.  In the event of a bad setting,
             // this will not return since it would call fatalError().
             validateIniSubSystemSettings();
+            validateScoreFormats();
         }
 
         // SOMEDAY code add NO_SAVE_OPTION_STRING
         if (parseArguments.isOptPresent(AppConstants.NO_SAVE_OPTION_STRING)) {
-            saveCofigurationToDisk = false;
+            saveConfigurationToDisk = false;
         }
 
         if (parseArguments.isOptPresent(AppConstants.SERVER_OPTION_STRING)) {
@@ -4202,7 +4217,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public boolean readConfigFromDisk(int siteNum) {
 
         boolean loadedConfiguration = false;
-        if (saveCofigurationToDisk) {
+        if (saveConfigurationToDisk) {
             try {
                 loadedConfiguration = contest.readConfiguration(siteNum, getLog());
 
@@ -5060,6 +5075,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (accept) {
             ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
             RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
+            // If using remote's judgement as authoritative, put run in HOLD state
+            // We will wait for the judgment from the remote
+            if(overrideSubmissionId < 0) {
+                overrideSubmissionId = -overrideSubmissionId;
+                // Waiting for remote judgement
+                run.setStatus(RunStates.BEING_JUDGED);
+            }
             Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
             sendToLocalServer(packet);
         } else {

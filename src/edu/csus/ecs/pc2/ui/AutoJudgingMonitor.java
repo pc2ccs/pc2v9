@@ -11,6 +11,7 @@ import java.util.TimeZone;
 
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
@@ -511,7 +512,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         executable.execute();
 
         // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
+        String executeDirctoryName = executable.getExecuteDirectoryName();
         Problem problem = getContest().getProblem(fetchedRun.getProblemId());
         ClientId clientId = getContest().getClientId();
         List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(contest, fetchedRun);
@@ -609,6 +610,24 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), solved, true, true);
                 judgementRecord.setValidatorResultString(results);
+                
+                //if it's a point-scoring contest, put the score and the judgement into the JudgementRecord
+                if (contest.getContestInformation().isScoreboardTypeScore()) {
+                    
+                    judgementRecord.setScore(executionData.getScore());
+                    
+                    CLICS_JUDGEMENT_ACRONYM acronym = executionData.getJudgementAcronym();
+                    String judgementDescription ;
+                    if (acronym != null) {
+                        judgementDescription = acronym.getValue();
+                    } else {
+                        judgementDescription = "Undefined";
+                    }
+                    boolean acronymRecognized = judgementRecord.setJudgementAcronym(judgementDescription);
+                    if (!acronymRecognized) {
+                        warn("Unrecognized judgement acronym description string: '" + judgementDescription + "'");
+                    }
+                }
 
             } else {
                 // Something went wrong either during validation or execution

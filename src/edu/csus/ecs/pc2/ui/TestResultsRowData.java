@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * 
  */
@@ -9,7 +9,8 @@ package edu.csus.ecs.pc2.ui;
  *
  */
 public class TestResultsRowData {
-    private String resultString; 
+    private String resultString;
+    private String score;
     private String time; 
     private String teamOutputViewLabel;
     private String teamOutputCompareLabel;
@@ -20,6 +21,7 @@ public class TestResultsRowData {
     private String validatorStderrViewLabel;
     /**
      * @param resultString
+     * @param score
      * @param time
      * @param teamOutputViewLabel
      * @param teamOutputCompareLabel
@@ -29,10 +31,11 @@ public class TestResultsRowData {
      * @param validatorOutputViewLabel
      * @param validatorStderrViewLabel
      */
-    public TestResultsRowData(String resultString, String time, String teamOutputViewLabel, String teamOutputCompareLabel, String teamStderrViewLabel, String judgesOutputViewLabel, String judgesDataViewLabel,
+    public TestResultsRowData(String resultString, String score, String time, String teamOutputViewLabel, String teamOutputCompareLabel, String teamStderrViewLabel, String judgesOutputViewLabel, String judgesDataViewLabel,
             String validatorOutputViewLabel, String validatorStderrViewLabel) {
         super();
         this.resultString = resultString;
+        this.score = score;
         this.time = time;
         this.teamOutputViewLabel = teamOutputViewLabel;
         this.teamOutputCompareLabel = teamOutputCompareLabel;
@@ -48,6 +51,12 @@ public class TestResultsRowData {
      */
     public String getResultString() {
         return resultString;
+    }
+    /**
+     * @return the point score
+     */
+    public String getScore() {
+        return score;
     }
     /**
      * @return the time

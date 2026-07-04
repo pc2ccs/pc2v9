@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IContestService } from '../abstract-services/i-contest.service';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ContestLanguage } from '../models/contest-language';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
@@ -8,14 +8,16 @@ import { ContestProblem } from '../models/contest-problem';
 import { ContestClock } from '../models/contest-clock';
 import { ContestTimerService } from './contestTimer.service';
 import { Clarification } from '../models/clarification';
-import { RESYNC_INTERVAL_IN_MINUTES } from 'src/constants';
+import { RESYNC_INTERVAL_IN_MINUTES, ScoreboardType } from 'src/constants';
 import { DEBUG_MODE } from 'src/constants';
-
+import { getStoredScoreboardType, saveStoredScoreboardType } from './session-storage.utils';
+import { mapServerScoreboardType } from 'src/app/utils/scoreboard-type.utils';
+         
 /**
  * This class provides a variety of "contest-related" services for clients.
  * It provides methods for initiating HTTP calls to the WTI Server to obtain contest
- * information (such as languages, problems, clarifications, standings, and the current
- * contest clock value); each of these services returns an "Observable" to which the invoking
+ * information (such as languages, problems, clarifications, standings, the contest scoreboard type,
+ * and the current contest clock value); each of these services returns an "Observable" to which the invoking
  * client can "subscribe" to receive a callback when the actual data is available from the HTTP call.
  * 
  * The class also provides localized services such as:
@@ -37,6 +39,9 @@ export class ContestService extends IContestService {
 
 	//the WTI-UI timer service which updates on-screen elapsed and remaining time when started (enabled)
 	contestTimer: ContestTimerService = new ContestTimerService(this);
+
+	//the contest scoreboard type (e.g. pass-fail or point-scoring)
+	private scoreboardType: ScoreboardType;
 
 	constructor(private _httpClient: HttpClient) {
 		super();
@@ -188,4 +193,55 @@ export class ContestService extends IContestService {
 		const remainingSecs = this.contestTimer.getRemainingSecs();
 		return remainingSecs;
 	}
+	
+	
+	/** Initializes the WTI-UI understanding of the contest scoreboard type
+	 */
+	async initializeScoreboardType(): Promise<void> {
+
+		// Try to get the scoreboard type from SessionStorage
+		const stored = getStoredScoreboardType();
+		if (stored) {
+			this.scoreboardType = stored;
+			if (DEBUG_MODE){
+				console.log('[ContestService] ScoreboardType restored from sessionStorage: ', stored);
+			}
+			return;
+		}
+
+		// request the scoreboard type from the server, and wait until it responds
+		
+		try {
+			const serverValue = await firstValueFrom(
+				this._httpClient.get<string>(`${environment.baseUrl}/contest/scoreboardType`)
+			);
+
+			const clientValue = mapServerScoreboardType(serverValue);
+			if (!clientValue) {
+				throw new Error(`[ContestService] Invalid scoreboard type from server: ${serverValue}`);
+			}
+
+			this.scoreboardType = clientValue;
+			saveStoredScoreboardType(clientValue);
+
+			if (DEBUG_MODE){
+				console.log('[ContestService] ScoreboardType initialized from server:', clientValue);	
+			}
+		} catch (err) {
+			console.error('[ContestService] Failed to initialize ScoreboardType', err);
+			throw err; // important so APP_INITIALIZER can fail loudly if needed
+		}
+
+	}
+	
+	/** Returns the scoreboard type if we have a value for it; otherwise throws an Error.
+	 */
+	getScoreboardType(): ScoreboardType {
+		if (!this.scoreboardType) {
+			throw new Error('ScoreboardType accessed before initialization');
+		}
+		return this.scoreboardType;
+	}
+
+	
 }

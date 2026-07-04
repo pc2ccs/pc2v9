@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package models;
 
 import java.util.List;
@@ -9,9 +10,10 @@ public class RunModel {
 	public long time;
 	public boolean isTestRun, isPreliminary, isFinal, isSolved;
 	public String id;
+	public String score;
 
 	public RunModel(String teamID, String language, String problem, String judgement, List<File> result, long time, 
-			boolean isTestRun, boolean isPreliminary, boolean isFinal, boolean isSolved, String id) {
+			boolean isTestRun, boolean isPreliminary, boolean isFinal, boolean isSolved, String id, String score) {
 		this.teamID = teamID;
 		this.language = language;
 		this.problem = problem;
@@ -23,6 +25,7 @@ public class RunModel {
 		this.judgement = judgement;
 		this.result = result;
 		this.id = id;
+		this.score = score;
 
 	}
 

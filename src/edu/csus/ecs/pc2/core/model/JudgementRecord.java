@@ -4,6 +4,9 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType;
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
+
 /**
  * A set of Judgement information for a run.
  *
@@ -13,10 +16,8 @@ import java.util.Date;
  * and whether the judgement {@link #isActive() is Active}
  *
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class JudgementRecord implements Serializable, IGetDate {
 
     /**
@@ -127,6 +128,11 @@ public class JudgementRecord implements Serializable, IGetDate {
     // Copied from submission when judgement record is complete
     private Date judgeStartDate = null;
 
+    // For point scoring contests
+    private double score = 0.0;
+    
+    //For point scoring contests
+    private CLICS_JUDGEMENT_ACRONYM judgementAcronym ;
 
     /**
      * Create a Judgement Record.
@@ -450,5 +456,62 @@ public class JudgementRecord implements Serializable, IGetDate {
      */
     public Date getJudgeStartDate() {
         return judgeStartDate;
+    }
+
+    /**
+     *
+     * @return the score, for point scoring contests
+     */
+    public double getScore() {
+        return score;
+    }
+
+    /**
+     * Set the score for point scoring contests
+     *
+     * @param score
+     */
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    /**
+     * Return the Grader-assigned Judgement Acronym for point-scoring contests.
+     * 
+     * @return a {@link CLICS_JUDGEMENT_ACRONYM} determined by the point-scoring Grader.
+     */
+    public CLICS_JUDGEMENT_ACRONYM getJudgementAcronym() {
+        return judgementAcronym;
+    }
+
+    /**
+     * Sets the {@link CLICS_JUDGEMENT_ACRONYM} based on the received judgement acronym description string,
+     * which is expected to be the description returned by {@link CLICS_JUDGEMENT_ACRONYM#getValue()}.
+     * For example, the description string associated with {@link CLICS_JUDGEMENT_ACRONYM.AC} is "Accepted".
+     * 
+     * @param judgementDescription - a String containing the "Description" associated with the 
+     *              {@link CLICS_JUDGEMENT_ACRONYM} to be saved in this JudgementRecord (for example,
+     *              "Accepted" for {@link CLICS_JUDGEMENT_ACRONYM.AC}).
+     * 
+     * @return true if the specified judgementDescription is a valid description associated with a 
+     *                  {@link CLICS_JUDGEMENT_ACRONYM}; false if not.
+     */
+    public boolean setJudgementAcronym(String judgementDescription) {
+        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementDescription);
+        if (acronym != null) {
+            this.judgementAcronym = acronym;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Sets the {@link CLICS_JUDGEMENT_ACRONYM} contained in this JudgementRecord to the specified acronym value.
+     * 
+     * @param judgementAcronym a {@link CLICS_JUDGEMENT_ACRONYM} which is to be stored in this JudgementRecord.
+     */
+    public void setJudgementAcronym (CLICS_JUDGEMENT_ACRONYM judgementAcronym) {
+        this.judgementAcronym = judgementAcronym;
     }
 }

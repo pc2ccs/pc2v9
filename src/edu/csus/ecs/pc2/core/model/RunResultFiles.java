@@ -179,7 +179,7 @@ public class RunResultFiles implements Serializable {
     }
 
     public void setFailedInValidating(boolean failed) {
-        if (executionData == null) {
+        if (executionData != null) {
             executionData.setValidationSuccess(!failed);
         }
     }

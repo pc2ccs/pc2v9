@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.IOException;
@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.RemoteCCSInformation;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.services.core.ScoreboardJson;
@@ -75,6 +76,8 @@ public class ShadowController {
 
     private String lastToken = null;
 
+    private int remoteTeamIdOffset = 0;
+
     public enum SHADOW_CONTROLLER_STATUS {
 
         SC_NEVER_STARTED("Shadow Controller has never been started"),
@@ -99,7 +102,7 @@ public class ShadowController {
         NONE,
         ONLY_MISMATCH
     }
-    
+
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
     private RemoteContestConfiguration remoteContestConfig;
     private Thread monitorThread;
@@ -107,6 +110,9 @@ public class ShadowController {
 
     private boolean convertJudgementsToBig5 = true;
     private FILTERS currentFilter = FILTERS.NONE ;
+
+    private boolean combineScoreboards = false;
+
     /**
      * a ContestInformation Listener
      *
@@ -157,7 +163,8 @@ public class ShadowController {
         this(localContest, localController, null, null,
                 localContest.getContestInformation().getPrimaryCCS_URL(),
                 localContest.getContestInformation().getPrimaryCCS_user_login(),
-                localContest.getContestInformation().getPrimaryCCS_user_pw());
+                localContest.getContestInformation().getPrimaryCCS_user_pw(),
+                false);
 
     }
 
@@ -173,7 +180,8 @@ public class ShadowController {
         this(localContest, localController, mon, null,
                 localContest.getContestInformation().getPrimaryCCS_URL(),
                 localContest.getContestInformation().getPrimaryCCS_user_login(),
-                localContest.getContestInformation().getPrimaryCCS_user_pw());
+                localContest.getContestInformation().getPrimaryCCS_user_pw(),
+                false);
 
     }
 
@@ -191,7 +199,25 @@ public class ShadowController {
         this(localContest, localController, mon, lastToken,
                 localContest.getContestInformation().getPrimaryCCS_URL(),
                 localContest.getContestInformation().getPrimaryCCS_user_login(),
-                localContest.getContestInformation().getPrimaryCCS_user_pw());
+                localContest.getContestInformation().getPrimaryCCS_user_pw(),
+                false);
+
+    }
+
+    /**
+     * Constructs a new ShadowController for the remote CCS specified by the data in the
+     * specified {@link IInternalContest} and {@link IInternalContest}.
+     *
+     * @param localContest a PC2 Contest to be used by the Shadow Controller
+     * @param localController a PC2 Controller to be used by the Shadow Controller
+     * @param mon optional monitor status handler
+     * @param lastToken location of where to resume feed from
+     * @param combineScoreboards if we should enter these runs into the system and accept the remote's judgments
+     */
+    public ShadowController(IInternalContest localContest, IInternalController localController, IShadowMonitorStatus mon, String lastToken,
+            boolean combineScoreboards) {
+
+        this(localContest, localController, mon, lastToken, null, null, null, combineScoreboards);
 
     }
 
@@ -210,7 +236,8 @@ public class ShadowController {
         this(localContest, localController, null, null,
                 localContest.getContestInformation().getPrimaryCCS_URL(),
                 localContest.getContestInformation().getPrimaryCCS_user_login(),
-                localContest.getContestInformation().getPrimaryCCS_user_pw());
+                localContest.getContestInformation().getPrimaryCCS_user_pw(),
+                false);
     }
 
     /**
@@ -223,15 +250,24 @@ public class ShadowController {
      * @param remoteCCSPassword
      */
     public ShadowController(IInternalContest localContest, IInternalController localController, IShadowMonitorStatus mon, String lastToken,
-                            String remoteURL, String remoteCCSLogin, String remoteCCSPassword) {
+                            String remoteURL, String remoteCCSLogin, String remoteCCSPassword, boolean combineScoreboards) {
 
         this.localContest = localContest;
         this.localController = localController;
-        this.remoteCCSURLString = remoteURL;
-        this.remoteCCSLogin = remoteCCSLogin;
-        this.remoteCCSPassword = remoteCCSPassword;
+        if(remoteURL == null) {
+            RemoteCCSInformation ccsInfo = localContest.getContestInformation().getRemoteCCSInfo(localContest.getClientId().getName());
+            this.remoteCCSURLString = ccsInfo.getCCS_URL();
+            this.remoteCCSLogin = ccsInfo.getCCS_user_login();
+            this.remoteCCSPassword = ccsInfo.getCCS_user_pw();
+            this.remoteTeamIdOffset = ccsInfo.getTeamOffset();
+        } else {
+            this.remoteCCSURLString = remoteURL;
+            this.remoteCCSLogin = remoteCCSLogin;
+            this.remoteCCSPassword = remoteCCSPassword;
+        }
         this.shadowMonitorStatus = mon;
         this.lastToken = lastToken;
+        this.combineScoreboards = combineScoreboards;
         this.localContest.addContestInformationListener(new ContestInformationListenerImplementation());
         this.setStatus(SHADOW_CONTROLLER_STATUS.SC_NEVER_STARTED);
     }
@@ -321,6 +357,9 @@ public class ShadowController {
             //construct an EventFeedMonitor for keeping track of the remote CCS events
             log.info("Constructing new RemoteEventFeedMonitor");
             monitor = new RemoteEventFeedMonitor(localController, remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter, shadowMonitorStatus);
+
+            monitor.setCombinedScoreboardClient(combineScoreboards);
+            monitor.setRemoteTeamIdOffset(remoteTeamIdOffset);
 
             if (! remoteContestAPIAdapter.testConnection()){
 
@@ -1032,17 +1071,17 @@ public class ShadowController {
     public IInternalController getLocalController() {
         return localController;
     }
-    
+
     public FILTERS getFilter() {
         return currentFilter;
     }
-    
+
     public void setFilter(FILTERS filter) {
         currentFilter = filter;
     }
-    
+
     /**
-     * 
+     *
      * @param currentJudgementMap
      * @return currentJudgementMap but judgements that shouldnt be shown is removed.
      */
@@ -1052,7 +1091,7 @@ public class ShadowController {
             for (String key : currentJudgementMap.keySet()) {
 
                 ShadowJudgementPair pair = currentJudgementMap.get(key).getShadowJudgementPair();
-                if ((! pair.getPc2Judgement().equals(pair.getRemoteCCSJudgement())) && 
+                if ((! pair.getPc2Judgement().equals(pair.getRemoteCCSJudgement())) &&
                         ! pair.getPc2Judgement().equals("<pending>") &&  !pair.getRemoteCCSJudgement().equals("<pending>") ){//When one of the judgement is pending it will be filtered out
                     newJudgementMap.put(key,currentJudgementMap.get(key));
                 }

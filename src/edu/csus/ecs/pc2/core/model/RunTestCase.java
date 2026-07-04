@@ -1,27 +1,22 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Date;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.imports.ccs.TestDataGroup;
 
 /**
  * Test Case results.
  *  
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class RunTestCase implements IElementObject, IGetDate{
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -9160568142729051113L;
-    /**
-     * 
-     */
     
     private boolean active = true;
     
@@ -42,6 +37,26 @@ public class RunTestCase implements IElementObject, IGetDate{
     private int testNumber;
     
     /**
+     * The "score" associated with this particular test case.
+     * (For point-scoring contests, each test case includes a "score" determined by the problem validator.
+     * Once all test cases have been executed, a separate "Grader" program is invoked by the {@link Executable}
+     * class to examine the scores for all test cases and determine, based on the scoring attributes of the problem,
+     * what the "actual score" for the Run (Submission) will be.)
+     */
+    private double score = 0.0;
+    
+    /**
+     * The CLICS judgement acronym associated with this RunTestCase once the submission (run) has 
+     * been executed using this RunTestCase.
+     */
+    private CLICS_JUDGEMENT_ACRONYM judgementAcronym = null;
+    
+    /**
+     * The TestDataGroup with which the test case associated with this RunTestCase is associated.
+     */
+    private TestDataGroup testDataGroup = null;
+    
+    /**
      * Whether or not the run passed this particular Test Case.
      */
     private boolean passed = false;
@@ -60,10 +75,11 @@ public class RunTestCase implements IElementObject, IGetDate{
      * each Test Case Result is marked as the
      * indicated Test Case Number and with the indicated status (either the Run
      * passed the Test Case or it failed the Test Case).
-     * @param run - the Run for which this test case applies
-     * @param record - the JudgementRecord for which this test case applies
-     * @param testNumber - the id of this test case
-     * @param passed - boolean indicating whether the Run passed this test case or not
+     * 
+     * @param run - the Run for which this test case applies.
+     * @param record - the JudgementRecord created when the run was executed using this test case as input.
+     * @param testNumber - the id of this test case.
+     * @param passed - boolean indicating whether the Run passed this test case or not.
      */
     public RunTestCase(Run run, JudgementRecord record, int testNumber, boolean passed) {
         runElementId = run.getElementId();
@@ -189,4 +205,29 @@ public class RunTestCase implements IElementObject, IGetDate{
     public void setContestTimeMS(long contestTimeMS) {
         this.contestTimeMS = contestTimeMS;
     }
+
+    public double getScore() {
+        return score;
+    }
+    
+    public void setScore(double runTestCaseScore) {
+        this.score = runTestCaseScore;
+    }
+
+    public CLICS_JUDGEMENT_ACRONYM getJudgementAcronym() {
+        return judgementAcronym;
+    }
+
+    public void setJudgementAcronym(CLICS_JUDGEMENT_ACRONYM judgementAcronym) {
+        this.judgementAcronym = judgementAcronym;
+    }
+
+    public void setTestDataGroup(TestDataGroup testDataGroup) {
+        this.testDataGroup = testDataGroup ;
+    }
+
+    public TestDataGroup getTestDataGroup() {
+        return testDataGroup;
+    }
+
 }

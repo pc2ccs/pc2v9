@@ -27,6 +27,11 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 // $HeadURL$
 public class LoadICPCTSVDataTest extends AbstractTestCase {
 
+    @Override
+    protected void setUp() throws Exception {
+        ensureStaticLog();
+        super.setUp();
+    }
 
     public void testCheckFiles() throws Exception {
         LoadICPCTSVData load = new LoadICPCTSVData();

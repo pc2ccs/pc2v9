@@ -6,11 +6,14 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.core.model.RemoteCCSInformation.RemoteCCSType;
 import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
@@ -147,6 +150,25 @@ public class ContestInformation implements Serializable{
         ALIAS,
     }
 
+    public enum ScoreboardType {
+        PASSFAIL("pass-fail"),
+        SCORE("score");
+
+        private final String type;
+
+        private ScoreboardType(String type) {
+            this.type = type;
+        }
+        
+        @JsonValue
+        public String getType() {
+            return type;
+        }
+
+    }
+
+    private ScoreboardType scoreboardType = ScoreboardType.PASSFAIL;
+
     private Properties scoringProperties = new Properties();
 
     /**
@@ -219,6 +241,11 @@ public class ContestInformation implements Serializable{
     private boolean stopOnFirstFailedtestCase = false;
 
     private String overrideLoadAccountsFilename = null;
+
+    /*
+     * This is for the feeder accounts so we can support multiple remote CCS's
+     */
+    RemoteCCSInformation remoteCCSInfo[] = null;
 
     /**
      * Submission Throttling
@@ -472,7 +499,38 @@ public class ContestInformation implements Serializable{
                 return false;
             }
 
-           return true;
+            if(stopOnFirstFailedtestCase != contestInformation.isStopOnFirstFailedtestCase()) {
+                return false;
+            }
+
+            if(memoryLimitInMeg != contestInformation.getMemoryLimitInMeg()) {
+                return false;
+            }
+
+            if(!StringUtilities.stringSame(sandboxCommandLine, contestInformation.getSandboxCommandLine())){
+                return false;
+            }
+
+            if(!StringUtilities.stringSame(overrideLoadAccountsFilename, contestInformation.getOverrideLoadAccountsFilename())){
+                return false;
+            }
+
+            if(loadSampleJudgesData != contestInformation.isLoadSampleJudgesData()) {
+                return false;
+            }
+
+            if(sandboxGraceTimeSecs != contestInformation.getSandboxGraceTimeSecs()) {
+                return false;
+            }
+
+            if(sandboxInteractiveGraceMultiplier != contestInformation.getSandboxInteractiveGraceMultiplier()) {
+                return false;
+            }
+
+            if (scoreboardType != contestInformation.getScoreboardType()) {
+                return false;
+            }
+            return true;
         } catch (Exception e) {
             e.printStackTrace(System.err); // TODO log this exception
             return false;
@@ -987,6 +1045,103 @@ public class ContestInformation implements Serializable{
 
     public void setAllowZeroLengthSubmissionFiles(boolean allowZeroLengthSubmissionFiles) {
         this.allowZeroLengthSubmissionFiles = allowZeroLengthSubmissionFiles;
+    }
+
+    /**
+     * Set contest scoreboard type based on the string passed in.
+     * 
+     * If the received string does not match any of the values defined in {@link ScoreboardType},
+     * no change is made to the recorded scoreboardType.  
+     * TODO:  Arguably, this should be changed by adding "UNDEFINED" as a ScoreboardType
+     * and setting to that, with appropriate error logging, if an unknown string is received.
+     *
+     * @param type one of "pass-fail" or "score", currently.
+     */
+    public void setScoreboardType(String type) {
+        for(ScoreboardType sbType : ScoreboardType.values()) {
+            if(type.compareToIgnoreCase(sbType.getType()) == 0) {
+                scoreboardType = sbType;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Accessor for contest scoreboard type.  Note there are convenient shorthands
+     * available below.
+     *
+     * @return scoreboardType enum
+     */
+    public ScoreboardType getScoreboardType() {
+        return scoreboardType;
+    }
+
+    /**
+     * Shorthand to determine if the contest is pass-fail scoring.
+     *
+     * @return true if the contest is pass-fail
+     */
+    public boolean isScoreboardTypePassFail() {
+        return (scoreboardType == ScoreboardType.PASSFAIL);
+    }
+
+    /**
+     * Shorthand to determine if the contest is score (point scoring).
+     *
+     * @return true of the contest is point scoring
+     */
+    public boolean isScoreboardTypeScore() {
+        return (scoreboardType == ScoreboardType.SCORE);
+    }
+
+    public void setRemoteCCSInfo(RemoteCCSInformation [] ccsInfo) {
+        remoteCCSInfo = ccsInfo;
+    }
+
+    public void setRemoteCCSInfo(String accountName, RemoteCCSInformation ccsInfo) {
+        if(remoteCCSInfo != null) {
+            RemoteCCSInformation info;
+            int i, n = remoteCCSInfo.length;
+            for(i = 0; i < n; i++) {
+                info = remoteCCSInfo[i];
+                if(info.getAccountName().equals(accountName)) {
+                    remoteCCSInfo[i] = ccsInfo;
+                    return;
+                }
+            }
+        }
+        // Ugh.  just set the legacy defaults
+        shadowMode = ccsInfo.isEnabled();
+        primaryCCS_URL = ccsInfo.getCCS_URL();
+        primaryCCS_user_login = ccsInfo.getCCS_user_login();
+        primaryCCS_user_pw = ccsInfo.getCCS_user_pw();
+        lastShadowEventID = ccsInfo.getLastEventID();
+    }
+
+    /**
+     * Gets the remote CCS information for the supplied user.
+     * Returns a default hand-crafted object if there is not a specific one defined.
+     *
+     * @param account eg. feeder1, feeder2, etc.
+     * @return a RemoteCCSInformation object describing the remote CCS connectino.
+     *      This routine never returns null.
+     */
+    public RemoteCCSInformation getRemoteCCSInfo(String account) {
+        RemoteCCSInformation remoteInfo = null;
+
+        if(remoteCCSInfo != null) {
+            for(RemoteCCSInformation info : remoteCCSInfo) {
+                if(info.getAccountName().equals(account)) {
+                    remoteInfo = info;
+                    break;
+                }
+            }
+        }
+        if(remoteInfo == null) {
+            // If no specific one defined for this account, just make one using the defaults (Backward compatiblity)
+            remoteInfo = new RemoteCCSInformation(account, RemoteCCSType.SHADOW, shadowMode, primaryCCS_URL, primaryCCS_user_login, primaryCCS_user_pw, 0);
+        }
+        return(remoteInfo);
     }
 
 }

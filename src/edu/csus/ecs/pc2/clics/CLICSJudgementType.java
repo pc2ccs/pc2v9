@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
+
 /**
  * This class encapsulates a "judgement type" as defined by the CLICS Contest API.
  * That API defines each type of judgement which can be assigned to a submission as having the following fields:
@@ -122,7 +124,20 @@ public class CLICSJudgementType {
      * The string name (text) of each judgement (including case, spacing, and syntax) is based on the "Name" 
      * given in the CLICS specification (see the URL above).
      * 
-     *
+     * Note: this enum defines a private field called "name" associated with each enum element, 
+     * and this value is returned by calling the enum function "getValue()". This private field called "name" 
+     * should not be confused with the value returned by the Java-defined implicit enum name() function; in fact, 
+     * what getValue() returns is the String which was passed into the enum constructor as each enum element was
+     * defined (for example, AC.getValue() returns "Accepted" for the enum element whose name() is "AC").
+     * The private field should probably have been called "description" or something like that.
+     * 
+     * It's unfortunate that the enum defines a field called "name" when name() is an implicit enum function which 
+     * returns something different from the data in the "name" field. In fact, what name() returns is a string
+     * representation of the enum element -- for example "AC" or "RTE".
+     * 
+     * Note also that Java recommends calling toString() to get the enum element name (e.g. "AC" or "RTE"), as the
+     * programmer may have overridden toString() to return a more readable value (although that has NOT happened in
+     * the case of THIS enum).
      */
     public static enum CLICS_JUDGEMENT_ACRONYM {
         AC  ("Accepted"),

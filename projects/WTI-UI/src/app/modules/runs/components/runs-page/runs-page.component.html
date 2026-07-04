@@ -53,8 +53,14 @@
                 <th>Language</th>
                 <th>Problem</th>
                 <th>Judgement</th>
-                <th>Time</th>
-                <th></th>
+                
+				<!-- Display appropriate column header based on Scoreboard Type -->
+				<th>
+					<ng-container *ngIf="isPassFail">Time</ng-container>
+					<ng-container *ngIf="isPointScoring">Score</ng-container>
+				</th>
+
+				<th></th>
             </tr>
             <tr *ngFor='let run of filteredRuns'>
             	<!-- Omit Run Type until Test Run capability is implemented -- see Issue #1031
@@ -77,7 +83,19 @@
                         (Preliminary)
                     </ng-container>
                 </td>
-                <td>{{ run.time }}</td>
+                
+				<td>
+					<ng-container *ngIf="isPassFail"> {{ run.time }} </ng-container>					
+					<ng-container *ngIf="isPointScoring"> 
+						<ng-container *ngIf="hasAcceptedJudgement(run); else noScore"> 
+							{{ run.score }}
+						</ng-container> 
+						<ng-template #noScore> 
+							<span title="Score shown only for accepted runs">--</span>
+						</ng-template>
+					</ng-container>
+				</td>
+                
                 <td>
                     <ng-container *ngIf='run.results'>
                         <button type='button' (click)='viewResults(run.problem, run.results)' class='textLink'>View Results</button>

@@ -94,6 +94,8 @@ public class StandingsTablePane extends JPanePlugin {
 
     private ListModel<Object> groupsListModel = new DefaultListModel<Object>();
 
+    private boolean isPointScoring = false;
+
     /**
      * This method initializes
      *
@@ -134,6 +136,8 @@ public class StandingsTablePane extends JPanePlugin {
         getContest().addBalloonSettingsListener(new BalloonSettingsListenerImplementation());
         getContest().addGroupListener(new GroupListenerImplementation());
 
+        isPointScoring = getContest().getContestInformation().isScoreboardTypeScore();
+
         populateGroupsList();
         refreshStandings();
     }
@@ -162,8 +166,14 @@ public class StandingsTablePane extends JPanePlugin {
                 outArray[1] = value;
             } else if (name.equals("solved")) {
                 outArray[2] = value;
-            } else if (name.equals("points")) {
-                outArray[3] = value;
+            } else {
+                if(isPointScoring) {
+                    if(name.equals("score")) {
+                        outArray[3] = value;
+                    }
+                } else if (name.equals("points")) {
+                    outArray[3] = value;
+                }
             }
         }
 
@@ -279,8 +289,16 @@ public class StandingsTablePane extends JPanePlugin {
      * @return JTableCustomized
      */
     private JTableCustomized getStandingsTable() {
-        Object[] cols = { "Rank", "Name", "Solved", "Points" };
+        Object[] colsPassFail = { "Rank", "Name", "Solved", "Points" };
+        Object[] colsPointScoring = { "Rank", "Name", "Solved", "Score" };
+        Object[] cols;
+
         if (standingsTable == null) {
+            if(isPointScoring) {
+                cols = colsPointScoring;
+            } else {
+                cols = colsPassFail;
+            }
             standingsTableModel = new DefaultTableModel(cols, 0) {
                 @Override
                 public boolean isCellEditable(int row, int col) {

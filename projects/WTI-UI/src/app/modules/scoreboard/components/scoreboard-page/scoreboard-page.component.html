@@ -21,8 +21,21 @@
   					</a>
 
                 </th>
-                <th style="text-align: center">Solved</th>
-                <th style="text-align: center">Score</th>
+                
+                <!-- original, before introduction of point-scoring
+                	<th style="text-align: center">Solved</th>
+                	<th style="text-align: center">Score</th>
+                -->
+                
+                <ng-container *ngIf="isPassFail"> 
+                	<th style="text-align: center">Solved</th>
+                	<th style="text-align: center">Time</th>
+  				</ng-container>
+  				
+				<ng-container *ngIf="isPointScoring"> 
+					<th style="text-align: center">Score</th> 
+				</ng-container>
+                
                 <th></th>
             </tr>
             <tr *ngFor= 'let team of teamStandings' >
@@ -40,19 +53,40 @@
           					'pending': !problem.isSolved && problem.isPending
         					}"
         				>
+ 
+ 						<ng-container *ngIf="problem.isSolved; else notSolved">
 
-      					<ng-container *ngIf="problem.isSolved; else notSolved">
-        					{{ problem.attempts }}/{{ problem.solutionTime }}
-      					</ng-container>
+  							<ng-container *ngIf="isPassFail"> 
+  								{{ problem.attempts }}/{{ problem.points }}
+  							</ng-container>
 
+  							<ng-container *ngIf="isPointScoring">
+    							{{ problem.attempts }}/{{ problem.score }}
+  							</ng-container>
+
+						</ng-container>
+ 
       					<ng-template #notSolved>
         					{{ problem.attempts }}/--
       					</ng-template>
     				</td>
   				</ng-container>
-                	
-                <td style="text-align: center">{{ team.solved }}</td>
-                <td style="text-align: center">{{ team.points }}</td>
+               
+             	<!-- original (before introduction of point-scoring):
+                	<td style="text-align: center">{{ team.solved }}</td>
+                	<td style="text-align: center">{{ team.points }}</td>
+             	-->
+
+  				<ng-container *ngIf="isPassFail"> 
+  					<td style="text-align: center"> {{ team.solved }}</td>
+                	<td style="text-align: center"> {{ team.points }}</td>
+  				</ng-container>
+  				
+				<ng-container *ngIf="isPointScoring"> 
+					<!-- display total score -->
+					<td style="text-align: center"> {{ team.score }} </td>
+				</ng-container>
+				
             </tr>
         </table>
     </div>
