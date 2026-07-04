@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -933,16 +932,17 @@ public class RunsTablePane extends JPanePlugin {
         ((DefaultTableCellRenderer)runTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
         runTable.setRowHeight(runTable.getRowHeight() + VERT_PAD);
 
-        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
-        rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
-        runTable.getColumnModel().getColumn(scoreColumn).setCellRenderer(rightRenderer);
-
         StringToNumberComparator numericStringSorter = new StringToNumberComparator();
         AccountNameCaseComparator accountNameSorter = new AccountNameCaseComparator();
 
         int sortKeyOffset = 0;
 
         if(isPointScoring) {
+            // Set up right justified renderer for score on scoring contests
+            DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+            rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
+            runTable.getColumnModel().getColumn(scoreColumn).setCellRenderer(rightRenderer);
+
             trs.setComparator(scoreColumn, new StringToDoubleComparator());
             sortKeyOffset = 1;
         }

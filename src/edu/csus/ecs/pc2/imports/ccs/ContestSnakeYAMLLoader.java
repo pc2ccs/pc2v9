@@ -646,7 +646,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         //get the map (if any) of the CLICS "medals" section in the contest.yaml file
-        Map<String, Object> medalsContent = fetchMap(content, CLICS_CONTEST_MEDALS);
+        Map<String, Object> medalsContent = ContestImportUtilities.fetchMap(content, CLICS_CONTEST_MEDALS);
         boolean updateFinalizeData = false;
         FinalizeData finalizeData = contest.getFinalizeData();
         if(finalizeData == null) {
@@ -664,15 +664,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             int scnt = srank - grank;
             int bcnt = brank - srank;
             // see if new counts specified in the "medals" object
-            Integer goldCount = fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_GOLD);
+            Integer goldCount = ContestImportUtilities.fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_GOLD);
             if(goldCount != null) {
                 gcnt = goldCount.intValue();
             }
-            Integer silverCount = fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_SILVER);
+            Integer silverCount = ContestImportUtilities.fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_SILVER);
             if(silverCount != null) {
                 scnt = silverCount.intValue();
             }
-            Integer bronzeCount = fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_BRONZE);
+            Integer bronzeCount = ContestImportUtilities.fetchIntValue(medalsContent, CLICS_CONTEST_MEDAL_BRONZE);
             if(bronzeCount != null) {
                 bcnt = bronzeCount.intValue();
             }
@@ -687,7 +687,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 finalizeData.setBronzeRank(newbrank);
             }
         }
-        boolean wfRankings = fetchBooleanValue(content, CONTEST_USE_WF_RANKING);
+        boolean wfRankings = ContestImportUtilities.fetchBooleanValue(content, CONTEST_USE_WF_RANKING, false);
         if(wfRankings != finalizeData.isUseWFGroupRanking()) {
             finalizeData.setUseWFGroupRanking(wfRankings);
             updateFinalizeData = true;
