@@ -1475,7 +1475,7 @@ public class PacketHandler {
             }
         } else {
             int nTestCase = -1;
-            if(status == RunExecutionStatus.TESTCASE_RESULT) {
+            if(status == RunExecutionStatus.TESTCASE_COMPLETED) {
                 nTestCase = (Integer)PacketFactory.getObjectValue(packet, PacketFactory.TESTCASE_ORDINAL);
             }
             // Accept and process this packet (for the API)

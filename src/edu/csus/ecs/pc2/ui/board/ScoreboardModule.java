@@ -317,7 +317,7 @@ public class ScoreboardModule implements UIPlugin {
         @Override
         public void runChanged(RunEvent event) {
             // Certainly do not want to generate output for every test case.
-            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                 generateOutput();
             }
         }

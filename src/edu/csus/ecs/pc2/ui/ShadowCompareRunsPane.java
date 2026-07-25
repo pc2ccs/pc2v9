@@ -1048,7 +1048,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         public void runChanged(RunEvent event) {
 
             // Not interested run test cases
-            if (event != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+            if (event != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
 
                 //get the run for which we have received a server "changed" notification
                 Run updatedRun = event.getRun();

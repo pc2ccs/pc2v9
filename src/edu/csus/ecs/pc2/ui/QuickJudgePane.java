@@ -255,7 +255,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
         @Override
         public void runChanged(RunEvent event) {
             // Do not update things if it was a test case result
-            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                 updateRunRow(event.getRun(), event.getWhoModifiedRun());
 
                 if (getContest().getClientId().equals(event.getSentToClientId())) {

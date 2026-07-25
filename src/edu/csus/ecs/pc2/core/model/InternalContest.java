@@ -1551,8 +1551,8 @@ public class InternalContest implements IInternalContest {
             case VALIDATING:
                 action = RunEvent.Action.RUN_VALIDATING;
                 break;
-            case TESTCASE_RESULT:
-                action = RunEvent.Action.RUN_TESTCASE_RESULT;
+            case TESTCASE_COMPLETED:
+                action = RunEvent.Action.RUN_TESTCASE_COMPLETED;
                 break;
             case COMPILING:
             default:
@@ -1562,8 +1562,8 @@ public class InternalContest implements IInternalContest {
 
         RunEvent runEvent = new RunEvent(action, run, null, null);
         runEvent.setWhoModifiedRun(whoUpdatedRun);
-        if(action == RunEvent.Action.RUN_TESTCASE_RESULT) {
-            runEvent.setActionParam(new Integer(param));
+        if(action == RunEvent.Action.RUN_TESTCASE_COMPLETED) {
+            runEvent.setActionParam(Integer.valueOf(param));
         }
         fireRunListener(runEvent);
     }
@@ -1673,7 +1673,12 @@ public class InternalContest implements IInternalContest {
 
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), runFiles, runResultFiles);
         runEvent.setWhoModifiedRun(whoChangedRun);
-
+        // These next 3 lines do not appear to be necessary, and in fact, may causes duplicate events to be sent
+        // using to the PC2 API (that is, WTI may get duplicate events since there is already a handler for CHECKEDOUT_RUN
+        // and CHECKEDOUT_REJUDGE_RUN.  It doesn't seem harmful to leave this in though.
+        if (run.getStatus().equals(RunStates.BEING_JUDGED) || run.getStatus().equals(RunStates.BEING_RE_JUDGED) ){
+            runEvent.setDetailedAction(RunEvent.Action.CHECKEDOUT_RUN);
+        }
         if (checkOutRun) {
             runEvent.setSentToClientId(whoChangedRun);
         }

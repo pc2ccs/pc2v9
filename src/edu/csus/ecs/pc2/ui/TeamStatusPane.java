@@ -437,7 +437,7 @@ public class TeamStatusPane extends JPanePlugin {
         @Override
         public void runChanged(RunEvent event) {
             // Do not update GUI for every test case result
-            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                 populateGUI();
             }
         }

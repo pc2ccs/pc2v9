@@ -31,7 +31,7 @@ public enum RunExecutionStatus {
     /**
      * Completed a testcase
      */
-    TESTCASE_RESULT
+    TESTCASE_COMPLETED
 
 
 }

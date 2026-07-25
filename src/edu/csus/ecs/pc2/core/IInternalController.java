@@ -243,7 +243,7 @@ public interface IInternalController {
     void sendToSpectators(Packet packet);
 
     /**
-     * Send to all feeder clients
+     * Send to all CLICS event feeder clients
      *
      * @param packet
      */

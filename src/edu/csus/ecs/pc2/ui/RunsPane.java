@@ -529,7 +529,7 @@ public class RunsPane extends JPanePlugin {
             Action action = event.getAction();
 
             // Do not update if just a test case result
-            if(action != RunEvent.Action.RUN_TESTCASE_RESULT) {
+            if(action != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                 updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
 
                 // check if this is a team; if so, pop up a response dialog

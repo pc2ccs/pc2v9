@@ -119,7 +119,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
         @Override
         public void runChanged(RunEvent event) {
             // Make sure we have a run, and ignore any test case results since they don't change anything
-            if (run != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+            if (run != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                 if (event.getRun().getElementId().equals(run.getElementId())) {
 
                     viewJudgementsPane.setRun(event.getRun());

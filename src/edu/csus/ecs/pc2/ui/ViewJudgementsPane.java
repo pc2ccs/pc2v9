@@ -329,7 +329,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         @Override
         public void runChanged(RunEvent event) {
             // Make sure we have a run, and ignore any test case results since they don't change anything
-            if (run != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT && event.getRun().getElementId().equals(run.getElementId())) {
+            if (run != null && event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED && event.getRun().getElementId().equals(run.getElementId())) {
                 setRun(event.getRun());
             }
         }

@@ -178,7 +178,7 @@ public class SubmissionBiffPane extends JPanePlugin {
         @Override
         public void runChanged(RunEvent event) {
             // Test case updates will not affect run count
-            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                 updateRunCount(event);
             }
         }

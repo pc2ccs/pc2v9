@@ -1367,7 +1367,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
         @Override
         public void runChanged(RunEvent event) {
             // Run Test case results are uninteresting in terms of adding a new submission
-            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                 SubmissionSample sub = getSubmission(event);
                 if(sub != null) {
                     updateRunRow(sub, event.getWhoModifiedRun(), true);

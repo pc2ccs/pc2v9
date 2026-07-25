@@ -557,13 +557,13 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                             // If judged already, we don't send out a 'judgements' notification for each testcase here.
                             // Just ignore them, we'll send them all at the end when the judgment finally comes in,
                             // unless they were being sent during judging (and this is the first judging of the submission).
-                            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_RESULT) {
+                            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                                 // Send final judgment BEFORE the testcases ('runs') to provide referential integrity on the judgement_id
                                 json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
                                 sendJSON(json + NL);
 
                                 // Only send test cases if batching OR there were previous judgments,
-                                // otherwise, we would have sent them below in the RUN_TESTCASE_RESULT handling code.
+                                // otherwise, we would have sent them below in the RUN_TESTCASE_COMPLETED handling code.
                                 JudgementRecord [] allJudgments = run.getAllJudgementRecords();
                                 if(ci.isBatchTestCasesOnEF() || (allJudgments != null && allJudgments.length > 1)) {
                                     // Now send out the runcases (test cases).  Get most recent ones for this run.
@@ -575,7 +575,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                                 }
                             }
                         }
-                    } else if(event.getAction() == RunEvent.Action.RUN_TESTCASE_RESULT) {
+                    } else if(event.getAction() == RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                         // Note:  If the run is already judged above (that is, this is a "rejudge"),
                         // then we do not send per-testcase results.  I don't think we want re-judges
                         // going to the clients (such as LIVE).  They'll get the batch at the end

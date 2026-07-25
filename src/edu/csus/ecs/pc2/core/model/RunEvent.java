@@ -80,7 +80,7 @@ public class RunEvent {
         /**
          * Testcase has completed
          */
-        RUN_TESTCASE_RESULT,
+        RUN_TESTCASE_COMPLETED,
         /**
          * (Force) refresh of all run lists.
          */

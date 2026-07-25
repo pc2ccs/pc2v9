@@ -361,6 +361,10 @@ public final class PacketFactory {
 
     /**
      * Index into runcases for the testcase in question
+     * Every Run has a single list containing the results of every test case (RunTestCase) that was ever
+     * made for the Run.  When a Run is rejudged (for example), the run test cases for that rejudge are tacked
+     * onto the end of the list of RunTestCase's.  This is the index into that list for the particular RunTestCase
+     * being reported.
      */
     public static final String TESTCASE_ORDINAL = "TESTCASE_ORDINAL";
 
@@ -2118,7 +2122,7 @@ public final class PacketFactory {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, judgeClient);
         prop.put(RUN, run);
-        prop.put(RUN_STATUS, RunExecutionStatus.TESTCASE_RESULT);
+        prop.put(RUN_STATUS, RunExecutionStatus.TESTCASE_COMPLETED);
         prop.put(TESTCASE_ORDINAL, ordinal);
         return createPacket(PacketType.Type.RUN_EXECUTION_STATUS, source, destination, prop);
     }
