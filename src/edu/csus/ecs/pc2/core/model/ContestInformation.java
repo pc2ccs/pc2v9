@@ -237,14 +237,6 @@ public class ContestInformation implements Serializable{
     private boolean batchTestCasesOnEF = false;
 
     /**
-     * Whether or not we should send an empty judgment at the start of judging a submission.
-     * This can be used in conjunction with batchTestCasesOnEF to signify that a judgment for
-     * a submission is starting, and the testcases will be coming in for that submission.
-     * If false, we will not send such a judgment on the vent feed.  true is the default.
-     */
-    private boolean sendBeginJudgmentOnEF = true;
-
-    /**
      * Returns the date/time when the contest is scheduled (intended) to start.
      * This value is null if no scheduled start time has been set,
      * or if the contest has already started.
@@ -487,9 +479,6 @@ public class ContestInformation implements Serializable{
             }
 
             if(batchTestCasesOnEF != contestInformation.isBatchTestCasesOnEF()) {
-                return false;
-            }
-            if(sendBeginJudgmentOnEF != contestInformation.isSendBeginJudgmentOnEF()) {
                 return false;
             }
 
@@ -1017,13 +1006,4 @@ public class ContestInformation implements Serializable{
     public void setBatchTestCasesOnEF(boolean batchTestCasesOnEF) {
         this.batchTestCasesOnEF = batchTestCasesOnEF;
     }
-
-    public boolean isSendBeginJudgmentOnEF() {
-        return sendBeginJudgmentOnEF;
-    }
-
-    public void setSendBeginJudgmentOnEF(boolean sendBeginJudgmentOnEF) {
-        this.sendBeginJudgmentOnEF = sendBeginJudgmentOnEF;
-    }
-
 }

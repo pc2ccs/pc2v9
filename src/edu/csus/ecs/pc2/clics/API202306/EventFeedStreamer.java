@@ -557,6 +557,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                             // If judged already, we don't send out a 'judgements' notification for each testcase here.
                             // Just ignore them, we'll send them all at the end when the judgment finally comes in,
                             // unless they were being sent during judging (and this is the first judging of the submission).
+                            // RUN_TESTCASE_COMPLETED events actions are only sent if isBatchTestCasesOnEF() is true.
                             if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
                                 // Send final judgment BEFORE the testcases ('runs') to provide referential integrity on the judgement_id
                                 json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
@@ -579,7 +580,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                         // Note:  If the run is already judged above (that is, this is a "rejudge"),
                         // then we do not send per-testcase results.  I don't think we want re-judges
                         // going to the clients (such as LIVE).  They'll get the batch at the end
-                        // like before.
+                        // like before.  Note: RUN_TESTCASE_COMPLETED action events are only sent if isBatchTestCasesOnEF() is true.
                         JudgementRecord [] allJudgments = run.getAllJudgementRecords();
                         // If no judgments yet, then we may want to send testcase results in real time.
                         if(allJudgments == null || allJudgments.length == 0) {
@@ -599,7 +600,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                                         // Note 2: if you want to send testcase results for rejudges as well, change
                                         //         the test of testCase == 0 to the following:
                                         //               RunTestCase rtc = testCases[testCase];
-                                        //               if(rtc.getTestNumber() == 1 && ci.isSendBeginJudgmentOnEF()) {
+                                        //               if(rtc.getTestNumber() == 1) {
                                         // Note 3: A brief history lesson:  testcase results for EVERY time a submission is judged
                                         //         are kept in the Run object as an list.  So, if a Run is judged 4 times and
                                         //         each judge run has 5 test cases, there will be 20 things in the Run object's list
@@ -612,7 +613,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                                         //         science for "ordinal".  The CS people (some anyway) say that 0 is the "first place in an array", so
                                         //         its ordinal is "0".  In general though, ordinals begin at 1. Then there's "limit ordinals", which are
                                         //         another thing.
-                                        if(testCase == 0 && ci.isSendBeginJudgmentOnEF()) {
+                                        if(testCase == 0) {
                                             json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
                                             sendJSON(json + NL);
                                         }
