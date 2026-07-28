@@ -6,6 +6,36 @@
   flex: 1;
 }
 
+//scoreboard control elements such as group dropdown
+.scoreboard-controls {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.scoreboard-group-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
+.scoreboard-group-filter-label {
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: #333;
+}
+
+.scoreboard-group-select {
+  width: auto;
+  max-width: min(28rem, 100%);
+  min-width: 10rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 5px;
+  border: 1px solid $border1;
+}
+
 .scoreboard-table {
 	td, th {
   		padding: 2px 4px !important;		
