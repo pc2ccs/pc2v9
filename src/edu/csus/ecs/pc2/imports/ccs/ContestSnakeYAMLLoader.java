@@ -423,7 +423,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         boolean allowZeroLengthSubmissionFiles = ContestImportUtilities.fetchBooleanValue(content, ALLOW_ZERO_LENGTH_SUBMISSION_FILES_KEY, contestInformation.isAllowZeroLengthSubmissionFiles());
         contestInformation.setAllowZeroLengthSubmissionFiles(allowZeroLengthSubmissionFiles);
 
-        boolean batchTestCasesOnEF = fetchBooleanValue(content, BATCH_TESTCASES_ON_EF, contestInformation.isBatchTestCasesOnEF());
+        boolean batchTestCasesOnEF = ContestImportUtilities.fetchBooleanValue(content, BATCH_TESTCASES_ON_EF, contestInformation.isBatchTestCasesOnEF());
         contestInformation.setBatchTestCasesOnEF(batchTestCasesOnEF);
 
         // Load team scoreboard string (the one with variables)
