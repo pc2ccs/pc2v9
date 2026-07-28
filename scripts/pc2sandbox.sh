@@ -13,6 +13,7 @@
 #  $7... : command arguments
 # 
 # Author: John Buck, based on earlier versions by John Clevenger and Doug Lane
+
 DEFAULT_CPU_NUM=3
 CPU_OVERRIDE_FILE=$HOME/pc2_cpu_override
 
@@ -43,7 +44,7 @@ MAXPROCS=32
 
 # Compute taskset cpu mask for running submission on single processor
 
-# Get system's maximum CPU number
+# Get system's maximum CPU number - numbered starting at 0
 MAX_CPU_NUM=`lscpu -p=cpu | tail -1`
 
 # See if the admin wants to override the CPU by reading the override file
@@ -71,13 +72,11 @@ then
 	if [[ "$cpunum" =~ ^[1-9][0-9]*$ ]]
 	then
 		# Restrict to number of CPU's.
-		cpunum=$(((cpunum-1)%(MAX_CPU_NUM+1)))
+		cpunum=$((cpunum%(MAX_CPU_NUM+1)))
 	else
-		cpunum=$(((DEFAULT_CPU_NUM+1)))
+		cpunum=$DEFAULT_CPU_NUM
 	fi
 fi
-cpunum=$((cpunum-1))
-CPUMASK=$((1<<cpunum))
 
 # Process ID of submission
 submissionpid=""
@@ -108,6 +107,13 @@ DEBUG_FILE=sandbox.log
 function DEBUG()
 {
   [ "$_DEBUG" == "on" ] && "$@" >> $DEBUG_FILE
+}
+
+# control whether the script outputs debug info for timing details
+_TDEBUG="on"   # change this to anything other than "on" to disable debug/trace output
+function TDEBUG()
+{
+  [ "$_TDEBUG" == "on" ] && "$@" >> $DEBUG_FILE
 }
 
 # For per-testcase reporting/logging
@@ -369,19 +375,17 @@ else
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
 
+# Create variables for various ulimit values.  These will be set once inside the cgroup.
 # We use ulimit to limit CPU time, not cgroups.  Time is supplied in seconds.  This may have to
 # be reworked if ms accuracy is needed.  The problem is, cgroups do not kill off a process that
 # exceeds the time limit, ulimit does.
 TIMELIMIT_US=$((TIMELIMIT * 1000000))
 REPORT_DEBUG Setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
-ulimit -t $TIMELIMIT
 
 MAXPROCS=$((MAXPROCS+`ps -T -u $USER | wc -l`))
 REPORT_DEBUG Setting maximum user processes to $MAXPROCS
-ulimit -u $MAXPROCS
 
 REPORT_DEBUG Setting stack size to unlimited
-ulimit -s unlimited
 
 # Keep track of details for reports
 REPORT_BRIEF ${JUDGEIN}
@@ -390,35 +394,54 @@ REPORT_BRIEF $cpunum
 REPORT_BRIEF $$
 REPORT_BRIEF $(date "+%F %T.%6N")
 
-# Remember wall time when we started
-starttime=`GetTimeInMicros`
-
-#put the current process (and implicitly its children) into the pc2sandbox cgroup.
-REPORT Putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
-if ! echo $$ > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
-then
-	echo $0: Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs - not executing submission.
-	SysFailure Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
-	exit $FAIL_SANDBOX_ERROR
-fi
+TDEBUG echo -n 'CGroup2 cpu usec to start: '
+TDEBUG grep usage_usec  $PC2_SANDBOX_CGROUP_PATH/cpu.stat
 
 # run the command
 # execute it directly (it's a child so it should still fall under the cgroup limits).
-REPORT_DEBUG Executing "setsid taskset $CPUMASK $COMMAND $*"
+REPORT_DEBUG Executing "setsid taskset -c ${cpunum} $COMMAND $*"
 
 # Set up trap handler to catch wall-clock time exceeded and getting killed by PC2's execute timer
 trap HandleTerminateFromPC2 15
 
-# This will create a new process group
-#bash -imc "taskset ${CPUMASK} $COMMAND $*" <&0 &
-setsid taskset ${CPUMASK} $COMMAND $* <&0 &
+TDEBUG echo -n 'CGroup2 cpu usec right before starting submission: '
+TDEBUG grep usage_usec  $PC2_SANDBOX_CGROUP_PATH/cpu.stat
+
+# Remember wall time when we started
+starttime=`GetTimeInMicros`
+
+# Get CPU starting time (first line)
+read cpustart < $PC2_SANDBOX_CGROUP_PATH/cpu.stat
+
+# This will create a new process group and put it into the created cgroup
+( if ! echo $BASHPID > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
+  then
+    echo $0: Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs - not executing submission.
+    SysFailure Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
+    exit $FAIL_SANDBOX_ERROR
+  fi
+  ulimit -t ${TIMELIMIT} -u ${MAXPROCS} -s unlimited
+  exec setsid taskset -c ${cpunum} $COMMAND $*
+) <&0 >&1 2>&2 &
+
 # Remember child's PID/PGRP for possible killing off later
 submissionpid=$!
 
+DEBUG echo Waiting for submission pid $submissionpid
 # Wait for child
 wait $submissionpid
-
 COMMAND_EXIT_CODE=$?
+
+# Get cpu time used by submission
+cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
+
+# Get wall time - we want it close to when we fetch the sub-process (submission) completes
+endtime=`GetTimeInMicros`
+walltime=$((endtime-starttime))
+
+read cpuend < $PC2_SANDBOX_CGROUP_PATH/cpu.stat
+
+TDEBUG echo CGroup2 Start: $cpustart End: $cpuend
 
 # See if we were killed due to memory - this is a kill 9 if it happened
 
@@ -426,13 +449,8 @@ kills=`grep oom_kill $PC2_SANDBOX_CGROUP_PATH/memory.events | cut -d ' ' -f 2`
 
 KillChildProcs
 
-# Get cpu time used.
-cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
-
-# Get wall time - we want it as close as possible to when we fetch the cpu time so they stay close
-# since the cpu.stat includes the time this script takes AFTER the submission finishes.
-endtime=`GetTimeInMicros`
-walltime=$((endtime-starttime))
+TDEBUG echo -n 'CGroup2 cpu usec after kill all children: '
+TDEBUG grep usage_usec  $PC2_SANDBOX_CGROUP_PATH/cpu.stat
 
 # Newer kernels support memory.peak, so we have to check if it's there.
 if test -e $PC2_SANDBOX_CGROUP_PATH/memory.peak
