@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -241,6 +241,13 @@ public interface IInternalController {
      * @param packet
      */
     void sendToSpectators(Packet packet);
+
+    /**
+     * Send to all CLICS event feeder clients
+     *
+     * @param packet
+     */
+    void sendToFeeders(Packet packet);
 
     /**
      * Start InternalController with command line arguments.
@@ -647,6 +654,14 @@ public interface IInternalController {
      * @param run
      */
     void sendValidatingMessage(Run run);
+
+    /**
+     * Send the result of a run testcase.  The test case index into the
+     * run's testcases is ordinal.
+     * @param run
+     * @param ordinal
+     */
+    void sendRunTestCaseResult(Run run, int ordinal);
 
     boolean isClientAutoShutdown();
 

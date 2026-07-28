@@ -22,5 +22,5 @@ validator:
    validatorOption: 1
 
 input: 
-   readFromSTDIN: false
+   readFromSTDIN: true
 

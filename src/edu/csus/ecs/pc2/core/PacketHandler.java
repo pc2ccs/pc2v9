@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -1465,17 +1465,21 @@ public class PacketHandler {
 
                 // If this is not a run status from this site, then send to spectators/API only
 
-                sendToSpectatorsAndSites(packet, false);
+                sendToSpectatorsFeedersAndSites(packet, false);
 
             } else {
                 // packet from this site, send to all spectators/API and to other servers.
 
               Packet runExecuteStatusPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
-              sendToSpectatorsAndSites(runExecuteStatusPacket, true);
+              sendToSpectatorsFeedersAndSites(runExecuteStatusPacket, true);
             }
         } else {
+            int nTestCase = -1;
+            if(status == RunExecutionStatus.TESTCASE_COMPLETED) {
+                nTestCase = (Integer)PacketFactory.getObjectValue(packet, PacketFactory.TESTCASE_ORDINAL);
+            }
             // Accept and process this packet (for the API)
-            contest.updateRunStatus(run, status, judgeClientId);
+            contest.updateRunStatus(run, status, judgeClientId, nTestCase);
         }
     }
 
@@ -3178,14 +3182,16 @@ public class PacketHandler {
     }
 
     /**
-     * Send to spectators and servers
+     * Send to spectators, feeders and servers.
+     * This is currently used for forwarding run execution status messages
      * @param packet
      * @param sendToServers
      */
-    public void sendToSpectatorsAndSites(Packet packet, boolean sendToServers) {
+    public void sendToSpectatorsFeedersAndSites(Packet packet, boolean sendToServers) {
 
         if (isServer()) {
             controller.sendToSpectators(packet);
+            controller.sendToFeeders(packet);
             if (sendToServers) {
                 controller.sendToServers(packet);
             }

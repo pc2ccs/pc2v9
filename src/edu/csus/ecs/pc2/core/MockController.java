@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -369,6 +369,11 @@ public class MockController implements IInternalController {
     }
 
     @Override
+    public void sendToFeeders(Packet packet) {
+
+    }
+
+    @Override
     public void sendToServers(Packet packet) {
 
     }
@@ -390,6 +395,11 @@ public class MockController implements IInternalController {
 
     @Override
     public void sendValidatingMessage(Run run) {
+
+    }
+
+    @Override
+    public void sendRunTestCaseResult(Run run, int ordinal) {
 
     }
 

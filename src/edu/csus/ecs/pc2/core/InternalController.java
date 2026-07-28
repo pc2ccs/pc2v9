@@ -636,7 +636,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
             sendToLocalServer(packet);
         } else {
-            throw new SubmissionRejectedException("Submission threshold exceeded - wait a minute and try again", 
+            throw new SubmissionRejectedException("Submission threshold exceeded - wait a minute and try again",
                                                     SubmissionRejectedException.SubmissionRejectionReason.THROTTLE_EXCEEDED);
         }
     }
@@ -786,7 +786,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         return s;
     }
-    
+
     /**
      * Check INI file settings specific sub-systems.  These settings may not actually be
      * used until the system is up, so we have to validate them at startup time.
@@ -800,14 +800,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // No return
         }
     }
-    
+
     /**
      * Validate the settings for throttling strategies
      */
     private boolean validateThrottleStrategySettings() {
         return MaxSubmissionsPerMinuteStrategy.validateConfigurationSettings();
     }
-    
+
 
     /**
      * Login to contest server.
@@ -2752,6 +2752,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
     }
 
+    @Override
     public void sendToFeeders(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.FEEDER);
     }
@@ -4360,6 +4361,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     @Override
     public void sendValidatingMessage(Run run) {
         sendStatusMessge(run, RunExecutionStatus.VALIDATING);
+    }
+
+    @Override
+    public void sendRunTestCaseResult(Run run, int ordinal) {
+        Packet sendPacket = PacketFactory.createRunTestCaseResultPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), ordinal);
+        sendToLocalServer(sendPacket);
     }
 
     @Override

@@ -1,11 +1,13 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
+
+import edu.csus.ecs.pc2.api.implementation.Contest;
 
 /**
  * A run and a event state {@link edu.csus.ecs.pc2.core.model.RunEvent.Action}.
- * 
+ *
  * See {@link Contest#getRunIds()} for an example of use.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -18,7 +20,7 @@ public class RunEvent {
 
     /**
      * Run Event States(s).
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
     public enum Action {
@@ -45,7 +47,7 @@ public class RunEvent {
         CHECKEDOUT_REJUDGE_RUN,
         /**
          * A run is newly available.
-         * 
+         *
          * Usually triggered by a cancel run.
          */
         RUN_AVAILABLE,
@@ -55,7 +57,7 @@ public class RunEvent {
         RUN_HELD,
         /**
          * Run not available.
-         * 
+         *
          * Send to a judge in response to a {@link #CHECKEDOUT_REJUDGE_RUN} or {@link #CHECKEDOUT_RUN}
          */
         RUN_NOT_AVAILABLE,
@@ -76,7 +78,11 @@ public class RunEvent {
          */
         RUN_VALIDATING,
         /**
-         * (Force) refresh of all run lists. 
+         * Testcase has completed
+         */
+        RUN_TESTCASE_COMPLETED,
+        /**
+         * (Force) refresh of all run lists.
          */
         REFRESH_ALL,
     }
@@ -85,7 +91,7 @@ public class RunEvent {
      * Action to be taken.
      */
     private Action action;
-    
+
     /**
      * If the action is CHANGED this is the specific action to be taken.
      */
@@ -95,7 +101,7 @@ public class RunEvent {
     private Run run;
 
     private RunFiles runFiles;
-    
+
     private RunResultFiles[] runResultFiles;
 
     /**
@@ -104,11 +110,13 @@ public class RunEvent {
     private ClientId sentToClientId;
 
     /**
-     * 
+     *
      */
     private ClientId whoModifiedRun;
 
     private String message;
+
+    private Object actionParam = null;
 
     public RunEvent(Action action, Run run, RunFiles runFiles, RunResultFiles[] runResultFiles) {
         super();
@@ -178,4 +186,11 @@ public class RunEvent {
         this.detailedAction = detailedAction;
     }
 
+    public void setActionParam(Object param) {
+        this.actionParam = param;
+    }
+
+    public Object getActionParam() {
+        return actionParam;
+    }
 }

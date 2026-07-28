@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
@@ -193,7 +193,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
         @Override
         public void runChanged(RunEvent event) {
-            logDebugMessage("Run Event " + event.getRun() + " CHANGED ");
+            logDebugMessage("Run Event " + event.getRun() + " CHANGED " + event.getAction().toString());
         }
 
         @Override

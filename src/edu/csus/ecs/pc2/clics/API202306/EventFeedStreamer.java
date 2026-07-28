@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.ByteArrayOutputStream;
@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -40,11 +41,13 @@ import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementEvent;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -535,22 +538,91 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         @Override
         public void runChanged(RunEvent event) {
             Run run = event.getRun();
+            String json;
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 if (run.isDeleted()) {
-                    String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "null");
+                    json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "null");
                     sendJSON(json + NL);
                 } else {
-                    if (run.isJudged()) {
-                        String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
-                        sendJSON(json + NL);
-                        // Now send out the runcases (test cases).  Get most recent ones for this run.
-                        RunTestCase [] testCases = JudgementUtilities.getLastTestCaseArray(contest, run);
-                        for (int j = 0; j < testCases.length; j++) {
-                            json = getJSONEvent(RUN_KEY, getNextEventId(), testCases[j].getElementId().toString(), jsonTool.convertToJSON(testCases, j).toString());
-                            sendJSON(json + NL);
-                        }
+                    ContestInformation ci = contest.getContestInformation();
 
+                    // To be clear, isJudged() means: JUDGED, BEING_REJUDGED or MANUAL REVIEW
+                    if (run.isJudged()) {
+                        // We are only interested in sending a 'judgements' notification iff the judgment has changed.
+                        // There is no point in sending (duplicate) judgments if it's BEING_REJUDGED or MANUAL REVIEW; we'll wait
+                        // for the JUDGED update to send the final 'judgements' notification, and possibly the list
+                        // of test cases, (eg, CLICS "runs" notifications).
+                        if(run.getStatus() == RunStates.JUDGED) {
+                            // If judged already, we don't send out a 'judgements' notification for each testcase here.
+                            // Just ignore them, we'll send them all at the end when the judgment finally comes in,
+                            // unless they were being sent during judging (and this is the first judging of the submission).
+                            // RUN_TESTCASE_COMPLETED events actions are only sent if isBatchTestCasesOnEF() is true.
+                            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
+                                // Send final judgment BEFORE the testcases ('runs') to provide referential integrity on the judgement_id
+                                json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
+                                sendJSON(json + NL);
+
+                                // Only send test cases if batching OR there were previous judgments,
+                                // otherwise, we would have sent them below in the RUN_TESTCASE_COMPLETED handling code.
+                                JudgementRecord [] allJudgments = run.getAllJudgementRecords();
+                                if(ci.isBatchTestCasesOnEF() || (allJudgments != null && allJudgments.length > 1)) {
+                                    // Now send out the runcases (test cases).  Get most recent ones for this run.
+                                    RunTestCase [] testCases = JudgementUtilities.getLastTestCaseArray(contest, run);
+                                    for (int j = 0; j < testCases.length; j++) {
+                                        json = getJSONEvent(RUN_KEY, getNextEventId(), testCases[j].getElementId().toString(), jsonTool.convertToJSON(testCases, j).toString());
+                                        sendJSON(json + NL);
+                                    }
+                                }
+                            }
+                        }
+                    } else if(event.getAction() == RunEvent.Action.RUN_TESTCASE_COMPLETED) {
+                        // Note:  If the run is already judged above (that is, this is a "rejudge"),
+                        // then we do not send per-testcase results.  I don't think we want re-judges
+                        // going to the clients (such as LIVE).  They'll get the batch at the end
+                        // like before.  Note: RUN_TESTCASE_COMPLETED action events are only sent if isBatchTestCasesOnEF() is true.
+                        JudgementRecord [] allJudgments = run.getAllJudgementRecords();
+                        // If no judgments yet, then we may want to send testcase results in real time.
+                        if(allJudgments == null || allJudgments.length == 0) {
+                            Object param = event.getActionParam();
+                            // Get the run index
+                            if(param != null && param instanceof Integer) {
+                                int testCase = ((Integer)param).intValue();
+
+                                // testcase index has to be within bounds of the run's test cases
+                                if(testCase >= 0) {
+                                    RunTestCase [] testCases = run.getRunTestCases();
+                                    if(testCases != null && testCase < testCases.length) {
+                                        // If very first test case, send a "blank" judgment (null judgment).
+                                        // This is absolutely ridiculous, but we've been asked to do it.
+                                        // Note 1: jsonTool.convertJudgementToJSON(run) uses CLICSJudgement, which understands
+                                        //         to emit 'null' for judgment type, and the end times if there is no judgment yet.
+                                        // Note 2: if you want to send testcase results for rejudges as well, change
+                                        //         the test of testCase == 0 to the following:
+                                        //               RunTestCase rtc = testCases[testCase];
+                                        //               if(rtc.getTestNumber() == 1) {
+                                        // Note 3: A brief history lesson:  testcase results for EVERY time a submission is judged
+                                        //         are kept in the Run object as an list.  So, if a Run is judged 4 times and
+                                        //         each judge run has 5 test cases, there will be 20 things in the Run object's list
+                                        //         of testcase results.   (5 testcases for each of 4 runs = 20 total testcases.)  This is
+                                        //         why testing for testCase == 0 means it's the very first judged run for this submission.
+                                        //         See Note 2 above if you want to send testcases ('runs' notifications) for every rejuding as
+                                        //         well.  Test testcase number in the RunTestCase objects are "1" based, not "0" based like "testCase";
+                                        //         that is to say, testCase is an index into the array.  getTestNumber() is "1" based, not index based.
+                                        //         I carefully avoided using the word "ordinal" here due to the definition some programmers use in computer
+                                        //         science for "ordinal".  The CS people (some anyway) say that 0 is the "first place in an array", so
+                                        //         its ordinal is "0".  In general though, ordinals begin at 1. Then there's "limit ordinals", which are
+                                        //         another thing.
+                                        if(testCase == 0) {
+                                            json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), jsonTool.convertJudgementToJSON(run).toString());
+                                            sendJSON(json + NL);
+                                        }
+                                        json = getJSONEvent(RUN_KEY, getNextEventId(), testCases[testCase].getElementId().toString(), jsonTool.convertToJSON(testCases, testCase).toString());
+                                        sendJSON(json + NL);
+                                    }
+                                }
+                            }
+                        }
                     } else {
                         log.info("runChanged: (not adding) " + run.toString());
 
@@ -560,7 +632,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                         // submission to appear on the event feed if an autojudge claims the submission.
                         // We should not be indicating a new submission on the event feed for *any*
                         // runChanged event (that I can think of). -- JohnB 4/14/2025
-//                        String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), IJSONTool.getSubmissionId(run), jsonTool.convertToJSON(run, servletRequest, null).toString());
+//                        json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), IJSONTool.getSubmissionId(run), jsonTool.convertToJSON(run, servletRequest, null).toString());
 //                        sendJSON(json + NL);
                     }
                 }
