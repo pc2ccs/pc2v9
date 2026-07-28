@@ -62,6 +62,7 @@ public interface IContestLoader {
     // CLICS (2022-07) compliant contest.yaml property names - these work for the latest draft (2023-06) as well
     final String CLICS_CONTEST_ID = "id";
     final String CLICS_CONTEST_NAME = "name";
+    final String CLICS_CONTEST_FORMAL_NAME = "formal_name";
     final String CLICS_CONTEST_START_TIME = "start_time";
     final String CLICS_CONTEST_DURATION = "duration";
     final String CLICS_CONTEST_FREEZE_DURATION = "scoreboard_freeze_duration";

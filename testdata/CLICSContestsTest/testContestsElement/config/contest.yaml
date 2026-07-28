@@ -5,8 +5,9 @@
 # Tue Oct 18 11:35:43 EST5EDT 2022
 # 
 
-name: Benelux Algorithm Programming Contest 2022
-short-name: bapc2022
+formal_name: Benelux Algorithm Programming Contest 2022
+name: Benelux Contest 2022
+id: bapc2022
 
 penalty-time: 20
 
