@@ -551,7 +551,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setSandboxInteractiveTimeMultiplier(contest, sandboxIntMult);
         }
 
-        loadDataFileContents = fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
+        loadDataFileContents = ContestImportUtilities.fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
 
         // Check if id is CLICS compliant
         if (!StringUtilities.isEmpty(contestId)) {
