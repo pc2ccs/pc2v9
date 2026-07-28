@@ -1,6 +1,9 @@
 
 max-output-size-K: 137
 
+# Default is false, but include it anyway
+batch_testcases_on_event_feed: false
+
 wf_honors_ranking: false
 
 sites:

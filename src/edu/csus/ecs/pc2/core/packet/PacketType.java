@@ -1,31 +1,31 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.packet;
 
 import java.io.Serializable;
 
 /**
  * Defines packet types and property names used to store data in packets.
- * 
+ *
  * This class defines the PC<sup>2</sup> Packet Types. The class contains a collection of public static fields of type
  * <I>PacketType</I>, each of which defines a different type of PC<sup>2</sup> <I>packet</I> (see {@link Packet}).
  * <P>
  * <P>
- * 
+ *
  * @author PC<sup>2</sup> (pc2@ecs.csus.edu)
  * @version $Id$
  */
 
-// SOMEDAY  Settings update from admin 
-// SOMEDAY  Clar update from admin 
-// SOMEDAY  import 
-// SOMEDAY  export 
-// SOMEDAY  force logoff 
-// SOMEDAY  force transport disconnection 
+// SOMEDAY  Settings update from admin
+// SOMEDAY  Clar update from admin
+// SOMEDAY  import
+// SOMEDAY  export
+// SOMEDAY  force logoff
+// SOMEDAY  force transport disconnection
 
 // $HeadURL$
 public final class PacketType implements Serializable {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 3948306726936701813L;
 
@@ -42,7 +42,7 @@ public final class PacketType implements Serializable {
     public static final String RUN_LIST = "RUN_LIST";
 
     public static final String SITE_LIST = "SITE_LIST";
-    
+
     public static final String SITE_NUMBER = "SITE_NUMBER";
 
     public static final String CONTEST_TIME = "CONTEST_TIME";
@@ -73,16 +73,16 @@ public final class PacketType implements Serializable {
 
     /**
      * A delimiter for fields within a packet field.
-     * 
+     *
      * This can be used to delimit fields within fields.
      */
     public static final String FIELD_DELIMIT = ":;";
 
     /**
      * All defined packet types.
-     * 
+     *
      * @see PacketType
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
 
@@ -90,14 +90,14 @@ public final class PacketType implements Serializable {
 
         /**
          * Unknown or not initialized Packet.
-         * 
+         *
          * Created as default state to avoid initializing a Packet with invalid type.
          */
         UNKNOWN,
 
         /**
          * InternalContest Settings or partial settings.
-         * 
+         *
          * InternalContest Settings from server<br>
          * From server to clients <br>
          * From server to remote server <br>
@@ -108,7 +108,7 @@ public final class PacketType implements Serializable {
 
         /**
          * Request Setting from server.
-         * 
+         *
          * From client to server<br>
          * From remote server to server <br>
          * Contents: Settings
@@ -117,7 +117,7 @@ public final class PacketType implements Serializable {
 
         /**
          * Run submitted by a team.
-         * 
+         *
          * From team to server<br>
          * Contents: Properties: Run and RunFiles
          */
@@ -132,7 +132,7 @@ public final class PacketType implements Serializable {
          * From server to judges, admins, servers<br>
          * <br>
          * Contents: {@link edu.csus.ecs.pc2.core.model.Run}
-         * 
+         *
          * @see #RUN_SUBMISSION
          */
         RUN_SUBMISSION_CONFIRM,
@@ -142,7 +142,7 @@ public final class PacketType implements Serializable {
          * <P>
          * From judge to server<br>
          * <P>
-         * 
+         *
          * <P>
          * Contents: Run
          */
@@ -168,7 +168,7 @@ public final class PacketType implements Serializable {
          * Could not get run, from server to requester.
          * <P>
          * When a judge requests a run (RUN_REQUEST) and the run is not available, this packet is sent to the judge.<br>
-         * 
+         *
          * From server to judge <br>
          * Contents: Run
          */
@@ -201,13 +201,13 @@ public final class PacketType implements Serializable {
 
         /**
          * Judgement from a server to all other servers and clients.
-         * 
+         *
          *  A server has updated a run with a run judgement
          *  <P>
          *  From server to server<br>
          *  From server to team (who submitted run) <br>
          *  From server to admin, judge, board <br>
-         *  
+         *
          */
         RUN_JUDGEMENT_UPDATE,
 
@@ -291,9 +291,9 @@ public final class PacketType implements Serializable {
 
         /**
          * A list of clarifications.
-         * 
+         *
          * Contains: Enumeration of Clarifications
-         * 
+         *
          * @see PacketFactory
          */
         CLARIFICATION_LIST,
@@ -316,7 +316,7 @@ public final class PacketType implements Serializable {
 
         /**
          * Export data used to manually send/receive data.
-         * 
+         *
          * From Admin to Admin (external media transfer) <br>
          * Contents: Hashtable of various settings
          */
@@ -332,22 +332,22 @@ public final class PacketType implements Serializable {
          * Contents: Login information SessionId (partially filled in)
          */
         LOGIN_REQUEST,
-        
+
         /**
          * Auto Registration Login Request.
          * <P>
-         * Send when a client/team is allowed to request a new login 
-         * and password.   
+         * Send when a client/team is allowed to request a new login
+         * and password.
          * From client to server<br>
          * Contents: auto login name, team member names.
          */
         AUTO_REGISTRATION_LOGIN_REQUEST,
-        
+
         /**
          * Response from Server to {@link #AUTO_REGISTRATION_LOGIN_REQUEST}.
-         * 
+         *
          * Sent back from server to auto reg request.
-         * 
+         *
          */
         AUTO_REGISTRATION_SUCCESS,
 
@@ -364,10 +364,10 @@ public final class PacketType implements Serializable {
          * Contents: Login information SessionId (partially filled in)
          */
         LOGOUT,
-        
+
         /**
          * User has loggged on.
-         * 
+         *
          * From server to server<br>
          * from server to admin<br>
          */
@@ -375,14 +375,14 @@ public final class PacketType implements Serializable {
 
         /**
          * Will logoff or disconnect (clear) configuration.
-         * 
+         *
          */
         FORCE_DISCONNECTION,
 
         /**
          * Request Run from server (read-only, not checked out).
          * <P>
-         * 
+         *
          * From client to server <br>
          * From server to server<br>
          * Contents: site and runid
@@ -395,14 +395,14 @@ public final class PacketType implements Serializable {
          * From scoreboard to server <br>
          * From server to server<br>
          * From server to scoreboard<br>
-         * 
+         *
          * Contents: who requested run list TODO code
          */
         RUN_LIST_REQUEST,
 
         /**
          * Notify judges that a clar has been submitted.
-         * 
+         *
          * From server to judge<br>
          * From server to server<br>
          * Contents: ClarificationData
@@ -411,19 +411,19 @@ public final class PacketType implements Serializable {
 
         /**
          * Reset Client when contest/site is reset.
-         * 
+         *
          * From server to all clients<br>
          * Contents: String - message about reset
          */
         CONTEST_RESET,
 
         /**
-         * Failure to Login.  
-         * 
+         * Failure to Login.
+         *
          * This could be caused by a number of causes which include
          * but are not limited to: no such account, invalid login,
          * invalid password, inactive account.
-         * 
+         *
          * From server to client<br>
          * From server to server <br>
          * Contents: SessionId/status
@@ -432,9 +432,9 @@ public final class PacketType implements Serializable {
 
         /**
          * Successful Login.
-         * 
+         *
          * In all cases this contains the contest settings. <P>
-         * 
+         *
          * From client to server<br>
          * From server to server <br>
          * Note: server login as well.
@@ -442,10 +442,10 @@ public final class PacketType implements Serializable {
          * Contents: InternalContest Settings.
          */
         LOGIN_SUCCESS,
-        
+
         /**
          * Notify judges that a run has been submitted.
-         * 
+         *
          * From server to judges, admins, servers<br>
          * Contents: Run
          */
@@ -470,7 +470,7 @@ public final class PacketType implements Serializable {
         BALLOON_DELIVERED,
         /**
          * Clar has been checked out/selected to be judged/answered.
-         * 
+         *
          * From server to judge<br>
          * From server to server<br>
          * From server to Admin<br>
@@ -484,10 +484,10 @@ public final class PacketType implements Serializable {
          * beyond a re-judgement (like delete, change submission time, etc). It may also include a run re-judgement.
          */
         RUN_UPDATE,
-        
+
         /**
          * Run has been updated.
-         * 
+         *
          * From server to server<br>
          * From server to clients<br>
          */
@@ -495,28 +495,28 @@ public final class PacketType implements Serializable {
 
         /**
          * An update of a clarification from Admin.
-         * 
+         *
          */
         CLARIFICATION_UPDATE,
         /**
          * Shutdown request server or client.
          * <P>
          * A orderly shutdown of a client or server.
-         * 
+         *
          * From client to server <br>
          * From server to client <br>
          */
         SHUTDOWN,
-        
+
         /**
          * Shutdown request for all connected servers.
-         * 
+         *
          */
         SHUTDOWN_ALL,
 
         /**
          * Message for user.
-         * 
+         *
          * Contains: String
          */
         MESSAGE,
@@ -534,10 +534,10 @@ public final class PacketType implements Serializable {
          * Contains: Properties (one or more properties to add to config).
          */
         ADD_SETTING,
-        
+
         /**
          * Remove setting.
-         * 
+         *
          * This packet contains a setting or list of settings to
          * remove from the settings ({@link edu.csus.ecs.pc2.core.model.InternalContest}
          * <P>
@@ -547,7 +547,7 @@ public final class PacketType implements Serializable {
          */
         DELETE_SETTING,
         /**
-         * Generate Accounts. 
+         * Generate Accounts.
          */
         GENERATE_ACCOUNTS,
         /**
@@ -558,12 +558,12 @@ public final class PacketType implements Serializable {
          * Stop InternalContest Clock. Admin to Server. Contains: SITE_NUMBER, CLIENT_ID
          */
         STOP_CONTEST_CLOCK,
-        
+
         /**
          * Clock has been stopped, from Server. Contents: CONTEST_TIME, CLIENT_ID
          */
         CLOCK_STOPPED,
-        
+
         /**
          * Clock has been started, from Server. Contents: CONTEST_TIME, CLIENT_ID
          */
@@ -571,21 +571,21 @@ public final class PacketType implements Serializable {
 
         /**
          * Update InternalContest Clock.
-         * 
+         *
          * Update elapsed, remaining, contest length, running or not. <br>
          * Contains: Properties (ContestTime)
          */
         UPDATE_CONTEST_CLOCK,
         /**
          * User Login.
-         * 
+         *
          * Admin and Server. Contains: Properties (ClientId)
          */
         ACCOUNT_LOGIN,
 
         /**
          * Clarification canceled by judge, no available to all judges.
-         * 
+         *
          * Contains: Properties (Clarification)
          */
         CLARIFICATION_AVAILABLE,
@@ -595,7 +595,7 @@ public final class PacketType implements Serializable {
         CLARIFICATION_ANSWER,
         /**
          * A request to rejudge a run.
-         * 
+         *
          */
         RUN_REJUDGE_REQUEST,
         /**
@@ -619,15 +619,15 @@ public final class PacketType implements Serializable {
          */
         STOP_ALL_CLOCKS,
         /**
-         * 
+         *
          */
         SCORING_PROPERTIES,
         /**
-         * 
+         *
          */
         CONTEST_PROPERTIES,
         /**
-         * 
+         *
          */
         CLARIFICATION_ANSWER_UPDATE,
         /**
@@ -636,11 +636,11 @@ public final class PacketType implements Serializable {
         SERVER_SETTINGS,
         /**
          * Reconnect Site Request.
-         * 
+         *
          */
         RECONNECT_SITE_REQUEST,
         /**
-         * 
+         *
          */
         SECURITY_MESSAGE,
         /**
@@ -664,25 +664,25 @@ public final class PacketType implements Serializable {
          */
         RUN_EXECUTION_STATUS,
         /**
-         * A notification that a run has been checked out 
+         * A notification that a run has been checked out
          */
         RUN_CHECKOUT_NOTIFICATION,
         /**
          * Switch to a new profile.
          * <br>
          * contains: old profile, new profile. <br>
-         * Sent from Admin to Server. <br>  
+         * Sent from Admin to Server. <br>
          * Profile flow is:
          * <ol>
          * <li>{@link #SWITCH_PROFILE} from Admin
          * <li>{@link #UPDATE_CLIENT_PROFILE} or {@link #UPDATE_SERVER_PROFILE}
          * </ol>
-         * 
+         *
          */
-        SWITCH_PROFILE, 
+        SWITCH_PROFILE,
         /**
          * Create/clone a new profile, possibly switch profile too.
-         * 
+         *
          */
         CLONE_PROFILE,
         /**
@@ -695,11 +695,11 @@ public final class PacketType implements Serializable {
         UPDATE_CLIENT_PROFILE,
         /**
          * This is a run confirmation with RunFiles.
-         * 
+         *
          * After a {@link #RUN_SUBMISSION} this packet will be
          * send to all servers then each server will send out
          * a {@link #RUN_SUBMISSION_CONFIRM} to the clients.
-         * 
+         *
          * @see #RUN_SUBMISSION
          */
         RUN_SUBMISSION_CONFIRM_SERVER,
@@ -712,16 +712,16 @@ public final class PacketType implements Serializable {
          * Requested run files for {@link #FETCH_RUN_FILES}.
          */
         UPDATE_RUN_FILES,
-        
+
         /**
          * Request to fetch remote submission and other data.
-         * 
+         *
          * Returns a LOGIN_SUCCESS as if the server had just logged in.
          */
         REQUEST_REMOTE_DATA,
         /**
          * Request profile status for server.
-         * 
+         *
          *  Is the server running the profile specified?
          */
         REQUEST_SERVER_STATUS,
@@ -732,34 +732,34 @@ public final class PacketType implements Serializable {
         SERVER_STATUS,
         /**
          * The "Go" packet - cause all servers to sync remote data.
-         * 
+         *
          * Sent to servers to synchronize (re-login) to all other
          * servers, the final step to switch profiles.
          */
         SYNCHRONIZE_REMOTE_DATA,
         /**
          * Same as LOGIN SUCCESS.
-         * 
+         *
          * Needed because LOGIN_SUCESS can only be sent to a server
          * or client once on login.  On switch the remote data must
          * be send to the server requesting it.
          */
         UPDATE_REMOTE_DATA,
         /**
-         * Start Playback 
+         * Start Playback
          */
         START_PLAYBACK,
         /**
-         * Stop Playback 
+         * Stop Playback
          */
         STOP_PLAYBACK,
         /**
-         * Start Playback 
+         * Start Playback
          */
         RESET_PLAYBACK,
         /**
          * A request to send a list of run files to client.
-         * 
+         *
          * An client (admin or feeder) will send a request
          * to the server for team's run source (RunFile []) files.
          */

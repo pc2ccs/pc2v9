@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Arrays;
@@ -466,8 +466,20 @@ public class Run extends Submission {
         return testcases.toArray(new RunTestCase[testcases.size()]);
     }
 
-    public void addTestCase(RunTestCase runTestCaseResult) {
+    /**
+     *
+     * @param runTestCaseResult - the test case to add
+     * @return index of the RunTestCase in the list of all test cases
+     *
+     * Recall that testcases contains (In addition to the current run's test cases), all
+     * previous run's test cases as well.  Each new run (rejudge) tacks the run test cases for that run
+     * on the end of the list.
+     */
+    public int addTestCase(RunTestCase runTestCaseResult) {
+        // Remember size before adding element, as this will be its index.
+        int testCaseIndex = testcases.size();
         testcases.add(runTestCaseResult);
+        return(testCaseIndex);
     }
 
     public void replaceTestCases(RunTestCase[] runTestCases) {

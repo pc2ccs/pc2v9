@@ -808,7 +808,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return MaxSubmissionsPerMinuteStrategy.validateConfigurationSettings();
     }
 
-
     /**
      * If there are any DecimalFormats defined in the ini file(s) for scores, eg. for formatting scoreboard, runs, etc then
      * Make sure those formats are valid, if not it's a fatal error.  We do this by simply trying to format a value
@@ -2766,6 +2765,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
     }
 
+    @Override
     public void sendToFeeders(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.FEEDER);
     }
@@ -4375,6 +4375,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     @Override
     public void sendValidatingMessage(Run run) {
         sendStatusMessge(run, RunExecutionStatus.VALIDATING);
+    }
+
+    @Override
+    public void sendRunTestCaseResult(Run run, int ordinal) {
+        Packet sendPacket = PacketFactory.createRunTestCaseResultPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), ordinal);
+        sendToLocalServer(sendPacket);
     }
 
     @Override

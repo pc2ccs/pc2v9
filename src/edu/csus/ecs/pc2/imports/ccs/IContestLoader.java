@@ -162,6 +162,8 @@ public interface IContestLoader {
 
     String PROBLEM_LOAD_DATA_FILES_KEY = "load-data-files";
 
+    String BATCH_TESTCASES_ON_EF = "batch_testcases_on_event_feed";
+
     String GROUPS_KEY = "groups";
 
     String DEFAULT_VALIDATOR_KEY = "default-validator";

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -8,19 +8,19 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunEvent;
-import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.RunEvent;
 
 /**
  * Submission Biff, shows XX Runs and XX Clars.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -42,7 +42,7 @@ public class SubmissionBiffPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public SubmissionBiffPane() {
         super();
@@ -51,7 +51,7 @@ public class SubmissionBiffPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         runAndClarCountsLabel = new JLabel();
@@ -72,14 +72,14 @@ public class SubmissionBiffPane extends JPanePlugin {
             updateString = unjudgedRunsCount + " Run";
         } else if (unjudgedRunsCount > 1) {
             updateString = unjudgedRunsCount + " Runs";
-        } 
+        }
 
         if (unansweredClarificationsCount == 1) {
             updateString = updateString + "   " + unansweredClarificationsCount + " Clar";
         } else if (unansweredClarificationsCount > 1) {
             updateString = updateString + "   " + unansweredClarificationsCount + " Clars";
         }
-        
+
         if (updateString.trim().length() == 0 && showNoRunsTitle){
             updateString = "-";
         }
@@ -91,6 +91,7 @@ public class SubmissionBiffPane extends JPanePlugin {
     private void updateMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 runAndClarCountsLabel.setText(string);
@@ -104,11 +105,11 @@ public class SubmissionBiffPane extends JPanePlugin {
 
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addClarificationListener(new ClarificationListenerImplementation());
-        
+
         newSubmissionFilter.addClarificationState(ClarificationStates.NEW);
         newSubmissionFilter.addRunState(RunStates.NEW);
         newSubmissionFilter.addRunState(RunStates.MANUAL_REVIEW);
-        
+
         unansweredClarificationsCount = getNewClarificationsCount();
         unjudgedRunsCount = getNewRunsCount();
         updateCountDisplay();
@@ -130,7 +131,7 @@ public class SubmissionBiffPane extends JPanePlugin {
                 counter++;
             }
         }
-        
+
         return counter;
     }
 
@@ -158,24 +159,31 @@ public class SubmissionBiffPane extends JPanePlugin {
 
     /**
      * Run Event Listener.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             updateRunCount(event);
         }
-        
+
+        @Override
         public void refreshRuns(RunEvent event) {
             updateRunCount(event);
         }
 
+        @Override
         public void runChanged(RunEvent event) {
-            updateRunCount(event);
+            // Test case updates will not affect run count
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
+                updateRunCount(event);
+            }
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             updateRunCount(event);
         }
@@ -184,30 +192,34 @@ public class SubmissionBiffPane extends JPanePlugin {
 
     /**
      * Clarification Event Listener.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     class ClarificationListenerImplementation implements IClarificationListener {
 
+        @Override
         public void clarificationAdded(ClarificationEvent event) {
             updateClarificationCounts(event);
         }
-        
+
+        @Override
         public void refreshClarfications(ClarificationEvent event) {
             updateClarificationCounts(event);
         }
 
+        @Override
         public void clarificationChanged(ClarificationEvent event) {
             updateClarificationCounts(event);
         }
 
+        @Override
         public void clarificationRemoved(ClarificationEvent event) {
             updateClarificationCounts(event);
         }
 
     }
-    
+
     public void setFontSize (int pointSize){
         runAndClarCountsLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, pointSize));
     }
@@ -215,10 +227,10 @@ public class SubmissionBiffPane extends JPanePlugin {
     public boolean isShowNoRunsTitle() {
         return showNoRunsTitle;
     }
-    
+
     /**
      * If there are no runs and clars show No runs.
-     * 
+     *
      * @param showNoRunsTitle if true show No Runs if not runs nor clars
      */
     public void setShowNoRunsTitle(boolean showNoRunsTitle) {

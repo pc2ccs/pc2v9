@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.IOException;
@@ -608,13 +608,14 @@ public interface IInternalContest {
     void runUpdated(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun) throws IOException, ClassNotFoundException, FileSecurityException;
 
     /**
-     * Update Run compiling/executing/vaidating status.
+     * Update Run compiling/executing/validating/testcase-reporting status.
      *
      * @param run
      * @param status
      * @param whoUpdatedRun
+     * @param param optional integer parameter
      */
-    void updateRunStatus(Run run, RunExecutionStatus status, ClientId whoUpdatedRun);
+    void updateRunStatus(Run run, RunExecutionStatus status, ClientId whoUpdatedRun, int param);
 
     /**
      * Add a run not available, notify listeners.

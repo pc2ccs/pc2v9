@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -42,13 +42,13 @@ import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Team Status Pane.
- * 
+ *
  * This presents the user with a grid of all local teams and whether the team has logged in, submitted a clarification, submitted a run or submitted a run and clarification by color.
  * <P>
  * There is a legend at the top which shows the color of each state of submission or login.
  * <P>
  * If one hovers over a team name will display the number of clarifications and runs that the team has submitted.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -57,7 +57,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 public class TeamStatusPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -7316022621929111614L;
 
@@ -104,12 +104,12 @@ public class TeamStatusPane extends JPanePlugin {
     private JComboBox<Site> siteComboBox = null;
 
     private Site allSitesSite = new Site("All Sites", 0);
-    
+
     // TODO fix when switching from all to one site, residue on screen.
 
     /**
      * Is the GUI being populated?.
-     * 
+     *
      * This avoids a loop that happens on the combo box item changed
      * invocation of populateGUI.
      */
@@ -119,7 +119,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public TeamStatusPane() {
         super();
@@ -128,7 +128,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -152,7 +152,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes messagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePane() {
@@ -169,7 +169,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes centerPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPane() {
@@ -187,13 +187,14 @@ public class TeamStatusPane extends JPanePlugin {
     }
 
     private void populateGUI() {
-        
+
         if (populatingGUI){
             return;
         }
         populatingGUI = true;
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 try {
                     repopulateSitePulldown();
@@ -230,7 +231,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * Repopulate Grid, optionally populate with info.
-     * 
+     *
      * @param populate update status'
      */
     private void repopulateGrid(boolean populate) {
@@ -262,13 +263,13 @@ public class TeamStatusPane extends JPanePlugin {
             vectorAccounts = getContest().getAccounts(ClientType.Type.TEAM, site.getSiteNumber());
 
         }
-        Account[] accounts = (Account[]) vectorAccounts.toArray(new Account[vectorAccounts.size()]);
+        Account[] accounts = vectorAccounts.toArray(new Account[vectorAccounts.size()]);
         Arrays.sort(accounts, new AccountComparator());
-        
+
         boolean showTeamsOnBoardOnly = getShowTeamsCheckBox().isSelected();
 
         for (Account account : accounts) {
-            
+
             if (showTeamsOnBoardOnly) {
                 if (!account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                     continue;
@@ -277,7 +278,7 @@ public class TeamStatusPane extends JPanePlugin {
                     continue;
                 }
             }
-            
+
             JLabel teamLabel = new JLabel();
             ClientId clientId = account.getClientId();
             String teamName = clientId.getName();
@@ -315,7 +316,7 @@ public class TeamStatusPane extends JPanePlugin {
             }
 
             toolTipText = toolTipText + " (" + account.getDisplayName() + ")";
-            
+
             teamLabel.setText(teamName);
             teamLabel.setForeground(teamStatusColor);
             teamLabel.setToolTipText(toolTipText);
@@ -346,7 +347,7 @@ public class TeamStatusPane extends JPanePlugin {
      * @return
      */
     private boolean hasLoggedIn(ClientId clientId) {
-        
+
         if (getContest().isLocalLoggedIn(clientId) || getContest().isRemoteLoggedIn(clientId)){
             return true;
         }
@@ -355,11 +356,12 @@ public class TeamStatusPane extends JPanePlugin {
         if (settings != null) {
             return settings.getProperty(ClientSettings.LOGIN_DATE) != null;
         }
-        
+
         return false;
     }
 
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
@@ -372,61 +374,75 @@ public class TeamStatusPane extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     public class SiteListenerImplementation implements ISiteListener{
 
+        @Override
         public void siteProfileStatusChanged(SiteEvent event) {
-            // TODO this UI does not use a change in profile status 
+            // TODO this UI does not use a change in profile status
         }
-        
+
+        @Override
         public void siteAdded(SiteEvent event) {
             populateGUI();
         }
 
+        @Override
         public void siteRemoved(SiteEvent event) {
             populateGUI();
         }
 
+        @Override
         public void siteChanged(SiteEvent event) {
             populateGUI();
         }
 
+        @Override
         public void siteLoggedOn(SiteEvent event) {
             // nada
-            
+
         }
 
+        @Override
         public void siteLoggedOff(SiteEvent event) {
             // nada
-            
+
         }
 
+        @Override
         public void sitesRefreshAll(SiteEvent siteEvent) {
             populateGUI();
         }
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
     public class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             populateGUI();
         }
 
+        @Override
         public void refreshRuns(RunEvent event) {
             populateGUI();
         }
-        
+
+        @Override
         public void runChanged(RunEvent event) {
-            populateGUI();
+            // Do not update GUI for every test case result
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
+                populateGUI();
+            }
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             populateGUI();
         }
@@ -438,44 +454,53 @@ public class TeamStatusPane extends JPanePlugin {
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             populateGUI();
         }
 
+        @Override
         public void accountModified(AccountEvent event) {
             // ignore, does not affect this pane
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             populateGUI();
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             // ignore, does not affect this pane
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             populateGUI();
         }
     }
    /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
     private class ClarificationListenerImplementation implements IClarificationListener {
 
+        @Override
         public void clarificationAdded(ClarificationEvent event) {
             populateGUI();
         }
-        
+
+        @Override
         public void refreshClarfications(ClarificationEvent event) {
             populateGUI();
         }
 
+        @Override
         public void clarificationChanged(ClarificationEvent event) {
             populateGUI();
         }
 
+        @Override
         public void clarificationRemoved(ClarificationEvent event) {
             populateGUI();
         }
@@ -483,23 +508,27 @@ public class TeamStatusPane extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
     public class LoginListenerImplementation implements ILoginListener {
 
+        @Override
         public void loginAdded(LoginEvent event) {
             populateGUI();
         }
 
+        @Override
         public void loginRemoved(final LoginEvent event) {
             populateGUI();
         }
 
+        @Override
         public void loginDenied(LoginEvent event) {
             populateGUI();
         }
-        
+
+        @Override
         public void loginRefreshAll(LoginEvent event) {
             populateGUI();
         }
@@ -507,7 +536,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes teamStatusPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getTeamStatusPane() {
@@ -522,7 +551,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -541,7 +570,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes clearButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getClearButton() {
@@ -551,6 +580,7 @@ public class TeamStatusPane extends JPanePlugin {
             clearButton.setToolTipText("Clear display");
             clearButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             clearButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     promptAndClearButtons();
                 }
@@ -562,6 +592,7 @@ public class TeamStatusPane extends JPanePlugin {
     protected void promptAndClearButtons() {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 repopulateGrid(false);
             }
@@ -571,7 +602,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes statusTitlePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getStatusTitlePane() {
@@ -592,7 +623,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes stateDescriptonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getStateDescriptonPane() {
@@ -627,7 +658,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes reloadButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getReloadButton() {
@@ -636,6 +667,7 @@ public class TeamStatusPane extends JPanePlugin {
             reloadButton.setText("Reload");
             reloadButton.setToolTipText("Reload display");
             reloadButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     populateGUI();
                 }
@@ -646,13 +678,14 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes siteComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Site> getSiteComboBox() {
         if (siteComboBox == null) {
             siteComboBox = new JComboBox<Site>();
             siteComboBox.addItemListener(new java.awt.event.ItemListener() {
+                @Override
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     populateGUI();
                 }
@@ -663,7 +696,7 @@ public class TeamStatusPane extends JPanePlugin {
 
     /**
      * This method initializes showTeamsCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getShowTeamsCheckBox() {
@@ -673,6 +706,7 @@ public class TeamStatusPane extends JPanePlugin {
             showTeamsCheckBox.setToolTipText("Show only teams who can login and are on the scoreboard");
             showTeamsCheckBox.setSelected(true);
             showTeamsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     populateGUI();
                 }

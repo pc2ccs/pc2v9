@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -159,7 +159,7 @@ public class ContestInformation implements Serializable{
         private ScoreboardType(String type) {
             this.type = type;
         }
-        
+
         @JsonValue
         public String getType() {
             return type;
@@ -251,11 +251,17 @@ public class ContestInformation implements Serializable{
      * Submission Throttling
      */
     private boolean submissionThrottling = true;
-    
+
     /**
      * Whether or not zero-length files are allowed in submissions.
      */
     private boolean allowZeroLengthSubmissionFiles = false;
+
+    /**
+     * Whether or not we should "batch" sending all run testcases after the entire submission is judged (true).
+     * If false, we send run testcases as they are judged (default).
+     */
+    private boolean batchTestCasesOnEF = false;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -530,7 +536,12 @@ public class ContestInformation implements Serializable{
             if (scoreboardType != contestInformation.getScoreboardType()) {
                 return false;
             }
-            return true;
+
+            if(batchTestCasesOnEF != contestInformation.isBatchTestCasesOnEF()) {
+                return false;
+            }
+
+           return true;
         } catch (Exception e) {
             e.printStackTrace(System.err); // TODO log this exception
             return false;
@@ -1049,9 +1060,9 @@ public class ContestInformation implements Serializable{
 
     /**
      * Set contest scoreboard type based on the string passed in.
-     * 
+     *
      * If the received string does not match any of the values defined in {@link ScoreboardType},
-     * no change is made to the recorded scoreboardType.  
+     * no change is made to the recorded scoreboardType.
      * TODO:  Arguably, this should be changed by adding "UNDEFINED" as a ScoreboardType
      * and setting to that, with appropriate error logging, if an unknown string is received.
      *
@@ -1144,4 +1155,11 @@ public class ContestInformation implements Serializable{
         return(remoteInfo);
     }
 
+    public boolean isBatchTestCasesOnEF() {
+        return batchTestCasesOnEF;
+    }
+
+    public void setBatchTestCasesOnEF(boolean batchTestCasesOnEF) {
+        this.batchTestCasesOnEF = batchTestCasesOnEF;
+    }
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.board;
 
 import java.io.File;
@@ -316,7 +316,10 @@ public class ScoreboardModule implements UIPlugin {
 
         @Override
         public void runChanged(RunEvent event) {
-            generateOutput();
+            // Certainly do not want to generate output for every test case.
+            if(event.getAction() != RunEvent.Action.RUN_TESTCASE_COMPLETED) {
+                generateOutput();
+            }
         }
 
         @Override

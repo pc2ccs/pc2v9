@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.Calendar;
@@ -126,6 +126,8 @@ public class CLICSJudgement {
         } else if(startJudgeDate != null) {
             start_time = Utilities.getIso8601formatterWithMS().format(startJudgeDate);
             start_contest_time = Utilities.formatDuration(startJudgeDate.getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
+            // Can't have a max_run_time if the thing isn't judged yet
+            exceptProps.add("max_run_time");
         }
         // else not much to do here if no start date.
     }
