@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -1185,6 +1185,7 @@ public class ContestInformationPane extends JPanePlugin {
 
             newContestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
             newContestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
+            newContestInformation.setAutoStopContest(savedContestInformation.isAutoStopContest());
         }
 
         newContestInformation.setScoringProperties(scoringPropertiesPane.getProperties());
@@ -1994,7 +1995,7 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return rigidArea3;
     }
-    
+
     private Component getRigidArea4() {
         if (rigidArea4==null) {
             rigidArea4 = Box.createRigidArea(new Dimension(20,20));
