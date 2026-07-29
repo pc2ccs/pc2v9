@@ -1170,6 +1170,16 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
     }
 
     /**
+     * Send commentary to the event feed.
+     * TODO: This will be a method in the commentary listener class when that gets added.
+     *
+     * @param json
+     */
+    public void commentaryAdded(String json) {
+        sendJSON(getJSONEvent(COMMENTARY_KEY, getNextEventId(), null, json) + NL);
+    }
+
+    /**
      * Implementation of IEventFeedStreamer for those needing just the full event feed. eg reports, etc.
      * Currently, this is called from the ui.WebServerPane.viewJSONEventFeed
      *
