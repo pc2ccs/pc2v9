@@ -7,7 +7,7 @@
                 <span class="scoreboard-group-filter-label">Group</span>
                 <select
                     [(ngModel)]="selectedGroupId"
-                    (ngModelChange)="onGroupFilterChange()"
+                    (change)="onGroupFilterChange($event)"
                     name="scoreboardGroup"
                     class="scoreboard-group-select">
                     <!-- add an "All Teams" option to the dropdown list -->
