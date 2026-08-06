@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
@@ -28,7 +29,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
@@ -63,7 +63,6 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
-import java.awt.Dimension;
 
 /**
  * Select a Judgement Pane.
@@ -157,7 +156,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel validatorAnswer = null;
 
     private JLabel selectJudgementCheckboxLabel = null;
-    
+
     private JButton viewOutputsAndDataButton = null;
 
     private GregorianCalendar startTimeCalendar;
@@ -191,7 +190,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel additionalInfoTextLabel;
 
     private JLabel addtionalInfoMoreButtonLabel;
-    
+
     private boolean isPointScoring = false;
 
     /**
@@ -224,9 +223,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-        
+
         isPointScoring = inContest.getContestInformation().isScoreboardTypeScore();
-        
+
         log = getController().getLog();
 
         displayTeamName = new DisplayTeamName();
@@ -412,7 +411,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             if (executable != null) {
                 executionData = executable.getExecutionData();
                 if (judgementRecord != null) {
-                    judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
+                    judgementRecord.setExecuteMS(executionData.getMaxExecuteTimeMS());
                     judgementRecord.setScore(executionData.getScore());
                 }
             }
@@ -539,7 +538,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             // if there IS a computer judgement, try to find a corresponding RunResultFile record
             RunResultFiles matchingResult = null;
             if (computerJudgement != null) {
-                
+
                 // search the RunResultFiles array for a matching result
                 if (runResultFiles != null) {
                     for (int i = 0; i < runResultFiles.length; i++) {
@@ -887,7 +886,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * Takes a boolean condition whether to override stop on first failure condition
      */
     protected void executeRun(boolean overrideStopOnFirstFailedTestCase) {
-       
+
         executeTimeMS = 0;
         System.gc();
 
@@ -957,7 +956,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             getTestResultsFrame().setData(run, runFiles, problem, getProblemDataFiles());
             getTestResultsFrame().setVisible(true);
         }
-        executeTimeMS = executable.getExecutionData().getExecuteTimeMS();
+        executeTimeMS = executable.getExecutionData().getMaxExecuteTimeMS();
 
         // Show validator results, if there are any.
 
@@ -1002,12 +1001,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
                 judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), solved, true);
                 judgementRecord.setValidatorResultString(results);
-                
+
                 //if it's a point-scoring contest, put the score and the judgement into the JudgementRecord
                 if (isPointScoring) {
-                    
+
                     judgementRecord.setScore(executionData.getScore());
-                    
+
                     CLICS_JUDGEMENT_ACRONYM acronym = executionData.getJudgementAcronym();
                     String judgementDescription ;
                     if (acronym != null) {
@@ -1458,7 +1457,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             if (executionData != null) {
                 String additionalText = null;
                 boolean enableMoreButton = false;
-                
+
                 if (isPointScoring && executionData.getJudgementAcronym() == CLICS_JUDGEMENT_ACRONYM.AC) {
                     DecimalFormat df = new DecimalFormat("0.0###");
                     additionalText = "Score: " + df.format(executionData.getScore());
@@ -1563,7 +1562,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         // this will be null if we are accepting the computer judgement
         if (executable != null) {
             executionData = executable.getExecutionData();
-            judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
+            judgementRecord.setExecuteMS(executionData.getMaxExecuteTimeMS());
             judgementRecord.setScore(executionData.getScore());
         }
         newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);

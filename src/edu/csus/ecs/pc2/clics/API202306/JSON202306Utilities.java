@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.text.SimpleDateFormat;
@@ -42,6 +42,8 @@ public class JSON202306Utilities extends JSONUtilities {
     public static final String AWARD_KEY = "awards";
 
     public static final String ORGANIZATION_KEY = "organizations";
+
+    public static final String PC2_SUBMISSION_ID_KEY = "pc2_submission_id";
 
     public static final String JSON_ANNOTATION_INTERFACE = ".JsonProperty";
 
@@ -201,6 +203,58 @@ public class JSON202306Utilities extends JSONUtilities {
 
         stringBuilder.append("}");
 
+    }
+
+    /**
+     * Add an event prefix to a buffer, optionally including a custom notification property in the
+     * event notification prefix.
+     * Adds event, (event) id, customProperty (an customValue) (if non-null) and data keyword to string.
+     *
+     * @param stringBuilder
+     * @param eventType
+     * @param data - json data for object
+     * @param customProperty - if non-null, adds property name with value customValue
+     * @param customValue - if customProperty is non-null, this is the value to assign (may be null)
+     */
+    public String getJSONEvent(String eventName, long eventSequence, String id, String data,
+            String customProperty, String customValue) {
+        StringBuilder stringBuilder = new StringBuilder();
+        appendJSONEvent(stringBuilder, eventName, eventSequence, id, data);
+        return stringBuilder.toString();
+    }
+
+    public void appendJSONEvent(StringBuilder stringBuilder, String eventName, long eventSequence, String id, String data,
+            String customProperty, String customValue) {
+
+        // {"type": "<event type>", "token": "<token>", "id": "<id>", "op": "<type of operation>", "data": <JSON data for element>, "customProperty": <customValue> }
+
+        stringBuilder.append("{");
+        appendPair(stringBuilder, "type", eventName);
+        stringBuilder.append(",");
+
+        appendPair(stringBuilder, "token", EventFeedJSON.getEventId(eventSequence));
+        stringBuilder.append(",");
+
+        if(id == null) {
+            appendPairNullValue(stringBuilder, "id");
+        } else {
+            appendPair(stringBuilder, "id", id);
+        }
+        stringBuilder.append(",");
+
+        stringBuilder.append("\"data\": ");
+
+        stringBuilder.append(data);
+
+        // Check if this is a "judgements" delete notification, if so, add PC2 custom property indicating
+        // the submission id
+        if(customProperty != null) {
+            stringBuilder.append(",\"");
+            stringBuilder.append(customProperty);
+            stringBuilder.append("\": ");
+            // null is safe here
+            stringBuilder.append(customValue);
+        }
     }
 
 }
