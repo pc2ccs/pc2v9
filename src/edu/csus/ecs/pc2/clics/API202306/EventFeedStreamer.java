@@ -542,8 +542,16 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 if (run.isDeleted()) {
-                    json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "null");
-                    sendJSON(json + NL);
+                    // We are only interested in real CHANGED events here.  For example, we don't want
+                    // to send delete judgment for run_testcase_completed since it's really NOT
+                    // a run changed type event.  In addition, we can get a CHANGED event for a detailed
+                    // action of CHECKEDOUT_RUN, again, we don't want to send a delete judgment - only
+                    // send the delete if there is no detailed action and the run has actually CHANGED.
+                    if(event.getAction() == RunEvent.Action.CHANGED && event.getDetailedAction() == null) {
+                        json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "null",
+                                PC2_SUBMISSION_ID_KEY, IJSONTool.getSubmissionId(run));
+                        sendJSON(json + NL);
+                    }
                 } else {
                     ContestInformation ci = contest.getContestInformation();
 
