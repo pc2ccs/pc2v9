@@ -421,6 +421,8 @@ public class ExecutionData implements Serializable {
         retStr += "runTimeLimitExceeded=" + runTimeLimitExceeded + ",";
         retStr += "failedToCompile=" + failedToCompile + ",";
         retStr += "additionalInformation=" + additionalInformation;
+        retStr += "score=" + score;
+        retStr += "judgementAcronym" + judgementAcronym;
         retStr += "]";
 
         return retStr;
@@ -451,7 +453,7 @@ public class ExecutionData implements Serializable {
         additionalInformation = "";
 
         //fields associated with "point-scoring" contests
-        double score = 0;
-        CLICS_JUDGEMENT_ACRONYM judgementAcronym = null;
+        score = 0;
+        judgementAcronym = null;
     }
 }
