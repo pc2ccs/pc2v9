@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.Calendar;
@@ -110,7 +110,7 @@ public class CLICSContestInfo {
         if(ci.getThawed() != null) {
             scoreboard_thaw_time = Utilities.getIso8601formatterWithMS().format(ci.getThawed());
         }
-        scoreboard_type = ci.getScoreboardType().toString().toLowerCase();
+        scoreboard_type = ci.getScoreboardType().getType().toLowerCase();
     }
 
     public String toJSON() {

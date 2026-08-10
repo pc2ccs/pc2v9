@@ -1,8 +1,7 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -67,7 +66,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     private PermissionList permissionList = new PermissionList();
 
     private boolean isPointScoring = false;
-    
+
     /**
      * Return a list of regional winners.
      *
@@ -1075,7 +1074,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
         memento.putString("systemURL", versionInfo.getSystemURL());
         memento.putString("currentDate", new Date().toString());
-        memento.putString("scoreType", contestInformation.getScoreboardType().toString().toLowerCase());
+        memento.putString("scoreType", contestInformation.getScoreboardType().getType().toLowerCase());
         memento.putString("generatorId", "$Id$");
 
         return memento;
