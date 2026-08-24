@@ -29,6 +29,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private fullTeamStandings: any[] = [];
 	groupOptions: ScoreboardGroupOption[] = [];
 	selectedGroupId = '';
+	/** Ignores out-of-order standings HTTP responses (e.g. initial full load finishing after a group pick). */
+	private standingsRequestSeq = 0;
 
 	numProblems: number = 0;
 	problemDetailHeaders: ProblemHeader[] = [];
@@ -80,31 +82,32 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 
 	private loadStandings(): void {
 		// Pass selectedGroupId so the server scopes teams and problem columns via wantedGroups.
-		// standingsHeader.groupList still lists all groups (for the dropdown) even on a group-scoped response.
-		this._contestService.getStandings(this.selectedGroupId)
+		const requestGroupId = this.selectedGroupId;
+		//keep a monotonically-increasing request id so we can ignore old replies due (e.g.) to double-clicks
+		const requestSeq = ++this.standingsRequestSeq;
+		this._contestService.getStandings(requestGroupId)
 			.pipe(takeUntil(this._unsubscribe))
 			.subscribe((standings: any) => {
-				// Snapshot team rows, derive dropdown options from standingsHeader.groupList (or team rows as fallback),
-				// reset an invalid filter choice, then derive visible rows and table metadata from the same payload.
+				if (requestSeq !== this.standingsRequestSeq) {
+					//this standings is for an old request; ignore it
+					return;
+				}
 				const rows = this.getTeamStandingsArray(standings);
 				this.fullTeamStandings = rows;
-				this.groupOptions = this.buildGroupDropdownOptions(standings, rows);
-				// Hide the filter (dropdown list) unless two or more groups qualify; clear selection if the chosen group vanished.
-				if (this.groupOptions.length <= 1) {
-					this.selectedGroupId = '';
-				} else if (
-					this.selectedGroupId !== '' &&
-					!this.groupOptions.some(g => g.id === this.selectedGroupId)
-				) {
-					this.selectedGroupId = '';
+				// Dropdown options come from the full-contest load only. A group-scoped response
+				// often yields a shorter or differently-keyed group list; previously, rebuilding from it cleared
+				// selectedGroupId and snapped the UI back to "All teams" after a single selection.
+				// Now, we only update the group dropdown when we've requested a full-contest standings reload
+				// (i.e. when requestGroupId is empty).
+				if (requestGroupId === '') {
+					this.groupOptions = this.buildGroupDropdownOptions(standings, rows);
+					this.validateSelectedGroupId();
 				}
-				// Server filters when groupId is sent; client filter still applies for "All teams" multi-group rows.
 				this.teamStandings = this.getFilteredStandings(rows);
 				this.numProblems = this.getNumProblems(standings);
 				this.problemDetailHeaders = this.getProblemDetailHeaders(standings);
 			});
 	}
-
 
 	/**
 	 * Update scoreboard standings whenever group dropdown ("filter") changes.
@@ -115,6 +118,17 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		this.teamStandings = this.getFilteredStandings(this.fullTeamStandings);
 		if (event?.target instanceof HTMLSelectElement) {
 			event.target.blur();
+		}
+	}
+
+	/** Clear the filter only when the chosen group id is no longer a valid dropdown option. */
+	private validateSelectedGroupId(): void {
+		if (this.selectedGroupId === '') {
+			return;
+		}
+		const sid = String(this.selectedGroupId);
+		if (!this.groupOptions.some(g => String(g.id) === sid)) {
+			this.selectedGroupId = '';
 		}
 	}
 
