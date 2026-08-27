@@ -1,9 +1,8 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -469,7 +468,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Problem[] allProblems = theContest.getProblems();
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
         int p2 = 0;
-        
+
         //if divisionNumber!=null it means we're using Division filtering, in which case divisionNumber is 1 or 2.
         //if wantedGroups!=null it means the caller has specified a set of groups it wants to filter on.
         //if the caller HASN'T specified any groups, we need to add to the wantedGroups list the groups for the specified division.
@@ -478,21 +477,21 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             // (this is because if wantedGroups is null it causes method canView(wantedGroups) to always return "yes").
             wantedGroups = new ArrayList<Group>();
         }
-        
+
         for (int p=1; p <= allProblems.length ; p++) {
             Problem prob = allProblems[p-1];
-            
+
             if (divisionNumber!=null) {
                 //we are filtering on divisions so we need to update "wantedGroups" with the "division" groups
                 // in the problem which match the desired division.
                 for (Group probGroup : prob.getGroups()) {
                    //Note: getGroupId() returns the "CMS external id".
                    if (probGroup.getGroupId()==divisionNumber) {
-                        wantedGroups.add(probGroup); 
+                        wantedGroups.add(probGroup);
                     }
                 }
             }
-            
+
             if (prob.isActive() && prob.canView(wantedGroups)) {
                 p2++;
                 problemsIndexHash.put(prob.getElementId(), new Integer(p2));
@@ -507,10 +506,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
 
         summaryMemento.putLong("problemCount", problems.length);
-        
+
         Site[] sites = theContest.getSites();
         summaryMemento.putInteger("siteCount", sites.length);
-        
+
         Group[] groups = theContest.getGroups();
         boolean bGroupsExcluded = false;
         if (groups != null) {
@@ -522,7 +521,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         //Note also that generateSummaryTotalsForProblem() already existed and was inserting MOST of that information in the output already;
         // the "colorList" processing code which used to be here was simply added to that method instead (adding internalId, letter, and
         // url to the <problem> elements), avoiding duplication of problem description data in the output XML.
-        
+
         if (runs == null) {
             // Note: we do not deal with divisionNumber here since
             //   1) it is being deprecated
@@ -1170,7 +1169,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
             IMemento problemMemento = summaryMemento.createChild("problem");
             problemMemento.putInteger("id", id);  //ordinal starting at 1
-            
+
             //the following was (probably) added when BalloonSettings were removed; BalloonSettings was creating
             // a variable named "id" and this was probably an attempt at renaming that variable.
             // It's likely that no other code is actually using "internalId", although it MIGHT be used
@@ -1182,14 +1181,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problemMemento.putString("letter", problems[i].getLetter());
             problemMemento.putString("rgb", problems[i].getColorRGB());
             problemMemento.putString("shortName", problems[i].getShortName());
-            
+
             //construct a string pointing to the place where the Contest Admin is expected to put the problem writeup.
             //Problem writeups are expected to be placed under the web-content folder in a problem-specific subfolder
             // named like <letter>-capitalizeFirstLetter(shortname), in a PDF file named the same but with ".pdf" added.
             String basename = problems[i].getLetter().toUpperCase() + "-" + capitalizeFirstLetter(problems[i].getShortName());
             String filename = basename + ".pdf";
             problemMemento.putString("url", "problems/" + basename + "/" + filename);
-            
+
             problemMemento.putLong("attempts", problemAttempts[id]);
             if (problemAttempts[id] > 0) {
                 grandTotalProblemAttempts++;
@@ -1218,12 +1217,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         if (input == null || input.isEmpty()) {
             return input; // Return as-is if null or empty
         }
-        
+
         char firstChar = input.charAt(0);
         if (!Character.isLetter(firstChar)) {
             return input; // Return unchanged if first char is not a letter
         }
-        
+
         return Character.toUpperCase(firstChar) + input.substring(1);
     }
 
@@ -1406,7 +1405,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
         memento.putString("systemURL", versionInfo.getSystemURL());  //TODO: fix this to return the proper URL (not a CSUS URL)
         memento.putString("currentDate", new Date().toString());
-        memento.putString("scoreType", contestInformation.getScoreboardType().toString().toLowerCase());
+        memento.putString("scoreType", contestInformation.getScoreboardType().getType().toLowerCase());
         memento.putString("generatorId", "$Id$");
         // bug 1540
         String value = "Live (unfrozen) scoreboard";
