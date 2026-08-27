@@ -1,6 +1,23 @@
 <div class='filter-table-container'>
 
     <div class='table-container scoreboard-table'>
+    	<!-- Add a group-selection dropdown list, but only if there is more than one group in the contest containing teams -->
+        <div class='scoreboard-controls' *ngIf="groupOptions.length > 1">
+            <label class="scoreboard-group-filter">
+                <span class="scoreboard-group-filter-label">Group</span>
+                <select
+                    [(ngModel)]="selectedGroupId"
+                    (change)="onGroupFilterChange($event)"
+                    name="scoreboardGroup"
+                    class="scoreboard-group-select">
+                    <!-- add an "All Teams" option to the dropdown list -->
+                    <option value="">All teams</option>
+                    <!-- add each separate group name to the dropdown list -->
+                    <option *ngFor="let g of groupOptions" [value]="g.id">{{ g.displayName }}</option>
+                </select>
+            </label>
+        </div>
+
 		<table style="border-collapse: separate; border-spacing: 6px 6px;">
             <tr>
                 <th>Rank</th>
@@ -23,10 +40,14 @@
                 </th>
                 <th style="text-align: center">Solved</th>
                 <th style="text-align: center">Score</th>
-                <th></th>
             </tr>
-            <tr *ngFor= 'let team of teamStandings' >
-                <td style="text-align: center">{{ team.rank }}</td>
+            <!-- loop through all teamStandings, tracking in-group index -->
+            <tr *ngFor="let team of teamStandings; let i = index">
+            
+            	<!-- display next team's rank WITHIN THE CURRENTLY SELECTED GROUP -->
+                <td style="text-align: center">{{ getDisplayRank(team, i) }}</td>
+                
+                <!-- display team name -->
                 <td>{{ team.teamName }}</td>
                 
   				<!-- Render problem detail cells, but only if the contest has started -->

@@ -18,6 +18,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -38,9 +39,11 @@ import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -802,7 +805,8 @@ public class ContestController extends MainController {
 						//					logger.fine("Got the following XML from DSA:");
 						//					logger.fine(xmlStandings);
 						logger.info("Converting DSA XML to JSON");
-						currentJSONStandings = this.getJSONStandings(xmlStandings);
+						currentJSONStandings = this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings),
+								internalContest);
 						//					logger.fine("Got the following JSON standings:");
 						//					logger.fine(currentJSONStandings);
 					} catch (IllegalContestState e) {
@@ -869,6 +873,135 @@ public class ContestController extends MainController {
 		
 		return jsonStandingsObject.toString();
 
+	}
+
+	/**
+	 * Adds multi-group membership to each scoreboard row.
+	 * <p>
+	 * PC2 standings XML only carries the team's primary group on each {@code teamStanding} node
+	 * ({@code teamGroupId}, {@code teamGroupName}, {@code groupRank}). A team may belong to several groups;
+	 * the UI needs every {@code standingsHeader.groupList.group} {@code id} that should include that team.
+	 * </p>
+	 * <p>
+	 * For each team row, looks up the {@link Account} and appends a {@code teamGroupIds} array: for each
+	 * {@code group} in the header {@code groupList}, if {@code externalId} matches the group's CMS id and
+	 * the account {@link Account#isGroupMember} for that group, the group's {@code id} string is added.
+	 * Those ids match the scoreboard group filter in the browser.
+	 * </p>
+	 * <p>
+	 * On any failure, returns the input JSON unchanged.
+	 * </p>
+	 *
+	 * @param jsonStandings JSON string from {@link #getJSONStandings(String)}
+	 * @param contest       contest providing team accounts and {@link Group} definitions
+	 * @return JSON with {@code teamGroupIds} set on each processed {@code teamStanding}, or the original string if
+	 *         enrichment is skipped or throws
+	 */
+	private String enrichScoreboardTeamGroups(String jsonStandings, IInternalContest contest) {
+		if (jsonStandings == null || contest == null) {
+			return jsonStandings;
+		}
+		try {
+			JSONObject root = new JSONObject(jsonStandings);
+
+			// PC2 XML-to-JSON must expose contestStandings, header, and team rows. If any are missing,
+			// we cannot align group ids with teams, so return the payload unchanged (client keeps legacy behavior).
+			// (In other words, the following block of code verifies that all the required elements are found in
+			// the received jsonStandings.)
+			if (!root.has("contestStandings")) {
+				return jsonStandings;
+			}
+			JSONObject contestStandings = root.getJSONObject("contestStandings");
+			if (!contestStandings.has("standingsHeader") || !contestStandings.has("teamStanding")) {
+				return jsonStandings;
+			}
+			JSONObject standingsHeader = contestStandings.getJSONObject("standingsHeader");
+			JSONObject groupListObj = null;
+			// org.json may preserve "groupList" casing from XML; we also want to accept "grouplist" for defensive parsing.
+			if (standingsHeader.has("groupList")) {
+				groupListObj = standingsHeader.getJSONObject("groupList");
+			} else if (standingsHeader.has("grouplist")) {
+				groupListObj = standingsHeader.getJSONObject("grouplist");
+			}
+			// No group metadata means nothing to merge with account membership.
+			if (groupListObj == null || !groupListObj.has("group")) {
+				return jsonStandings;
+			}
+
+			// Header "group" entries use externalId (CMS group id) and id (sequential scoreboard id used in the UI filter).
+			// Construct a Map CMS id -> PC2 Group so we can call account.isGroupMember(ElementId) for each header row.
+			JSONArray groupArray = asJsonArray(groupListObj.get("group"));
+			HashMap<Integer, Group> groupByCmsId = new HashMap<Integer, Group>();
+			for (Group g : contest.getGroups()) {
+				groupByCmsId.put(Integer.valueOf(g.getGroupId()), g);
+			}
+
+			// Walk the list of teamStandings (one teamStanding element per team); for each team, insert into 
+			// the teamStanding an array containing teamGroupIds for the group(s) to which that team belongs.
+			Object rawTeams = contestStandings.get("teamStanding");
+			JSONArray teamArray = asJsonArray(rawTeams);
+			int defaultSite = contest.getSiteNumber();
+			for (int i = 0; i < teamArray.length(); i++) {
+				JSONObject team = teamArray.getJSONObject(i);
+				if (!team.has("teamId")) {
+					//can't do anything with this teamStanding row if it contains no teamId
+					continue;
+				}
+				//get the team number
+				int teamNum = team.optInt("teamId", -1);
+				if (teamNum < 0) {
+					continue;
+				}
+				//get the account associated with the team
+				int siteNum = team.has("teamSiteId") ? team.getInt("teamSiteId") : defaultSite;
+				ClientId cid = new ClientId(siteNum, Type.TEAM, teamNum);
+				Account account = contest.getAccount(cid);
+				if (account == null) {
+					//can't do anything with this team if there's no account for them
+					continue;
+				}
+				// Collect every scoreboard group "id" from the header for which this account belongs to that group.
+				JSONArray memberStandingsIds = new JSONArray();
+				for (int gi = 0; gi < groupArray.length(); gi++) {
+					JSONObject groupJson = groupArray.getJSONObject(gi);
+					if (!groupJson.has("externalId") || !groupJson.has("id")) {
+						continue;
+					}
+					int extId = groupJson.getInt("externalId");
+					Group scoredGroup = groupByCmsId.get(Integer.valueOf(extId));
+					if (scoredGroup != null && account.isGroupMember(scoredGroup.getElementId())) {
+						Object idObj = groupJson.get("id");
+						String standingsId = idObj == null ? "" : String.valueOf(idObj).trim();
+						if (!standingsId.isEmpty()) {
+							memberStandingsIds.put(standingsId);
+						}
+					}
+				}
+				//insert the groupIds for this team in the team's teamStanding row
+				team.put("teamGroupIds", memberStandingsIds);
+			}
+			
+			//return an updated JSON string which now also contains the groupIds in each teamStanding row
+			return root.toString();
+			
+		} catch (Exception e) {
+			// Malformed JSON, missing fields, or type mismatches: do not fail the request; the UI can still filter by primary teamGroupId.
+			logger.warning("ContestController.enrichScoreboardTeamGroups failed while adding teamGroupIds; returning unenriched JSON: " + e.getMessage());
+			return jsonStandings;
+		}
+	}
+
+	/** Wraps a single JSONObject from XML in a one-element JSONArray so callers can always use indexed loops. */
+	private static JSONArray asJsonArray(Object orig) throws JSONException {
+		if (orig == null) {
+			return new JSONArray();
+		}
+		if (orig instanceof JSONArray) {
+			return (JSONArray) orig;
+		}
+		JSONArray array = new JSONArray();
+		array.put(orig);
+		return array;
 	}
 
 	/**
