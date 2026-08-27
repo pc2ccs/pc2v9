@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -658,7 +659,17 @@ public class SubmissionService implements Feature {
                     return Response.status(Response.Status.BAD_REQUEST).entity("only one zip archive is allowed").build();
                 }
 
-                srcFiles = EventFeedUtilities.getIFiles(firstFile.getData());
+                try {
+                    byte[] zipBytes = Base64.getDecoder().decode(firstFile.getData());
+                    long maxSourceSizeBytes = model.getContestInformation().getMaxSourceSizeInBytes();
+                    EventFeedUtilities.enforceUncompressedZipSourceSizeLimit(zipBytes, maxSourceSizeBytes);
+                    srcFiles = EventFeedUtilities.getIFiles(zipBytes, maxSourceSizeBytes);
+                } catch (SubmissionRejectedException sre) {
+                    log.log(Level.WARNING, "SubmissionRejectedException (Source too large) submitting CLICS API run for team "
+                            + team_id + " by " + user);
+                    return Response.status(Response.Status.REQUEST_ENTITY_TOO_LARGE)
+                            .entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
+                }
             }
             String entry = sub.getEntry_point();
             IFile mainFile = srcFiles.get(0);
