@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -51,9 +51,11 @@ import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -1109,9 +1111,12 @@ public class ContestInformationPane extends JPanePlugin {
 
     /**
      * Returns a new ContestInformation object containing data fetched from this pane's fields.
+     * @param validating If true, some display fields will be validated and throw an IllegalArgumentException if bad.
+     *        In addition, if true, some display fields may be changed (normalized).
      * @return a ContestInformation object
+     * @throws IllegalArgumentException if a field value is bad
      */
-    protected ContestInformation getFromFields() {
+    protected ContestInformation getFromFields(boolean validating) throws IllegalArgumentException {
         ContestInformation newContestInformation = new ContestInformation();
         ContestInformation currentContestInformation = getContest().getContestInformation();
 
@@ -1180,8 +1185,8 @@ public class ContestInformationPane extends JPanePlugin {
             newContestInformation.setContestShortName(savedContestInformation.getContestShortName());
             newContestInformation.setExternalYamlPath(savedContestInformation.getExternalYamlPath());
 
-            //TODO: why is the following being done here when it is overridden below?
-            newContestInformation.setFreezeTime(savedContestInformation.getFreezeTime());
+            // setFreezeTime is always called below so this is indeed unnecessary
+            // newContestInformation.setFreezeTime(savedContestInformation.getFreezeTime());
 
             newContestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
             newContestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
@@ -1189,11 +1194,25 @@ public class ContestInformationPane extends JPanePlugin {
 
         newContestInformation.setScoringProperties(scoringPropertiesPane.getProperties());
 
-        newContestInformation.setFreezeTime(contestFreezeLengthTextField.getText());
+        // make sure time is formatted properly
+        String freezeField = contestFreezeLengthTextField.getText();
+        long freezeSeconds = Utilities.convertStringToSeconds(freezeField);
+        if(freezeSeconds == -1) {
+            if(validating) {
+                throw new IllegalArgumentException("Invalid freeze time \"" + freezeField + "\" specified.");
+            }
+        } else {
+            freezeField = ContestTime.formatTime(freezeSeconds);
+            if(validating) {
+                // Update display to show possibly normalized freeze duration
+                contestFreezeLengthTextField.setText(freezeField);
+            }
+        }
+        newContestInformation.setFreezeTime(freezeField);
 
         newContestInformation.setThawed(scoreboardHasBeenUnfrozen);
 
-        // fill in sandbox/interative grace time adjustments
+        // fill in sandbox/interactive grace time adjustments
         newContestInformation.setSandboxGraceTimeSecs(StringUtilities.getIntegerValue("0" + getSandboxGraceTimeTextField().getText(), savedContestInformation.getSandboxGraceTimeSecs()));
         newContestInformation.setSandboxInteractiveGraceMultiplier(StringUtilities.getIntegerValue("0" + this.getSandboxInteractiveMultiplierTextField().getText(), savedContestInformation.getSandboxInteractiveGraceMultiplier()));
 
@@ -1219,7 +1238,7 @@ public class ContestInformationPane extends JPanePlugin {
     }
 
     protected void enableUpdateButton() {
-        ContestInformation newChoice = getFromFields();
+        ContestInformation newChoice = getFromFields(false);
 
         if (getContest().getContestInformation().isSameAs(newChoice)) {
             setEnableButtons(false);
@@ -1308,7 +1327,14 @@ public class ContestInformationPane extends JPanePlugin {
 
 
     private void updateContestInformation() {
-        ContestInformation contestInformation = getFromFields();
+        ContestInformation contestInformation = null;
+
+        try {
+            contestInformation = getFromFields(true);
+        } catch(IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, e.getLocalizedMessage(), "Bad Value Specified", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
 
         getController().updateContestInformation(contestInformation);
     }
@@ -1994,7 +2020,7 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return rigidArea3;
     }
-    
+
     private Component getRigidArea4() {
         if (rigidArea4==null) {
             rigidArea4 = Box.createRigidArea(new Dimension(20,20));
