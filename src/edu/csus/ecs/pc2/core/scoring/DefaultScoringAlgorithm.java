@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -42,6 +42,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.core.standings.ScoreboardGroupUtilities;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.RunStatistics;
@@ -405,6 +406,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Site[] sites = theContest.getSites();
         summaryMemento.putInteger("siteCount", sites.length);
         
+        // Whether WTI/XSL should offer an "All teams" scoreboard (AUTO/TRUE/FALSE policy)
+        summaryMemento.putBoolean("showAllTeams", ScoreboardGroupUtilities.shouldShowAllTeams(theContest));
+
         Group[] groups = theContest.getGroups();
         boolean bGroupsExcluded = false;
         if (groups != null) {
@@ -583,6 +587,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * indicating we excluded some groups.   This information is used by the teamStandings memento generator
      * so it will not include medal / citation information in the teamStanding memento.
      *
+     * <p>
+     * Attribute {@code id} is the <em>scoreboard group-list ordinal</em>: 1-based among
+     * groups with {@link Group#isDisplayOnScoreboard()} true, in contest order.
+     * It is not {@link Group#getGroupId()} (External Id; emitted as {@code externalId})
+     * and not the Admin Groups tab "Id" column.
+     * Attribute {@code divisionWide} reflects {@link Group#isDivisionWideScoreboard()}.
+     * </p>
+     *
      * @param groups All groups configured
      * @param memento Where to put the group XML informtion
      * @param wantedGroups - specific groups the scoreboard is being generated for
@@ -592,14 +604,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private boolean dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups, AccountList accountList) {
         memento.putInteger("groupCount", groups.length+1);
         IMemento groupsMemento = memento.createChild("groupList");
-        int id = 0;
+        int ordinal = 0;
         int teamCount;
         boolean excludedGroups = false;
         for (int i = 0; i < groups.length; i++) {
             if (!groups[i].isDisplayOnScoreboard()) {
                 continue;
             }
-            id = id + 1;
+            ordinal = ordinal + 1;
             // Count number of scoreboard displayed teams in this group
             teamCount = 0;
             for (Account account : accountList.getList()) {
@@ -610,9 +622,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
             }
             IMemento groupMemento = groupsMemento.createChild("group");
-            groupMemento.putInteger("id", id);
+            // Scoreboard group-list ordinal (standings group/@id, WTI ?groupId=)
+            groupMemento.putInteger("id", ordinal);
             groupMemento.putString("title", groups[i].getDisplayName());
             groupMemento.putInteger("externalId", groups[i].getGroupId());
+            groupMemento.putBoolean("divisionWide", groups[i].isDivisionWideScoreboard());
             if (groups[i].getSite() != null) {
                 groupMemento.putInteger("pc2Site", groups[i].getSite().getSiteNumber());
             }
