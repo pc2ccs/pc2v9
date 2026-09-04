@@ -59,7 +59,7 @@ public class ScoreboardGroupUtilitiesTest extends AbstractTestCase {
         assertEquals("California - D1", visible.get(2).getDisplayName());
     }
 
-    public void testGetScoreboardGroupIdNumbering() {
+    public void testGetScoreboardGroupListOrdinalNumbering() {
         IInternalContest contest = createPacNWStyleContest(true);
 
         Group d1 = findGroup(contest, "D1");
@@ -67,22 +67,24 @@ public class ScoreboardGroupUtilitiesTest extends AbstractTestCase {
         Group california = findGroup(contest, "California");
         Group californiaD1 = findGroup(contest, "California - D1");
 
-        assertEquals(1, ScoreboardGroupUtilities.getScoreboardGroupId(contest, d1));
-        assertEquals(2, ScoreboardGroupUtilities.getScoreboardGroupId(contest, d2));
-        assertEquals(-1, ScoreboardGroupUtilities.getScoreboardGroupId(contest, california));
-        assertEquals(3, ScoreboardGroupUtilities.getScoreboardGroupId(contest, californiaD1));
+        // Ordinals are among display-on-scoreboard groups only (California is skipped)
+        assertEquals(1, ScoreboardGroupUtilities.getScoreboardGroupListOrdinal(contest, d1));
+        assertEquals(2, ScoreboardGroupUtilities.getScoreboardGroupListOrdinal(contest, d2));
+        assertEquals(-1, ScoreboardGroupUtilities.getScoreboardGroupListOrdinal(contest, california));
+        assertEquals(3, ScoreboardGroupUtilities.getScoreboardGroupListOrdinal(contest, californiaD1));
     }
 
-    public void testGetGroupForScoreboardId() {
+    public void testGetGroupForScoreboardGroupListOrdinal() {
         IInternalContest contest = createPacNWStyleContest(true);
 
-        assertEquals("D1", ScoreboardGroupUtilities.getGroupForScoreboardId(contest, 1).getDisplayName());
-        assertEquals("D2", ScoreboardGroupUtilities.getGroupForScoreboardId(contest, "2").getDisplayName());
-        assertEquals("California - D1", ScoreboardGroupUtilities.getGroupForScoreboardId(contest, 3).getDisplayName());
-        assertNull(ScoreboardGroupUtilities.getGroupForScoreboardId(contest, 0));
-        assertNull(ScoreboardGroupUtilities.getGroupForScoreboardId(contest, 99));
-        assertNull(ScoreboardGroupUtilities.getGroupForScoreboardId(contest, "abc"));
-        assertNull(ScoreboardGroupUtilities.getGroupForScoreboardId(contest, ""));
+        assertEquals("D1", ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, 1).getDisplayName());
+        assertEquals("D2", ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, "2").getDisplayName());
+        assertEquals("California - D1",
+                ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, 3).getDisplayName());
+        assertNull(ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, 0));
+        assertNull(ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, 99));
+        assertNull(ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, "abc"));
+        assertNull(ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, ""));
     }
 
     public void testDefaultDivisionWideGroupPrefersMembership() {
@@ -97,7 +99,7 @@ public class ScoreboardGroupUtilitiesTest extends AbstractTestCase {
         Group defaultGroup = ScoreboardGroupUtilities.getDefaultDivisionWideGroup(contest, team);
         assertNotNull(defaultGroup);
         assertEquals("D1", defaultGroup.getDisplayName());
-        assertEquals(1, ScoreboardGroupUtilities.getScoreboardGroupId(contest, defaultGroup));
+        assertEquals(1, ScoreboardGroupUtilities.getScoreboardGroupListOrdinal(contest, defaultGroup));
     }
 
     public void testDefaultDivisionWideGroupPrefersPrimaryWhenDivisionWide() {
@@ -123,7 +125,7 @@ public class ScoreboardGroupUtilitiesTest extends AbstractTestCase {
 
     /**
      * PacNW-like group set: D1/D2 (optional division-wide), hidden California site group,
-     * and California - D1 site×division group on the scoreboard.
+     * and California - D1 site-by-division group on the scoreboard.
      */
     private IInternalContest createPacNWStyleContest(boolean markDivisionWide) {
         IInternalContest contest = new SampleContest().createContest(1, 1, 2, 0, true);

@@ -11,11 +11,25 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * This is a utility class supporting division-wide scoreboard group selection.
+ * This is a utility class supporting scoreboard group selections, including methods
+ * for handling groups in a contest with "divisions".
  *
- * <p>Scoreboard group ids match {@code DefaultScoringAlgorithm.dumpGroupList}:
- * only groups with {@link Group#isDisplayOnScoreboard()} true, in
- * {@link IInternalContest#getGroups()} order, numbered from 1.</p>
+ * <p>Note that there are multiple notions associated with the term "group Id":
+ * <ul>
+ *   <li><b>Admin Groups tab "Id"</b> -- UI row number only; not used by these methods.</li>
+ *   <li><b>External Id</b> ({@link Group#getGroupId()}) -- CMS / {@code groups.tsv} id;
+ *       used by {@code division-scoreboard.yaml} {@code id:} matching.</li>
+ *   <li><b>Scoreboard group-list ordinal</b> -- 1-based position among groups with
+ *       {@link Group#isDisplayOnScoreboard()} {@code true}, in
+ *       {@link IInternalContest#getGroups()} order, as assigned by
+ *       {@code DefaultScoringAlgorithm.dumpGroupList}. Appears as standings
+ *       {@code group/@id} and as the WTI {@code ?groupId=} query parameter.</li>
+ * </ul>
+ * Methods here that take or return a numeric scoreboard group id mean the
+ * <em>scoreboard group-list ordinal</em>, never External Id and never the Admin Groups "Id"
+ * column (UI row).
+ * The scoreboard group-list ordinal is recomputed when standings are built; groups with
+ * {@code displayOnScoreboard == false} are skipped and do not receive an ordinal.
  */
 public final class ScoreboardGroupUtilities {
 
@@ -120,7 +134,7 @@ public final class ScoreboardGroupUtilities {
      *
      * @param contest contest model
      * @param account team (or other) account
-     * @return matching division-wide group, or null if none
+     * @return matching division-wide {@link Group}, or null if none
      */
     public static Group getDefaultDivisionWideGroup(IInternalContest contest, Account account) {
         if (contest == null || account == null) {
@@ -150,47 +164,51 @@ public final class ScoreboardGroupUtilities {
     }
 
     /**
-     * Returns the sequential scoreboard group id for the specified {@link Group}, 
-     * matching dumpGroupList numbering.  Note that the returned id is the sequential number
-     * of the group as determined when groups are loaded -- NOT the "External Id" of the group.
+     * Returns the scoreboard group-list ordinal for a {@link Group}; that is, the 1-based 
+     * ordinal within the group list defined by {@code DefaultScoringAlgorithm.dumpGroupList}.
+     *
+     * <p>Note that this is <em>not</em> {@link Group#getGroupId()} (External Id), and
+     * <em>not</em> the Admin Groups tab "Id" column.</p>
      *
      * @param contest contest model
-     * @param group group whose Id is to be returned
-     * @return id >= 1, or -1 if the group is null, not in the contest, or not display-on-scoreboard
+     * @param group group whose scoreboard group-list ordinal is requested
+     * @return ordinal <= 1, or -1 if the group is null, not scoreboard-visible, or not in the contest
      */
-    public static int getScoreboardGroupId(IInternalContest contest, Group group) {
+    public static int getScoreboardGroupListOrdinal(IInternalContest contest, Group group) {
         if (contest == null || group == null || !group.isDisplayOnScoreboard()) {
             return -1;
         }
 
-        int id = 0;
+        int ordinal = 0;
         for (Group candidate : getScoreboardVisibleGroups(contest)) {
-            id++;
+            ordinal++;
             if (candidate.getElementId().equals(group.getElementId())) {
-                return id;
+                return ordinal;
             }
         }
         return -1;
     }
 
     /**
-     * Returns the {@link Group} corresponding to the specified integer scoreboardGroupId.
-     * Note that scoreboardGroupId is expected to be the sequential Group Id assigned
-     * when groups are first loaded, NOT a Group "External Id".
+     * Returns a {@link Group} corresponding to a scoreboard group-list ordinal.
+     *
+     * <p>{@code scoreboardGroupListOrdinal} is the dumpGroupList / standings
+     * {@code group/@id} / WTI {@code ?groupId=} value -- <em>not</em> External Id
+     * and <em>not</em> the Admin Groups tab "Id".</p>
      *
      * @param contest contest model
-     * @param scoreboardGroupId sequential id from dumpGroupList / WTI {@code ?groupId=}
-     * @return matching group, or null if id is invalid or unknown
+     * @param scoreboardGroupListOrdinal 1-based ordinal among scoreboard-visible groups
+     * @return matching group, or null if ordinal is invalid or unknown
      */
-    public static Group getGroupForScoreboardId(IInternalContest contest, int scoreboardGroupId) {
-        if (contest == null || scoreboardGroupId < 1) {
+    public static Group getGroupForScoreboardGroupListOrdinal(IInternalContest contest, int scoreboardGroupListOrdinal) {
+        if (contest == null || scoreboardGroupListOrdinal < 1) {
             return null;
         }
 
-        int id = 0;
+        int ordinal = 0;
         for (Group group : getScoreboardVisibleGroups(contest)) {
-            id++;
-            if (id == scoreboardGroupId) {
+            ordinal++;
+            if (ordinal == scoreboardGroupListOrdinal) {
                 return group;
             }
         }
@@ -198,25 +216,25 @@ public final class ScoreboardGroupUtilities {
     }
 
     /**
-     * Returns the {@link Group} corresponding to the specified string scoreboardGroupId.
-     * Note that scoreboardGroupId is expected to be a string representation of the 
-     * sequential Group Id assigned when groups are first loaded, NOT a Group "External Id".
+     * Resolve a scoreboard group-list ordinal string to a model {@link Group}.
      *
+     * <p>Same meaning as {@link #getGroupForScoreboardGroupListOrdinal(IInternalContest, int)}:
+     * the returned value is the dumpGroupList ordinal, not External Id, not Admin Groups "Id".</p>
      *
      * @param contest contest model
-     * @param scoreboardGroupId sequential id string
-     * @return matching group, or null if id string is blank, non-numeric, or unknown
+     * @param scoreboardGroupListOrdinal string form of the 1-based ordinal (e.g. WTI {@code groupId} query value)
+     * @return matching group, or null if blank, non-numeric, or unknown
      */
-    public static Group getGroupForScoreboardId(IInternalContest contest, String scoreboardGroupId) {
-        if (scoreboardGroupId == null) {
+    public static Group getGroupForScoreboardGroupListOrdinal(IInternalContest contest, String scoreboardGroupListOrdinal) {
+        if (scoreboardGroupListOrdinal == null) {
             return null;
         }
-        String trimmed = scoreboardGroupId.trim();
+        String trimmed = scoreboardGroupListOrdinal.trim();
         if (trimmed.isEmpty()) {
             return null;
         }
         try {
-            return getGroupForScoreboardId(contest, Integer.parseInt(trimmed));
+            return getGroupForScoreboardGroupListOrdinal(contest, Integer.parseInt(trimmed));
         } catch (NumberFormatException e) {
             return null;
         }
