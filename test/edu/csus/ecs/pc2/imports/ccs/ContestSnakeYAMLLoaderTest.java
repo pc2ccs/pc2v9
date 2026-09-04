@@ -3929,4 +3929,30 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
       }
         
     }
+
+    /** Test that explicitly setting the "show all teams on scoreboard" flag to false works.
+     */
+    public void testScoreboardSectionShowAllTeams() throws Exception {
+        String[] yamlLines = {
+                "name: scoreboard section test",
+                IContestLoader.SCOREBOARD_SECTION_KEY + ":",
+                "  " + IContestLoader.SHOW_ALL_TEAMS_ON_SCOREBOARD_KEY + ": false",
+        };
+
+        IInternalContest contest = snake.fromYaml(new InternalContest(), yamlLines, getName(), false);
+        assertEquals(ContestInformation.ShowAllTeamsOnScoreboard.FALSE,
+                contest.getContestInformation().getShowAllTeamsOnScoreboard());
+    }
+
+    /** Test that the "show all teams on scoreboard" flag defaults to "Auto".
+     */
+    public void testScoreboardSectionShowAllTeamsDefaultAuto() throws Exception {
+        String[] yamlLines = {
+                "name: scoreboard section test",
+        };
+
+        IInternalContest contest = snake.fromYaml(new InternalContest(), yamlLines, getName(), false);
+        assertEquals(ContestInformation.ShowAllTeamsOnScoreboard.AUTO,
+                contest.getContestInformation().getShowAllTeamsOnScoreboard());
+    }
 }
