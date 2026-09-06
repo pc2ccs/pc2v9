@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package controllers;
 
 import java.io.IOException;
@@ -45,6 +45,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.standings.ScoreboardGroupUtilities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -741,7 +742,7 @@ public class ContestController extends MainController {
 					}
 
 					try {
-						responseJson = buildScoreboardJson(internalContest, groupId);
+						responseJson = buildScoreboardJson(internalContest, groupId, userInformation.getContest().getMyClient());
 					} catch (IllegalArgumentException e) {
 						logger.warning("Invalid groupId for scoreboard request: " + e.getMessage());
 						return Response.status(Response.Status.BAD_REQUEST)
@@ -793,7 +794,7 @@ public class ContestController extends MainController {
 	/**
 	 * Builds enriched JSON standings for the full contest or one scoreboard group.
 	 */
-	private String buildScoreboardJson(IInternalContest internalContest, String groupId)
+	private String buildScoreboardJson(IInternalContest internalContest, String groupId, IClient requestingClient)
 			throws IllegalContestState, IOException, JSONException {
 
 		Properties props = internalContest.getContestInformation().getScoringProperties();
@@ -815,7 +816,11 @@ public class ContestController extends MainController {
 		String xmlStandings = dsa.getStandings(internalContest, null, wantedGroups, props, logger);
 
 		logger.info("Converting DSA XML to JSON");
-		return this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings), internalContest);
+		ClientId requestingClientId = null;
+		if (requestingClient != null) {
+			requestingClientId = new ClientId(requestingClient.getSiteNumber(), Type.TEAM, requestingClient.getAccountNumber());
+		}
+		return this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings), internalContest, requestingClientId);
 	}
 
 	private static String getStandingsCacheKey(String groupId) {
@@ -852,30 +857,7 @@ public class ContestController extends MainController {
 	 * {@link Group#isDisplayOnScoreboard()} true, in contest order, numbered from 1.
 	 */
 	private Group resolveGroupForScoreboardId(IInternalContest contest, String scoreboardGroupId) {
-		int targetId;
-		try {
-			targetId = Integer.parseInt(scoreboardGroupId);
-		} catch (NumberFormatException e) {
-			return null;
-		}
-		if (targetId < 1) {
-			return null;
-		}
-		int id = 0;
-		Group[] groups = contest.getGroups();
-		if (groups == null) {
-			return null;
-		}
-		for (Group group : groups) {
-			if (!group.isDisplayOnScoreboard()) {
-				continue;
-			}
-			id++;
-			if (id == targetId) {
-				return group;
-			}
-		}
-		return null;
+		return ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, scoreboardGroupId);
 	}
  
 	/**
@@ -933,7 +915,7 @@ public class ContestController extends MainController {
 	 * @return JSON with {@code teamGroupIds} set on each processed {@code teamStanding}, or the original string if
 	 *         enrichment is skipped or throws
 	 */
-	private String enrichScoreboardTeamGroups(String jsonStandings, IInternalContest contest) {
+	private String enrichScoreboardTeamGroups(String jsonStandings, IInternalContest contest, ClientId requestingClientId) {
 		if (jsonStandings == null || contest == null) {
 			return jsonStandings;
 		}
@@ -952,6 +934,7 @@ public class ContestController extends MainController {
 				return jsonStandings;
 			}
 			JSONObject standingsHeader = contestStandings.getJSONObject("standingsHeader");
+			addDefaultGroupIdToHeader(standingsHeader, contest, requestingClientId);
 			JSONObject groupListObj = null;
 			// org.json may preserve "groupList" casing from XML; we also want to accept "grouplist" for defensive parsing.
 			if (standingsHeader.has("groupList")) {
@@ -1024,6 +1007,35 @@ public class ContestController extends MainController {
 			// Malformed JSON, missing fields, or type mismatches: do not fail the request; the UI can still filter by primary teamGroupId.
 			logger.warning("ContestController.enrichScoreboardTeamGroups failed while adding teamGroupIds; returning unenriched JSON: " + e.getMessage());
 			return jsonStandings;
+		}
+	}
+
+	/**
+	 * If "All teams" is hidden for this contest/requester, add a defaultGroupId to the standingsHeader
+	 * so the WTI UI can select the requester's division-wide scoreboard without a separate endpoint.
+	 */
+	private void addDefaultGroupIdToHeader(JSONObject standingsHeader, IInternalContest contest, ClientId requestingClientId)
+			throws JSONException {
+		if (standingsHeader == null || contest == null || requestingClientId == null) {
+			return;
+		}
+		if (ScoreboardGroupUtilities.shouldShowAllTeams(contest)) {
+			return;
+		}
+
+		Account requestingAccount = contest.getAccount(requestingClientId);
+		if (requestingAccount == null) {
+			return;
+		}
+
+		Group defaultGroup = ScoreboardGroupUtilities.getDefaultDivisionWideGroup(contest, requestingAccount);
+		if (defaultGroup == null) {
+			return;
+		}
+
+		int ordinal = ScoreboardGroupUtilities.getScoreboardGroupListOrdinal(contest, defaultGroup);
+		if (ordinal > 0) {
+			standingsHeader.put("defaultGroupId", Integer.toString(ordinal));
 		}
 	}
 

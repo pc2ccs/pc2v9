@@ -28,6 +28,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	teamStandings: any = [];
 	private fullTeamStandings: any[] = [];
 	groupOptions: ScoreboardGroupOption[] = [];
+	showAllTeamsOption = true;
 	selectedGroupId = '';
 	/** Ignores out-of-order standings HTTP responses (e.g. initial full load finishing after a group pick). */
 	private standingsRequestSeq = 0;
@@ -101,7 +102,14 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 				// (i.e. when requestGroupId is empty).
 				if (requestGroupId === '') {
 					this.groupOptions = this.buildGroupDropdownOptions(standings, rows);
-					this.validateSelectedGroupId();
+					const selectedGroupChanged = this.updateGroupSelectionStateFromStandings(standings);
+					if (selectedGroupChanged) {
+						this.loadStandings();
+						return;
+					}
+				}
+				else {
+					this.showAllTeamsOption = this.readShowAllTeamsFlag(standings);
 				}
 				this.teamStandings = this.getFilteredStandings(rows);
 				this.numProblems = this.getNumProblems(standings);
@@ -130,6 +138,27 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		if (!this.groupOptions.some(g => String(g.id) === sid)) {
 			this.selectedGroupId = '';
 		}
+	}
+
+	/**
+	 * Refreshes the "All teams" visibility flag and, when needed, applies the server-provided
+	 * default division-wide group selection from standingsHeader.defaultGroupId.
+	 *
+	 * @return true iff selectedGroupId changed and standings should be reloaded for that scope
+	 */
+	private updateGroupSelectionStateFromStandings(standings: any): boolean {
+		const previousSelectedGroupId = this.selectedGroupId;
+		this.showAllTeamsOption = this.readShowAllTeamsFlag(standings);
+		this.validateSelectedGroupId();
+
+		if (this.selectedGroupId === '' && !this.showAllTeamsOption) {
+			const defaultGroupId = this.readDefaultGroupId(standings);
+			if (defaultGroupId !== '' && this.groupOptions.some(g => String(g.id) === defaultGroupId)) {
+				this.selectedGroupId = defaultGroupId;
+			}
+		}
+
+		return this.selectedGroupId !== previousSelectedGroupId;
 	}
 
 	/**
@@ -280,6 +309,37 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		return out.sort((a, b) =>
 			a.displayName.localeCompare(b.displayName, undefined, { sensitivity: 'base' })
 		);
+	}
+
+	private readShowAllTeamsFlag(standings: any): boolean {
+		const header = standings?.contestStandings?.standingsHeader;
+		if (!header || typeof header !== 'object') {
+			return true;
+		}
+		const raw = this.readXmlishField(header as Record<string, unknown>, 'showAllTeams');
+		if (raw === undefined || raw === null) {
+			return true;
+		}
+		const normalized = String(raw).trim().toLowerCase();
+		if (normalized === 'false') {
+			return false;
+		}
+		if (normalized === 'true') {
+			return true;
+		}
+		return true;
+	}
+
+	private readDefaultGroupId(standings: any): string {
+		const header = standings?.contestStandings?.standingsHeader;
+		if (!header || typeof header !== 'object') {
+			return '';
+		}
+		const raw = this.readXmlishField(header as Record<string, unknown>, 'defaultGroupId');
+		if (raw === undefined || raw === null) {
+			return '';
+		}
+		return String(raw).trim();
 	}
 
 	/**
