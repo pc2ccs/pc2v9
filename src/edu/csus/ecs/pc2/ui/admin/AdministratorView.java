@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -70,6 +71,7 @@ import edu.csus.ecs.pc2.ui.QuickJudgePane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.ResultsComparePane;
 import edu.csus.ecs.pc2.ui.RunsTablePane;
+import edu.csus.ecs.pc2.ui.ScoreboardXSLPane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsTablePane;
@@ -87,6 +89,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     private static final long serialVersionUID = 1L;
 
     private static final String SAMPLE_SUBMIT_PANE_KEY = "admin.sampleSubmitPane";
+
+    private static final String STANDINGS_HTML_XSL_FILE = "full.xsl";
+    private static final String STANDINGS_SCORING_HTML_XSL_FILE = "fullps.xsl";
 
     private IInternalContest contest;
 
@@ -210,6 +215,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         this.contest = inContest;
         this.controller = inController;
         final JFrame thisFrame = this;
+        ContestInformation ci = contest.getContestInformation();
 
         updateProfileLabel();
 
@@ -257,6 +263,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 GroupsPane groupsPane = new GroupsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Groups", groupsPane);
+
+                ScoreboardXSLPane xslPane = new ScoreboardXSLPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Scoreboard XSL", xslPane);
 
                 ICPCLoadPane icpcPane = new ICPCLoadPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "ICPC", icpcPane);
@@ -404,10 +413,13 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     addUIPlugin(getRunContestTabbedPane(), "Standings", standingsTablePane);
 
                     String xslFileName;
-                    if(contest.getContestInformation().isScoreboardTypeScore()) {
-                        xslFileName = "fullps.xsl";
-                    } else {
-                        xslFileName = "full.xsl";
+                    xslFileName = ci.getStandingsHTMLXSL();
+                    if(xslFileName == null) {
+                        if(ci.isScoreboardTypeScore()) {
+                            xslFileName = STANDINGS_SCORING_HTML_XSL_FILE;
+                        } else {
+                            xslFileName = STANDINGS_HTML_XSL_FILE;
+                        }
                     }
                     StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane(xslFileName);
                     addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);

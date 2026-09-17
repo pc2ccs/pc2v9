@@ -520,6 +520,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // per-account ccs settings (overrides the above)
         getRemoteCCSSettings(contestInformation, content);
 
+        // XSL files
+        contestInformation.setStandingsHTMLXSL(ContestImportUtilities.fetchValue(content, STANDINGS_HTML_XSL_FILE));
+        String scoreboardXSLFiles = ContestImportUtilities.fetchValue(content, SCOREBOARD_XSL_FILES);
+        if(scoreboardXSLFiles != null) {
+            // This is a CSV list of names, first trim and check that something's there.  Recall that
+            // String.split() will return an array with a single empty string if the input string is empty itself.
+            String xslCSV = scoreboardXSLFiles.trim();
+            if(!xslCSV.isEmpty()) {
+                contestInformation.setScoreboardXSLFiles(scoreboardXSLFiles.trim().split(","));
+            }
+        }
+
         // save ContesInformation to model
         contest.updateContestInformation(contestInformation);
 

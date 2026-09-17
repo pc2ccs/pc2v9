@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -25,7 +26,7 @@ import edu.csus.ecs.pc2.core.util.XSLTransformer;
 
 /**
  * Print list of profiles.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -34,7 +35,7 @@ import edu.csus.ecs.pc2.core.util.XSLTransformer;
 public class HTMLReport implements IReport {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 808321237990590312L;
 
@@ -52,7 +53,7 @@ public class HTMLReport implements IReport {
     private String styleSheetDirectoryName = null;
 
     private IScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
-    
+
     private String reportDirectory = "reports";  //  @jve:decl-index=0:
 
     private String getDefaultSyleSheetDirectoryName() {
@@ -92,7 +93,7 @@ public class HTMLReport implements IReport {
         /**
          * Fill in with default properties if not using them.
          */
-        String[] keys = (String[]) defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
+        String[] keys = defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
         for (String key : keys) {
             if (!properties.containsKey(key)) {
                 properties.put(key, defProperties.get(key));
@@ -102,6 +103,7 @@ public class HTMLReport implements IReport {
         return properties;
     }
 
+    @Override
     public void writeReport(PrintWriter printWriter) throws Exception {
 
         String xslDir = getStyleSheetDirectoryName();
@@ -121,37 +123,38 @@ public class HTMLReport implements IReport {
             file.mkdirs();
         }
 
-        String[] inputFiles = inputDir.list();
-        for (int i = 0; i < inputFiles.length; i++) {
-            String filename = inputFiles[i];
-            if (filename.endsWith(".xsl")) {
+        // Get configured list of XSL files, if none, scan directory and only include xsl files
+        String[] inputFiles = contest.getContestInformation().getScoreboardXSLFiles();
+        if(inputFiles == null) {
+            inputFiles = Arrays.stream(inputDir.list()).filter(s -> s != null && s.endsWith(".xsl")).toArray(String[]::new);
+        }
+        for (String filename : inputFiles) {
 
-                String xsltFileName = inputDir.getCanonicalPath() + File.separator + filename;
+            String xsltFileName = inputDir.getCanonicalPath() + File.separator + filename;
 
-                String scoreboardXML;
+            String scoreboardXML;
 
-                try {
+            try {
 
-                    Properties scoringProperties = getScoringProperties();
-                    scoreboardXML = scoringAlgorithm.getStandings(getContest(), scoringProperties, log);
-                    String html = createHTML(scoreboardXML, xsltFileName);
+                Properties scoringProperties = getScoringProperties();
+                scoreboardXML = scoringAlgorithm.getStandings(getContest(), scoringProperties, log);
+                String html = createHTML(scoreboardXML, xsltFileName);
 
-                    String name = filename.replaceAll(".xsl$", "");
+                String name = filename.replaceAll(".xsl$", "");
 
-                    String outputFilename = getReportFilename(this, name, "html");
+                String outputFilename = getReportFilename(this, name, "html");
 
-                    String htmlFilename = outputDirectory + File.separator + outputFilename;
+                String htmlFilename = outputDirectory + File.separator + outputFilename;
 
-                    writeString(htmlFilename, html);
+                writeString(htmlFilename, html);
 
-                    printWriter.println("Wrote file " + htmlFilename);
-                    printWriter.println("  based on " + filename);
-                    printWriter.println();
+                printWriter.println("Wrote file " + htmlFilename);
+                printWriter.println("  based on " + filename);
+                printWriter.println();
 
-                } catch (Exception e) {
-                    printWriter.println("Exception in report: " + e.getMessage());
-                    e.printStackTrace(printWriter);
-                }
+            } catch (Exception e) {
+                printWriter.println("Exception in report: " + e.getMessage());
+                e.printStackTrace(printWriter);
             }
         }
     }
@@ -160,19 +163,20 @@ public class HTMLReport implements IReport {
     // writeFile
     /**
      * Write the string to the file.
-     * 
+     *
      * @param filename
      * @param html
-     * @throws FileNotFoundException 
+     * @throws FileNotFoundException
      */
     private void writeString(String filename, String html) throws FileNotFoundException {
-        
+
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         printWriter.print(html);
         printWriter.close();
         printWriter = null;
     }
 
+    @Override
     public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());
@@ -189,16 +193,16 @@ public class HTMLReport implements IReport {
 
         }
     }
-    
+
     /**
      * Creates a report name.
-     * 
+     *
      * <pre>
      * Form: report.&lt;report title&gt;[.extraPart].yyMMdd HHmmss.SSS.&lt;extension&gt;
      * </pre>
-     * 
+     *
      * Will replace all spaces with underscores.
-     * 
+     *
      * @param selectedReport
      * @param extraPart
      * @param extension
@@ -223,11 +227,13 @@ public class HTMLReport implements IReport {
 
     }
 
+    @Override
     public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");
     }
 
+    @Override
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -253,32 +259,39 @@ public class HTMLReport implements IReport {
         }
     }
 
+    @Override
     public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
+    @Override
     public String createReportXML(Filter inFilter) throws IOException {
         return Reports.notImplementedXML(this);
     }
 
+    @Override
     public String getReportTitle() {
         return "Standings Web Pages";
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
     }
 
+    @Override
     public String getPluginTitle() {
         return "Standings Web Pages generator";
     }
 
+    @Override
     public Filter getFilter() {
         return filter;
     }
 
+    @Override
     public void setFilter(Filter filter) {
         this.filter = filter;
     }
@@ -289,7 +302,7 @@ public class HTMLReport implements IReport {
 
     /**
      * Returns true if this client is a server.
-     * 
+     *
      * @return true if logged in client is a server.
      */
     private boolean isServer() {

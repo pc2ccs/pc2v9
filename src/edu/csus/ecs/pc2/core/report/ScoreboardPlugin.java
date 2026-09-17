@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.ByteArrayInputStream;
@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.xml.transform.TransformerConfigurationException;
 
@@ -20,7 +21,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Create HTML files
- * 
+ *
  * @author $Author$
  * @version $Id$
  */
@@ -28,7 +29,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 public class ScoreboardPlugin implements UIPlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -5834251267967257702L;
 
@@ -42,7 +43,7 @@ public class ScoreboardPlugin implements UIPlugin {
 
     /**
      * Write all standings HTML to output directory.
-     * 
+     *
      * @param outputDir
      * @throws IllegalContestState
      */
@@ -55,7 +56,7 @@ public class ScoreboardPlugin implements UIPlugin {
 
     /**
      * Write all standings to output directory.
-     * 
+     *
      * @param xmlString
      * @param aLog
      * @param outputDir
@@ -106,53 +107,55 @@ public class ScoreboardPlugin implements UIPlugin {
             aLog.log(Log.WARNING, "Problem writing to " + "results.xml", e);
         }
 
-        String[] inputFiles = inputDir.list();
         XSLTransformer transformer = new XSLTransformer();
-        for (int i = 0; i < inputFiles.length; i++) {
-            String xslFilename = inputFiles[i];
-            if (xslFilename.endsWith(".xsl")) {
-                String outputFilename = xslFilename.substring(0, xslFilename.length() - 4) + ".html";
-                try {
-                    File output = File.createTempFile("__t", ".htm", outputDirFile);
-                    FileOutputStream outputStream = new FileOutputStream(output);
-                    transformer.transform(xslDir + File.separator + xslFilename, new ByteArrayInputStream(xmlString.getBytes()), outputStream);
-                    outputStream.close();
-                    if (output.length() > 0) {
-                        File outputFile = new File(outputDir + File.separator + outputFilename);
-                        if (xslFilename.equals("pc2export.xsl")) {
-                            // change that, we want the pc2export written as a .dat in the cwd
-                            outputFile = new File("pc2export.dat");
-                        }
-                        // dump json and tsv and csv files in the html directory
-                        if (xslFilename.endsWith(".json.xsl") || xslFilename.endsWith(".tsv.xsl") || xslFilename.endsWith(".csv.xsl") || xslFilename.endsWith(".php.xsl")) {
-                            outputFile = new File(outputDir + File.separator + xslFilename.substring(0, xslFilename.length() - 4));
-                        }
-                        // behaviour of renameTo is platform specific, try the possibly atomic 1st
+
+        // Get configured list of XSL files, if none, scan directory and only include xsl files
+        String[] inputFiles = contest.getContestInformation().getScoreboardXSLFiles();
+        if(inputFiles == null) {
+            inputFiles = Arrays.stream(inputDir.list()).filter(s -> s != null && s.endsWith(".xsl")).toArray(String[]::new);
+        }
+        for (String xslFilename : inputFiles) {
+            String outputFilename = xslFilename.substring(0, xslFilename.length() - 4) + ".html";
+            try {
+                File output = File.createTempFile("__t", ".htm", outputDirFile);
+                FileOutputStream outputStream = new FileOutputStream(output);
+                transformer.transform(xslDir + File.separator + xslFilename, new ByteArrayInputStream(xmlString.getBytes()), outputStream);
+                outputStream.close();
+                if (output.length() > 0) {
+                    File outputFile = new File(outputDir + File.separator + outputFilename);
+                    if (xslFilename.equals("pc2export.xsl")) {
+                        // change that, we want the pc2export written as a .dat in the cwd
+                        outputFile = new File("pc2export.dat");
+                    }
+                    // dump json and tsv and csv files in the html directory
+                    if (xslFilename.endsWith(".json.xsl") || xslFilename.endsWith(".tsv.xsl") || xslFilename.endsWith(".csv.xsl") || xslFilename.endsWith(".php.xsl")) {
+                        outputFile = new File(outputDir + File.separator + xslFilename.substring(0, xslFilename.length() - 4));
+                    }
+                    // behaviour of renameTo is platform specific, try the possibly atomic 1st
+                    if (!output.renameTo(outputFile)) {
+                        // otherwise fallback to the delete then rename
+                        outputFile.delete();
                         if (!output.renameTo(outputFile)) {
-                            // otherwise fallback to the delete then rename
-                            outputFile.delete();
-                            if (!output.renameTo(outputFile)) {
-                                aLog.warning("Could not create " + outputFile.getCanonicalPath());
-                            } else {
-                                aLog.finest("rename2 to " + outputFile.getCanonicalPath() + " succeeded.");
-                            }
+                            aLog.warning("Could not create " + outputFile.getCanonicalPath());
                         } else {
-                            aLog.finest("rename to " + outputFile.getCanonicalPath() + " succeeded.");
+                            aLog.finest("rename2 to " + outputFile.getCanonicalPath() + " succeeded.");
                         }
                     } else {
-                        // 0 length file
-                        aLog.warning("output from tranformation " + xslFilename + " was empty");
-                        output.delete();
+                        aLog.finest("rename to " + outputFile.getCanonicalPath() + " succeeded.");
                     }
-                    output = null;
-                } catch (IOException e) {
-                    aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
-                } catch (TransformerConfigurationException e) {
-                    // unfortunately this prints the details to stdout (or maybe stderr)
-                    aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
-                } catch (Exception e) {
-                    aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
+                } else {
+                    // 0 length file
+                    aLog.warning("output from tranformation " + xslFilename + " was empty");
+                    output.delete();
                 }
+                output = null;
+            } catch (IOException e) {
+                aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
+            } catch (TransformerConfigurationException e) {
+                // unfortunately this prints the details to stdout (or maybe stderr)
+                aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
+            } catch (Exception e) {
+                aLog.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
             }
         }
     }

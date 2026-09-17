@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
@@ -210,6 +210,7 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new ReportPane());
         plugins.add(new RunsPane());
         plugins.add(new RunsTablePane());
+        plugins.add(new ScoreboardXSLPane());
         plugins.add(new SitesPane());
         plugins.add(new StandingsPane());
         // plugins.add(new StandingsHTMLPane());

@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -262,6 +263,18 @@ public class ContestInformation implements Serializable{
      * If false, we send run testcases as they are judged (default).
      */
     private boolean batchTestCasesOnEF = false;
+
+    /**
+     * List of XSL files to use to generate scoreboards
+     * If null, use all .xsl files in the data/xsl folder.
+     */
+    String scoreboardXSLFiles [] = null;
+
+    /**
+     * XSL file to use for the Standings HTML pane
+     * If null, use default
+     */
+    String standingsHTMLXSL = null;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -541,7 +554,14 @@ public class ContestInformation implements Serializable{
                 return false;
             }
 
-           return true;
+            if(!StringUtilities.stringSame(standingsHTMLXSL, contestInformation.getStandingsHTMLXSL())) {
+                return false;
+            }
+
+            if(!Arrays.equals(scoreboardXSLFiles, contestInformation.getScoreboardXSLFiles())) {
+                return false;
+            }
+            return true;
         } catch (Exception e) {
             e.printStackTrace(System.err); // TODO log this exception
             return false;
@@ -1161,5 +1181,40 @@ public class ContestInformation implements Serializable{
 
     public void setBatchTestCasesOnEF(boolean batchTestCasesOnEF) {
         this.batchTestCasesOnEF = batchTestCasesOnEF;
+    }
+
+    /**
+     * Accessor for scoreboard XSL files
+     *
+     * @return array of XSL files or null
+     */
+    public String [] getScoreboardXSLFiles() {
+        return scoreboardXSLFiles;
+    }
+
+    /**
+     * Set new list of scoreboards XSL files
+     * @param scoreboardXSLFiles array of new scoreboard XSL files
+     */
+    public void setScoreboardXSLFiles(String [] scoreboardXSLFiles) {
+        this.scoreboardXSLFiles = scoreboardXSLFiles;
+    }
+
+    /**
+     * Get the XSL file used to generate the standings pane (HTML)
+     *
+     * @return XSL file to use for standings HTML pane or null to use default
+     */
+    public String getStandingsHTMLXSL() {
+        return standingsHTMLXSL;
+    }
+
+    /**
+     * Set the XSL file to use to generate the standings HTML pane
+     *
+     * @param new XSL file to use generate standings HTML pane
+     */
+    public void setStandingsHTMLXSL(String standingsHTMLXSL) {
+        this.standingsHTMLXSL = standingsHTMLXSL;
     }
 }

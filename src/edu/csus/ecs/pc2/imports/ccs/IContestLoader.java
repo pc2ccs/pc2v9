@@ -266,6 +266,12 @@ public interface IContestLoader {
 
     String SUBMISSION_THROTTLING_KEY = "submission-throttling";
 
+    /**
+     * For XSL file specification
+     */
+    static final String SCOREBOARD_XSL_FILES = "scoreboard-xsl-files";
+    static final String STANDINGS_HTML_XSL_FILE = "standings-html-xsl-file";
+
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 
     void dumpSerialzedFileList(Problem problem, String logPrefixId, SerializedFile[] sfList);

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  *
  */
@@ -19,6 +19,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import javax.xml.transform.TransformerConfigurationException;
 
@@ -121,10 +122,36 @@ public class ScoreboardCommon {
     }
 
     public void generateOutput(String xmlString, String xslDir, String outputDir, Log log) {
-        generateOutput(xmlString, null, xslDir, outputDir, log);
+        generateOutput(xmlString, null, xslDir, outputDir, null, log);
     }
 
     public void generateOutput(String xmlString, String groupName, String xslDir, String outputDir, Log log) {
+        generateOutput(xmlString, groupName, xslDir, outputDir, null, log);
+    }
+
+    /**
+     * Generate output from xsl templates using supplied xmlString
+     * @param xmlString XML source string to transform
+     * @param xslDir Directory where xsl files are found
+     * @param outputDir Directory to place transformed output files in
+     * @param inputFiles If non-null, list of XSL files in outputDir to use to create output files.  If null, all XSL files in outputDir are used.
+     * @param log Log for messages
+     */
+    public void generateOutput(String xmlString, String xslDir, String outputDir, String [] inputFiles, Log log) {
+        generateOutput(xmlString, null, xslDir, outputDir, inputFiles, log);
+    }
+
+    /**
+     * Generate output for specified group from xsl templates using supplied xmlString
+     *
+     * @param xmlString XML source string to transform
+     * @param groupName Group name to append to output basename (may be null, in which case nothing is appended)
+     * @param xslDir Directory where xsl files are found
+     * @param outputDir Directory to place transformed output files in
+     * @param inputFiles If non-null, list of XSL files in outputDir to use to create output files.  If null, all XSL files in outputDir are used.
+     * @param log Log for messages
+     */
+    public void generateOutput(String xmlString, String groupName, String xslDir, String outputDir, String [] inputFiles, Log log) {
         // FUTUREWORK move to to a common location (currently in both Module and View)
         File inputDir = new File(xslDir);
         if (!inputDir.isDirectory()) {
@@ -143,11 +170,20 @@ public class ScoreboardCommon {
         } else {
             log.fine("Sending output to " + outputDirFile.getAbsolutePath());
         }
-        String[] inputFiles = inputDir.list();
+
         XSLTransformer transformer = new XSLTransformer();
-        for (int i = 0; i < inputFiles.length; i++) {
-            String xslFilename = inputFiles[i];
-            if (xslFilename.endsWith(".xsl")) {
+
+        // If no xsl files passed, scan directory and only include xsl files
+        if(inputFiles == null) {
+            inputFiles = inputDir.list();
+        } else {
+            // When generating scoreboard HTML files, we also have to copy any non-xsl files in the folder
+            // since they may be css files, etc.  We just append these to the input file list.
+            inputFiles = Stream.concat(Arrays.stream(inputFiles),
+                Arrays.stream(inputDir.list()).filter(s -> s != null && !s.endsWith(".xsl"))).toArray(String[]::new);
+        }
+        for (String xslFilename : inputFiles) {
+            if(xslFilename.endsWith(".xsl")) {
                 // file name minus ".xls"
                 String baseFilename = xslFilename.substring(0, xslFilename.length() - 4);
                 try {
@@ -215,7 +251,7 @@ public class ScoreboardCommon {
                 }
             } else {
                 if (new File(xslDir + File.separator+ xslFilename).isFile()) {
-                    // not xsl, and a file, so just copy it**
+                    // not xsl, and a file, so just copy it**  This is for things like CSS style sheet files.
                     copyIfNeeded(xslDir, xslFilename, outputDir, log);
                 }
             }
