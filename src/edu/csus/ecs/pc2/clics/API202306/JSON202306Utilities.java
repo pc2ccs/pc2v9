@@ -165,13 +165,14 @@ public class JSON202306Utilities extends JSONUtilities {
     }
 
     /**
-     * Add an event prefix to the buffer.
-     *
+     * Add an event prefix to a buffer.
      * Adds event, (event) id, and data keyword to string.
      *
-     * @param stringBuilder
-     * @param eventType
-     * @param data - json data for object
+     * @param eventName Event (notification) type, eg.  "submissions", "judgements", etc.
+     * @param eventSequence Used for generating the token
+     * @param id ID for this event
+     * @param data The data associated with the event
+     * @return Json formatted string containing the full notification
      */
     public String getJSONEvent(String eventName, long eventSequence, String id, String data) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -210,16 +211,18 @@ public class JSON202306Utilities extends JSONUtilities {
      * event notification prefix.
      * Adds event, (event) id, customProperty (an customValue) (if non-null) and data keyword to string.
      *
-     * @param stringBuilder
-     * @param eventType
-     * @param data - json data for object
-     * @param customProperty - if non-null, adds property name with value customValue
-     * @param customValue - if customProperty is non-null, this is the value to assign (may be null)
+     * @param eventName Event (notification) type, eg. "judgements", "submissions", etc.
+     * @param eventSequence Sequence number used for generating the token
+     * @param id Event ID
+     * @param data The data property of the event
+     * @param customProperty included if non-null (it's optional)
+     * @param customValue value for customProperty, if customProperty is non-null
+     * @return Json formatted string containing the full notification
      */
     public String getJSONEvent(String eventName, long eventSequence, String id, String data,
             String customProperty, String customValue) {
         StringBuilder stringBuilder = new StringBuilder();
-        appendJSONEvent(stringBuilder, eventName, eventSequence, id, data);
+        appendJSONEvent(stringBuilder, eventName, eventSequence, id, data, customProperty, customValue);
         return stringBuilder.toString();
     }
 
