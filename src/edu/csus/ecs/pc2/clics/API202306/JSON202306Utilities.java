@@ -43,6 +43,8 @@ public class JSON202306Utilities extends JSONUtilities {
 
     public static final String ORGANIZATION_KEY = "organizations";
 
+    public static final String COMMENTARY_KEY = "commentary";
+
     public static final String JSON_ANNOTATION_INTERFACE = ".JsonProperty";
 
     /**

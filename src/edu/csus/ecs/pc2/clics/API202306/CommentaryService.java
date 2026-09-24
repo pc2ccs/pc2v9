@@ -50,6 +50,10 @@ public class CommentaryService implements Feature {
 
     private IInternalController controller;
 
+    // TODO: create a commentary listener, but since commentary is not integrated into the
+    // pc2 models yet, we will do it directly.
+    private EventFeedService eventFeedService = null;
+
     public CommentaryService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
@@ -223,7 +227,11 @@ public class CommentaryService implements Feature {
             if(commentaryEntries != null) {
                 commentaryEntries.writeCommentary(json + JSON202306Utilities.NL);
             }
-            return Response.created(uriBuilder.build()).entity(json).build();
+            Response reply = Response.created(uriBuilder.build()).entity(json).build();
+            if(reply != null && eventFeedService != null) {
+                eventFeedService.commentaryAdded(json);
+            }
+            return reply;
         } catch (Exception e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for commentary " + e.getMessage()).build();
         }
@@ -239,6 +247,16 @@ public class CommentaryService implements Feature {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
                 !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) ||
                 !sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST));
+    }
+
+    /**
+     * Set the event feed service so we can deliver notifications of new commentary
+     * TODO: This will be removed when we add a commentary listener
+     *
+     * @param svc
+     */
+    public void SetEventFeedService(EventFeedService svc) {
+        eventFeedService = svc;
     }
 
     /**

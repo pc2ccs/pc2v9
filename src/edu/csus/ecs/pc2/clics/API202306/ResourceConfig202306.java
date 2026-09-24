@@ -78,7 +78,8 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
             showStartingMessage("judgements web service");
             resConfig.register(new RunService(getContest(), getController()));
             showStartingMessage("runs web service");
-            resConfig.register(new EventFeedService(getContest(), getController()));
+            EventFeedService eventFeedService = new EventFeedService(getContest(), getController());
+            resConfig.register(eventFeedService);
             showStartingMessage("event-feed web service");
             resConfig.register(new StateService(getContest(), getController()));
             showStartingMessage("state web service");
@@ -86,7 +87,9 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
             showStartingMessage("awards web service");
             resConfig.register(new VersionService(getContest(), getController()));
             showStartingMessage("commentary web service");
-            resConfig.register(new CommentaryService(getContest(), getController()));
+            CommentaryService commentaryService = new CommentaryService(getContest(), getController());
+            resConfig.register(commentaryService);
+            commentaryService.SetEventFeedService(eventFeedService);
             showStartingMessage("results (extension) web service");
             resConfig.register(new ResultsService(getContest(), getController()));
             showMessage("Starting / endpoint for version web service");
