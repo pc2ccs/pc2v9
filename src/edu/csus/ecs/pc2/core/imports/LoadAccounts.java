@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
@@ -71,6 +72,11 @@ public class LoadAccounts {
     private int teamNameColumn = -1;
     private int scoreAdjustmentColumn = -1;
     private int institutionCodeColumn = -1;
+
+    /**
+     * In case we have to create accounts
+     */
+    PermissionGroup permissionGroup = new PermissionGroup();
 
     /**
      *
@@ -230,6 +236,136 @@ public class LoadAccounts {
         return account;
     }
 
+
+    /**
+     * Create an Account object using data from a TSV Load operation.
+     * We know at this point that the account name (accountColumn) and the site (siteColumn) are valid since we could not get here
+     * if they weren't.
+     *
+     * @param contest The contest
+     * @param values TSV Values
+     * @param lineCount Current line in the TSV file (for error reporting)
+     * @param filename Name of TSV file (for error reporting)
+     * @return Newly created account
+     * @throws Exception on various TSV errors
+     */
+    protected Account createAccountDuringLoad(IInternalContest contest, String[] values, int lineCount, String filename) throws Exception {
+
+        // Break account apart to create a client ID
+        String accountString = values[accountColumn];
+        String[] accountSplit = accountString.split("[0-9]+$");
+        String accountName = accountString.substring(0, accountSplit[0].length());
+        Type type = Type.valueOf(accountName.toUpperCase());
+        int clientNumber = Integer.parseInt(accountString.substring(accountSplit[0].length()));
+        int siteNum = Integer.parseInt(values[siteColumn]);
+        ClientId clientId = new ClientId(siteNum, type, clientNumber);
+
+        // Make sure account doesn't exist alrady
+        Account accountExisting = existingAccountsMap.get(clientId);
+        if (accountExisting != null) {
+            String msg = filename + ":" + lineCount + ": " + " account (" + values[accountColumn] + ") already exists - can not recreate it!";
+            throw new IllegalTSVFormatException(msg);
+        }
+
+        String password;
+        // See if a password was specified, if so, use that, otherwise use the account name (Joe password)
+        if (passwordColumn != -1 && values.length > passwordColumn) {
+            password = values[passwordColumn];
+        } else {
+            // Use Joe password
+            password = accountString;
+        }
+        Account account = new Account(clientId, password, siteNum);
+
+        account.clearListAndLoadPermissions(permissionGroup.getPermissionList(type));
+        if (displayNameColumn != -1 && values.length > displayNameColumn) {
+            account.setDisplayName(values[displayNameColumn]);
+            // When loading teams2.tsv at contest configuration time, teamname is set to the displayname column
+            // This can be overridden below, if there is an explicit "teamname" column in the file.
+            account.setTeamName(values[displayNameColumn]);
+        }
+        if (aliasColumn != -1 && values.length > aliasColumn) {
+            account.setAliasName(values[aliasColumn]);
+        }
+        if (externalIdColumn != -1 && values.length > externalIdColumn) {
+            account.setExternalId(values[externalIdColumn]);
+        }
+        if (longSchoolNameColumnn != -1 && values.length > longSchoolNameColumnn) {
+            account.setLongSchoolName(values[longSchoolNameColumnn]);
+        }
+        if (shortSchoolNameColumn != -1 && values.length > shortSchoolNameColumn) {
+            account.setShortSchoolName(values[shortSchoolNameColumn]);
+        }
+        if (countryCodeColumn != -1 && values.length > countryCodeColumn) {
+            account.setCountryCode(values[countryCodeColumn]);
+        }
+        if (teamNameColumn != -1 && values.length > teamNameColumn) {
+            account.setExternalName(values[teamNameColumn]);
+            account.setTeamName(values[teamNameColumn]);
+        } else {
+            // When loading teams2.tsv at contest configuration time, the account external name is simply set to
+            // the long school name.  Unless there is explicitly a "teamname" column in the file
+            // being loaded, we do the same here.
+            account.setExternalName(account.getLongSchoolName());
+        }
+
+        if (groups.size() > 0) {
+            if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
+                boolean needPrimaryGroup = true;
+
+                // only set primary group if it is not already set.
+                if(account.getPrimaryGroupId() != null) {
+                    needPrimaryGroup = false;
+                }
+
+                // may be a CSV list of CMS groups ids (to support multiple groups / team)
+                String [] cmsGroups = values[groupColumn].split(",");
+                for(String cmsGroup : cmsGroups) {
+                    if (groups.containsKey(cmsGroup)) {
+                        account.addGroupId(groups.get(cmsGroup).getElementId(), needPrimaryGroup);
+                        needPrimaryGroup = false;
+                    }
+                }
+            }
+        }
+
+        if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
+            if (Boolean.parseBoolean(values[permDisplayColumn]) {
+                account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+            } else {
+                account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+            }
+        }
+        if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
+            if (Boolean.parseBoolean(values[permLoginColumn])) {
+                account.addPermission(Permission.Type.LOGIN);
+            } else {
+                account.removePermission(Permission.Type.LOGIN);
+            }
+        }
+        if (permPasswordColumn != -1 && values.length > permPasswordColumn && values[permPasswordColumn].length() > 0) {
+            Permission.Type perm = Permission.Type.CHANGE_PASSWORD;
+            if (Boolean.parseBoolean(values[permPasswordColumn])) {
+                account.addPermission(perm);
+            } else {
+                account.removePermission(perm);
+            }
+        }
+        if (scoreAdjustmentColumn != -1 && values.length > scoreAdjustmentColumn && values[scoreAdjustmentColumn].length() > 0) {
+            try {
+                int newValue = Integer.parseInt(values[scoreAdjustmentColumn]);
+                account.setScoringAdjustment(newValue);
+            } catch (NumberFormatException e) {
+                String message = e.getMessage();
+                StaticLog.warning(message);
+                System.out.println("WARNING: " + message);
+            }
+        }
+        if (institutionCodeColumn != -1 && values.length > institutionCodeColumn && values[institutionCodeColumn].length() > 0) {
+            setInstitutionInformation(account, values[institutionCodeColumn]);
+        }
+        return account;
+    }
 
     /**
      * Create a new account or update an existing account given input values from load accounts file.
@@ -581,9 +717,10 @@ public class LoadAccounts {
                     // No such account in contest model
                     Account account = getAccount(values);
                     if (account == null) {
-                        String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
-                        in.close();
-                        throw new IllegalTSVFormatException(msg);
+                        // If no account, create a new one.  The caller will have to arrange to have the account
+                        // added to the model.  This only creates an Account object locally and adds it to the local account map
+                        // and ultimately, the returned array of modified accounts!
+                        account = createAccountDuringLoad(contest, values, lineCount, filename);
                     }
                     accountMap.put(account.getClientId(), account);
                 }
