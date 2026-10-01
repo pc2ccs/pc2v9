@@ -330,15 +330,13 @@ public class LoadAccounts {
         }
 
         if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
-            boolean newValue = Boolean.parseBoolean(values[permDisplayColumn]);
-            if (newValue) {
+            if (Boolean.parseBoolean(values[permDisplayColumn]) {
                 account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
             } else {
                 account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
             }
         }
         if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
-            boolean newValue = Boolean.parseBoolean(values[permLoginColumn]);
             if (Boolean.parseBoolean(values[permLoginColumn])) {
                 account.addPermission(Permission.Type.LOGIN);
             } else {
@@ -347,7 +345,6 @@ public class LoadAccounts {
         }
         if (permPasswordColumn != -1 && values.length > permPasswordColumn && values[permPasswordColumn].length() > 0) {
             Permission.Type perm = Permission.Type.CHANGE_PASSWORD;
-            boolean newValue = Boolean.parseBoolean(values[permPasswordColumn]);
             if (Boolean.parseBoolean(values[permPasswordColumn])) {
                 account.addPermission(perm);
             } else {
