@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IFileImpl;
 
@@ -146,12 +147,33 @@ public final class EventFeedUtilities {
     }
 
     /**
-     * Get files from a zipfile's bytes.
+     * Get files from a zipfile's bytes with no uncompressed-size cap.
+     * Callers such as shadow replay that must extract whatever the remote CCS stored should use this overload.
      *
      * @param bytes bytes comprising a zip file.
      * @return list of IFiles extracted from the input bytes
      */
     public static List<IFile> getIFiles(byte[] bytes) {
+        try {
+            return getIFiles(bytes, 0);
+        } catch (SubmissionRejectedException e) {
+            // max of 0 means unlimited, so this should not occur
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Get files from a zipfile's bytes, optionally stopping if inflated contents exceed a size limit.
+     * A {@code maxUncompressedBytes} of 0 or less means there is no limit (same behavior as {@link #getIFiles(byte[])}).
+     * The limit is applied to the running total of bytes actually inflated, so a zip whose headers understate
+     * entry sizes cannot expand without bound in memory.
+     *
+     * @param bytes bytes comprising a zip file
+     * @param maxUncompressedBytes maximum combined uncompressed file bytes allowed; {@code <= 0} for unlimited
+     * @return list of IFiles extracted from the input bytes
+     * @throws SubmissionRejectedException if inflated contents would exceed {@code maxUncompressedBytes}
+     */
+    public static List<IFile> getIFiles(byte[] bytes, long maxUncompressedBytes) throws SubmissionRejectedException {
 
         List<IFile> files = new ArrayList<IFile>();
 
@@ -160,6 +182,7 @@ public final class EventFeedUtilities {
         try {
             zipStream = new ZipInputStream(new ByteArrayInputStream(bytes));
             ZipEntry entry = null;
+            long extracted = 0;
             /**
              * Read each zip entry, add IFile.
              */
@@ -176,7 +199,14 @@ public final class EventFeedUtilities {
                     int bytesRead = 0;
                     while ((bytesRead = zipStream.read(buffer)) != -1)
                     {
+                        if (maxUncompressedBytes > 0 && extracted + bytesRead > maxUncompressedBytes) {
+                            throw new SubmissionRejectedException(
+                                    "Source file(s) are too large (" + (extracted + bytesRead) + " bytes) - maximum is "
+                                            + maxUncompressedBytes + " bytes.",
+                                    SubmissionRejectedException.SubmissionRejectionReason.SOURCE_TOO_BIG);
+                        }
                         byteOutputStream.write(buffer, 0, bytesRead);
+                        extracted += bytesRead;
                     }
 
                     String base64Data = getBase64Data(byteOutputStream.toByteArray());
@@ -189,6 +219,15 @@ public final class EventFeedUtilities {
             }
             zipStream.close();
 
+        } catch (SubmissionRejectedException e) {
+            if (zipStream != null){
+                try {
+                    zipStream.close();
+                } catch (Exception ze) {
+                    ; // problem closing stream, ignore.
+                }
+            }
+            throw e;
         } catch (Exception e) {
             if (zipStream != null){
                 try {
