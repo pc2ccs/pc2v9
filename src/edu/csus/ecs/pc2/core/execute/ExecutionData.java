@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.Serializable;
@@ -55,6 +55,8 @@ public class ExecutionData implements Serializable {
 
     private long executeTimeMS = 0;
 
+    private long maxExecuteTimeMS = 0;
+
     private long validateTimeMS = 0;
 
     private Exception executionException = null;
@@ -66,7 +68,7 @@ public class ExecutionData implements Serializable {
     private boolean failedToCompile = false;
 
     private String additionalInformation = "";
-    
+
     //fields associated with "point-scoring" contests
     private double score ;
     private CLICS_JUDGEMENT_ACRONYM judgementAcronym ;
@@ -293,10 +295,18 @@ public class ExecutionData implements Serializable {
 
     public void setExecuteTimeMS(long inExecuteTime){
         executeTimeMS = inExecuteTime;
+        // Keep track of longest execution time
+        if(executeTimeMS > maxExecuteTimeMS) {
+            maxExecuteTimeMS = executeTimeMS;
+        }
     }
 
     public long getExecuteTimeMS(){
         return executeTimeMS;
+    }
+
+    public long getMaxExecuteTimeMS() {
+        return maxExecuteTimeMS;
     }
 
     public void setvalidateTimeMS(long validateTime){
@@ -415,7 +425,7 @@ public class ExecutionData implements Serializable {
 
         return retStr;
     }
-    
+
     /**
      * When the same execute data is to be used between successive test cases, certain fields should be reset.
      * Specifically, those related to the actual execution and validation of the test case run.
@@ -439,7 +449,7 @@ public class ExecutionData implements Serializable {
         memoryLimitExceeded = false;
         failedToCompile = false;
         additionalInformation = "";
-        
+
         //fields associated with "point-scoring" contests
         double score = 0;
         CLICS_JUDGEMENT_ACRONYM judgementAcronym = null;

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.util.ArrayList;
@@ -610,12 +610,12 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), solved, true, true);
                 judgementRecord.setValidatorResultString(results);
-                
+
                 //if it's a point-scoring contest, put the score and the judgement into the JudgementRecord
                 if (contest.getContestInformation().isScoreboardTypeScore()) {
-                    
+
                     judgementRecord.setScore(executionData.getScore());
-                    
+
                     CLICS_JUDGEMENT_ACRONYM acronym = executionData.getJudgementAcronym();
                     String judgementDescription ;
                     if (acronym != null) {
@@ -668,7 +668,7 @@ public class AutoJudgingMonitor implements UIPlugin {
             long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
             long totalSeconds = milliDiff / 1000;
             judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
-            judgementRecord.setExecuteMS(executeTimeMS);
+            judgementRecord.setExecuteMS(executionData.getMaxExecuteTimeMS());
             judgementRecord.setJudgeStartDate(fetchedRun.getJudgeStartDate());
 
             runResultFiles = new RunResultFiles(fetchedRun, fetchedRun.getProblemId(), judgementRecord, executable.getExecutionData());
