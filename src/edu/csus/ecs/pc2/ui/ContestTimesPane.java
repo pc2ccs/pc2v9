@@ -19,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 
 import com.ibm.webrunner.j2mclb.util.Comparator;
@@ -73,6 +74,9 @@ public class ContestTimesPane extends JPanePlugin {
     private MCLB contestTimeListBox = null;
 
     private JButton refreshButton = null;
+
+    /** Refreshes elapsed/remaining columns while the Times tab is visible. */
+    private Timer elapsedRefreshTimer = null;
 
     private JButton setScheduledStartTimeButton = null;
 
@@ -366,6 +370,7 @@ public class ContestTimesPane extends JPanePlugin {
         initializePermissions();
 
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
+        ensureElapsedRefreshTimer();
 
         getContest().addSiteListener(new SiteListenerImplementation());
 
@@ -969,4 +974,39 @@ public class ContestTimesPane extends JPanePlugin {
         }
         return contestTimesPanel;
     }
+
+    /**
+     * Keep Elapsed/Remaining columns live while the contest clock is running.
+     * ContestTime events only fire on start/stop/edit, so without a local timer
+     * the grid stays at the last event snapshot until the user hits Refresh (#1285).
+     */
+    private void ensureElapsedRefreshTimer() {
+        if (elapsedRefreshTimer != null) {
+            return;
+        }
+        elapsedRefreshTimer = new Timer(1000, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (!isShowing()) {
+                    return;
+                }
+                IInternalContest contest = getContest();
+                if (contest == null) {
+                    return;
+                }
+                ContestTime[] times = contest.getContestTimes();
+                if (times == null) {
+                    return;
+                }
+                for (int i = 0; i < times.length; i++) {
+                    ContestTime ct = times[i];
+                    if (ct != null && ct.isContestRunning()) {
+                        updateContestTimeRow(ct);
+                    }
+                }
+            }
+        });
+        elapsedRefreshTimer.setRepeats(true);
+        elapsedRefreshTimer.start();
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
