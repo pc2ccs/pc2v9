@@ -1629,7 +1629,7 @@ public class PacketHandler {
         // Send to remote client (on another server) or a local team
         // Note that if this was proxy submit by say, a feeder on this server, the response
         // will get sent below in sendToJudgesAndOthers().  We don't want
-        // to send the same packet to the same client twice.
+        // to send the same packet to the same client twice. (i1065)
         if(!isThisServer || fromId.getClientType() == ClientType.Type.TEAM) {
             controller.sendToClient(confirmPacket);
         }
@@ -1639,6 +1639,15 @@ public class PacketHandler {
             controller.sendToJudgesAndOthers(confirmPacket, false);
             Packet dupSubmissionPacket = PacketFactory.createRunSubmissionConfirmation(contest.getClientId(), fromId, run, runFiles);
             controller.sendToServers(dupSubmissionPacket);
+
+            // Proxy submissions (e.g. pc2submit via the Event Feeder) are confirmed to the
+            // proxy through sendToJudgesAndOthers above, which deliberately excludes teams.
+            // Also notify the actual team submitter so team clients (including WTI) learn
+            // about the pending run immediately. See GitHub issue #1278.
+            if (proxySubmission && submitter.getClientType() == ClientType.Type.TEAM) {
+                Packet teamConfirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), submitter, run);
+                controller.sendToClient(teamConfirmPacket);
+            }
         }
 
         controller.sendRunToSubmissionInterface(run, runFiles);
