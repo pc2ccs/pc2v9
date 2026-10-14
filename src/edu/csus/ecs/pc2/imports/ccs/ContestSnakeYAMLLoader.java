@@ -187,7 +187,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
-        }
         return(contestTitle);
     }
 
@@ -437,7 +436,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             /*
              * Look up contest short name, which is what CLICS_CONTEST_NAME is, really.
              */
-            String oldContestName = fetchValue(content, SHORT_NAME_KEY);
+            String oldContestName = ContestImportUtilities.fetchValue(content, SHORT_NAME_KEY);
             if(!StringUtilities.isEmpty(oldContestName)) {
                 // Let's not overwrite one if there happens to be one in the contest yaml
                 if(StringUtilities.isEmpty(contestFormal)) {
