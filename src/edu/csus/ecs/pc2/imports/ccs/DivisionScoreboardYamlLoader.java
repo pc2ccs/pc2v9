@@ -1,84 +1,46 @@
 // Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.MarkedYAMLException;
-
-import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Loads optional division-scoreboard.yaml overlay for division-type contests.
+ * Applies the optional {@code division-groups} list from PC2 YAML ({@code system.pc2.yaml}).
  *
- * <p>This file adjusts scoreboard-related flags on groups that already exist from
+ * <p>The list adjusts scoreboard-related flags on groups that already exist from
  * groups.tsv / CMS import. It does not create groups or change team membership.</p>
  */
 public class DivisionScoreboardYamlLoader {
 
-    private final Yaml yaml = new Yaml();
-
     /**
-     * Apply division-scoreboard.yaml if present in the CDP config directory.
-     * The content of the file "division-scoreboard.yaml" defines "overlays"
-     * on any existing group information; that is, it updates existing groups
-     * with information regarding which groups represent "division scoreboards".
-     * Groups must have already been defined before attempting to apply overlay/update
-     * information.
+     * Updates existing groups from a {@code division-groups} list in the parsed YAML map.
+     * Groups must already have been loaded. A missing list is a no-op.
      *
      * @param contest loaded contest model
-     * @param cdpConfigDirectory CDP config directory
-     * @return true if the file existed and was read
-     */
-    public boolean loadDivisionScoreboardYamlOverlay(IInternalContest contest, File cdpConfigDirectory) {
-        if (contest == null) {
-            throw new IllegalArgumentException("contest is null");
-        }
-        if (cdpConfigDirectory == null) {
-            throw new IllegalArgumentException("cdpConfigDirectory is null");
-        }
-
-        File overlayFile = new File(cdpConfigDirectory, IContestLoader.DIVISION_SCOREBOARD_YAML_FILENAME);
-        if (!overlayFile.isFile()) {
-            return false;
-        }
-
-        if (contest.getGroups().length == 0) {
-            StaticLog.warning("Found " + overlayFile.getAbsolutePath()
-                    + " but no groups are loaded; load groups.tsv first");
-            return true;
-        }
-
-        Map<String, Object> content = loadYaml(overlayFile);
-        if (content == null) {
-            return true;
-        }
-
-        applyOverlay(contest, content, overlayFile.getAbsolutePath());
-        return true;
-    }
-
-    /**
-     * Updates existing groups based on information obtained from division-scoreboard.yaml ("sourceDescription" file).
-     * If the YAML file indicates a group is a "division scoreboard", the corresponding Group is
+     * @param content parsed YAML document (contest.yaml concatenated with system.pc2.yaml)
+     * @param sourceDescription name used in warning messages, typically {@code system.pc2.yaml}
      */
     @SuppressWarnings("unchecked")
     void applyOverlay(IInternalContest contest, Map<String, Object> content, String sourceDescription) {
-    	
+        if (contest == null || content == null) {
+            return;
+        }
+
     	//get info from YAML on which groups represent entire divisions
         ArrayList<Map<String, Object>> divisionGroups = fetchList(content, IContestLoader.DIVISION_GROUPS_KEY);
         if (divisionGroups == null || divisionGroups.isEmpty()) {
             return;
         }
 
+        if (contest.getGroups().length == 0) {
+            StaticLog.warning("Found division-groups in " + sourceDescription
+                    + " but no groups are loaded; load groups.tsv first");
+            return;
+        }
         Group[] groups = contest.getGroups();
         for (Map<String, Object> entry : divisionGroups) {
             Integer groupId = fetchInteger(entry, IContestLoader.DIVISION_GROUP_ID_KEY);
@@ -106,7 +68,7 @@ public class DivisionScoreboardYamlLoader {
                 continue;
             }
 
-            //update the current group's flags based on the values from the division-scoreboard YAML file
+            //update the current group's flags based on the division-groups entry
             if (entry.containsKey(IContestLoader.DISPLAY_ON_SCOREBOARD_KEY)) {
                 group.setDisplayOnScoreboard(fetchBoolean(entry, IContestLoader.DISPLAY_ON_SCOREBOARD_KEY, true));
             }
@@ -243,26 +205,5 @@ public class DivisionScoreboardYamlLoader {
             return false;
         }
         return defaultValue;
-    }
-
-    /**
-     * Reads the specified file, assumed to contain YAML, and returns a {@link Map} of the
-     * YAML entries.  
-     * 
-     * @return a Map containing the YAML keys and corresponding values.
-     * @throws {@link YamlLoadException} if the file contains YAML errors.
-     * @throws {@link FileNotFoundException} if the specified file cannot be found.
-     */
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> loadYaml(File file) {
-        try {
-            InputStream stream = new FileInputStream(file);
-            return (Map<String, Object>) yaml.load(stream);
-        } catch (MarkedYAMLException e) {
-            ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
-            throw new YamlLoadException(loader.getSnakeParserDetails(e), e, file.getAbsolutePath());
-        } catch (FileNotFoundException e) {
-            throw new YamlLoadException("File not found " + file.getAbsolutePath(), e, file.getAbsolutePath());
-        }
     }
 }

@@ -18,7 +18,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * <ul>
  *   <li><b>Admin Groups tab "Id"</b> -- UI row number only; not used by these methods.</li>
  *   <li><b>External Id</b> ({@link Group#getGroupId()}) -- CMS / {@code groups.tsv} id;
- *       used by {@code division-scoreboard.yaml} {@code id:} matching, by WTI scoreboard
+ *       used by {@code system.pc2.yaml} {@code division-groups} {@code id:} matching, by WTI scoreboard
  *       filtering ({@code ?groupExternalId=}), and emitted as standings {@code group/@externalId}.</li>
  *   <li><b>Scoreboard group-list ordinal</b> -- 1-based position among groups with
  *       {@link Group#isDisplayOnScoreboard()} {@code true}, in

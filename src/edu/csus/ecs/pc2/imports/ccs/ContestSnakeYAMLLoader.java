@@ -525,6 +525,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // should be consolidated into this new section.  (JLC)
         loadScoreboardSection(content, contestInformation);
 
+        // division-groups is a PC2-only list, normally in system.pc2.yaml (concatenated into this document).
+        // Groups must already have been loaded from groups.tsv.
+        new DivisionScoreboardYamlLoader().applyOverlay(contest, content, "system.pc2.yaml");
+
         // save ContesInformation to model
         contest.updateContestInformation(contestInformation);
 
@@ -3625,10 +3629,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         } else {
 
             loadCCSTSVFiles(contest, cdpConfigDirectory);
-
-            //load an optional scoreboard-division file if it exists.
-            //A scoreboard-division file describes assignment of (existing) groups into divisions
-            new DivisionScoreboardYamlLoader().loadDivisionScoreboardYamlOverlay(contest, cdpConfigDirectory);
 
             contest = fromYaml(contest, cdpConfigDirectory.getAbsolutePath());
 

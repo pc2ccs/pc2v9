@@ -11,7 +11,7 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
- * Unit tests for division-scoreboard.yaml overlay loading.
+ * Unit tests for the system.pc2.yaml division-groups overlay.
  */
 public class DivisionScoreboardYamlLoaderTest extends AbstractTestCase {
 
@@ -24,7 +24,7 @@ public class DivisionScoreboardYamlLoaderTest extends AbstractTestCase {
     public void testApplyDivisionScoreboardOverlay() throws Exception {
         InternalContest contest = createContestWithGroups();
 
-        File overlayFile = new File(getTestDataDirectory(), IContestLoader.DIVISION_SCOREBOARD_YAML_FILENAME);
+        File overlayFile = new File(getTestDataDirectory(), "system.pc2.yaml");
         Map<String, Object> content = new ContestSnakeYAMLLoader().loadYaml(overlayFile.getAbsolutePath());
         loader.applyOverlay(contest, content, overlayFile.getAbsolutePath());
 
@@ -40,12 +40,10 @@ public class DivisionScoreboardYamlLoaderTest extends AbstractTestCase {
         assertFalse("Europe not division-wide", europe.isDivisionWideScoreboard());
     }
 
-    public void testMissingOverlayFileIsNoOp() throws Exception {
+    public void testMissingDivisionGroupsKeyIsNoOp() {
         InternalContest contest = createContestWithGroups();
-        File configDir = new File(getTestDataDirectory(), "missing");
 
-        boolean loaded = loader.loadDivisionScoreboardYamlOverlay(contest, configDir);
-        assertFalse("Missing overlay should not load", loaded);
+        loader.applyOverlay(contest, new java.util.HashMap<String, Object>(), "system.pc2.yaml");
 
         Group d1 = findGroupByName(contest, "D1");
         assertTrue("Default display on scoreboard unchanged", d1.isDisplayOnScoreboard());

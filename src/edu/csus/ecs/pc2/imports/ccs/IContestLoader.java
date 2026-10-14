@@ -261,14 +261,8 @@ public interface IContestLoader {
     String SUBMISSION_THROTTLING_KEY = "submission-throttling";
 
     /**
-     * Name of the optional post-CDP-loading file which allows for specifying division-type
-     * contest scoreboard group flags.
+     * Top-level key in system.pc2.yaml listing scoreboard flags for existing groups.
      * Does not define groups; applied after groups.tsv is loaded.
-     */
-    String DIVISION_SCOREBOARD_YAML_FILENAME = "division-scoreboard.yaml";
-
-    /**
-     * Top-level key in division-scoreboard.yaml.
      */
     String DIVISION_GROUPS_KEY = "division-groups";
 
