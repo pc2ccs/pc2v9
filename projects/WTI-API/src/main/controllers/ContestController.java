@@ -93,7 +93,7 @@ public class ContestController extends MainController {
 
 	/**
 	 * Cached scoreboard standings JSON by group scope. Key {@link #STANDINGS_CACHE_KEY_ALL} is the full contest;
-	 * other keys are scoreboard {@code groupList.group.id} values from {@link DefaultScoringAlgorithm#dumpGroupList}.
+	 * other keys are group {@link Group#getGroupId() External Id} strings (WTI {@code groupExternalId}).
 	 */
 	private final HashMap<String, String> standingsJsonCache = new HashMap<>();
 	
@@ -664,13 +664,15 @@ public class ContestController extends MainController {
 	 *  This XML string is then converted to JSON before being returned to the caller.
 	 *  
 	 *  The ContestController <I>caches</i> scoreboard standings JSON per scope (full contest and each requested
-	 *  {@code groupId}). If standings have not changed since the last DSA run, a cached entry is returned.
-	 *  Optional {@code groupId} matches {@code standingsHeader.groupList.group.id} and causes DSA to generate
-	 *  standings for that PC2 {@link Group} only (correct teams and problem columns).
+	 *  {@code groupExternalId}). If standings have not changed since the last DSA run, a cached entry is returned.
+	 *  Optional {@code groupExternalId} matches {@code standingsHeader.groupList.group.externalId}
+	 *  ({@link Group#getGroupId()}) and causes DSA to generate standings for that PC2 {@link Group} only
+	 *  (correct teams and problem columns). It is <em>not</em> the scoreboard group-list ordinal
+	 *  ({@code group/@id}), which remains for classic XSL/HTML scoreboards.
 	 * 
 	 * @param key a String containing a key which uniquely identifies the team making the request.  
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
-	 * @param groupId optional scoreboard group id from the standings header; omit for full contest
+	 * @param groupExternalId optional CMS / groups.tsv External Id of a scoreboard-visible group; omit for full contest
 	 *
 	 * @return Response of:
 	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
@@ -688,7 +690,7 @@ public class ContestController extends MainController {
 	})
 	public Response getStandings(
 			@ApiParam(value="token used by logged in users to access team information", required = true) @HeaderParam("team_id")String key,
-			@ApiParam(value="optional scoreboard group id (standingsHeader.groupList.group.id) for group-scoped standings") @QueryParam("groupId") String groupId) {
+			@ApiParam(value="optional group External Id (standingsHeader.groupList.group.externalId) for group-scoped standings") @QueryParam("groupExternalId") String groupExternalId) {
 
 		logger.fine("Looking up team login connection");
 		
@@ -712,11 +714,12 @@ public class ContestController extends MainController {
 		
 		try {
 			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName()
-					+ (groupId != null && !groupId.trim().isEmpty() ? " groupId=" + groupId.trim() : " (full contest)"));
+					+ (groupExternalId != null && !groupExternalId.trim().isEmpty()
+							? " groupExternalId=" + groupExternalId.trim() : " (full contest)"));
 			
 			xlog(logger, "debug 22 Start" );
 			
-			final String cacheKey = getStandingsCacheKey(groupId);
+			final String cacheKey = getStandingsCacheKey(groupExternalId);
 			String responseJson = null;
 
 			//insure that only one browser client at a time can attempt to use the DSA to update standings
@@ -742,9 +745,9 @@ public class ContestController extends MainController {
 					}
 
 					try {
-						responseJson = buildScoreboardJson(internalContest, groupId, userInformation.getContest().getMyClient());
+						responseJson = buildScoreboardJson(internalContest, groupExternalId, userInformation.getContest().getMyClient());
 					} catch (IllegalArgumentException e) {
-						logger.warning("Invalid groupId for scoreboard request: " + e.getMessage());
+						logger.warning("Invalid groupExternalId for scoreboard request: " + e.getMessage());
 						return Response.status(Response.Status.BAD_REQUEST)
 								.entity(new ServerErrorResponseModel(Response.Status.BAD_REQUEST, e.getMessage()))
 								.type(MediaType.APPLICATION_JSON).build();
@@ -792,9 +795,11 @@ public class ContestController extends MainController {
 	}
 
 	/**
-	 * Builds enriched JSON standings for the full contest or one scoreboard group.
+	 * Builds enriched JSON standings for the full contest or one scoreboard-visible group.
+	 *
+	 * @param groupExternalId blank/null for full contest; otherwise {@link Group#getGroupId()} External Id
 	 */
-	private String buildScoreboardJson(IInternalContest internalContest, String groupId, IClient requestingClient)
+	private String buildScoreboardJson(IInternalContest internalContest, String groupExternalId, IClient requestingClient)
 			throws IllegalContestState, IOException, JSONException {
 
 		Properties props = internalContest.getContestInformation().getScoringProperties();
@@ -812,7 +817,7 @@ public class ContestController extends MainController {
 		// TODO i686 - Find/fix root cause for NPE in WTI DSA, details in i680 #686
 		props = DefaultScoringAlgorithm.getDefaultProperties();
 
-		ArrayList<Group> wantedGroups = resolveWantedGroups(internalContest, groupId);
+		ArrayList<Group> wantedGroups = resolveWantedGroups(internalContest, groupExternalId);
 		String xmlStandings = dsa.getStandings(internalContest, null, wantedGroups, props, logger);
 
 		logger.info("Converting DSA XML to JSON");
@@ -823,28 +828,29 @@ public class ContestController extends MainController {
 		return this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings), internalContest, requestingClientId);
 	}
 
-	private static String getStandingsCacheKey(String groupId) {
-		if (groupId == null) {
+	private static String getStandingsCacheKey(String groupExternalId) {
+		if (groupExternalId == null) {
 			return STANDINGS_CACHE_KEY_ALL;
 		}
-		String trimmed = groupId.trim();
+		String trimmed = groupExternalId.trim();
 		return trimmed.isEmpty() ? STANDINGS_CACHE_KEY_ALL : trimmed;
 	}
 
 	/**
-	 * Resolves optional {@code groupId} to a one-element {@code wantedGroups} list for DSA.
-	 * {@code groupId} matches sequential scoreboard ids assigned in {@link DefaultScoringAlgorithm#dumpGroupList}.
+	 * Resolves optional {@code groupExternalId} to a one-element {@code wantedGroups} list for DSA.
+	 * {@code groupExternalId} is {@link Group#getGroupId()} for a scoreboard-visible group
+	 * (standings {@code group/@externalId}), not the dumpGroupList ordinal ({@code group/@id}).
 	 *
 	 * @return {@code null} for full-contest standings
 	 */
-	private ArrayList<Group> resolveWantedGroups(IInternalContest contest, String groupId) {
-		String cacheKey = getStandingsCacheKey(groupId);
+	private ArrayList<Group> resolveWantedGroups(IInternalContest contest, String groupExternalId) {
+		String cacheKey = getStandingsCacheKey(groupExternalId);
 		if (STANDINGS_CACHE_KEY_ALL.equals(cacheKey)) {
 			return null;
 		}
-		Group group = resolveGroupForScoreboardId(contest, cacheKey);
+		Group group = resolveGroupForExternalId(contest, cacheKey);
 		if (group == null) {
-			throw new IllegalArgumentException("Unknown scoreboard groupId: " + cacheKey);
+			throw new IllegalArgumentException("Unknown scoreboard groupExternalId: " + cacheKey);
 		}
 		ArrayList<Group> wantedGroups = new ArrayList<Group>();
 		wantedGroups.add(group);
@@ -852,12 +858,10 @@ public class ContestController extends MainController {
 	}
 
 	/**
-	 * Maps a scoreboard header group {@code id} to the corresponding {@link Group}.
-	 * Id assignment matches {@link DefaultScoringAlgorithm#dumpGroupList}: only groups with
-	 * {@link Group#isDisplayOnScoreboard()} true, in contest order, numbered from 1.
+	 * Maps a group External Id string to the corresponding scoreboard-visible {@link Group}.
 	 */
-	private Group resolveGroupForScoreboardId(IInternalContest contest, String scoreboardGroupId) {
-		return ScoreboardGroupUtilities.getGroupForScoreboardGroupListOrdinal(contest, scoreboardGroupId);
+	private Group resolveGroupForExternalId(IInternalContest contest, String groupExternalId) {
+		return ScoreboardGroupUtilities.getGroupForExternalId(contest, groupExternalId);
 	}
  
 	/**
@@ -894,17 +898,18 @@ public class ContestController extends MainController {
 	}
 
 	/**
-	 * Adds multi-group membership to each scoreboard row.
+	 * Adds multi-group membership to each scoreboard row, keyed by External Id.
 	 * <p>
 	 * PC2 standings XML only carries the team's primary group on each {@code teamStanding} node
-	 * ({@code teamGroupId}, {@code teamGroupName}, {@code groupRank}). A team may belong to several groups;
-	 * the UI needs every {@code standingsHeader.groupList.group} {@code id} that should include that team.
+	 * ({@code teamGroupId} ordinal-style, {@code teamGroupExternalId}, {@code teamGroupName}, {@code groupRank}).
+	 * A team may belong to several groups; the WTI UI needs every scoreboard-visible group's
+	 * {@code externalId} that should include that team.
 	 * </p>
 	 * <p>
-	 * For each team row, looks up the {@link Account} and appends a {@code teamGroupIds} array: for each
+	 * For each team row, looks up the {@link Account} and appends a {@code teamGroupExternalIds} array: for each
 	 * {@code group} in the header {@code groupList}, if {@code externalId} matches the group's CMS id and
-	 * the account {@link Account#isGroupMember} for that group, the group's {@code id} string is added.
-	 * Those ids match the scoreboard group filter in the browser.
+	 * the account {@link Account#isGroupMember} for that group, that {@code externalId} string is added.
+	 * Those values match the WTI scoreboard filter ({@code ?groupExternalId=} / dropdown).
 	 * </p>
 	 * <p>
 	 * On any failure, returns the input JSON unchanged.
@@ -912,7 +917,7 @@ public class ContestController extends MainController {
 	 *
 	 * @param jsonStandings JSON string from {@link #getJSONStandings(String)}
 	 * @param contest       contest providing team accounts and {@link Group} definitions
-	 * @return JSON with {@code teamGroupIds} set on each processed {@code teamStanding}, or the original string if
+	 * @return JSON with {@code teamGroupExternalIds} set on each processed {@code teamStanding}, or the original string if
 	 *         enrichment is skipped or throws
 	 */
 	private String enrichScoreboardTeamGroups(String jsonStandings, IInternalContest contest, ClientId requestingClientId) {
@@ -934,7 +939,7 @@ public class ContestController extends MainController {
 				return jsonStandings;
 			}
 			JSONObject standingsHeader = contestStandings.getJSONObject("standingsHeader");
-			addDefaultGroupIdToHeader(standingsHeader, contest, requestingClientId);
+			addDefaultGroupExternalIdToHeader(standingsHeader, contest, requestingClientId);
 			JSONObject groupListObj = null;
 			// org.json may preserve "groupList" casing from XML; we also want to accept "grouplist" for defensive parsing.
 			if (standingsHeader.has("groupList")) {
@@ -947,8 +952,8 @@ public class ContestController extends MainController {
 				return jsonStandings;
 			}
 
-			// Header "group" entries use externalId (CMS group id) and id (sequential scoreboard id used in the UI filter).
-			// Construct a Map CMS id -> PC2 Group so we can call account.isGroupMember(ElementId) for each header row.
+			// Header "group" entries include externalId (CMS group id; WTI filter key) and id (scoreboard
+			// ordinal for XSL/HTML). Map CMS id -> PC2 Group for account.isGroupMember(ElementId).
 			JSONArray groupArray = asJsonArray(groupListObj.get("group"));
 			HashMap<Integer, Group> groupByCmsId = new HashMap<Integer, Group>();
 			for (Group g : contest.getGroups()) {
@@ -956,7 +961,7 @@ public class ContestController extends MainController {
 			}
 
 			// Walk the list of teamStandings (one teamStanding element per team); for each team, insert into 
-			// the teamStanding an array containing teamGroupIds for the group(s) to which that team belongs.
+			// the teamStanding an array containing External Ids for the scoreboard group(s) to which that team belongs.
 			Object rawTeams = contestStandings.get("teamStanding");
 			JSONArray teamArray = asJsonArray(rawTeams);
 			int defaultSite = contest.getSiteNumber();
@@ -979,42 +984,39 @@ public class ContestController extends MainController {
 					//can't do anything with this team if there's no account for them
 					continue;
 				}
-				// Collect every scoreboard group "id" from the header for which this account belongs to that group.
-				JSONArray memberStandingsIds = new JSONArray();
+				// Collect every scoreboard group externalId from the header for which this account belongs to that group.
+				JSONArray memberExternalIds = new JSONArray();
 				for (int gi = 0; gi < groupArray.length(); gi++) {
 					JSONObject groupJson = groupArray.getJSONObject(gi);
-					if (!groupJson.has("externalId") || !groupJson.has("id")) {
+					if (!groupJson.has("externalId")) {
 						continue;
 					}
 					int extId = groupJson.getInt("externalId");
 					Group scoredGroup = groupByCmsId.get(Integer.valueOf(extId));
 					if (scoredGroup != null && account.isGroupMember(scoredGroup.getElementId())) {
-						Object idObj = groupJson.get("id");
-						String standingsId = idObj == null ? "" : String.valueOf(idObj).trim();
-						if (!standingsId.isEmpty()) {
-							memberStandingsIds.put(standingsId);
-						}
+						memberExternalIds.put(Integer.toString(extId));
 					}
 				}
-				//insert the groupIds for this team in the team's teamStanding row
-				team.put("teamGroupIds", memberStandingsIds);
+				//insert the externalGroupIds for this team into the team's teamStanding row
+				team.put("teamGroupExternalIds", memberExternalIds);
 			}
 			
-			//return an updated JSON string which now also contains the groupIds in each teamStanding row
+			//return an updated JSON string which now also contains the externalGroupIds in each teamStanding row
 			return root.toString();
 			
 		} catch (Exception e) {
-			// Malformed JSON, missing fields, or type mismatches: do not fail the request; the UI can still filter by primary teamGroupId.
-			logger.warning("ContestController.enrichScoreboardTeamGroups failed while adding teamGroupIds; returning unenriched JSON: " + e.getMessage());
+			// Malformed JSON, missing fields, or type mismatches: do not fail the request; the UI can still filter by primary teamGroupExternalId.
+			logger.warning("ContestController.enrichScoreboardTeamGroups failed while adding teamGroupExternalIds; returning unenriched JSON: " + e.getMessage());
 			return jsonStandings;
 		}
 	}
 
 	/**
-	 * If "All teams" is hidden for this contest/requester, add a defaultGroupId to the standingsHeader
+	 * If "All teams" is hidden for this contest/requester, add {@code defaultGroupExternalId} to the standingsHeader
 	 * so the WTI UI can select the requester's division-wide scoreboard without a separate endpoint.
+	 * The value is {@link Group#getGroupId()}, not the scoreboard group-list ordinal.
 	 */
-	private void addDefaultGroupIdToHeader(JSONObject standingsHeader, IInternalContest contest, ClientId requestingClientId)
+	private void addDefaultGroupExternalIdToHeader(JSONObject standingsHeader, IInternalContest contest, ClientId requestingClientId)
 			throws JSONException {
 		if (standingsHeader == null || contest == null || requestingClientId == null) {
 			return;
@@ -1033,10 +1035,7 @@ public class ContestController extends MainController {
 			return;
 		}
 
-		int ordinal = ScoreboardGroupUtilities.getScoreboardGroupListOrdinal(contest, defaultGroup);
-		if (ordinal > 0) {
-			standingsHeader.put("defaultGroupId", Integer.toString(ordinal));
-		}
+		standingsHeader.put("defaultGroupExternalId", Integer.toString(defaultGroup.getGroupId()));
 	}
 
 	/** Wraps a single JSONObject from XML in a one-element JSONArray so callers can always use indexed loops. */

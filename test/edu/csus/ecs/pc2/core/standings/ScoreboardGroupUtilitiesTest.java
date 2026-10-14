@@ -74,6 +74,21 @@ public class ScoreboardGroupUtilitiesTest extends AbstractTestCase {
         assertEquals(3, ScoreboardGroupUtilities.getScoreboardGroupListOrdinal(contest, californiaD1));
     }
 
+    public void testGetGroupForExternalId() {
+        IInternalContest contest = createPacNWStyleContest(true);
+
+        assertEquals("D1", ScoreboardGroupUtilities.getGroupForExternalId(contest, 1200).getDisplayName());
+        assertEquals("D2", ScoreboardGroupUtilities.getGroupForExternalId(contest, "1201").getDisplayName());
+        assertEquals("California - D1",
+                ScoreboardGroupUtilities.getGroupForExternalId(contest, 400).getDisplayName());
+        // Hidden from scoreboard: External Id exists on the group but is not scoreboard-visible
+        assertNull(ScoreboardGroupUtilities.getGroupForExternalId(contest, 1202));
+        assertNull(ScoreboardGroupUtilities.getGroupForExternalId(contest, 0));
+        assertNull(ScoreboardGroupUtilities.getGroupForExternalId(contest, 99));
+        assertNull(ScoreboardGroupUtilities.getGroupForExternalId(contest, "abc"));
+        assertNull(ScoreboardGroupUtilities.getGroupForExternalId(contest, ""));
+    }
+
     public void testGetGroupForScoreboardGroupListOrdinal() {
         IInternalContest contest = createPacNWStyleContest(true);
 

@@ -64,13 +64,14 @@ export abstract class IContestService {
   abstract getRemainingSecs(): number;
 
   /**
-   * @param groupId optional scoreboard group id (standingsHeader.groupList.group.id).
-   *        Omit or pass '' for full-contest standings.
+   * @param groupExternalId optional CMS / groups.tsv External Id of a scoreboard-visible group
+   *        (standingsHeader.groupList.group.externalId). Omit or pass '' for full-contest standings.
+   *        Not the scoreboard group-list ordinal (group/@id), which is for classic XSL/HTML.
    */
-  abstract getStandings(groupId?: string): Observable<String>;
+  abstract getStandings(groupExternalId?: string): Observable<String>;
 
   abstract markStandingsOutOfDate(): void;
 
-  /** @param groupId same group scope as {@link getStandings} */
-  abstract getStandingsAreCurrentFlag(groupId?: string): boolean;
+  /** @param groupExternalId same group scope as {@link getStandings} */
+  abstract getStandingsAreCurrentFlag(groupExternalId?: string): boolean;
 }

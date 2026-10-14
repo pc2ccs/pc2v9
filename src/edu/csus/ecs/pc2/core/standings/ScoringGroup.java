@@ -14,7 +14,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class ScoringGroup {
 
     // <group externalId="18474" id="1" included="1" title="..." teamCount="10" divisionWide="false"/>
-    // Attribute id is the scoreboard group-list ordinal (dumpGroupList), not External Id.
+    // Attribute id is the scoreboard group-list ordinal (dumpGroupList) for classic XSL/HTML.
+    // Attribute externalId is Group.getGroupId(); WTI scoreboard filtering uses externalId.
 
     @XmlAttribute
     private String externalId;

@@ -994,7 +994,8 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     /**
      * Create XML groupList.
      * <p>
-     * Attribute {@code id} is the scoreboard group-list ordinal (not External Id).
+     * Attribute {@code id} is the scoreboard group-list ordinal for classic XSL/HTML (not External Id;
+     * WTI filters by {@code externalId}).
      * Attribute {@code divisionWide} reflects {@link Group#isDivisionWideScoreboard()}.
      * </p>
      *

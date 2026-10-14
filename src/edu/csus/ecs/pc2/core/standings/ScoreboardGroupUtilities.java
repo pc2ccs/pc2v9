@@ -18,18 +18,18 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * <ul>
  *   <li><b>Admin Groups tab "Id"</b> -- UI row number only; not used by these methods.</li>
  *   <li><b>External Id</b> ({@link Group#getGroupId()}) -- CMS / {@code groups.tsv} id;
- *       used by {@code division-scoreboard.yaml} {@code id:} matching.</li>
+ *       used by {@code division-scoreboard.yaml} {@code id:} matching, by WTI scoreboard
+ *       filtering ({@code ?groupExternalId=}), and emitted as standings {@code group/@externalId}.</li>
  *   <li><b>Scoreboard group-list ordinal</b> -- 1-based position among groups with
  *       {@link Group#isDisplayOnScoreboard()} {@code true}, in
  *       {@link IInternalContest#getGroups()} order, as assigned by
  *       {@code DefaultScoringAlgorithm.dumpGroupList}. Appears as standings
- *       {@code group/@id} and as the WTI {@code ?groupId=} query parameter.</li>
+ *       {@code group/@id} for classic XSL/HTML scoreboards. <em>Not</em> used by WTI
+ *       for filtering (WTI uses External Id).</li>
  * </ul>
- * Methods here that take or return a numeric scoreboard group id mean the
- * <em>scoreboard group-list ordinal</em>, never External Id and never the Admin Groups "Id"
- * column (UI row).
  * The scoreboard group-list ordinal is recomputed when standings are built; groups with
  * {@code displayOnScoreboard == false} are skipped and do not receive an ordinal.
+ * External Id is stable across such renumbering.
  */
 public final class ScoreboardGroupUtilities {
 
@@ -164,15 +164,61 @@ public final class ScoreboardGroupUtilities {
     }
 
     /**
+     * Returns the scoreboard-visible {@link Group} whose {@link Group#getGroupId() External Id}
+     * equals {@code externalId}.
+     *
+     * <p>This is the lookup used by WTI ({@code ?groupExternalId=}). Groups that are not
+     * {@link Group#isDisplayOnScoreboard() display-on-scoreboard} are not matched.</p>
+     *
+     * @param contest contest model
+     * @param externalId CMS / groups.tsv External Id
+     * @return matching scoreboard-visible group, or null if none
+     */
+    public static Group getGroupForExternalId(IInternalContest contest, int externalId) {
+        if (contest == null) {
+            return null;
+        }
+        for (Group group : getScoreboardVisibleGroups(contest)) {
+            if (group.getGroupId() == externalId) {
+                return group;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolve a string form of External Id to a scoreboard-visible {@link Group}.
+     *
+     * @param contest contest model
+     * @param externalId string form of {@link Group#getGroupId()} (e.g. WTI {@code groupExternalId} query value)
+     * @return matching group, or null if blank, non-numeric, or unknown / not scoreboard-visible
+     */
+    public static Group getGroupForExternalId(IInternalContest contest, String externalId) {
+        if (externalId == null) {
+            return null;
+        }
+        String trimmed = externalId.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        try {
+            return getGroupForExternalId(contest, Integer.parseInt(trimmed));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /**
      * Returns the scoreboard group-list ordinal for a {@link Group}; that is, the 1-based 
      * ordinal within the group list defined by {@code DefaultScoringAlgorithm.dumpGroupList}.
      *
-     * <p>Note that this is <em>not</em> {@link Group#getGroupId()} (External Id), and
-     * <em>not</em> the Admin Groups tab "Id" column.</p>
+     * <p>Used by classic XSL/HTML scoreboards via standings {@code group/@id}.
+     * This is <em>not</em> {@link Group#getGroupId()} (External Id), <em>not</em> the Admin
+     * Groups tab "Id" column, and <em>not</em> the WTI scoreboard filter key.</p>
      *
      * @param contest contest model
      * @param group group whose scoreboard group-list ordinal is requested
-     * @return ordinal <= 1, or -1 if the group is null, not scoreboard-visible, or not in the contest
+     * @return ordinal >= 1, or -1 if the group is null, not scoreboard-visible, or not in the contest
      */
     public static int getScoreboardGroupListOrdinal(IInternalContest contest, Group group) {
         if (contest == null || group == null || !group.isDisplayOnScoreboard()) {
@@ -193,8 +239,8 @@ public final class ScoreboardGroupUtilities {
      * Returns a {@link Group} corresponding to a scoreboard group-list ordinal.
      *
      * <p>{@code scoreboardGroupListOrdinal} is the dumpGroupList / standings
-     * {@code group/@id} / WTI {@code ?groupId=} value -- <em>not</em> External Id
-     * and <em>not</em> the Admin Groups tab "Id".</p>
+     * {@code group/@id} value used by classic XSL/HTML -- <em>not</em> External Id,
+     * <em>not</em> the Admin Groups "Id", and <em>not</em> the WTI {@code groupExternalId} filter.</p>
      *
      * @param contest contest model
      * @param scoreboardGroupListOrdinal 1-based ordinal among scoreboard-visible groups
@@ -219,10 +265,10 @@ public final class ScoreboardGroupUtilities {
      * Resolve a scoreboard group-list ordinal string to a model {@link Group}.
      *
      * <p>Same meaning as {@link #getGroupForScoreboardGroupListOrdinal(IInternalContest, int)}:
-     * the returned value is the dumpGroupList ordinal, not External Id, not Admin Groups "Id".</p>
+     * dumpGroupList ordinal for XSL/HTML, not External Id / WTI filter.</p>
      *
      * @param contest contest model
-     * @param scoreboardGroupListOrdinal string form of the 1-based ordinal (e.g. WTI {@code groupId} query value)
+     * @param scoreboardGroupListOrdinal string form of the 1-based ordinal
      * @return matching group, or null if blank, non-numeric, or unknown
      */
     public static Group getGroupForScoreboardGroupListOrdinal(IInternalContest contest, String scoreboardGroupListOrdinal) {

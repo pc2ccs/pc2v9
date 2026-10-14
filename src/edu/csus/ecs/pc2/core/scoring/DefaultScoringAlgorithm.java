@@ -622,7 +622,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
             }
             IMemento groupMemento = groupsMemento.createChild("group");
-            // Scoreboard group-list ordinal (standings group/@id, WTI ?groupId=)
+            // Scoreboard group-list ordinal (standings group/@id for classic XSL/HTML).
+            // WTI filters by externalId (group/@externalId), not this ordinal.
             groupMemento.putInteger("id", ordinal);
             groupMemento.putString("title", groups[i].getDisplayName());
             groupMemento.putInteger("externalId", groups[i].getGroupId());

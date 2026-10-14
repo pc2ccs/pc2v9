@@ -105,7 +105,7 @@ export class ContestMockService extends IContestService {
 	return 18000 - 3600 ;  //mock: 5 hour contest with one hour elapsed
   }
 
-  getStandings(_groupId: string = ''): Observable<String> {
+  getStandings(_groupExternalId: string = ''): Observable<String> {
   
 	//TODO: this method needs to return a legitimate (mock) team standing array!
 	var json = "{\"teamStanding\":[]\"}";
@@ -118,7 +118,7 @@ export class ContestMockService extends IContestService {
 		//do nothing
 	}
 	
-	getStandingsAreCurrentFlag(_groupId: string = ''): boolean {
+	getStandingsAreCurrentFlag(_groupExternalId: string = ''): boolean {
 		return true ;
 	}
 

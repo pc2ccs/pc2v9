@@ -13,8 +13,9 @@ interface ProblemHeader {
     url: string;
 }
 
+/** Dropdown option keyed by CMS / groups.tsv External Id (not scoreboard ordinal). */
 interface ScoreboardGroupOption {
-	id: string;
+	externalId: string;
 	displayName: string;
 }
   
@@ -29,7 +30,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private fullTeamStandings: any[] = [];
 	groupOptions: ScoreboardGroupOption[] = [];
 	showAllTeamsOption = true;
-	selectedGroupId = '';
+	/** Selected group's External Id, or '' for full contest / All teams. */
+	selectedGroupExternalId = '';
 	/** Ignores out-of-order standings HTTP responses (e.g. initial full load finishing after a group pick). */
 	private standingsRequestSeq = 0;
 
@@ -73,7 +75,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 
 	ngDoCheck(): void {
         //console.log("Scoreboard ngDoCheck(): ") ;
-        if (!this._contestService.getStandingsAreCurrentFlag(this.selectedGroupId)) {
+        if (!this._contestService.getStandingsAreCurrentFlag(this.selectedGroupExternalId)) {
 	        //console.log("Standings have changed; updating...");
 	        this.loadStandings();
         } else {
@@ -82,11 +84,11 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	}
 
 	private loadStandings(): void {
-		// Pass selectedGroupId so the server scopes teams and problem columns via wantedGroups.
-		const requestGroupId = this.selectedGroupId;
+		// Pass External Id so the server scopes teams and problem columns via wantedGroups.
+		const requestGroupExternalId = this.selectedGroupExternalId;
 		//keep a monotonically-increasing request id so we can ignore old replies due (e.g.) to double-clicks
 		const requestSeq = ++this.standingsRequestSeq;
-		this._contestService.getStandings(requestGroupId)
+		this._contestService.getStandings(requestGroupExternalId)
 			.pipe(takeUntil(this._unsubscribe))
 			.subscribe((standings: any) => {
 				if (requestSeq !== this.standingsRequestSeq) {
@@ -95,21 +97,20 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 				}
 				const rows = this.getTeamStandingsArray(standings);
 				this.fullTeamStandings = rows;
-				// Dropdown options come from the full-contest load only. A group-scoped response
-				// often yields a shorter or differently-keyed group list; previously, rebuilding from it cleared
-				// selectedGroupId and snapped the UI back to "All teams" after a single selection.
-				// Now, we only update the group dropdown when we've requested a full-contest standings reload
-				// (i.e. when requestGroupId is empty).
-				if (requestGroupId === '') {
-					this.groupOptions = this.buildGroupDropdownOptions(standings, rows);
-					const selectedGroupChanged = this.updateGroupSelectionStateFromStandings(standings);
-					if (selectedGroupChanged) {
-						this.loadStandings();
-						return;
-					}
+				// DSA dumpGroupList emits the full scoreboard-visible groupList (with externalId) on every
+				// standings payload, including group-scoped ones. Refresh options from every response so
+				// Admin displayOnScoreboard changes update the dropdown without a dual-fetch.
+				// Replace the array only when the option set actually changes. Assigning a new array with
+				// the same External Ids recreates the <option> elements and the select falls back to
+				// "All teams" (value "") even though selectedGroupExternalId is unchanged.
+				const nextGroupOptions = this.buildGroupDropdownOptions(standings, rows);
+				if (!this.sameGroupOptions(this.groupOptions, nextGroupOptions)) {
+					this.groupOptions = nextGroupOptions;
 				}
-				else {
-					this.showAllTeamsOption = this.readShowAllTeamsFlag(standings);
+				const selectedGroupChanged = this.updateGroupSelectionStateFromStandings(standings);
+				if (selectedGroupChanged) {
+					this.loadStandings();
+					return;
 				}
 				this.teamStandings = this.getFilteredStandings(rows);
 				this.numProblems = this.getNumProblems(standings);
@@ -122,53 +123,77 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	 * Blur the select afterward so arrow keys scroll the scoreboard instead of
 	 * cycling dropdown options (a focused native select keeps consuming those keys).
 	 */
-	onGroupFilterChange(event?: Event): void {
+	onGroupFilterChange(newGroupExternalId: string, event?: Event): void {
+		const next = newGroupExternalId ?? '';
+		if (next === this.selectedGroupExternalId) {
+			return;
+		}
+		this.selectedGroupExternalId = next;
 		this.teamStandings = this.getFilteredStandings(this.fullTeamStandings);
 		if (event?.target instanceof HTMLSelectElement) {
 			event.target.blur();
 		}
 	}
 
-	/** Clear the filter only when the chosen group id is no longer a valid dropdown option. */
-	private validateSelectedGroupId(): void {
-		if (this.selectedGroupId === '') {
+	/** Identity for the group <option> list so a refresh does not recreate an unchanged option. */
+	trackGroupOption(_index: number, option: ScoreboardGroupOption): string {
+		return option.externalId;
+	}
+
+	private sameGroupOptions(current: ScoreboardGroupOption[], next: ScoreboardGroupOption[]): boolean {
+		if (current.length !== next.length) {
+			return false;
+		}
+		for (let i = 0; i < current.length; i++) {
+			if (current[i].externalId !== next[i].externalId || current[i].displayName !== next[i].displayName) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Clear the filter only when the chosen External Id is no longer a valid dropdown option. */
+	private validateSelectedGroupExternalId(): void {
+		if (this.selectedGroupExternalId === '') {
 			return;
 		}
-		const sid = String(this.selectedGroupId);
-		if (!this.groupOptions.some(g => String(g.id) === sid)) {
-			this.selectedGroupId = '';
+		const sid = String(this.selectedGroupExternalId);
+		if (!this.groupOptions.some(g => String(g.externalId) === sid)) {
+			this.selectedGroupExternalId = '';
 		}
 	}
 
 	/**
 	 * Refreshes the "All teams" visibility flag and, when needed, applies the server-provided
-	 * default division-wide group selection from standingsHeader.defaultGroupId.
+	 * default division-wide group selection from standingsHeader.defaultGroupExternalId.
 	 *
-	 * @return true iff selectedGroupId changed and standings should be reloaded for that scope
+	 * @return true iff selectedGroupExternalId changed and standings should be reloaded for that scope
 	 */
 	private updateGroupSelectionStateFromStandings(standings: any): boolean {
-		const previousSelectedGroupId = this.selectedGroupId;
+		const previousSelectedGroupExternalId = this.selectedGroupExternalId;
 		this.showAllTeamsOption = this.readShowAllTeamsFlag(standings);
-		this.validateSelectedGroupId();
+		this.validateSelectedGroupExternalId();
 
-		if (this.selectedGroupId === '' && !this.showAllTeamsOption) {
-			const defaultGroupId = this.readDefaultGroupId(standings);
-			if (defaultGroupId !== '' && this.groupOptions.some(g => String(g.id) === defaultGroupId)) {
-				this.selectedGroupId = defaultGroupId;
+		if (this.selectedGroupExternalId === '' && !this.showAllTeamsOption) {
+			const defaultGroupExternalId = this.readDefaultGroupExternalId(standings);
+			if (defaultGroupExternalId !== ''
+					&& this.groupOptions.some(g => String(g.externalId) === defaultGroupExternalId)) {
+				this.selectedGroupExternalId = defaultGroupExternalId;
 			}
 		}
 
-		return this.selectedGroupId !== previousSelectedGroupId;
+		return this.selectedGroupExternalId !== previousSelectedGroupExternalId;
 	}
 
 	/**
 	 * Returns the value shown in the Rank column for one team row, depending on whether a group filter is active.
 	 *
 	 * - No group selected: use contest-wide {@code rank} from the standings payload (PC2 overall placement).
-	 * - Group selected and this row's primary group matches the filter ({@code teamGroupId}): use {@code groupRank}
-	 *   when present (within-group rank from PC2 for that primary group).
-	 * - Group selected but the row is included because of another group (e.g. {@code teamGroupIds}) or {@code groupRank}
-	 *   is missing: use {@code filteredIndex + 1} for a simple 1-based order in the currently filtered table.
+	 * - Group selected and this row's primary group External Id matches the filter
+	 *   ({@code teamGroupExternalId}): use {@code groupRank} when present.
+	 * - Group selected but the row is included because of another group (e.g. {@code teamGroupExternalIds})
+	 *   or {@code groupRank} is missing: use {@code filteredIndex + 1} for a simple 1-based order in the
+	 *   currently filtered table.
 	 *
 	 * PC2 only emits {@code groupRank} for the team's primary group; it is not reused when the user filters to a
 	 * non-primary group membership.
@@ -177,10 +202,10 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	 * @param filteredIndex zero-based index in the current {@code teamStandings} array (after group filter)
 	 */
 	getDisplayRank(team: any, filteredIndex: number): string | number {
-		if (this.selectedGroupId === '') {
+		if (this.selectedGroupExternalId === '') {
 			return team.rank;
 		}
-		const primaryMatches = String(team.teamGroupId ?? '') === this.selectedGroupId;
+		const primaryMatches = String(team.teamGroupExternalId ?? '') === this.selectedGroupExternalId;
 		if (primaryMatches) {
 			const gr = team.groupRank;
 			if (gr !== undefined && gr !== null && String(gr) !== '') {
@@ -238,7 +263,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	/**
 	 * Returns an array of options for populating the scoreboard Group dropdown. The preferred source is 
 	 * standingsHeader.groupList.group (see DefaultScoringAlgorithm.dumpGroupList)
-	 * with teamCount > 0. Option values use each group's "id" (matches WTI-enriched teamGroupIds / legacy teamGroupId).
+	 * with teamCount > 0. Option values use each group's {@code externalId} (WTI filter key;
+	 * matches {@code teamGroupExternalIds} / {@code teamGroupExternalId}).
 	 * If the header omits usable group rows, falls back to groups inferred from team standings.
 	 */
 	private buildGroupDropdownOptions(standings: any, teams: any[]): ScoreboardGroupOption[] {
@@ -273,36 +299,35 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		//start with an empty list of group dropdown options
 		const out: ScoreboardGroupOption[] = [];
 		
-		//check each group in the groupList.  For each group, safely read id/title/teamCount across JSON quirks; 
-		//keep only groups with a non-empty id and positive team count; assign a readable label.
+		//check each group in the groupList.  For each group, safely read externalId/title/teamCount across JSON quirks; 
+		//keep only groups with a non-empty externalId and positive team count; assign a readable label.
 		for (const g of groups) {
 		
 			//normalize each item in this group to an object, either what it was to start with or an empty-string Record
 			const row = g && typeof g === 'object' ? (g as Record<string, unknown>) : {};
 			
 			//pull the standard fields (id, title, teamCount, etc.) out of the group row
-			const id = this.readXmlishField(row, 'id');
+			const externalId = this.readXmlishField(row, 'externalId');
 			const title = this.readXmlishField(row, 'title');
 			const teamCountVal = this.readXmlishField(row, 'teamCount');
 			const teamCountAlt = row['teamcount'] ?? row['team_count'];
 			const tc = this.parsePositiveCount(teamCountVal ?? teamCountAlt);
-			const stringGroupId = id !== undefined && id !== null && String(id).trim() !== ''
-				? String(id).trim()
+			const stringExternalId = externalId !== undefined && externalId !== null && String(externalId).trim() !== ''
+				? String(externalId).trim()
 				: '';
 				
 			//skip invalid or empty groups
-			if (stringGroupId === '' || !(tc > 0)) {
+			if (stringExternalId === '' || !(tc > 0)) {
 				continue;
 			}
 			
-			//If title is present (after trim), use it as label; otherwise use 'Group+stringId' as label
+			//If title is present (after trim), use it as label; otherwise use 'Group+externalId' as label
 			const label = title !== undefined && title !== null && String(title).trim() !== ''
 				? String(title).trim()
-				: `Group ${stringGroupId}`;
+				: `Group ${stringExternalId}`;
 				
 				
-			//insert the stringGroupId and label into the output array
-			out.push({ id: stringGroupId, displayName: label });
+			out.push({ externalId: stringExternalId, displayName: label });
 		}
 		
 		//return options sorted alphabetically by display name, case-insensitive
@@ -330,12 +355,12 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		return true;
 	}
 
-	private readDefaultGroupId(standings: any): string {
+	private readDefaultGroupExternalId(standings: any): string {
 		const header = standings?.contestStandings?.standingsHeader;
 		if (!header || typeof header !== 'object') {
 			return '';
 		}
-		const raw = this.readXmlishField(header as Record<string, unknown>, 'defaultGroupId');
+		const raw = this.readXmlishField(header as Record<string, unknown>, 'defaultGroupExternalId');
 		if (raw === undefined || raw === null) {
 			return '';
 		}
@@ -344,9 +369,9 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 
 	/**
 	 * The fields in scoreboard records come from XML converted to JSON.  Depending on what XML serializer and
-	 * schema was used, the same conceptual attribute (id, title, teamCount, ...) can appear either
-	 * directly as a property on the object representing the <group> element, e.g. { id: "1", title: "..." }, or
-	 * inside a synthetic child keyed something like @attributes, e.g. { "@attributes": { id: "1", title: "..." } }.
+	 * schema was used, the same conceptual attribute (externalId, title, teamCount, ...) can appear either
+	 * directly as a property on the object representing the <group> element, e.g. { externalId: "1200", title: "..." }, or
+	 * inside a synthetic child keyed something like @attributes, e.g. { "@attributes": { externalId: "1200", title: "..." } }.
 	 * readXmlishField is a tiny normalization helper: "give me the value for logical field field from this JSON object, 
 	 * no matter which of those two layouts we got."
 	 */
@@ -373,11 +398,11 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		return Number.isFinite(n) ? n : NaN;
 	}
 
-	/** Fallback: one row per teamGroupId present on team standings (legacy / missing header). */
+	/** Fallback: one row per teamGroupExternalId present on team standings (legacy / missing header). */
 	private buildGroupOptionsFromTeamRows(teams: any[]): ScoreboardGroupOption[] {
 		const idToLabel = new Map<string, string>();
 		for (const row of teams) {
-			const id = row?.teamGroupId;
+			const id = row?.teamGroupExternalId;
 			const name = row?.teamGroupName;
 			if (id === undefined || id === null || String(id).trim() === '') {
 				continue;
@@ -389,32 +414,32 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		}
 		return Array.from(idToLabel.entries())
 			.sort((a, b) => a[1].localeCompare(b[1], undefined, { sensitivity: 'base' }))
-			.map(([id, displayName]) => ({ id, displayName }));
+			.map(([externalId, displayName]) => ({ externalId, displayName }));
 	}
 
 	private getFilteredStandings(allRows: any[]): any[] {
-		if (this.selectedGroupId === '') {
+		if (this.selectedGroupExternalId === '') {
 			return allRows.slice();
 		}
-		const sid = this.selectedGroupId;
-		// WTI puts all group ids on each row; otherwise only PC2 primary teamGroupId exists.
+		const sid = this.selectedGroupExternalId;
+		// WTI puts all membership External Ids on each row; otherwise only PC2 primary teamGroupExternalId exists.
 		return allRows.filter(row => this.rowBelongsToSelectedGroup(row, sid));
 	}
 
 	/**
-	 * Prefer WTI-enriched `teamGroupIds` (all groups the team belongs to).
-	 * Otherwise fall back to PC2's single {@code teamGroupId} (primary group only).
+	 * Prefer WTI-enriched `teamGroupExternalIds` (all scoreboard groups the team belongs to).
+	 * Otherwise fall back to PC2's single {@code teamGroupExternalId} (primary group only).
 	 */
-	private rowBelongsToSelectedGroup(row: any, selectedId: string): boolean {
-		const ids = this.getTeamGroupIdsFromRow(row);
+	private rowBelongsToSelectedGroup(row: any, selectedExternalId: string): boolean {
+		const ids = this.getTeamGroupExternalIdsFromRow(row);
 		if (ids.length > 0) {
-			return ids.indexOf(selectedId) >= 0;
+			return ids.indexOf(selectedExternalId) >= 0;
 		}
-		return String(row.teamGroupId ?? '') === selectedId;
+		return String(row.teamGroupExternalId ?? '') === selectedExternalId;
 	}
 
-	private getTeamGroupIdsFromRow(row: any): string[] {
-		const raw = row?.teamGroupIds;
+	private getTeamGroupExternalIdsFromRow(row: any): string[] {
+		const raw = row?.teamGroupExternalIds;
 		if (raw == null) {
 			return [];
 		}
