@@ -57,7 +57,6 @@ public class CLICSScoreboard {
     public CLICSScoreboard() {
 
     }
-
     /**
      * Fill in the scoreboard information for the whole contest or for a single group.
      *
@@ -65,6 +64,16 @@ public class CLICSScoreboard {
      * @param group when non-null, standings are restricted to this group via DSA wantedGroups filtering
      */
     public CLICSScoreboard(IInternalContest model, Group group)  throws IllegalContestState, JAXBException, IOException {
+        this(model, group, false);
+    }
+
+    /**
+     * Fill in the scoreboard information for the whole contest or for a single group.
+     *
+     * @param model contest model
+     * @param group when non-null, standings are restricted to this group via DSA wantedGroups filtering
+     */
+    public CLICSScoreboard(IInternalContest model, Group group, boolean obeyFreeze)  throws IllegalContestState, JAXBException, IOException {
 
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
