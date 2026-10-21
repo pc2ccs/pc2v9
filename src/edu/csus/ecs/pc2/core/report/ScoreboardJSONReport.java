@@ -100,7 +100,7 @@ public class ScoreboardJSONReport implements IReport {
     @Override
     public String[] createReport(Filter inFilter) {
         try {
-            CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contest, null, null);
+            CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contest, null);
             String json = clicsScoreboard.toJSON();
             String[] sa = { json };
             return sa;

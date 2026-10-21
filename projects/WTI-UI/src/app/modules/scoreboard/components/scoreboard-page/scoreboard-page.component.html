@@ -6,14 +6,14 @@
             <label class="scoreboard-group-filter">
                 <span class="scoreboard-group-filter-label">Group</span>
                 <select
-                    [(ngModel)]="selectedGroupId"
-                    (change)="onGroupFilterChange($event)"
+                    [(ngModel)]="selectedGroupExternalId"
+                    (ngModelChange)="onGroupFilterChange($event)"
                     name="scoreboardGroup"
                     class="scoreboard-group-select">
                     <!-- add an "All Teams" option to the dropdown list -->
-                    <option value="">All teams</option>
-                    <!-- add each separate group name to the dropdown list -->
-                    <option *ngFor="let g of groupOptions" [value]="g.id">{{ g.displayName }}</option>
+                    <option *ngIf="showAllTeamsOption" value="">All teams</option>
+                    <!-- add each separate group name to the dropdown list (value = External Id) -->
+                    <option *ngFor="let g of groupOptions; trackBy: trackGroupOption" [value]="g.externalId">{{ g.displayName }}</option>
                 </select>
             </label>
         </div>

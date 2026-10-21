@@ -147,6 +147,39 @@ public class ContestInformation implements Serializable{
         ALIAS,
     }
 
+    /**
+     * Contest-level override for whether the WTI scoreboard includes "All teams".
+     */
+    public enum ShowAllTeamsOnScoreboard {
+        AUTO,
+        TRUE,
+        FALSE;
+
+        /**
+         * Parse a contest.yaml scoreboard.show-all-teams value.
+         *
+         * @param value yaml string value
+         * @return an element from the ShowAllTeamsOnScoreboard enum corresponding to the specified string value
+         * @throws IllegalArgumentException if received string value is not auto, true, or false
+         */
+        public static ShowAllTeamsOnScoreboard fromYamlValue(String value) {
+            if (value == null) {
+                throw new IllegalArgumentException("show-all-teams value is null");
+            }
+            String normalized = value.trim().toLowerCase();
+            if ("auto".equals(normalized)) {
+                return AUTO;
+            }
+            if ("true".equals(normalized)) {
+                return TRUE;
+            }
+            if ("false".equals(normalized)) {
+                return FALSE;
+            }
+            throw new IllegalArgumentException("Invalid show-all-teams value '" + value + "', expected auto, true, or false");
+        }
+    }
+
     private Properties scoringProperties = new Properties();
 
     /**
@@ -235,6 +268,12 @@ public class ContestInformation implements Serializable{
      * If false, we send run testcases as they are judged (default).
      */
     private boolean batchTestCasesOnEF = false;
+    
+    /*
+     * Whether WTI scoreboard shows an "All teams" option.
+     * AUTO hides it when any scoreboard-visible group has divisionWideScoreboard set.
+     */
+    private ShowAllTeamsOnScoreboard showAllTeamsOnScoreboard = ShowAllTeamsOnScoreboard.AUTO;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -479,6 +518,9 @@ public class ContestInformation implements Serializable{
             }
 
             if(batchTestCasesOnEF != contestInformation.isBatchTestCasesOnEF()) {
+                return false;
+            }
+            if (showAllTeamsOnScoreboard != contestInformation.getShowAllTeamsOnScoreboard()) {
                 return false;
             }
 
@@ -1006,4 +1048,15 @@ public class ContestInformation implements Serializable{
     public void setBatchTestCasesOnEF(boolean batchTestCasesOnEF) {
         this.batchTestCasesOnEF = batchTestCasesOnEF;
     }
+    public ShowAllTeamsOnScoreboard getShowAllTeamsOnScoreboard() {
+        if (showAllTeamsOnScoreboard == null) {
+            showAllTeamsOnScoreboard = ShowAllTeamsOnScoreboard.AUTO;
+        }
+        return showAllTeamsOnScoreboard;
+    }
+
+    public void setShowAllTeamsOnScoreboard(ShowAllTeamsOnScoreboard showAllTeamsOnScoreboard) {
+        this.showAllTeamsOnScoreboard = showAllTeamsOnScoreboard;
+    }
+
 }

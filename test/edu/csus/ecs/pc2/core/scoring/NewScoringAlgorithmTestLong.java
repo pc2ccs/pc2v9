@@ -88,27 +88,21 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     private Properties populateProperties(int perNo, int perMin, int baseYes) {
         Properties props = DefaultScoringAlgorithm.getDefaultProperties();
-        System.out.println(props);
         Enumeration<Object> keys = props.keys();
-        System.out.println(keys);
         while (keys.hasMoreElements()) {
             String key = (String) keys.nextElement();
-            String value = props.getProperty(key);
-            if (value.equals("public_html") || value.equals("html")) {
-                continue;
-            }
-            switch (Integer.parseInt(value)) {
-                case 0:
+            switch (key) {
+                case DefaultScoringAlgorithm.BASE_POINTS_PER_YES:
                     props.put(key, Integer.toString(baseYes));
                     break;
-                case 20:
+                case DefaultScoringAlgorithm.POINTS_PER_NO:
                     props.put(key, Integer.toString(perNo));
                     break;
-                case 1:
+                case DefaultScoringAlgorithm.POINTS_PER_YES_MINUTE:
                     props.put(key, Integer.toString(perMin));
                     break;
                 default:
-                    assertTrue("Unknown property: " + key, true);
+                    // Leave booleans (ignore CE/SV), output dirs, and other defaults unchanged.
                     break;
             }
         }
