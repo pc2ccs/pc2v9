@@ -330,7 +330,7 @@ public class LoadAccounts {
         }
 
         if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
-            if (Boolean.parseBoolean(values[permDisplayColumn]) {
+            if (Boolean.parseBoolean(values[permDisplayColumn])) {
                 account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
             } else {
                 account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
