@@ -1,8 +1,9 @@
-// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -48,7 +49,8 @@ public final class StringUtilities implements Serializable {
     }
 
     /**
-     * null-safe string arrays compare.
+     * null-safe string arrays compare for exactly the same elements in the same order
+     * JTB: Note: this is NOT null safe if s2 is null and s1 is non-null.
      *
      * @param s1[]
      * @param s2[]
@@ -73,6 +75,32 @@ public final class StringUtilities implements Serializable {
         }
         return true;
 
+    }
+
+    /**
+     * null-safe string arrays compare for arrays having the same elements,
+     * not necessarily in the same order
+     *
+     * @param s1[]
+     * @param s2[]
+     * @return true if both null or equal, false otherwise
+     */
+    public static boolean stringArraySameUnordered(String[] s1, String[] s2){
+        if (s1 == null) {
+            return(s2 == null);
+        }
+        if (s2 == null) {
+            return false;
+        }
+
+        if (s1.length != s2.length) {
+            return false;
+        }
+        String [] s1Sorted = Arrays.copyOf(s1, s1.length);
+        String [] s2Sorted = Arrays.copyOf(s2, s2.length);
+        Arrays.sort(s1Sorted);
+        Arrays.sort(s2Sorted);
+        return(Arrays.equals(s1Sorted, s2Sorted));
     }
 
     /**

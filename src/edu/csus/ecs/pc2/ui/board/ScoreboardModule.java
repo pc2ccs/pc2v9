@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.BalloonSettingsEvent;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
@@ -152,13 +153,14 @@ public class ScoreboardModule implements UIPlugin {
     }
 
     private void generateOutput(String xmlString, Group group) {
-        String outputDir = contest.getContestInformation().getScoringProperties().getProperty(DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR, "html");
+        ContestInformation ci = contest.getContestInformation();
+        String outputDir = ci.getScoringProperties().getProperty(DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR, "html");
         String groupName = null;
 
         if(group != null) {
             groupName = group.getDisplayName();
         }
-        scoreboardCommon.generateOutput(xmlString, groupName, xslDir, outputDir, log);
+        scoreboardCommon.generateOutput(xmlString, groupName, xslDir, outputDir, ci.getScoreboardXSLFiles(), log);
         scoreboardCommon.generateResults(contest, controller, xmlString, group, xslDir, log);
         try {
             Properties scoringProperties = scoreboardCommon.getScoringProperties(getContest().getContestInformation().getScoringProperties());
@@ -170,7 +172,7 @@ public class ScoreboardModule implements UIPlugin {
                     groupOfOneList.add(group);
                 }
                 String frozenXML = algoFrozen.getStandings(contest, null, null, groupOfOneList,scoringProperties, log);
-                scoreboardCommon.generateOutput(frozenXML, groupName, xslDir, frozenOutputDir, log);
+                scoreboardCommon.generateOutput(frozenXML, groupName, xslDir, frozenOutputDir, ci.getScoreboardXSLFiles(), log);
             }
         } catch (Exception e) {
             log.warning("Exception generating frozen html");
