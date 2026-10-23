@@ -174,14 +174,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         // Try CLICS name first.  Fun fact: CLICS_CONTEST_NAME == CONTEST_NAME_KEY, but may not someday
         String contestTitle = ContestImportUtilities.fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_FORMAL_NAME);
-        if(StringUtilities.isEmpty(contestTitle)) {
+        if (StringUtilities.isEmpty(contestTitle)) {
             // No formal name, so try clics name (short name)
             contestTitle = ContestImportUtilities.fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_NAME);
             // only if the CLICS name isn't there do we try the old one.  non-null means it is there.
             // See "Fun fact" above.
-            if(StringUtilities.isEmpty(contestTitle)) {
+            if (StringUtilities.isEmpty(contestTitle)) {
                 contestTitle = ContestImportUtilities.fetchValue(contestYaml, IContestLoader.CONTEST_NAME_KEY);
-                if(StringUtilities.isEmpty(contestTitle)) {
+                if (StringUtilities.isEmpty(contestTitle)) {
                     // last resort, try clics id
                     contestTitle = ContestImportUtilities.fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_ID);
                 }
@@ -483,7 +483,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         boolean batchTestCasesOnEF = ContestImportUtilities.fetchBooleanValue(content, BATCH_TESTCASES_ON_EF, contestInformation.isBatchTestCasesOnEF());
         contestInformation.setBatchTestCasesOnEF(batchTestCasesOnEF);
-
         // Load team scoreboard string (the one with variables)
         String teamScoreboadDisplayString = ContestImportUtilities.fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
@@ -566,11 +565,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 );
             }
         } else {
-            // only if CLICS id is not present do we try the name
-            contestId = contestName;
+            // only if CLICS id is not present do we try older key `short-name`
+            contestId = ContestImportUtilities.fetchValue(content, SHORT_NAME_KEY);
             contestId = StringUtilities.makeStringCLICSCompliant(contestId);
         }
 
+        // only if both CLICS id and `short-name` is not present do we try the key `name`
+        if (StringUtilities.isEmpty(contestId)) {
+            contestId = contestName;
+            contestId = StringUtilities.makeStringCLICSCompliant(contestId);
+        }
         // only set short name if string is present AND not empty
         if (!StringUtilities.isEmpty(contestId)) {
             setShortContestNameAndIdentifier(contest, contestId, contestName);

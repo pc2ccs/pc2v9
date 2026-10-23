@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -658,11 +659,18 @@ public class SubmissionService implements Feature {
                     return Response.status(Response.Status.BAD_REQUEST).entity("only one zip archive is allowed").build();
                 }
 
-                srcFiles = EventFeedUtilities.getIFiles(firstFile.getData());
-                // handle empty list of src files.
-                if(srcFiles.isEmpty()) {
-                    log.info(user + " Attempt to submit empty source file in archive for problem " + prob.getShortName() + " on behalf of team " + team_id);
-                    return Response.status(Response.Status.BAD_REQUEST).entity("submission source files are empty").build();
+                try {
+                    // Single-pass extract with an inflated-byte cap (contest max source size).
+                    // Do not pre-scan zip metadata with ZipFile/temp files; that double-reads the zip
+                    // and is unnecessary when getIFiles already stops once the limit is exceeded.
+                    byte[] zipBytes = Base64.getDecoder().decode(firstFile.getData());
+                    long maxSourceSizeBytes = model.getContestInformation().getMaxSourceSizeInBytes();
+                    srcFiles = EventFeedUtilities.getIFiles(zipBytes, maxSourceSizeBytes);
+                } catch (SubmissionRejectedException sre) {
+                    log.log(Level.WARNING, "SubmissionRejectedException (Source too large) submitting CLICS API run for team "
+                            + team_id + " by " + user);
+                    return Response.status(Response.Status.REQUEST_ENTITY_TOO_LARGE)
+                            .entity("Unable to submit run: " + sre.getLocalizedMessage()).build();
                 }
             }
             String entry = sub.getEntry_point();

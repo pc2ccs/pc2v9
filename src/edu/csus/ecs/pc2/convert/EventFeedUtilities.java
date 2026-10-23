@@ -11,10 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 
-import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IFileImpl;
 
@@ -27,9 +26,6 @@ import edu.csus.ecs.pc2.core.model.IFileImpl;
 public final class EventFeedUtilities {
 
     public static final long MS_PER_SECOND = 1000;
-    public static final String ZIP_DEFLATE_EXT_ERROR = "only DEFLATED entries can have EXT descriptor";
-    // Somewhat arbitrary - more of a sentinel with a touch of paranoia.
-    public static final int MAX_ZIP_ENTRIES_TO_PROCESS = 1000;
 
     private EventFeedUtilities() {
         super();
@@ -151,12 +147,33 @@ public final class EventFeedUtilities {
     }
 
     /**
-     * Get files from a zipfile's bytes.
+     * Get files from a zipfile's bytes with no uncompressed-size cap.
+     * Callers such as shadow replay that must extract whatever the remote CCS stored should use this overload.
      *
      * @param bytes bytes comprising a zip file.
      * @return list of IFiles extracted from the input bytes
      */
     public static List<IFile> getIFiles(byte[] bytes) {
+        try {
+            return getIFiles(bytes, 0);
+        } catch (SubmissionRejectedException e) {
+            // max of 0 means unlimited, so this should not occur
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Get files from a zipfile's bytes, optionally stopping if inflated contents exceed a size limit.
+     * A {@code maxUncompressedBytes} of 0 or less means there is no limit (same behavior as {@link #getIFiles(byte[])}).
+     * The limit is applied to the running total of bytes actually inflated, so a zip whose headers understate
+     * entry sizes cannot expand without bound in memory.
+     *
+     * @param bytes bytes comprising a zip file
+     * @param maxUncompressedBytes maximum combined uncompressed file bytes allowed; {@code <= 0} for unlimited
+     * @return list of IFiles extracted from the input bytes
+     * @throws SubmissionRejectedException if inflated contents would exceed {@code maxUncompressedBytes}
+     */
+    public static List<IFile> getIFiles(byte[] bytes, long maxUncompressedBytes) throws SubmissionRejectedException {
 
         List<IFile> files = new ArrayList<IFile>();
 
@@ -165,59 +182,52 @@ public final class EventFeedUtilities {
         try {
             zipStream = new ZipInputStream(new ByteArrayInputStream(bytes));
             ZipEntry entry = null;
-            int nEnt;
-            
+            long extracted = 0;
             /**
              * Read each zip entry, add IFile.
-             * We use a separate try block here since there is a deficiency with Java 8 ZipInputStream where
-             * you'll get a: "only DEFLATED entries can have EXT descriptor" ZipException if an entry is 0 bytes in length.
-             * So we check that specifically, since it is legal.
              */
-            for(nEnt = 0; nEnt < MAX_ZIP_ENTRIES_TO_PROCESS; nEnt++) {
-                try {
-                    entry = zipStream.getNextEntry();
-                    if(entry == null) {
-                        break;
-                    }
-                    String entryName = entry.getName();
-                    
-                    // Only add the file to the list if the file name is not an empty string.
-                    // and it's not a directory entry.
-                    if(!entryName.isEmpty() && !entryName.endsWith("/")) {
-                        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-    
-                        byte[] buffer = new byte[8096];
-                        int bytesRead = 0;
-                        while ((bytesRead = zipStream.read(buffer)) != -1)
-                        {
-                            byteOutputStream.write(buffer, 0, bytesRead);
+            while ((entry = zipStream.getNextEntry()) != null) {
+
+                String entryName = entry.getName();
+
+                // Only add the file to the list if the file name is not an empty string.
+                // and it's not a directory entry.
+                if(!entryName.isEmpty() && !entryName.endsWith("/")) {
+                    ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+
+                    byte[] buffer = new byte[8096];
+                    int bytesRead = 0;
+                    while ((bytesRead = zipStream.read(buffer)) != -1)
+                    {
+                        if (maxUncompressedBytes > 0 && extracted + bytesRead > maxUncompressedBytes) {
+                            throw new SubmissionRejectedException(
+                                    "Source file(s) are too large (" + (extracted + bytesRead) + " bytes) - maximum is "
+                                            + maxUncompressedBytes + " bytes.",
+                                    SubmissionRejectedException.SubmissionRejectionReason.SOURCE_TOO_BIG);
                         }
-    
-                        String base64Data = getBase64Data(byteOutputStream.toByteArray());
-                        IFile iFile = new IFileImpl(entryName, base64Data);
-                        files.add(iFile);
-    
-                        byteOutputStream.close();
+                        byteOutputStream.write(buffer, 0, bytesRead);
+                        extracted += bytesRead;
                     }
-                } catch (ZipException e) {
-                    String msg = e.getLocalizedMessage();
-                    // If not the single exception we ignore, then abort like we used to
-                    if(msg == null || !msg.equals(ZIP_DEFLATE_EXT_ERROR)) {
-                        try {
-                            zipStream.close();
-                        } catch (Exception ze) {
-                            ; // problem closing stream, ignore.
-                        }
-                        throw new RuntimeException(e);
-                    }
-                } 
+
+                    String base64Data = getBase64Data(byteOutputStream.toByteArray());
+                    IFile iFile = new IFileImpl(entryName, base64Data);
+                    files.add(iFile);
+
+                    byteOutputStream.close();
+                }
                 zipStream.closeEntry();
             }
-            // If we maxed out on reading entries, log it in case someone cares later.
-            if(nEnt >= MAX_ZIP_ENTRIES_TO_PROCESS) {
-                StaticLog.warning(ZIP_DEFLATE_EXT_ERROR);
-            }
             zipStream.close();
+
+        } catch (SubmissionRejectedException e) {
+            if (zipStream != null){
+                try {
+                    zipStream.close();
+                } catch (Exception ze) {
+                    ; // problem closing stream, ignore.
+                }
+            }
+            throw e;
         } catch (Exception e) {
             if (zipStream != null){
                 try {
