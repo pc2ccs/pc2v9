@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -64,6 +64,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private IInternalContest contest;
 
     private Account[] accounts;
+    private Account[] newAccounts;
+
     private static final String CHANGE_BEGIN = "";
 
     private static final String CHANGE_END = "*";
@@ -137,7 +139,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             accountListBox = new MCLB();
             accountListBox.setMaximumSize(new Dimension(4096, 1024));
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"};
+            Object[] cols = { "New", "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"};
             accountListBox.addColumns(cols);
 
             /**
@@ -258,7 +260,23 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         getAcceptButton().setEnabled(false);
         getShowAllAccountsCheckBox().setSelected(false);
         try {
-            accounts = loadAccounts.fromTSVFile(contest, filename, getAllAccounts(), contest.getGroups());
+            Account [] accountsLoaded = loadAccounts.fromTSVFile(contest, filename, getAllAccounts(), contest.getGroups());
+            // Accounts loaded from 'filename' may not exist yet, so we create 2 lists:
+            //    1 of existing accounts to update (this is the way it previously worked since accounts could only be updated)
+            //    1 of new accounts.  An account is deemed to be "new" if it doesn't exist in the contest.
+            ArrayList<Account> accountsToUpdate = new ArrayList<Account>();
+            ArrayList<Account> accountsToAdd = new ArrayList<Account>();
+            for(Account account : accountsLoaded) {
+                if(contest.getAccount(account.getClientId()) != null) {
+                    // Account exists, so add it to the accounts to update list
+                    accountsToUpdate.add(account);
+                } else {
+                    // Account doesn't exist (yet) so add it to the accounts to be added list
+                    accountsToAdd.add(account);
+                }
+            }
+            accounts = accountsToUpdate.toArray(new Account[0]);
+            newAccounts = accountsToAdd.toArray(new Account[0]);
             refreshList();
         } catch (Exception e) {
             log.warning(e.getMessage());
@@ -273,10 +291,20 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             int count=0;
             getAccountListBox().removeAllRows();
             Arrays.sort(accounts, new AccountComparator());
+            Arrays.sort(newAccounts, new AccountComparator());
+            // New accounts are always shown first.  Why you ask?  Well..
+            // I wish there was a way to "highlight" the row (in a different color), but MCLB can't do that.
+            // Until the MCLB is changed to a JTable (someday), we just added a column for "New".
+            // To hopefully make the new accounts more obvious, we put them first. *sigh* -- JohnB
+            for (Account account : newAccounts) {
+                Account accountOrig = contest.getAccount(account.getClientId());
+                updateAccountRow(account, true);
+                count++;
+            }
             for (Account account : accounts) {
                 Account accountOrig = contest.getAccount(account.getClientId());
                 if (getShowAllAccountsCheckBox().isSelected() || !accountOrig.isSameAs(account)) {
-                    updateAccountRow(account);
+                    updateAccountRow(account, false);
                     count++;
                 }
             }
@@ -292,12 +320,17 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
 
-    public void updateAccountRow(final Account account) {
+    private void updateAccountRow(final Account account, boolean newAccount) {
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                Object[] objects = buildAccountRow(account);
+                Object[] objects;
+                if(newAccount) {
+                    objects = buildNewAccountRow(account);
+                } else {
+                    objects = buildAccountRow(account);
+                }
                 int rowNumber = accountListBox.getIndexByKey(account.getClientId());
                 if (rowNumber == -1) {
                     accountListBox.addRow(objects, account.getClientId());
@@ -310,25 +343,26 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"}
+        // Object[] cols = { "New", "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"}
         try {
             int cols = accountListBox.getColumnCount();
             Object[] s = new String[cols];
 
             ClientId clientId = account.getClientId();
             Account accountOrig = contest.getAccount(clientId);
-            s[0] = getSiteTitle("" + account.getSiteNumber());
-            s[1] = clientId.getClientType().toString().toLowerCase();
-            s[2] = "" + clientId.getClientNumber();
+            s[0] = "No";
+            s[1] = getSiteTitle("" + account.getSiteNumber());
+            s[2] = clientId.getClientType().toString().toLowerCase();
+            s[3] = "" + clientId.getClientNumber();
             if (getTeamDisplayName(accountOrig).equals(getTeamDisplayName(account))) {
-                s[3] = getTeamDisplayName(account);
+                s[4] = getTeamDisplayName(account);
             } else {
-                s[3] = CHANGE_BEGIN + getTeamDisplayName(account) + CHANGE_END;
+                s[4] = CHANGE_BEGIN + getTeamDisplayName(account) + CHANGE_END;
             }
             if (accountOrig.getPassword().equals(account.getPassword())) {
-                s[4] = account.getPassword();
+                s[5] = account.getPassword();
             } else {
-                s[4] = CHANGE_BEGIN + account.getPassword() + CHANGE_END;
+                s[5] = CHANGE_BEGIN + account.getPassword() + CHANGE_END;
             }
             String perms = "";
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
@@ -340,16 +374,16 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             if (account.isAllowed(Permission.Type.CHANGE_PASSWORD)) {
                 perms = perms + "CHANGE_PASSWORD ";
             }
-            s[5] = perms.trim();
+            s[6] = perms.trim();
 
             HashSet<ElementId> groupsOrig = accountOrig.getGroupIds();
             HashSet<ElementId> groupsNew = account.getGroupIds();
 
             if (groupsOrig == null && groupsNew == null) {
-                s[6] = "";
+                s[7] = "";
             } else {
                 if (groupsNew == null) {
-                    s[6] = CHANGE_BEGIN + "<removed>" + CHANGE_END;
+                    s[7] = CHANGE_BEGIN + "<removed>" + CHANGE_END;
                 } else {
                     // we're going to always need the new accounts list of groups, so compute it once first
                     String allGroups = "";
@@ -366,66 +400,136 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
                     // groupsOrig may be null here, but groupsNew will always be non-null
                     if (groupsNew.equals(groupsOrig)) {
-                        s[6] = allGroups;
+                        s[7] = allGroups;
                     } else {
-                        s[6] = CHANGE_BEGIN + allGroups + CHANGE_END;
+                        s[7] = CHANGE_BEGIN + allGroups + CHANGE_END;
                     }
                 }
             }
-            // TODO extra foo to handle null,  maybe it should initialize to "" ?
+
             if (accountOrig.getAliasName() == null && account.getAliasName() == null) {
-                s[7] = "";
+                s[8] = "";
             } else {
                 if (account.getAliasName() == null) {
-                    s[7] = CHANGE_BEGIN + "<removed>" + CHANGE_END;
+                    s[8] = CHANGE_BEGIN + "<removed>" + CHANGE_END;
                 } else {
                     if (accountOrig.getAliasName() == null) {
-                        s[7] = CHANGE_BEGIN + account.getAliasName() + CHANGE_END;
+                        s[8] = CHANGE_BEGIN + account.getAliasName() + CHANGE_END;
                     } else {
                         // neither are null
                         if (account.getAliasName().equals(accountOrig.getAliasName())) {
-                            s[7] = account.getAliasName();
+                            s[8] = account.getAliasName();
                         } else {
-                            s[7] = CHANGE_BEGIN + account.getAliasName() + CHANGE_END;
+                            s[8] = CHANGE_BEGIN + account.getAliasName() + CHANGE_END;
                         }
                     }
                 }
             }
             // afk icpc teamId
             if (accountOrig.getExternalId().equals(account.getExternalId())) {
-                s[8] = account.getExternalId();
+                s[9] = account.getExternalId();
             } else {
-                s[8] = CHANGE_BEGIN + account.getExternalId() + CHANGE_END;
+                s[9] = CHANGE_BEGIN + account.getExternalId() + CHANGE_END;
             }
             if (accountOrig.getShortSchoolName().equals(account.getShortSchoolName())) {
-                s[9] = account.getShortSchoolName();
+                s[10] = account.getShortSchoolName();
             } else {
-                s[9] = CHANGE_BEGIN + account.getShortSchoolName() + CHANGE_END;
+                s[10] = CHANGE_BEGIN + account.getShortSchoolName() + CHANGE_END;
             }
             if (accountOrig.getLongSchoolName().equals(account.getLongSchoolName())) {
-                s[10] = account.getLongSchoolName();
+                s[11] = account.getLongSchoolName();
             } else {
-                s[10] = CHANGE_BEGIN + account.getLongSchoolName() + CHANGE_END;
+                s[11] = CHANGE_BEGIN + account.getLongSchoolName() + CHANGE_END;
             }
             if (accountOrig.getInstitutionCode().equals(account.getInstitutionCode())) {
-                s[11] = account.getInstitutionCode();
+                s[12] = account.getInstitutionCode();
             } else {
-                s[11] = CHANGE_BEGIN + account.getInstitutionCode() + CHANGE_END;
+                s[12] = CHANGE_BEGIN + account.getInstitutionCode() + CHANGE_END;
             }
             // afk icpc teamName
             if (accountOrig.getExternalName().equals(account.getExternalName())) {
-                s[12] = account.getExternalName();
+                s[13] = account.getExternalName();
             } else {
-                s[12] = CHANGE_BEGIN + account.getExternalName() + CHANGE_END;
+                s[13] = CHANGE_BEGIN + account.getExternalName() + CHANGE_END;
             }
             if (accountOrig.getCountryCode().equals(account.getCountryCode())) {
-                s[13] = account.getCountryCode();
+                s[14] = account.getCountryCode();
             } else {
-                s[13] = CHANGE_BEGIN + account.getCountryCode() + CHANGE_END;
+                s[14] = CHANGE_BEGIN + account.getCountryCode() + CHANGE_END;
             }
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildAccountRow()", exception);
+        }
+        return null;
+    }
+
+    /**
+     * Builds array of objects for a new account's row (basically, all fields are "new").
+     *
+     * @param account
+     * @return array of objects for each column in the row.
+     */
+    protected Object[] buildNewAccountRow(Account account) {
+        // Object[] cols = { "New", "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"}
+        try {
+            int cols = accountListBox.getColumnCount();
+            Object[] s = new String[cols];
+
+            ClientId clientId = account.getClientId();
+            s[0] =  "Yes";
+            s[1] = getSiteTitle("" + account.getSiteNumber());
+            s[2] = clientId.getClientType().toString().toLowerCase();
+            s[3] = "" + clientId.getClientNumber();
+            s[4] = CHANGE_BEGIN + getTeamDisplayName(account) + CHANGE_END;
+            s[5] = CHANGE_BEGIN + account.getPassword() + CHANGE_END;
+            String perms = "";
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                perms = perms + "DISPLAY_ON_SCOREBOARD ";
+            }
+            if (account.isAllowed(Permission.Type.LOGIN)) {
+                perms = perms + "LOGIN ";
+            }
+            if (account.isAllowed(Permission.Type.CHANGE_PASSWORD)) {
+                perms = perms + "CHANGE_PASSWORD ";
+            }
+            s[6] = perms.trim();
+
+            HashSet<ElementId> groupsNew = account.getGroupIds();
+
+            if (groupsNew == null || groupsNew.isEmpty()) {
+                s[7] = "";
+            } else {
+                // we're going to always need the new accounts list of groups, so compute it once first
+                String allGroups = "";
+                boolean firstString = true;
+
+                for(ElementId groupElementId : groupsNew) {
+                    if(!firstString) {
+                        allGroups = allGroups + ',';
+                    } else {
+                        firstString = false;
+                    }
+                    allGroups = allGroups + contest.getGroup(groupElementId).getDisplayName();
+                }
+
+                s[7] = CHANGE_BEGIN + allGroups + CHANGE_END;
+            }
+            String aliasName = account.getAliasName();
+            if(aliasName != null && aliasName.length() > 0) {
+                s[8] = CHANGE_BEGIN + aliasName + CHANGE_END;
+            } else {
+                s[8] = "";
+            }
+            s[9] = CHANGE_BEGIN + account.getExternalId() + CHANGE_END;
+            s[10] = CHANGE_BEGIN + account.getShortSchoolName() + CHANGE_END;
+            s[11] = CHANGE_BEGIN + account.getLongSchoolName() + CHANGE_END;
+            s[12] = CHANGE_BEGIN + account.getInstitutionCode() + CHANGE_END;
+            s[13] = CHANGE_BEGIN + account.getExternalName() + CHANGE_END;
+            s[14] = CHANGE_BEGIN + account.getCountryCode() + CHANGE_END;
+            return s;
+        } catch (Exception exception) {
+            StaticLog.getLog().log(Log.INFO, "Exception in buildNewAccountRow()", exception);
         }
         return null;
     }
@@ -465,8 +569,23 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     protected void handleAccept() {
-        controller.updateAccounts(accounts);
-        log.info("Loaded "+accounts.length+" from file "+loadedFileName);
+        int updateLength = accounts.length;
+        int newLength = newAccounts.length;
+        // First, update existing accounts
+        if(updateLength > 0) {
+            controller.updateAccounts(accounts);
+        }
+        // If we have accounts to add, add them.  It should be noted that:
+        // controller.addNewAccount(Account) differs drastically from controller.addNewAccounts(Account [])
+        // This is not because one takes an array and one doesn't it's because the non-array (addNewAccount(Account)) will re-assign
+        // the ClientId for the new account (it find the first empty slot).
+        // The array version does not reassign the ClientId and believes what is passed in each
+        // Account in the array.  The latter does exactly what we want.
+        if(newLength > 0) {
+            controller.addNewAccounts(newAccounts);
+        }
+
+        log.info("Updated " + updateLength + " and added " + newAccounts.length + " accounts from file " + loadedFileName);
         this.dispose();
     }
 
