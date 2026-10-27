@@ -212,7 +212,7 @@ public class StandingsTablePane extends JPanePlugin {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
             Properties properties = getScoringProperties();
 
-            xmlString = defaultScoringAlgorithm.getStandings(getContest(), null, null, garray, properties, getController().getLog());
+            xmlString = defaultScoringAlgorithm.getStandings(getContest(), null, garray, properties, getController().getLog());
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));

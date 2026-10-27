@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.services.web;
 
 import edu.csus.ecs.pc2.clics.API202306.EventFeedJSON;
 import edu.csus.ecs.pc2.clics.API202306.EventFeedLog;
+import edu.csus.ecs.pc2.clics.API202306.EventFeedType;
 import edu.csus.ecs.pc2.clics.API202306.JSONTool;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
@@ -14,6 +15,10 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedLogTest extends AbstractTestCase {
+
+    private static final int STANDARD_CONTEST_NON_COLLECTION_LINES = 277;
+
+    private static final int STANDARD_CONTEST_ALL_COLLECTION_LINES = 7;
 
     public void testWriteRead() throws Exception {
 
@@ -38,8 +43,7 @@ public class EventFeedLogTest extends AbstractTestCase {
         eFeedLog.writeEvent(events);
 
         eFeedLog = new EventFeedLog(contest);
-        // was 143, but there are now 134 additional 'account' records
-        assertEquals(277, eFeedLog.getLogLines().length);
+        assertEquals(expectedLineCount(contest, false, efEventFeedJSON), eFeedLog.getLogLines().length);
 
     }
 
@@ -66,8 +70,23 @@ public class EventFeedLogTest extends AbstractTestCase {
         eFeedLog.writeEvent(events);
 
         eFeedLog = new EventFeedLog(contest);
-        assertEquals(7, eFeedLog.getLogLines().length);
+        assertEquals(expectedLineCount(contest, true, efEventFeedJSON), eFeedLog.getLogLines().length);
 
+    }
+
+    /**
+     * Expected log line count respects {@link EventFeedJSON} collection settings from pc2v9.ini
+     * (e.g. {@code clics.disable-collections=accounts}).
+     */
+    private int expectedLineCount(IInternalContest contest, boolean useCollections, EventFeedJSON efJson) {
+        if (!useCollections) {
+            return STANDARD_CONTEST_NON_COLLECTION_LINES;
+        }
+        int expected = STANDARD_CONTEST_ALL_COLLECTION_LINES;
+        if (!efJson.isUseNotificationCollection(EventFeedType.ACCOUNTS)) {
+            expected += contest.getAccounts().length - 1;
+        }
+        return expected;
     }
 
 }

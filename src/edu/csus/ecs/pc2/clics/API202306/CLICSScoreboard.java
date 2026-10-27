@@ -57,19 +57,23 @@ public class CLICSScoreboard {
     public CLICSScoreboard() {
 
     }
-
     /**
-     * Fill in the scoreboard information for reports and exports.
-     * These are internal (staff) related things, and we do not obey the freeze.
+     * Fill in the scoreboard information for the whole contest or for a single group.
+     *
+     * @param model contest model
+     * @param group when non-null, standings are restricted to this group via DSA wantedGroups filtering
      */
-    public CLICSScoreboard(IInternalContest model, Group group, Integer division)  throws IllegalContestState, JAXBException, IOException {
-        this(model, group, division, false);
+    public CLICSScoreboard(IInternalContest model, Group group)  throws IllegalContestState, JAXBException, IOException {
+        this(model, group, false);
     }
 
     /**
-     * Fill in the scoreboard information possibly obeying the freeze.
+     * Fill in the scoreboard information for the whole contest or for a single group.
+     *
+     * @param model contest model
+     * @param group when non-null, standings are restricted to this group via DSA wantedGroups filtering
      */
-    public CLICSScoreboard(IInternalContest model, Group group, Integer division, boolean obeyFreeze)  throws IllegalContestState, JAXBException, IOException {
+    public CLICSScoreboard(IInternalContest model, Group group, boolean obeyFreeze)  throws IllegalContestState, JAXBException, IOException {
 
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
@@ -84,7 +88,7 @@ public class CLICSScoreboard {
         scoringAlgorithm.setObeyFreeze(obeyFreeze);
 
         // legacy - standings are created as XML, and we convert that to JSON.
-        String xml = scoringAlgorithm.getStandings(model, null, division, groupList, properties, StaticLog.getLog());
+        String xml = scoringAlgorithm.getStandings(model, null, groupList, properties, StaticLog.getLog());
 
         ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(xml);
 

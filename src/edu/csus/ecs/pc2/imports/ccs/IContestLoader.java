@@ -260,6 +260,30 @@ public interface IContestLoader {
 
     String SUBMISSION_THROTTLING_KEY = "submission-throttling";
 
+    /**
+     * Top-level key in system.pc2.yaml listing scoreboard flags for existing groups.
+     * Does not define groups; applied after groups.tsv is loaded.
+     */
+    String DIVISION_GROUPS_KEY = "division-groups";
+
+    /**
+     * Nested contest.yaml section for scoreboard-related settings.
+     */
+    String SCOREBOARD_SECTION_KEY = "scoreboard";
+
+    /**
+     * Key under scoreboard: for show-all-teams: auto | true | false
+     */
+    String SHOW_ALL_TEAMS_ON_SCOREBOARD_KEY = "show-all-teams";
+
+    String DIVISION_GROUP_ID_KEY = "id";
+
+    String DIVISION_GROUP_NAME_KEY = "name";
+
+    String DISPLAY_ON_SCOREBOARD_KEY = "displayOnScoreboard";
+
+    String DIVISION_WIDE_SCOREBOARD_KEY = "divisionWideScoreboard";
+
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 
     void dumpSerialzedFileList(Problem problem, String logPrefixId, SerializedFile[] sfList);

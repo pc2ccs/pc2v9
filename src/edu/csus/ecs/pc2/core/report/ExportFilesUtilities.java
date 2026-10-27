@@ -62,7 +62,7 @@ public class ExportFilesUtilities {
         }
 
         try {
-            CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contest, null, null);
+            CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contest, null);
             String json = clicsScoreboard.toJSON();
             String[] sa = { json };
             FileUtilities.writeFileContents(scoreboardJsonFilename, sa);

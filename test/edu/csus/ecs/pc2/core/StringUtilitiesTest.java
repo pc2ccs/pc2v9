@@ -3,7 +3,9 @@ package edu.csus.ecs.pc2.core;
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -288,58 +290,59 @@ public class StringUtilitiesTest extends AbstractTestCase {
         StaticLog.setLog(new Log("logs", name + ".log"));
     }
 
-    public void testgetRunsForUser() throws Exception {
+    public void testgetRunsForGroupFilter() throws Exception {
 
         initializeStaticLog(getName());
         InternalContest contest = new InternalContest();
-        String cdpDir = "C:/repos/PacNWSpring2023/testcontest1/config";
+        String cdpDir = getTestSampleContestDirectory("tc1");
 
-        if (! new File(cdpDir).isDirectory()) {
-            // TODO coipy testcontest1 into testdata or samples then use that path
-            System.out.println("testgetRunsForUser Irnoring test using "+cdpDir);
-            return;
-        }
         IContestLoader loader = new ContestSnakeYAMLLoader();
-        loader.initializeContest(contest, new File( cdpDir));
-
-        Group[] groups = contest.getGroups();
-
-        for (Group group : groups) {
-            String divName = ScoreboardUtilities.getDivision(group.getDisplayName());
-            assertNotNull("No division found for "+group.getDisplayName(), divName);
-        }
+        loader.initializeContest(contest, new File(cdpDir));
 
         Account[] accounts = getTeamAccounts(contest);
         Arrays.sort(accounts, new AccountComparator());
 
-        Judgement[] judgements = contest.getJudgements();
-
-        assertEquals("Expecting # jugements", 10, judgements.length);
+        assertEquals("Expecting # jugements", 10, contest.getJudgements().length);
 
         addTc1Runs(contest);
 
-        Run[] runlist = contest.getRuns();
-        for (Run run : runlist) {
-            assertNotNull("Expecting account for "+run.getSubmitter(), contest.getAccount(run.getSubmitter()));
-            String div = ScoreboardUtilities.getDivision(contest, run.getSubmitter());
-            assertNotNull("Missing division for "+run.getSubmitter(), div);
+        Group group5 = contest.getGroup(contest.getAccount(accounts[5].getClientId()).getPrimaryGroupId());
+        assertNotNull(group5);
+        assertEquals("getGroupFilteredRuns for " + group5.getDisplayName(),
+                countRunsWhoseSubmitterIsInGroup(contest, group5), getRunsForGroup(contest, group5).length);
+
+        Account account12 = accounts[12];
+        Group group12 = contest.getGroup(account12.getPrimaryGroupId());
+        assertNotNull(group12);
+        int runsInGroup12Before = getRunsForGroup(contest, group12).length;
+        assertEquals("getGroupFilteredRuns for " + group12.getDisplayName(),
+                countRunsWhoseSubmitterIsInGroup(contest, group12), runsInGroup12Before);
+        assertTrue("Expecting at least one run from a team in " + group12.getDisplayName(), runsInGroup12Before > 0);
+
+        account12.clearGroups();
+        contest.updateAccounts(accounts);
+        for (Run run : getRunsForGroup(contest, group12)) {
+            assertFalse("Team removed from group should not appear in group-filtered runs",
+                    run.getSubmitter().equals(account12.getClientId()));
         }
 
-        ClientId client1 = accounts[5].getClientId();
-        Group group = contest.getGroup(contest.getAccount(client1).getPrimaryGroupId());
+    }
 
-        Run[] runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
-        assertEquals("Expecting runs matching group " + group, 7, runs.length);
+    private Run[] getRunsForGroup(IInternalContest contest, Group group) {
+        List<Group> wantedGroups = new ArrayList<Group>();
+        wantedGroups.add(group);
+        return ScoreboardUtilities.getGroupFilteredRuns(contest, wantedGroups);
+    }
 
-        client1 = accounts[12].getClientId();
-        runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
-        assertEquals("Expecting runs matching group " + group, 5, runs.length);
-
-        accounts[12].clearGroups(); // test for null group
-        contest.updateAccounts(accounts);
-        runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
-        assertEquals("Expecting runs matching group " + group, 0, runs.length);
-
+    private int countRunsWhoseSubmitterIsInGroup(IInternalContest contest, Group group) {
+        int count = 0;
+        for (Run run : contest.getRuns()) {
+            Account account = contest.getAccount(run.getSubmitter());
+            if (account != null && account.isGroupMember(group.getElementId())) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -376,39 +379,6 @@ public class StringUtilitiesTest extends AbstractTestCase {
     public String getTestSampleContestDirectory(String dirname) {
         return getSampleContestsDirectory() + File.separator + dirname;
     }
-
-    public void testgetDivision() throws Exception {
-
-        String[] groupDivisionData = { //
-                "  Foo D1;1", //
-                "  Foo D5;5", //
-                "British Columbia - UBC D1;1", //
-                "British Columbia - UBC D2;2", //
-                "Washington - UW Tacoma D1;1", //
-                "Washington - UW Tacoma D2;2", //
-                "Oregon - George Fox D1;1", //
-                "Oregon - George Fox D2;2", //
-                "California - Chico State D1;1", //
-                "California - Chico State D2;2", //
-                "Hawaii - BYUH D1;1", //
-                "Hawaii - BYUH D2;2", //
-                "University of Alberta D3;3", //
-                "Colorado School of Mines D3;3", //
-                "Brigham Young University D3;3", //
-        };
-
-        for (String string : groupDivisionData) {
-            String[] fields = string.split(";");
-            String input = fields[0];
-            String expected = fields[1];
-
-            String actual = ScoreboardUtilities.getDivision(input);
-            assertEquals("Expecting division for " + input, expected, actual);
-        }
-
-    }
-
-
 
     public void testgetTeamNumber() throws Exception {
 

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -34,8 +33,6 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
@@ -220,129 +217,13 @@ public class ScoreboardUtilities {
         return Utilities.nullSafeToInt(string, defaultNumber);
     }
 
-    public static Run[] getRunsForUserDivision(ClientId clientId, IInternalContest contest) {
-
-        String division = getDivision(contest, clientId);
-
-//        System.out.println("debug 22 getRunsForUserDivision for "+clientId+" div is "+division);
-
-        if (ClientType.Type.TEAM.equals(clientId.getClientType())) {
-
-            List<Run> theDivisionTeamRuns = new ArrayList<Run>();
-            for (Run run : contest.getRuns()) {
-
-                ClientId runClientId = run.getSubmitter();
-
-                if (runClientId.equals(clientId)) {
-                    // add team/client's own runs
-                    theDivisionTeamRuns.add(run);
-                } else {
-                    // add if submitting team in same division
-                    if (matchDivsion(contest, division, run.getSubmitter())) {
-                        theDivisionTeamRuns.add(run);
-//                        System.out.println("debug 22 Added run " + run);
-                    }
-                }
-            }
-
-            return theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
-
-        } else {
-            return contest.getRuns();
-        }
-    }
-
-    public static Run[] getRunsForDivision(IInternalContest contest, String division) {
-
-        List<Run> theDivisionTeamRuns = new ArrayList<Run>();
-        for (Run run : contest.getRuns()) {
-
-            // add if submitting team in same division
-            if (matchDivsion(contest, division, run.getSubmitter())) {
-                theDivisionTeamRuns.add(run);
-            }
-        }
-
-        return theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
-
-    }
-
-    /**
-     * Is the submitter in the inputDivision?
-     * @param contest
-     * @param inputDivision
-     * @param submitter
-     * @return true if submitter division matches inputDivision, else false
-     */
-    protected static boolean matchDivsion(IInternalContest contest, String inputDivision, ClientId submitter) {
-
-        String division = getDivision(contest, submitter);
-
-        if (inputDivision == null && division == null) {
-            return true;
-        }
-        if (inputDivision == null) {
-            return false;
-        } else {
-            return inputDivision.equals(division);
-        }
-    }
-
-    /**
-     * Return division for input clientId.
-     *
-     * TODO To be deprecated when multiple groups are fully implemented.  Although, we have to see if anyone still
-     * uses this.
-     *
-     * @param contest
-     * @param submitter
-     * @return null if no division, else a digit
-     */
-    public static String getDivision(IInternalContest contest, ClientId submitter) {
-
-        HashSet<ElementId> groups = contest.getAccount(submitter).getGroupIds();
-        String groupName = null;
-
-        if(groups != null) {
-            for(ElementId elementId: groups) {
-                Group group = contest.getGroup(elementId);
-                if(group != null) {
-                    groupName = getDivision(group.getDisplayName());
-                    if(groupName != null) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return groupName;
-    }
-
-    /**
-     * Return division number from groupName
-     * @param groupName
-     * @return null if no division number found, else the division number
-     */
-    // TODO REFACTOR i689 redesign how divisions are identified.
-    public static String getDivision(String groupName) {
-
-        int idx = groupName.lastIndexOf('D');
-        if (idx != -1) {
-            // expecting D# at end of string
-            if (idx == groupName.length() - 2) {
-                return groupName.substring(idx+1);
-            }
-        }
-        return null;
-    }
-
     /**
      * Get the runs that are only for the desired groups.
      * If null, then all runs are returned.
      *
      * @param theContest (used for getting accounts and runs for the contest)
      * @param wantedGroups
-     * @return array of Run filtered by division and groups
+     * @return array of Run filtered by group membership of the submitter
      */
     public static Run [] getGroupFilteredRuns(IInternalContest theContest, List<Group> wantedGroups) {
 

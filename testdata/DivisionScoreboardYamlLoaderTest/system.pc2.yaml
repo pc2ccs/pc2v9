@@ -1,0 +1,11 @@
+division-groups:
+  - name: D1
+    displayOnScoreboard: true
+    divisionWideScoreboard: true
+  - name: D2
+    displayOnScoreboard: true
+    divisionWideScoreboard: true
+  - name: California
+    displayOnScoreboard: false
+  - id: 201
+    displayOnScoreboard: false

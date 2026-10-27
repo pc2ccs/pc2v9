@@ -31,28 +31,11 @@ public interface IScoringAlgorithm {
     String getStandings(IInternalContest theContest, Properties properties, Log log) throws IllegalContestState;
 
     /**
-     * Returns an XML description of the current contest standings.
+     * Returns an XML description of the current contest standings, optionally filtered by group.
      *
      * @param theContest
      *            A proxy object referencing the underlying model describing the contest
-     * @param runs null use all runs, otherwise runs to be used.
-     * @param divisionNumber get standings for specified division (null if all)
-     * @param properties
-     *            general and implementation specific settings.
-     * @param inputLog
-     *            a logger, used to add info to the log file and window.
-     * @return An XML descriptor giving standings properties for each team
-     * @throws IllegalContestState
-     */
-    String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState;
-
-    /**
-     * Returns an XML description of the current contest standings filtered by groups (and division).
-     *
-     * @param theContest
-     *            A proxy object referencing the underlying model describing the contest
-     * @param runs null use all runs, otherwise runs to be used.
-     * @param divisionNumber division number to fetch standings for (null is ok - means all)
+     * @param runs null use all runs (filtered by wantedGroups when non-null), otherwise runs to be used.
      * @param wantedGroups List of groups to fetch standings for (null is ok - means all)
      * @param properties
      *            general and implementation specific settings.
@@ -61,5 +44,5 @@ public interface IScoringAlgorithm {
      * @return An XML descriptor giving standings properties for each team
      * @throws IllegalContestState
      */
-    String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, List<Group> wantedGroups, Properties properties, Log inputLog) throws IllegalContestState;
+    String getStandings(IInternalContest theContest, Run[] runs, List<Group> wantedGroups, Properties properties, Log inputLog) throws IllegalContestState;
 }

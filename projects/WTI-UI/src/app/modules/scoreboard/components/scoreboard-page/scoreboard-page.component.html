@@ -5,15 +5,35 @@
         <div class='scoreboard-controls' *ngIf="groupOptions.length > 1">
             <label class="scoreboard-group-filter">
                 <span class="scoreboard-group-filter-label">Group</span>
+                <!--
+                  The following "select" defines the group selection drop-down list.
+                  The line
+                      [ngModel]="selectedGroupExternalId"
+                      forces Angular to display the "selectedGroupExternalId" in the drop-down, but does NOT automatically
+                      update "selectedGroupExternalId" in the component when the user changes the selection (that update is 
+                      done when method "onGroupFilterChange() is called.
+                  The line 
+                      (ngModelChange)="onGroupFilterChange($event)"
+                      says "whenever the Angular model changes, call method "onGroupFilterChange()", passing the new model value
+                      (a string which is the selected drop-down option's value)".
+                  The line 
+                      (change)="blurGroupFilter($event)"
+                      says "whenever the BROWSER generates a 'change event' (for example, when the user selects a new drop-down 
+                      option), call method "blurGroupFilter()", passing it the browser (DOM) event.  (This event is used in
+                      method blurGroupFilter() to remove keyboard focus from the drop-down so that, for example, up/down arrow
+                      keys continue to scroll the scoreboard table instead of the dropdown list choices.)
+                 -->
                 <select
-                    [(ngModel)]="selectedGroupId"
-                    (change)="onGroupFilterChange($event)"
+                    [ngModel]="selectedGroupExternalId"
+                    (ngModelChange)="onGroupFilterChange($event)"
+                    (change)="blurGroupFilter($event)"
                     name="scoreboardGroup"
                     class="scoreboard-group-select">
-                    <!-- add an "All Teams" option to the dropdown list -->
-                    <option value="">All teams</option>
-                    <!-- add each separate group name to the dropdown list -->
-                    <option *ngFor="let g of groupOptions" [value]="g.id">{{ g.displayName }}</option>
+                    <!-- add an "All Teams" option to the dropdown list if appropriate -->
+                    <option *ngIf="showAllTeamsOption" value="">All teams</option>
+                    <!-- add each separate group name to the dropdown list (the "value" in each option is that group's External Id),
+                    	while the text which is DISPLAYED for each option is the group's "displayNam") -->
+                    <option *ngFor="let g of groupOptions; trackBy: trackGroupOption" [value]="g.externalId">{{ g.displayName }}</option>
                 </select>
             </label>
         </div>

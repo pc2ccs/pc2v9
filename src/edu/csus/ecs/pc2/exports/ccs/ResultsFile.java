@@ -160,7 +160,7 @@ public class ResultsFile {
                 groupList = new ArrayList<Group>();
                 groupList.add(group);
             }
-            standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null,  groupList, properties, false, null);
+            standingsRecords = scoringAlgorithm.getStandingsRecords(contest, groupList, properties, false, null);
         } catch (Exception e) {
             throw new RuntimeException("Unable to generate standings ", e.getCause());
         }

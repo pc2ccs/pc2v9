@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import java.io.Serializable;
@@ -92,6 +92,13 @@ public class StandingsHeader implements Serializable {
 
     @XmlAttribute
     private String totalSolved;
+
+    /**
+     * Whether the scoreboard should offer an "All teams" option
+     * ({@code ScoreboardGroupUtilities.shouldShowAllTeams}).
+     */
+    @XmlAttribute
+    private String showAllTeams;
     
     @XmlAnyElement(lax = true)
     private List<Object> otherElements;
@@ -209,6 +216,14 @@ public class StandingsHeader implements Serializable {
 
     public void setTotalSolved(String totalSolved) {
         this.totalSolved = totalSolved;
+    }
+
+    public String getShowAllTeams() {
+        return showAllTeams;
+    }
+
+    public void setShowAllTeams(String showAllTeams) {
+        this.showAllTeams = showAllTeams;
     }
 
     public GroupList getGrouplist() {

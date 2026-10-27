@@ -130,6 +130,19 @@ public class ContestInformationTest extends TestCase {
         info2.setFreezeTime("1:23:00");
         assertFalse("Expeced Freeze time changed ", info.isSameAs(info2));
     }
+
+    public void testShowAllTeamsOnScoreboardIsSameAs() throws Exception {
+        ContestInformation info = new ContestInformation();
+        ContestInformation info2 = new ContestInformation();
+
+        assertTrue("Default show-all-teams identical", info.isSameAs(info2));
+
+        info.setShowAllTeamsOnScoreboard(ContestInformation.ShowAllTeamsOnScoreboard.FALSE);
+        assertFalse("show-all-teams changed", info.isSameAs(info2));
+
+        info2.setShowAllTeamsOnScoreboard(ContestInformation.ShowAllTeamsOnScoreboard.FALSE);
+        assertTrue("show-all-teams same", info.isSameAs(info2));
+    }
     
     public void testDefaultMaxOutputSize() throws Exception {
         ContestInformation info = new ContestInformation();

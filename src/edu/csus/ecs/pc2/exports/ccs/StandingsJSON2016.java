@@ -81,7 +81,7 @@ public class StandingsJSON2016 {
             groupList.add(group);
         }
 
-        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null,  groupList, properties, false, null);
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, groupList, properties, false, null);
 
         RunStatistics runStatistics = new RunStatistics(contest);
 

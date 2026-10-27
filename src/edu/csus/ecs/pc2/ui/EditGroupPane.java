@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -72,6 +72,22 @@ public class EditGroupPane extends JPanePlugin {
 
     private JCheckBox displayOnScoreboardCheckbox = null;
 
+    private JCheckBox divisionWideScoreboardCheckbox = null;
+
+    private JLabel divisionWideScoreboardWhatsThisLabel = null;
+
+    private static final String divisionWideScoreboardWhatsThisMessage = //
+            "A \"division\" is a set of teams all working on the same problem set"
+            + " in a contest where different teams work on different problem sets."
+            + "\nCheck this box only for a group that represents a full division/problem-set scoreboard "
+            + "\n(for example, a group representing \"all teams in \'Division 1\' \", or \"all teams in \'Undergrad Division\' \")."
+            + "\n\nLeave this box unchecked for:"
+            + "\n  - Contests with a single problem set for all teams"
+            + "\n  - Site or site-by-division groups (for example, \"California D1\")"
+            + "\n  - Physical-site groups used only for site-specific clarifications (for example, \"California\")"
+            + "\n\nWhen one or more groups are marked as division-wide and appear on the scoreboard, "
+            + "\nthe WTI scoreboard will hide \"All teams\" and default each team to their overall division scoreboard.";
+
     /**
      * This method initializes
      * 
@@ -87,7 +103,7 @@ public class EditGroupPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(517, 197));
+        this.setSize(new Dimension(517, 230));
 
         this.add(getJPanel(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -201,6 +217,7 @@ public class EditGroupPane extends JPanePlugin {
             checkGroup.setGroupId(Integer.parseInt(externalIdTextField.getText()));
         }
         checkGroup.setDisplayOnScoreboard(getDisplayOnScoreboardCheckbox().isSelected());
+        checkGroup.setDivisionWideScoreboard(getDivisionWideScoreboardCheckbox().isSelected());
         return checkGroup;
     }
 
@@ -322,7 +339,7 @@ public class EditGroupPane extends JPanePlugin {
     private JPanel getJPanel() {
         if (jPanel == null) {
             jLabel4 = new JLabel();
-            jLabel4.setBounds(new Rectangle(18, 125, 182, 20));
+            jLabel4.setBounds(new Rectangle(18, 152, 182, 20));
             jLabel4.setName("ExternalIdLabel");
             jLabel4.setMaximumSize(new Dimension(2147483647, 2147483647));
             jLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -352,6 +369,8 @@ public class EditGroupPane extends JPanePlugin {
             jPanel.add(getExternalidTextField(), getExternalidTextField().getName());
             jPanel.add(getSiteComboBox(), null);
             jPanel.add(getDisplayOnScoreboardCheckbox(), null);
+            jPanel.add(getDivisionWideScoreboardCheckbox(), null);
+            jPanel.add(getDivisionWideScoreboardWhatsThisLabel(), null);
         }
         return jPanel;
     }
@@ -384,7 +403,7 @@ public class EditGroupPane extends JPanePlugin {
     private JTextField getExternalidTextField() {
         if (externalIdTextField == null) {
             externalIdTextField = new JTextField();
-            externalIdTextField.setBounds(new Rectangle(213, 125, 76, 20));
+            externalIdTextField.setBounds(new Rectangle(213, 152, 76, 20));
             externalIdTextField.setToolTipText("");
             externalIdTextField.setName("externalIdTextField");
             externalIdTextField.setDocument(new IntegerDocument());
@@ -485,6 +504,8 @@ public class EditGroupPane extends JPanePlugin {
             getDisplayNameTextField().setText(group2.getDisplayName());
             getExternalidTextField().setText(String.valueOf(group2.getGroupId()));
             getDisplayOnScoreboardCheckbox().setSelected(group2.isDisplayOnScoreboard());
+            getDivisionWideScoreboardCheckbox().setSelected(group2.isDivisionWideScoreboard());
+            updateDivisionWideScoreboardEnabled();
 
             int siteNumber = 0;
             if (group2.getSite() != null) {
@@ -498,6 +519,8 @@ public class EditGroupPane extends JPanePlugin {
             getDisplayNameTextField().setText("");
             getExternalidTextField().setText("");
             getDisplayOnScoreboardCheckbox().setSelected(true);
+            getDivisionWideScoreboardCheckbox().setSelected(false);
+            updateDivisionWideScoreboardEnabled();
 
             populateSiteCombo(0);
             getAddButton().setVisible(true);
@@ -549,6 +572,7 @@ public class EditGroupPane extends JPanePlugin {
             displayOnScoreboardCheckbox.setText("Display on Scoreboard?");
             displayOnScoreboardCheckbox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    updateDivisionWideScoreboardEnabled();
                     enableUpdateButton();
                 }
             });
@@ -556,4 +580,46 @@ public class EditGroupPane extends JPanePlugin {
         return displayOnScoreboardCheckbox;
     }
 
-} // @jve:decl-index=0:visual-constraint="10,10"
+    private void updateDivisionWideScoreboardEnabled() {
+        boolean onScoreboard = getDisplayOnScoreboardCheckbox().isSelected();
+        getDivisionWideScoreboardCheckbox().setEnabled(onScoreboard);
+        getDivisionWideScoreboardWhatsThisLabel().setEnabled(onScoreboard);
+        if (!onScoreboard) {
+            getDivisionWideScoreboardCheckbox().setSelected(false);
+        }
+    }
+
+    /**
+     * This method initializes divisionWideScoreboardCheckbox
+     *
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getDivisionWideScoreboardCheckbox() {
+        if (divisionWideScoreboardCheckbox == null) {
+            divisionWideScoreboardCheckbox = new JCheckBox();
+            // Same x/width as Display on Scoreboard so right-aligned text and checkbox boxes line up
+            divisionWideScoreboardCheckbox.setBounds(new Rectangle(18, 116, 182, 21));
+            divisionWideScoreboardCheckbox.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+            divisionWideScoreboardCheckbox.setHorizontalAlignment(SwingConstants.RIGHT);
+            divisionWideScoreboardCheckbox.setText("Division-wide scoreboard?");
+            divisionWideScoreboardCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return divisionWideScoreboardCheckbox;
+    }
+
+    private JLabel getDivisionWideScoreboardWhatsThisLabel() {
+        if (divisionWideScoreboardWhatsThisLabel == null) {
+            divisionWideScoreboardWhatsThisLabel = FrameUtilities.getWhatsThisLabel(
+                    "About Division-wide Scoreboard",
+                    divisionWideScoreboardWhatsThisMessage);
+            // FrameUtilities adds EmptyBorder(0,15,0,0); width must include that inset or the icon clips
+            divisionWideScoreboardWhatsThisLabel.setBounds(new Rectangle(205, 116, 40, 20));
+        }
+        return divisionWideScoreboardWhatsThisLabel;
+    }
+
+}
