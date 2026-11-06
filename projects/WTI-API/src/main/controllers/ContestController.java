@@ -828,8 +828,9 @@ public class ContestController extends MainController {
 						//					logger.fine("Got the following XML from DSA:");
 						//					logger.fine(xmlStandings);
 						logger.info("Converting DSA XML to JSON");
-						currentJSONStandings = this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings),
-								internalContest);
+						currentJSONStandings = this.omitZeroSubmissionTeamsIfConfigured(
+								this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings),
+								internalContest));
 						//					logger.fine("Got the following JSON standings:");
 						//					logger.fine(currentJSONStandings);
 					} catch (IllegalContestState e) {
@@ -1159,6 +1160,58 @@ public class ContestController extends MainController {
 			logger.warning("ContestController.enrichScoreboardTeamGroups failed while adding teamGroupIds; returning unenriched JSON: " + e.getMessage());
 			return jsonStandings;
 		}
+	}
+
+	/**
+	 * When {@code suppressScoreboardZeros=true} in pc2v9.ini, drop team rows with no counted submissions.
+	 * Accepted, rejected, and pending runs all count via {@code totalAttempts}. The flag is read once at WTI startup.
+	 * On any failure the original JSON is returned.
+	 */
+	private String omitZeroSubmissionTeamsIfConfigured(String jsonStandings) {
+		if (jsonStandings == null || ini == null || !ini.isSuppressScoreboardZeros()) {
+			return jsonStandings;
+		}
+		try {
+			JSONObject root = new JSONObject(jsonStandings);
+			JSONObject contestStandings = root.optJSONObject("contestStandings");
+			if (contestStandings == null || !contestStandings.has("teamStanding")) {
+				return jsonStandings;
+			}
+			JSONArray teams = asJsonArray(contestStandings.get("teamStanding"));
+			JSONArray kept = new JSONArray();
+			for (int i = 0; i < teams.length(); i++) {
+				JSONObject team = teams.optJSONObject(i);
+				if (team != null && teamHasCountedSubmission(team)) {
+					kept.put(team);
+				}
+			}
+			contestStandings.put("teamStanding", kept);
+			return root.toString();
+		} catch (Exception e) {
+			logger.warning("ContestController.omitZeroSubmissionTeamsIfConfigured failed; returning full standings: " + e.getMessage());
+			return jsonStandings;
+		}
+	}
+
+	/**
+	 * True when this standings row records at least one counted submission.
+	 * Uses {@code totalAttempts} when present; otherwise any {@code problemSummaryInfo.attempts} greater than zero.
+	 */
+	private boolean teamHasCountedSubmission(JSONObject team) throws JSONException {
+		if (team.has("totalAttempts")) {
+			return team.optLong("totalAttempts", 0) > 0;
+		}
+		if (!team.has("problemSummaryInfo")) {
+			return false;
+		}
+		JSONArray problems = asJsonArray(team.get("problemSummaryInfo"));
+		for (int i = 0; i < problems.length(); i++) {
+			JSONObject problem = problems.optJSONObject(i);
+			if (problem != null && problem.optLong("attempts", 0) > 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Wraps a single JSONObject from XML in a one-element JSONArray so callers can always use indexed loops. */
