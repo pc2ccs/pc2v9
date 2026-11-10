@@ -7,6 +7,7 @@ import { AuthGuard } from './modules/core/auth/auth.guard';
 import { LogoutComponent } from './modules/login/components/logout/logout.component';
 import { ClarificationsPageComponent } from './modules/clarifications/components/clarifications-page/clarifications-page.component';
 import { ScoreboardPageComponent } from './modules/scoreboard/components/scoreboard-page/scoreboard-page.component';
+import { ScoreboardAccessGuard } from './modules/scoreboard/scoreboard-access.guard';
 
 /**
  * This class defines the "routes" which the Angular application (specifically, the Angular Router) knows how to follow.
@@ -48,7 +49,7 @@ const routes: Routes = [
     path: 'scoreboard',
     title: 'View Scoreboard',
     component: ScoreboardPageComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, ScoreboardAccessGuard]
   }, {
     path: '**',
     pathMatch: 'full',

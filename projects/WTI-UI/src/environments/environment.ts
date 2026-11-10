@@ -8,7 +8,10 @@ export const environment = {
   production: false,
   baseUrl: 'http://localhost:8080/api',
   websocketUrl: 'ws://localhost:8080/websocket/WTISocket',
-  useMock: false
+  useMock: false,
+  // Overwritten from assets/appconfig.json, which the WTI rewrites from pc2v9.ini at startup.
+  hideWTIScoreboard: false,
+  showOnlyMeOnWTIScoreboard: false
 };
 
 /*

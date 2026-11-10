@@ -27,6 +27,7 @@ import org.json.XML;
 import communication.WTIWebsocket;
 import config.ServerInit;
 import edu.csus.ecs.pc2.api.IClarification;
+import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IJudgement;
@@ -856,8 +857,13 @@ public class ContestController extends MainController {
 				}
 			}//end synchronized block
 			
-			// standings are (now) current; return them to requestor
-			return Response.ok().entity(currentJSONStandings).type(MediaType.APPLICATION_JSON).build();
+			// standings are (now) current; return them to requestor.
+			// showOnlyMe is applied per request so the shared cache still holds every team.
+			String standingsJson = currentJSONStandings;
+			if (ini != null && ini.isShowOnlyMeOnWTIScoreboard()) {
+				standingsJson = keepOnlyRequestingTeam(standingsJson, userInformation);
+			}
+			return Response.ok().entity(standingsJson).type(MediaType.APPLICATION_JSON).build();
 			
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED).entity(
@@ -1189,6 +1195,77 @@ public class ContestController extends MainController {
 			return root.toString();
 		} catch (Exception e) {
 			logger.warning("ContestController.omitZeroSubmissionTeamsIfConfigured failed; returning full standings: " + e.getMessage());
+			return jsonStandings;
+		}
+	}
+
+	/**
+	 * Returns standings JSON containing only the logged-in team's row, with rank fields cleared.
+	 * Problem headers are left unchanged. If the team has no row, the team list is empty.
+	 * On failure, returns standings with no team rows rather than the full board.
+	 */
+	private String keepOnlyRequestingTeam(String jsonStandings, ServerConnection user) throws NotLoggedInException {
+		if (jsonStandings == null || user == null) {
+			return jsonStandings;
+		}
+		try {
+			IClient client = user.getMyClient();
+			int teamNum = client.getAccountNumber();
+			int siteNum = client.getSiteNumber();
+			JSONObject root = new JSONObject(jsonStandings);
+			JSONObject contestStandings = root.optJSONObject("contestStandings");
+			if (contestStandings == null || !contestStandings.has("teamStanding")) {
+				return jsonStandings;
+			}
+			JSONArray teams = asJsonArray(contestStandings.get("teamStanding"));
+			JSONArray kept = new JSONArray();
+			for (int i = 0; i < teams.length(); i++) {
+				JSONObject team = teams.optJSONObject(i);
+				if (team != null && isRequestingTeamRow(team, teamNum, siteNum)) {
+					clearRankFields(team);
+					kept.put(team);
+					break;
+				}
+			}
+			contestStandings.put("teamStanding", kept);
+			return root.toString();
+		} catch (NotLoggedInException e) {
+			throw e;
+		} catch (Exception e) {
+			logger.warning("ContestController.keepOnlyRequestingTeam failed; returning standings with no team rows: " + e.getMessage());
+			return removeTeamRows(jsonStandings);
+		}
+	}
+
+	/** True when this standings row is the logged-in team (account number and site). */
+	private boolean isRequestingTeamRow(JSONObject team, int teamNum, int siteNum) {
+		if (team.optInt("teamId", -1) != teamNum) {
+			return false;
+		}
+		if (!team.has("teamSiteId")) {
+			return true;
+		}
+		return team.optInt("teamSiteId", -1) == siteNum;
+	}
+
+	/** Clears contest, group, and division rank so the UI rank column stays blank. */
+	private void clearRankFields(JSONObject team) throws JSONException {
+		team.put("rank", "");
+		team.put("overallRank", "");
+		team.put("groupRank", "");
+		team.put("divisionRank", "");
+	}
+
+	/** Returns the same standings document with an empty team list. */
+	private String removeTeamRows(String jsonStandings) {
+		try {
+			JSONObject root = new JSONObject(jsonStandings);
+			JSONObject contestStandings = root.optJSONObject("contestStandings");
+			if (contestStandings != null) {
+				contestStandings.put("teamStanding", new JSONArray());
+			}
+			return root.toString();
+		} catch (Exception e) {
 			return jsonStandings;
 		}
 	}

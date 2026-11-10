@@ -2,7 +2,7 @@
 
     <div class='table-container scoreboard-table'>
     	<!-- Add a group-selection dropdown list, but only if there is more than one group in the contest containing teams -->
-        <div class='scoreboard-controls' *ngIf="groupOptions.length > 1">
+        <div class='scoreboard-controls' *ngIf="groupOptions.length > 1 && !showOnlyMe">
             <label class="scoreboard-group-filter">
                 <span class="scoreboard-group-filter-label">Group</span>
                 <select
