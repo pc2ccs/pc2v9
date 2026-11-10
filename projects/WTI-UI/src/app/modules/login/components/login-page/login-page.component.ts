@@ -44,6 +44,23 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 	loginStarted = false;
 	contestClock: ContestClock = new ContestClock();
 
+	/**
+	 * http or https URL from pc2v9.ini showRegistrationURL, loaded into the UI config at WTI startup.
+	 * Empty when the property is missing, blank, or not an http or https URL.
+	 */
+	get registrationUrl(): string {
+		const raw = environment.showRegistrationURL;
+		if (typeof raw !== 'string') {
+			return '';
+		}
+		const url = raw.trim();
+		const lower = url.toLowerCase();
+		if (lower.startsWith('https://') || lower.startsWith('http://')) {
+			return url;
+		}
+		return '';
+	}
+
 	constructor(private _formBuilder: FormBuilder,
 		private _authService: AuthService,
 		private _websocketService: IWebsocketService,
