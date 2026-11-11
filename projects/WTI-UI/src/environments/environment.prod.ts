@@ -7,5 +7,7 @@ export const environment = {
   useMock: false,
   // Overwritten from assets/appconfig.json, which the WTI rewrites from pc2v9.ini at startup.
   hideWTIScoreboard: false,
-  showOnlyMeOnWTIScoreboard: false
+  showOnlyMeOnWTIScoreboard: false,
+  // Empty unless pc2v9.ini showRegistrationURL is an http or https URL.
+  showRegistrationURL: ''
 };
