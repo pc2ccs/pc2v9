@@ -14,6 +14,7 @@ import java.util.Properties;
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 
 
@@ -46,8 +47,11 @@ public class ServerInit {
     private final String WTI_KEY_STORE_PATH_KEY = "keyStoreFilePath";
     private final String WTI_KEY_STORE_PASSWORD_KEY = "keyStorePassword";
     private final String WTI_CERT_ALIAS_KEY = "certificateAlias";
+    /** When true, scoreboard JSON omits teams with no counted submissions. Default false. */
+    private final String WTI_SUPPRESS_SCOREBOARD_ZEROS_KEY = "suppressScoreboardZeros";
 
     private static final boolean DEF_USE_SSL = false;
+    private static final boolean DEF_SUPPRESS_SCOREBOARD_ZEROS = false;
     private static final int DEF_WTI_HTTP_PORT = 8080;
     private static final String DEF_WEBSOCK_PATH = "/websocket";
     private static final String DEF_SCOREBOARD_ACCT = "scoreboard2";
@@ -59,6 +63,7 @@ public class ServerInit {
 	private static List<String> allowedOSNames;
 
 	private boolean useSSL = DEF_USE_SSL;
+	private boolean suppressScoreboardZeros = DEF_SUPPRESS_SCOREBOARD_ZEROS;
 	private int portNum;
 	private String socketSource;
 	private String scoreboardAccount;
@@ -110,6 +115,8 @@ public class ServerInit {
 		      keyStoreFilePath = p.getProperty(WTI_KEY_STORE_PATH_KEY);
 		      keyStorePassword = p.getProperty(WTI_KEY_STORE_PASSWORD_KEY);
 		      certAlias = p.getProperty(WTI_CERT_ALIAS_KEY);
+		      this.suppressScoreboardZeros = StringUtilities.getBooleanValue(
+		    		  p.getProperty(WTI_SUPPRESS_SCOREBOARD_ZEROS_KEY), DEF_SUPPRESS_SCOREBOARD_ZEROS);
 
 		      String infoMsg = "Found the following properties in " + WTI_INI_FILE_KEY + ": " + p;
 		      System.out.println (infoMsg);
@@ -149,6 +156,7 @@ public class ServerInit {
 
 	private void setDefaults() {
 		this.useSSL = DEF_USE_SSL;
+		this.suppressScoreboardZeros = DEF_SUPPRESS_SCOREBOARD_ZEROS;
 		this.portNum = DEF_WTI_HTTP_PORT;
 		this.socketSource = DEF_WEBSOCK_PATH;
 		this.scoreboardAccount = DEF_SCOREBOARD_ACCT;
@@ -162,6 +170,14 @@ public class ServerInit {
 	 */
 	public boolean isUseSSL() {
 		return useSSL;
+	}
+
+	/**
+	 * True when {@code suppressScoreboardZeros=true} was set in pc2v9.ini at WTI startup.
+	 * Absent or unrecognized values leave this false, so the scoreboard includes teams with no submissions.
+	 */
+	public boolean isSuppressScoreboardZeros() {
+		return suppressScoreboardZeros;
 	}
 
 	/**
