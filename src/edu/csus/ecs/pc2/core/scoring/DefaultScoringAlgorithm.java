@@ -482,11 +482,17 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             Problem prob = allProblems[p-1];
 
             if (divisionNumber!=null) {
+                // eg, D1, D2
+                String divName = 'D' + divisionNumber.toString();
+                String grpName;
+                int grpNameLen;
                 //we are filtering on divisions so we need to update "wantedGroups" with the "division" groups
                 // in the problem which match the desired division.
                 for (Group probGroup : prob.getGroups()) {
-                   //Note: getGroupId() returns the "CMS external id".
-                   if (probGroup.getGroupId()==divisionNumber) {
+                    grpName = probGroup.getDisplayName();
+                    grpNameLen = grpName.length();
+                    // look at last 2 chars of group name and if they match the division, we're good.
+                    if(grpNameLen >= 2 && divName.compareToIgnoreCase(grpName.substring(grpNameLen-2)) == 0) {
                         wantedGroups.add(probGroup);
                     }
                 }
