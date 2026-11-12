@@ -9,6 +9,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.json.Json;
@@ -49,9 +50,18 @@ public class ServerInit {
     private final String WTI_CERT_ALIAS_KEY = "certificateAlias";
     /** When true, scoreboard JSON omits teams with no counted submissions. Default false. */
     private final String WTI_SUPPRESS_SCOREBOARD_ZEROS_KEY = "suppressScoreboardZeros";
+    /** When true, the WTI omits the Scoreboard tab. Default false. */
+    private final String WTI_HIDE_SCOREBOARD_KEY = "hideWTIScoreboard";
+    /** When true, and the scoreboard is visible, it shows only the logged-in team with a blank rank. Default false. */
+    private final String WTI_SHOW_ONLY_ME_KEY = "showOnlyMeOnWTIScoreboard";
+    /** When set to an http or https URL, the login screen links there for Open-contest account requests. */
+    private final String WTI_SHOW_REGISTRATION_URL_KEY = "showRegistrationURL";
 
     private static final boolean DEF_USE_SSL = false;
     private static final boolean DEF_SUPPRESS_SCOREBOARD_ZEROS = false;
+    private static final boolean DEF_HIDE_WTI_SCOREBOARD = false;
+    private static final boolean DEF_SHOW_ONLY_ME = false;
+    private static final String DEF_SHOW_REGISTRATION_URL = "";
     private static final int DEF_WTI_HTTP_PORT = 8080;
     private static final String DEF_WEBSOCK_PATH = "/websocket";
     private static final String DEF_SCOREBOARD_ACCT = "scoreboard2";
@@ -64,6 +74,9 @@ public class ServerInit {
 
 	private boolean useSSL = DEF_USE_SSL;
 	private boolean suppressScoreboardZeros = DEF_SUPPRESS_SCOREBOARD_ZEROS;
+	private boolean hideWTIScoreboard = DEF_HIDE_WTI_SCOREBOARD;
+	private boolean showOnlyMeOnWTIScoreboard = DEF_SHOW_ONLY_ME;
+	private String showRegistrationURL = DEF_SHOW_REGISTRATION_URL;
 	private int portNum;
 	private String socketSource;
 	private String scoreboardAccount;
@@ -117,6 +130,11 @@ public class ServerInit {
 		      certAlias = p.getProperty(WTI_CERT_ALIAS_KEY);
 		      this.suppressScoreboardZeros = StringUtilities.getBooleanValue(
 		    		  p.getProperty(WTI_SUPPRESS_SCOREBOARD_ZEROS_KEY), DEF_SUPPRESS_SCOREBOARD_ZEROS);
+		      this.hideWTIScoreboard = StringUtilities.getBooleanValue(
+		    		  p.getProperty(WTI_HIDE_SCOREBOARD_KEY), DEF_HIDE_WTI_SCOREBOARD);
+		      this.showOnlyMeOnWTIScoreboard = StringUtilities.getBooleanValue(
+		    		  p.getProperty(WTI_SHOW_ONLY_ME_KEY), DEF_SHOW_ONLY_ME);
+		      this.showRegistrationURL = normalizeRegistrationUrl(p.getProperty(WTI_SHOW_REGISTRATION_URL_KEY));
 
 		      String infoMsg = "Found the following properties in " + WTI_INI_FILE_KEY + ": " + p;
 		      System.out.println (infoMsg);
@@ -157,6 +175,9 @@ public class ServerInit {
 	private void setDefaults() {
 		this.useSSL = DEF_USE_SSL;
 		this.suppressScoreboardZeros = DEF_SUPPRESS_SCOREBOARD_ZEROS;
+		this.hideWTIScoreboard = DEF_HIDE_WTI_SCOREBOARD;
+		this.showOnlyMeOnWTIScoreboard = DEF_SHOW_ONLY_ME;
+		this.showRegistrationURL = DEF_SHOW_REGISTRATION_URL;
 		this.portNum = DEF_WTI_HTTP_PORT;
 		this.socketSource = DEF_WEBSOCK_PATH;
 		this.scoreboardAccount = DEF_SCOREBOARD_ACCT;
@@ -178,6 +199,50 @@ public class ServerInit {
 	 */
 	public boolean isSuppressScoreboardZeros() {
 		return suppressScoreboardZeros;
+	}
+
+	/**
+	 * True when {@code hideWTIScoreboard=true} was set in pc2v9.ini at WTI startup.
+	 * The Scoreboard tab is omitted. {@code showOnlyMeOnWTIScoreboard} has no effect while this is true.
+	 */
+	public boolean isHideWTIScoreboard() {
+		return hideWTIScoreboard;
+	}
+
+	/**
+	 * True when {@code showOnlyMeOnWTIScoreboard=true} was set in pc2v9.ini at WTI startup.
+	 * The scoreboard payload then contains only the requesting team, with rank fields cleared.
+	 */
+	public boolean isShowOnlyMeOnWTIScoreboard() {
+		return showOnlyMeOnWTIScoreboard;
+	}
+
+	/**
+	 * The URL from {@code showRegistrationURL} in pc2v9.ini, or an empty string when the property
+	 * is missing, blank, or not an http or https URL. The login screen shows the account-request
+	 * link only when this is non-empty.
+	 */
+	public String getShowRegistrationURL() {
+		return showRegistrationURL;
+	}
+
+	/**
+	 * Keeps an http or https URL. Anything else is treated as unspecified so the login screen stays unchanged.
+	 */
+	private String normalizeRegistrationUrl(String raw) {
+		if (raw == null) {
+			return DEF_SHOW_REGISTRATION_URL;
+		}
+		String url = raw.trim();
+		if (url.isEmpty()) {
+			return DEF_SHOW_REGISTRATION_URL;
+		}
+		String lower = url.toLowerCase(Locale.ROOT);
+		if (lower.startsWith("https://") || lower.startsWith("http://")) {
+			return url;
+		}
+		logger.warning("Ignoring showRegistrationURL because it is not an http or https URL");
+		return DEF_SHOW_REGISTRATION_URL;
 	}
 
 	/**
@@ -265,6 +330,9 @@ public class ServerInit {
 			JsonObject newJson = Json.createObjectBuilder()
 					.add("baseUrl", baseUrl)
 					.add("websocketUrl", websocketUrl)
+					.add("hideWTIScoreboard", ini.isHideWTIScoreboard())
+					.add("showOnlyMeOnWTIScoreboard", ini.isShowOnlyMeOnWTIScoreboard())
+					.add("showRegistrationURL", ini.getShowRegistrationURL())
 					.build();
 
 			// Save the JSON URL string to the file location where the WTI-UI code expects to find it.

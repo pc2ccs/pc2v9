@@ -9,6 +9,7 @@ import { SCOREBOARD_TYPE } from 'src/constants';
 import type { ScoreboardType } from 'src/constants';
 import { ensureArray } from 'src/app/modules/core/utils/json-utils';
 import { ScoreboardModeService } from 'src/app/modules/core/services/scoreboard-mode.service';
+import { environment } from 'src/environments/environment';
 
 interface ProblemHeader {
     label: string;
@@ -144,6 +145,10 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	 * @param filteredIndex zero-based index in the current {@code teamStandings} array (after group filter)
 	 */
 	getDisplayRank(team: any, filteredIndex: number): string | number {
+		// showOnlyMeOnWTIScoreboard leaves the rank column blank, including the group-filter fallback.
+		if (environment.showOnlyMeOnWTIScoreboard) {
+			return '';
+		}
 		if (this.selectedGroupId === '') {
 			return team.rank;
 		}
@@ -495,6 +500,11 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
   		return this.isContestStarted() ? this.problemDetailHeaders as ProblemHeader[] : [];
 	}
 	
+	/** True when pc2v9.ini showOnlyMeOnWTIScoreboard=true was loaded into the UI config at WTI startup. */
+	get showOnlyMe(): boolean {
+		return environment.showOnlyMeOnWTIScoreboard;
+	}
+
 	get isPassFail(): boolean {
 		return this._scoreboardMode.isPassFail();
 	}

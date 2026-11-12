@@ -27,6 +27,9 @@ export class AppHeaderComponent implements OnDestroy {
 	//Return a boolean indicating whether or not to show nav-bar links in the header
 	get showLinks(): boolean { return this._authService.isLoggedIn; }
 
+	/** False when pc2v9.ini hideWTIScoreboard=true was loaded into the UI config at WTI startup. */
+	get showScoreboard(): boolean { return !environment.hideWTIScoreboard; }
+
 	//Return a boolean indicating whether or not to show a teamId in the header
 	get showTeamId(): boolean { return this._authService.isLoggedIn; }
 

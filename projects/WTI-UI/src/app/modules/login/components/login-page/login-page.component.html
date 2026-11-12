@@ -13,5 +13,8 @@
                 {{ loginStarted ? 'Logging in...' : 'Log In' }}
             </button>
         </form>
+        <p class='registration-link' *ngIf='registrationUrl'>
+            Click <a [href]='registrationUrl' target='_blank' rel='noopener noreferrer'>here</a> to request a PC2 account for this contest.
+        </p>
     </div>
 </div>
