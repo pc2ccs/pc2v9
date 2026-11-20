@@ -275,7 +275,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 if(group.isDisplayOnScoreboard()) {
                     groupListOfOne.clear();
                     groupListOfOne.add(group);
-                    saXML = algo.getStandings(contest,  null,  null, groupListOfOne, scoringProperties, log);
+                    saXML = algo.getStandings(contest,  null,  groupListOfOne, scoringProperties, log);
                     generateOutput(saXML, group);
                 }
             }
@@ -307,7 +307,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                     groupOfOneList = new ArrayList<Group>();
                     groupOfOneList.add(group);
                 }
-                String frozenXML = algoFrozen.getStandings(contest, null, null, groupOfOneList,scoringProperties, log);
+                String frozenXML = algoFrozen.getStandings(contest, null, groupOfOneList,scoringProperties, log);
                 scoreboardCommon.generateOutput(frozenXML, groupName, xslDir, frozenOutputDir, ci.getScoreboardXSLFiles(), log);
             }
         } catch (Exception e) {

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 /**
@@ -24,6 +24,14 @@ public class Group implements IElementObject {
     private String displayName;
     private ElementId site;
     private boolean displayOnScoreboard = true;
+
+    /**
+     * If true, this group is a full division / problem-set cohort for scoreboard purposes
+     * (e.g. all of D1), as opposed to a site or site-by-division subset (e.g. California D1).
+     * Used by WTI to hide "All teams" and choose a team's default scoreboard filter when
+     * any such groups exist. Leave false for World Finals-style contests.
+     */
+    private boolean divisionWideScoreboard = false;
     
     public ElementId getElementId() {
         return elementId;
@@ -117,6 +125,20 @@ public class Group implements IElementObject {
     }
 
     /**
+     * @return true if this group is a full division / problem-set scoreboard cohort
+     */
+    public boolean isDivisionWideScoreboard() {
+        return divisionWideScoreboard;
+    }
+
+    /**
+     * @param divisionWideScoreboard true to mark this group as a division-wide scoreboard cohort
+     */
+    public void setDivisionWideScoreboard(boolean divisionWideScoreboard) {
+        this.divisionWideScoreboard = divisionWideScoreboard;
+    }
+
+    /**
      * Compares string, handles if either string is null.
      * 
      * @param s1
@@ -153,6 +175,9 @@ public class Group implements IElementObject {
             if (isDisplayOnScoreboard() != newGroup.isDisplayOnScoreboard()) {
                 return false;
             }
+            if (isDivisionWideScoreboard() != newGroup.isDivisionWideScoreboard()) {
+                return false;
+            }
             if (site != null && newGroup.getSite() != null) {
                 if (!newGroup.getSite().equals(site)) {
                     return false;
@@ -186,5 +211,6 @@ public class Group implements IElementObject {
         displayName = newGroup.getDisplayName();
         site = newGroup.getSite();
         displayOnScoreboard = newGroup.displayOnScoreboard;
+        divisionWideScoreboard = newGroup.divisionWideScoreboard;
     }
 }

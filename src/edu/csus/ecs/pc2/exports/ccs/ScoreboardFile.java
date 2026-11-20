@@ -63,7 +63,7 @@ public class ScoreboardFile {
         lines.addElement("scoreboard" + TAB + "1");
 
         // return ranked teams
-        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null,  groupList, properties, false, null);
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, groupList, properties, false, null);
 
         for (StandingsRecord record : standingsRecords) {
 

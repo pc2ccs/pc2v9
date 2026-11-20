@@ -20,11 +20,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 public class StandingsRecord {
 
     /**
-     * Division Rank Number.
-     */
-    private int divisionRankNumber = 0;
-
-    /**
      * Rank Number.
      */
     private int rankNumber;
@@ -226,16 +221,6 @@ public class StandingsRecord {
         return jsonString;
     }
 
-    public int getDivisionRankNumber() {
-        return divisionRankNumber;
-    }
-    /**
-     * @param divisionRankNumber The groupRankNumber to set.
-     */
-    public void setDivisionRankNumber(int divisionRankNumber) {
-        this.divisionRankNumber = divisionRankNumber;
-    }
-
     /**
      * @return the score
      */
@@ -249,28 +234,4 @@ public class StandingsRecord {
     public void setScore(double score) {
         this.score = score;
     }
-    
-    /**
-     * Returns the per-problem summary information as an ordered list.
-     * This is intended for JSON serialization and UI consumers (e.g. WTI / Angular),
-     * since Angular requires Iterables for *ngFor.
-     * 
-     * Note that this method is never called directly by any PC2 code; rather,
-     * it gets invoked by Jackson during the serialization process (that is,
-     * when some code executes (something like):
-     *      ObjectMapper mapper = new ObjectMapper();
-     *      String json = mapper.writeValueAsString(standingsRecord);
-     *      
-     * Note also that this is the reason the "@JsonIgnore" annotations was added
-     * to method getSummaryRow() (above); that annotation keeps the Jackson
-     * serializer from using a method which returns a Object when what we want
-     * to serialize for StandingsRecord components are iterables (e.g. arrays).
-     * 
-     */
-    @JsonProperty("problemSummaryInfo")
-    public java.util.List<ProblemSummaryInfo> getProblemSummaryInfo() {
-        return summaryRow == null ? java.util.Collections.emptyList()
-                                  : summaryRow.toOrderedList();
-    }
-
 }

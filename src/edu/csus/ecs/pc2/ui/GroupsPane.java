@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2026 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -110,7 +110,7 @@ public class GroupsPane extends JPanePlugin {
         if (groupListBox == null) {
             groupListBox = new MCLB();
 
-            Object[] cols = { "Id", "Display Name", "PC^2 Site", "External Id" , "On Scoreboard"};
+            Object[] cols = { "Id", "Display Name", "PC^2 Site", "External Id" , "On Scoreboard", "Division-wide"};
             groupListBox.addColumns(cols);
             
             groupListBox.autoSizeAllColumns();
@@ -140,7 +140,7 @@ public class GroupsPane extends JPanePlugin {
 
     protected Object[] buildGroupRow(Group group, int rowNumber) {
 
-//        Object[] cols = { "Id", "Display Name", "PC^2 Site", "External Id" , "On Scoreboard"};
+//        Object[] cols = { "Id", "Display Name", "PC^2 Site", "External Id" , "On Scoreboard", "Division-wide"};
 
         int numberColumns = groupListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -154,6 +154,7 @@ public class GroupsPane extends JPanePlugin {
         }
         c[3] = Integer.valueOf(group.getGroupId()).toString();
         c[4] = Boolean.toString(group.isDisplayOnScoreboard());
+        c[5] = Boolean.toString(group.isDivisionWideScoreboard());
         return c;
     }
 

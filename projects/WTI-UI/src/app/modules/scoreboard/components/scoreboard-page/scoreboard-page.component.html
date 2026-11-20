@@ -11,7 +11,7 @@
                     name="scoreboardGroup"
                     class="scoreboard-group-select">
                     <!-- add an "All Teams" option to the dropdown list -->
-                    <option value="">All teams</option>
+                    <option *ngIf="showAllTeamsOption" value="">All teams</option>
                     <!-- add each separate group name to the dropdown list -->
                     <option *ngFor="let g of groupOptions" [value]="g.id">{{ g.displayName }}</option>
                 </select>
