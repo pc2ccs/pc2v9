@@ -507,8 +507,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contestInformation.setPrimaryCCS_user_login(ccsLogin);
 
         // CCS REST password
-        String ccsPassoword = ContestImportUtilities.fetchValue(content, CCS_PASSWORD_KEY, contestInformation.getPrimaryCCS_user_pw());
-        contestInformation.setPrimaryCCS_user_pw(ccsPassoword);
+        String ccsPassword = ContestImportUtilities.fetchValue(content, CCS_PASSWORD_KEY, contestInformation.getPrimaryCCS_user_pw());
+        contestInformation.setPrimaryCCS_user_pw(ccsPassword);
 
         String lastEventId = ContestImportUtilities.fetchValue(content, CCS_LAST_EVENT_ID_KEY, contestInformation.getLastShadowEventID());
         contestInformation.setLastShadowEventID(lastEventId);
@@ -1246,9 +1246,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     /**
      * Checks for an optional "scoreboard" section in the specified YAML content;
      * if present, checks that section for a SHOW_ALL_TEAMS_ON_SCOREBOARD value.
-     * If such a value is found, updates the specified ContestInformation object to 
+     * If such a value is found, updates the specified ContestInformation object to
      * contain that value.
-     * 
+     *
      *  @return an updated ContestInformation object if the YAML contains scoreboard information;
      *          returns with no side effects if the YAML doesn't contain scoreboard information.
      *  @throws YamlLoadException if the YAML contains an illegal/undefined value in the scoreboard section.

@@ -3,6 +3,11 @@ package controllers;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -61,6 +66,7 @@ import models.LanguageModel;
 import models.ProblemModel;
 import models.ServerErrorResponseModel;
 import services.ScoreboardChangeListener;
+
 
 /**
  * This class acts as the MVC "Controller" for all accesses to the WTI endpoints related to obtaining information about
@@ -959,7 +965,19 @@ public class ContestController extends MainController {
 		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);
 		changeScoresToStrings(jsonStandingsObject);
 
-//		logger.fine("Standings JSON: " + jsonStandingsObject.toString(2));
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+		String timestamp = LocalDateTime.now().format(formatter);
+		String jsonFileName = "standings/" + timestamp + ".json";
+		java.nio.file.Path folderPath = Paths.get("standings");
+		java.nio.file.Path filePath = folderPath.resolve(jsonFileName);
+		try {
+			Files.createDirectories(folderPath);
+			byte [] jsonBytes = jsonStandingsObject.toString(4).getBytes(StandardCharsets.UTF_8);
+		    Files.write(Paths.get(jsonFileName), jsonBytes);
+		    logger.fine("Standings JSON saved to " + jsonFileName);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 		return jsonStandingsObject.toString();
 
 	}
