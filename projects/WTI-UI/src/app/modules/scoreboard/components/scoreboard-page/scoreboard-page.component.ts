@@ -7,7 +7,6 @@ import { DEBUG_MODE } from 'src/constants';
 import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
 import { SCOREBOARD_TYPE } from 'src/constants';
 import type { ScoreboardType } from 'src/constants';
-import { ensureArray } from 'src/app/modules/core/utils/json-utils';
 import { ScoreboardModeService } from 'src/app/modules/core/services/scoreboard-mode.service';
 import { environment } from 'src/environments/environment';
 
@@ -225,7 +224,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		// showOnlyMeOnWTIScoreboard leaves the rank column blank, including the group-filter fallback.
 		if (environment.showOnlyMeOnWTIScoreboard) {
 			return '';
-		if (this.selectedGroupId === '') {
+		}
 		if (this.selectedGroupExternalId === '') {
 			return team.rank;
 		}
