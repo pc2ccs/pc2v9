@@ -693,6 +693,8 @@ public class ContestController extends MainController {
 	 *
 	 *  The ContestController <I>caches</i> scoreboard standings JSON per scope (full contest and each requested
 	 *  {@code groupExternalId}). If standings have not changed since the last DSA run, a cached entry is returned.
+	 *  The cache does not include {@code defaultGroupExternalId}. That field depends on the requesting team and is
+	 *  added to the JSON returned for this request, after the cache lookup.
 	 *  Optional {@code groupExternalId} matches {@code standingsHeader.groupList.group.externalId}
 	 *  ({@link Group#getGroupId()}) and causes DSA to generate standings for that PC2 {@link Group} only
 	 *  (correct teams and problem columns). It is <em>not</em> the scoreboard group-list ordinal
@@ -771,7 +773,7 @@ public class ContestController extends MainController {
 					}
 
 					try {
-						responseJson = buildScoreboardJson(internalContest, groupExternalId, userInformation.getContest().getMyClient());
+						responseJson = buildScoreboardJson(internalContest, groupExternalId);
 					} catch (IllegalArgumentException e) {
 						logger.warning("Invalid groupExternalId for scoreboard request: " + e.getMessage());
 						return Response.status(Response.Status.BAD_REQUEST)
@@ -809,15 +811,22 @@ public class ContestController extends MainController {
 						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
 								"Scoreboard JSON unavailable"))
 						.type(MediaType.APPLICATION_JSON).build();
-			} else {
-				// standings are (now) current; return them to requestor.
-				// showOnlyMe is applied per request so the shared cache still holds every team.
-				String standingsJson = responseJson;
-				if (ini != null && ini.isShowOnlyMeOnWTIScoreboard()) {
-					standingsJson = keepOnlyRequestingTeam(standingsJson, userInformation);
-				}
 			}
-			return Response.ok().entity(responseJson).type(MediaType.APPLICATION_JSON).build();
+
+			// "showOnlyMe" as well as "which group should be selected by default" in the "Group:" UI dropdown
+			// both depend on who asked. Apply them to the response copy so the shared cache still holds 
+			// every team and holds no default dropdown group.
+			String standingsJson = responseJson;
+			if (ini != null && ini.isShowOnlyMeOnWTIScoreboard()) {
+				standingsJson = keepOnlyRequestingTeam(standingsJson, userInformation);
+			}
+			IInternalContest contestForRequester = null;
+			if (scoreboardServerConn != null && scoreboardServerConn.getContest() != null) {
+				contestForRequester = scoreboardServerConn.getContest().getInternalContest();
+			}
+			standingsJson = applyDefaultGroupExternalId(standingsJson, contestForRequester,
+					userInformation.getContest().getMyClient());
+			return Response.ok().entity(standingsJson).type(MediaType.APPLICATION_JSON).build();
 
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED).entity(
@@ -870,7 +879,7 @@ public class ContestController extends MainController {
 	 *
 	 * @param groupExternalId blank/null for full contest; otherwise {@link Group#getGroupId()} External Id
 	 */
-	private String buildScoreboardJson(IInternalContest internalContest, String groupExternalId, IClient requestingClient)
+	private String buildScoreboardJson(IInternalContest internalContest, String groupExternalId)
 			throws IllegalContestState, IOException, JSONException {
 
 		Properties props = internalContest.getContestInformation().getScoringProperties();
@@ -892,11 +901,7 @@ public class ContestController extends MainController {
 		String xmlStandings = dsa.getStandings(internalContest, null, wantedGroups, props, logger);
 
 		logger.info("Converting DSA XML to JSON");
-		ClientId requestingClientId = null;
-		if (requestingClient != null) {
-			requestingClientId = new ClientId(requestingClient.getSiteNumber(), Type.TEAM, requestingClient.getAccountNumber());
-		}
-		return this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings), internalContest, requestingClientId);
+		return this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings), internalContest);
 	}
 
 	private static String getStandingsCacheKey(String groupExternalId) {
@@ -1108,7 +1113,7 @@ public class ContestController extends MainController {
 	 * @return JSON with {@code teamGroupExternalIds} set on each processed {@code teamStanding}, or the original string if
 	 *         enrichment is skipped or throws
 	 */
-	private String enrichScoreboardTeamGroups(String jsonStandings, IInternalContest contest, ClientId requestingClientId) {
+	private String enrichScoreboardTeamGroups(String jsonStandings, IInternalContest contest) {
 		if (jsonStandings == null || contest == null) {
 			return jsonStandings;
 		}
@@ -1127,7 +1132,6 @@ public class ContestController extends MainController {
 				return jsonStandings;
 			}
 			JSONObject standingsHeader = contestStandings.getJSONObject("standingsHeader");
-			addDefaultGroupExternalIdToHeader(standingsHeader, contest, requestingClientId);
 			JSONObject groupListObj = null;
 			// org.json may preserve "groupList" casing from XML; we also want to accept "grouplist" for defensive parsing.
 			if (standingsHeader.has("groupList")) {
@@ -1200,9 +1204,52 @@ public class ContestController extends MainController {
 	}
 
 	/**
+	 * Returns a copy of the standings JSON with {@code defaultGroupExternalId} set for this requester.
+	 * The shared cache stores standings without that field, because the field depends on who asked.
+	 * On any failure the original string is returned.
+	 *
+	 * @param jsonStandings cached or freshly built standings JSON, without a per-team default group
+	 * @param contest contest providing the requester's account and division-wide groups
+	 * @param requestingClient logged-in team whose division-wide group should be the starting selection;
+	 *        null leaves the JSON unchanged
+	 * @return a new JSON string with {@code standingsHeader.defaultGroupExternalId} set when this team
+	 *         has a division-wide scoreboard group and "All teams" is hidden; otherwise {@code jsonStandings}
+	 */
+	private String applyDefaultGroupExternalId(String jsonStandings, IInternalContest contest, IClient requestingClient) {
+		if (jsonStandings == null || contest == null || requestingClient == null) {
+			return jsonStandings;
+		}
+		try {
+			JSONObject root = new JSONObject(jsonStandings);
+			JSONObject contestStandings = root.optJSONObject("contestStandings");
+			if (contestStandings == null) {
+				return jsonStandings;
+			}
+			JSONObject standingsHeader = contestStandings.optJSONObject("standingsHeader");
+			if (standingsHeader == null) {
+				return jsonStandings;
+			}
+			ClientId requestingClientId = new ClientId(requestingClient.getSiteNumber(), Type.TEAM, requestingClient.getAccountNumber());
+			addDefaultGroupExternalIdToHeader(standingsHeader, contest, requestingClientId);
+			return root.toString();
+		} catch (Exception e) {
+			logger.warning("ContestController.applyDefaultGroupExternalId failed; returning standings without a default group: " + e.getMessage());
+			return jsonStandings;
+		}
+	}
+
+	/**
 	 * If "All teams" is hidden for this contest/requester, add {@code defaultGroupExternalId} to the standingsHeader
 	 * so the WTI UI can select the requester's division-wide scoreboard without a separate endpoint.
 	 * The value is {@link Group#getGroupId()}, not the scoreboard group-list ordinal.
+	 * Call this on the response copy only. Do not write the result back into {@link #standingsJsonCache}.
+	 *
+	 * @param standingsHeader header object from the response copy; the field is written here in place
+	 * @param contest contest providing the requester's account and division-wide groups
+	 * @param requestingClientId site and account number of the team making this request
+	 * @return nothing. The method updates {@code standingsHeader} when a default group applies, and leaves
+	 *         it unchanged when the header, contest, or client is missing, "All teams" is shown, the account
+	 *         cannot be found, or the account belongs to no division-wide scoreboard group
 	 */
 	private void addDefaultGroupExternalIdToHeader(JSONObject standingsHeader, IInternalContest contest, ClientId requestingClientId)
 			throws JSONException {
