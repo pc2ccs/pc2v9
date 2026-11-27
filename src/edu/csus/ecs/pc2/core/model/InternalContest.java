@@ -51,7 +51,6 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.ContestInformation.ScoreboardType;
 import edu.csus.ecs.pc2.core.model.PasswordChangeEvent.Action;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -2252,13 +2251,14 @@ public class InternalContest implements IInternalContest {
         }
     }
 
+    /**
+     * addContestInformation is only called when a contest restored from a saved contest profile.
+     * Note that ContestInformation contains the scoreboard type, and that is safe to set here, in fact,
+     * this is where it gets set when starting up a server from a saved contest.
+     */
     @Override
     public void addContestInformation(ContestInformation inContestInformation) {
-        // Remember scoreboard type since this can't be set once it's set
-        ScoreboardType stype = this.contestInformation.getScoreboardType();
         this.contestInformation = inContestInformation;
-// JB Regionals26        this.contestInformation.setScoreboardType("score" /*stype.getType()*/);
-        this.contestInformation.setScoreboardType(stype.getType());
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.ADDED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
@@ -2266,9 +2266,6 @@ public class InternalContest implements IInternalContest {
     @Override
     public void updateContestInformation(ContestInformation inContestInformation) {
         this.contestInformation = inContestInformation;
-        // Remember scoreboard type since this can't be set once it's set
-//        ScoreboardType stype = this.contestInformation.getScoreboardType();
-//        this.contestInformation.setScoreboardType(stype.getType());
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.CHANGED, contestInformation);
         fireContestInformationListener(contestInformationEvent);
     }
