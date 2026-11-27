@@ -118,7 +118,7 @@ Last updated
 		<xsl:choose>
 		    <xsl:when test="@index mod 2 = 0">
 			<tr class="even">
-<td><xsl:value-of select="@divisionRank"/></td>
+<td><xsl:value-of select="@rank"/></td>
 <td><xsl:value-of select="@teamName"/></td>
 <td>
 <xsl:attribute name="class">center</xsl:attribute>
@@ -133,7 +133,7 @@ Last updated
 		    </xsl:when>
 		    <xsl:otherwise>
 		        <tr class="odd">
-<td><xsl:value-of select="@divisionRank"/></td>
+<td><xsl:value-of select="@rank"/></td>
 <td><xsl:value-of select="@teamName"/></td>
 <td>
 <xsl:attribute name="class">center</xsl:attribute>

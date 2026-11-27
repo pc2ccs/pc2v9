@@ -170,6 +170,39 @@ public class ContestInformation implements Serializable{
 
     private ScoreboardType scoreboardType = ScoreboardType.PASSFAIL;
 
+    /**
+     * Contest-level override for whether the WTI scoreboard includes "All teams".
+     */
+    public enum ShowAllTeamsOnScoreboard {
+        AUTO,
+        TRUE,
+        FALSE;
+
+        /**
+         * Parse a contest.yaml scoreboard.show-all-teams value.
+         *
+         * @param value yaml string value
+         * @return an element from the ShowAllTeamsOnScoreboard enum corresponding to the specified string value
+         * @throws IllegalArgumentException if received string value is not auto, true, or false
+         */
+        public static ShowAllTeamsOnScoreboard fromYamlValue(String value) {
+            if (value == null) {
+                throw new IllegalArgumentException("show-all-teams value is null");
+            }
+            String normalized = value.trim().toLowerCase();
+            if ("auto".equals(normalized)) {
+                return AUTO;
+            }
+            if ("true".equals(normalized)) {
+                return TRUE;
+            }
+            if ("false".equals(normalized)) {
+                return FALSE;
+            }
+            throw new IllegalArgumentException("Invalid show-all-teams value '" + value + "', expected auto, true, or false");
+        }
+    }
+
     private Properties scoringProperties = new Properties();
 
     /**
@@ -275,6 +308,12 @@ public class ContestInformation implements Serializable{
      * If null, use default
      */
     String standingsHTMLXSL = null;
+
+    /**
+     * Whether WTI scoreboard shows an "All teams" option.
+     * AUTO hides it when any scoreboard-visible group has divisionWideScoreboard set.
+     */
+    private ShowAllTeamsOnScoreboard showAllTeamsOnScoreboard = ShowAllTeamsOnScoreboard.AUTO;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -561,7 +600,12 @@ public class ContestInformation implements Serializable{
             if(!Arrays.equals(scoreboardXSLFiles, contestInformation.getScoreboardXSLFiles())) {
                 return false;
             }
-            return true;
+
+            if (showAllTeamsOnScoreboard != contestInformation.getShowAllTeamsOnScoreboard()) {
+                return false;
+            }
+
+           return true;
         } catch (Exception e) {
             e.printStackTrace(System.err); // TODO log this exception
             return false;
@@ -1216,5 +1260,16 @@ public class ContestInformation implements Serializable{
      */
     public void setStandingsHTMLXSL(String standingsHTMLXSL) {
         this.standingsHTMLXSL = standingsHTMLXSL;
+    }
+
+    public ShowAllTeamsOnScoreboard getShowAllTeamsOnScoreboard() {
+        if (showAllTeamsOnScoreboard == null) {
+            showAllTeamsOnScoreboard = ShowAllTeamsOnScoreboard.AUTO;
+        }
+        return showAllTeamsOnScoreboard;
+    }
+
+    public void setShowAllTeamsOnScoreboard(ShowAllTeamsOnScoreboard showAllTeamsOnScoreboard) {
+        this.showAllTeamsOnScoreboard = showAllTeamsOnScoreboard;
     }
 }

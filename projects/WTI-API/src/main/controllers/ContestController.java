@@ -3,6 +3,11 @@ package controllers;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -12,10 +17,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.inject.Singleton;
-import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -36,8 +41,6 @@ import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
-import edu.csus.ecs.pc2.core.IniFile;
-import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -49,9 +52,8 @@ import edu.csus.ecs.pc2.core.model.ContestInformation.ScoreboardType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
+import edu.csus.ecs.pc2.core.standings.ScoreboardGroupUtilities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -65,18 +67,19 @@ import models.ProblemModel;
 import models.ServerErrorResponseModel;
 import services.ScoreboardChangeListener;
 
+
 /**
  * This class acts as the MVC "Controller" for all accesses to the WTI endpoints related to obtaining information about
- * a specific contest -- that is, it is the managing Resource for all REST accesses to the "/contest" WTI API endpoint.  
- * 
+ * a specific contest -- that is, it is the managing Resource for all REST accesses to the "/contest" WTI API endpoint.
+ *
  * The {@link MainController} parent class maintains a HashTable mapping currently logged-in teams
  * to corresponding PC2 {@link ServerConnection} objects; when any reference to a sub-resource (such as "/contest/languages",
  * "/contest/problems", etc.) is made, the sub-resource checks the connection hashtable for an entry for the requesting team;
  * if found, the corresponding PC2 ServerConnection is invoked to obtain the requesting information.
- * 
+ *
  * The class is marked as @Singleton to insure that the Jetty webserver creates just one instance of the class to service
  * all /contest requests (rather than having a new instance created for each incoming request).
- * 
+ *
  * @author EWU WTI Student Project team, with updates by John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  *
  */
@@ -86,42 +89,43 @@ import services.ScoreboardChangeListener;
 		@Authorization(value="sampleoauth", scopes = {})
 })
 public class ContestController extends MainController {
-	
-	/**
-	 * Key to enable filtering scoreboard by division.
-	 */
-	private static final String SERVER_WTI_BOARD_USE_DIVISIONS_KEY = "server.wtiBoardUseDivisions";
-	
+
 	public final static String DEFAULT_PC2_SCOREBOARD_ACCOUNT = "scoreboard2";
 	public final static String DEFAULT_PC2_SCOREBOARD_PASSWORD = "scoreboard2";
-	
+
 	//this boolean is reset false whenever a standings-changing event is received by the WTI scoreboard ServerConnection;
 	// it is updated to true whenever an access to the /scoreboard REST API endpoint causes the current standings to be updated
 	private boolean wtiServerStandingsAreCurrent = false;
-			
-	//the current ("cached") copy of the scoreboard standings, converted to JSON from XML returned by {@link DefaultScoringAlgorithm#getStandings()}
-	private String currentJSONStandings ;
-	
+
+	/** Cache key for full-contest standings (no group filter). */
+	private static final String STANDINGS_CACHE_KEY_ALL = "";
+
+	/**
+	 * Cached scoreboard standings JSON by group scope. Key {@link #STANDINGS_CACHE_KEY_ALL} is the full contest;
+	 * other keys are group {@link Group#getGroupId() External Id} strings (WTI {@code groupExternalId}).
+	 */
+	private final HashMap<String, String> standingsJsonCache = new HashMap<>();
+
 	// Static vars -- must be initialized as soon as the class is loaded so that Jetty startup fails if
 	// PC2 Scoreboard login fails
-	
+
 	//the ServerConnection used by the ContestController to connect to the PC2 server with a scoreboard account
 	private static ServerConnection scoreboardServerConn ;
-	
+
 	//the DSA to be used by the /scoreboard endpoint for updating standings when requested
 	private static DefaultScoringAlgorithm dsa;
-	
+
 	//mutex to insure at most one browser client at a time can attempt to use the above DSA to update standings
 	private static Boolean updateStandingsMutex = new Boolean(false);
-	
+
 	//the current contest state information
 	private static ContestInformation contestInformation = null;
-	
+
 	/**
 	 * Constructs a ContestController for the WTI server. Construction includes
-	 * invoking the super-class {@link MainController} constructor; the super-class 
-	 * constructor has the following effects:
-	 * 
+	 * invoking the super-class {@link MainController}, constructor, which has the
+	 * following effects:
+	 *
 	 * <pre>
 	 * <ol>
 	 *   <li>create an (initially empty) {@link HashMap} mapping team keys to {@link ServerConnection}s.
@@ -131,23 +135,23 @@ public class ContestController extends MainController {
 	 * <p> The objects created by the superclass constructor are all "protected", making them accessible to this ContestController
 	 * subclass.
 	 * </pre>
-	 * 
-	 * Subsequently, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
+	 *
+	 * In addition, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
 	 * the PC2 server using the scoreboard credentials specified in the WTI configuration (pc2v9.ini file).
-	 * 
+	 *
 	 * @throws URISyntaxException    if a valid websocket could not be constructed in the {@link MainController} super-class from
 	 *                               the initialization values specified in the WTI pc2v9.ini file.
 	 * @throws LoginFailureException if the ContestController could not login to the PC2 server using the credentials specified in
 	 *                               the WTI pc2v9.ini file.
-	 * @throws NotLoggedInException if the ContestController initialization block somehow successfully logged in but a subsequent 
+	 * @throws NotLoggedInException if the ContestController initialization block somehow successfully logged in but a subsequent
 	 * 								check returns "not logged in".
 	 */
 	public ContestController() throws URISyntaxException, LoginFailureException, NotLoggedInException {
 		super();
-		
+
 		//create a scoreboard account connection to the PC2 server
 		scoreboardServerConn = new ServerConnection();
-	
+
 		//get the credentials to be used to login to the PC2 server, either those given in the WTI pc2v9.ini file or the defaults defined above
 		String sbAccount = ini.getScoreboardAccount();
 		if (sbAccount==null || sbAccount.equals("")) {
@@ -157,7 +161,7 @@ public class ContestController extends MainController {
 		if (sbPassword==null || sbPassword.equals("")) {
 			sbPassword = DEFAULT_PC2_SCOREBOARD_PASSWORD;
 		}
-		
+
 		//login to the PC2 server
 		try {
 			scoreboardServerConn.login(sbAccount, sbPassword);
@@ -167,15 +171,15 @@ public class ContestController extends MainController {
 			// Theroretically.
 			logger.info("WTI Login failed for scoreboard account '" + sbAccount + "': " + e.getMessage());
 			throw new RuntimeException("WTI login failed for PC2 scoreboard account '" + sbAccount + "': " + e.getMessage()) ;
-		} 
-		
+		}
+
 		//create a DefaultScoringAlgorithm to be used for computing standings
 		logger.fine("Constructing DSA for Contest Controller");
 		dsa = new DefaultScoringAlgorithm() ;
-		
+
 		//insure that team clients only see FROZEN results when in a scoreboard freeze period
 		dsa.setObeyFreeze(true);
-		
+
 		//add to the Scoreboard ServerConnection's contest a listener for each type of event which can change standings
 		try {
 			ScoreboardChangeListener sbListener = new ScoreboardChangeListener(this, client);
@@ -188,7 +192,7 @@ public class ContestController extends MainController {
 			e.printStackTrace();
 			throw e;
 		}
-		
+
 		//fetch the current ContestInformation from the PC2 server
 		try {
 			contestInformation = scoreboardServerConn.getContest().getInternalContest().getContestInformation();
@@ -204,26 +208,25 @@ public class ContestController extends MainController {
 			e.printStackTrace();
 			throw e;
 		}
-
 	}
 
 	/***
 	 *  Languages gets all the languages in the PC^2 contest.
-	 *  
-	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 *
+	 * @param key a String containing a key which uniquely identifies the team making the request.
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
-	 * 
+	 *
 	 * @return Response of:
 	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in);
 	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
 	 * 				otherwise 200 (OK) and a JSON string containing an array of {@link ILanguage}s is returned.
-	 */	
+	 */
 	@Path("/languages")
 	@GET
 	@ApiOperation(value = "languages",
 	notes = "Gets languages used within PC^2 contest.")
 	@ApiResponses({
-		@ApiResponse(code = 200, message = "Returns list of languages.", response = LanguageModel.class), 
+		@ApiResponse(code = 200, message = "Returns list of languages.", response = LanguageModel.class),
 		@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class),
 		@ApiResponse(code = 500, message = "Return if server is having trouble handling request", response = ServerErrorResponseModel.class)
 	})
@@ -241,7 +244,7 @@ public class ContestController extends MainController {
 
 		//the list of languages to be returned
 		List<LanguageModel> languages = new ArrayList<LanguageModel>();
-		
+
 		try {
 			ILanguage[] langs = userInformation.getContest().getLanguages();
 			for(ILanguage lang : langs)
@@ -259,7 +262,7 @@ public class ContestController extends MainController {
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.languages()"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
-		
+
 		return Response.ok()
 				.entity(languages)
 				.type(MediaType.APPLICATION_JSON).build();
@@ -267,21 +270,21 @@ public class ContestController extends MainController {
 
 	/**
 	 * Judgements gets all the possible judgments in the PC^2 contest -- that is, a list containing every judgement which could be assigned to a submission.
-	 * 
-	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 *
+	 * @param key a String containing a key which uniquely identifies the team making the request.
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
-	 * 
+	 *
 	 * @return Response of:
 	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in);
 	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
 	 * 				otherwise 200 (OK) and a JSON string containing an array of {@link IJudgement}s is returned.
-	 */		
+	 */
 	@Path("/judgements")
 	@GET
 	@ApiOperation(value = "judgements",
 	notes = "Gets judgements used within PC^2 contest.")
 	@ApiResponses({
-		@ApiResponse(code = 200, message = "Returns list of judgements.", response = String.class), 
+		@ApiResponse(code = 200, message = "Returns list of judgements.", response = String.class),
 		@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class)
 	})
 	public Response judgements(
@@ -315,23 +318,23 @@ public class ContestController extends MainController {
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.judgements()"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
-		
+
 		return Response.ok()
 				.entity(judgements)
 				.type(MediaType.APPLICATION_JSON).build();
 	}
 
 	/***
-	 *  This method returns a list of all the problems in the PC^2 contest.  It first checks to see that the 
+	 *  This method returns a list of all the problems in the PC^2 contest.  It first checks to see that the
 	 *  user (team) specified by the received "key" is currently logged in and that the contest is running
 	 *  (contest problems are only allowed to be viewed when the contest is running). If so, the method
 	 *  returns the current contest problems, obtained from the PC2 {@link ServerConnection} for the team.
-	 *  
+	 *
 	 *  Note that only NON-HIDDEN problems are returned.
-	 * 
-	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 *
+	 * @param key a String containing a key which uniquely identifies the team making the request.
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
-	 * 
+	 *
 	 * @return Response of:
 	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
 	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
@@ -342,7 +345,7 @@ public class ContestController extends MainController {
 	@ApiOperation(value = "problems",
 	notes = "Gets problems used within PC^2 contest.")
 	@ApiResponses({
-		@ApiResponse(code = 200, message = "Returns list of problems.", response = ProblemModel.class), 
+		@ApiResponse(code = 200, message = "Returns list of problems.", response = ProblemModel.class),
 		@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied or the contest is not running", response = ServerErrorResponseModel.class)
 	})
 	public Response problems(
@@ -350,7 +353,7 @@ public class ContestController extends MainController {
 
 		//get the PC2 server connection information for the team
 		ServerConnection userInformation = connections.get(key);
-		
+
 		//verify the user is logged in and the contest is running
 		try {
 			// make sure we have connection information for this user (i.e. that the user is logged in)
@@ -395,19 +398,19 @@ public class ContestController extends MainController {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.problems()"))
 					.type(MediaType.APPLICATION_JSON).build();
-		}		
-		
+		}
+
 		return Response.ok()
 				.entity(problems)
 				.type(MediaType.APPLICATION_JSON).build();
 	}
-	
+
 	/***
 	 *  This method returns an indication of whether the contest clock is currently running.
-	 * 
-	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 *
+	 * @param key a String containing a key which uniquely identifies the team making the request.
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
-	 * 
+	 *
 	 * @return Response of:
 	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
 	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
@@ -418,7 +421,7 @@ public class ContestController extends MainController {
 	@ApiOperation(value = "isRunning",
 	notes = "Get the state of the contest if it is running of not")
 	@ApiResponses({
-		@ApiResponse(code = 200, message = "Returns a boolean true or false", response = Boolean.class), 
+		@ApiResponse(code = 200, message = "Returns a boolean true or false", response = Boolean.class),
 		@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class)
 	})
 	public Response isRunning(
@@ -430,9 +433,9 @@ public class ContestController extends MainController {
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
-		
+
 		try {
-			
+
 			isRunning = userInformation.getContest().getContestClock().isContestClockRunning();
 		}
 		catch(NotLoggedInException e) {
@@ -444,22 +447,22 @@ public class ContestController extends MainController {
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
-		
+
 		return Response.ok()
 				.entity(isRunning)
 				.type(MediaType.APPLICATION_JSON).build();
 	}
 
-	
+
 			/***
-			 *  This method returns a "ContestClock" object encapsulating the current state of the PC2 contest clock 
-			 *  as maintained by the PC2 class "ContestTime".  
+			 *  This method returns a "ContestClock" object encapsulating the current state of the PC2 contest clock
+			 *  as maintained by the PC2 class "ContestTime".
 			 *  It first checks to see that the user (team) specified by the received "key" is currently logged in. If so, the method
 			 *  returns the current contest time information, obtained from the PC2 {@link ServerConnection} for the team.
-			 * 
-			 * @param key a String containing a key which uniquely identifies the team making the request.  
+			 *
+			 * @param key a String containing a key which uniquely identifies the team making the request.
 			 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
-			 * 
+			 *
 			 * @return Response of:
 			 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
 			 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
@@ -470,11 +473,11 @@ public class ContestController extends MainController {
 			@ApiOperation(value = "contestclock",
 			notes = "Gets the PC2 contest clock (time info).")
 			@ApiResponses({
-				@ApiResponse(code = 200, message = "Returns a contest clock object.", response = ContestClockModel.class), 
+				@ApiResponse(code = 200, message = "Returns a contest clock object.", response = ContestClockModel.class),
 				@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class)
 			})
 
-			public Response contestClock(@ApiParam(value="token used by logged in users to access teams information", 
+			public Response contestClock(@ApiParam(value="token used by logged in users to access teams information",
 											required = true) @HeaderParam("team_id")String key) {
 
 				if (connections == null) {
@@ -489,20 +492,20 @@ public class ContestController extends MainController {
 					// make sure we have connection information for this user (i.e. that the user is logged in)
 					if (userInformation == null) {
 						throw new NotLoggedInException();
-					} 
+					}
 				} catch (NotLoggedInException e1) {
 					return Response.status(Response.Status.UNAUTHORIZED)
 							.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 							.type(MediaType.APPLICATION_JSON).build();
 				}
-				
+
 				//the ContestClock object to be returned in the response to the HTTP request
 				ContestClockModel returnableContestClock ;
-				
+
 				try {
 					//get the contest clock from the PC2 Server via the PC2 API ServerConnection
 //					IContestClock contestClock = userInformation.getContest().getContestClock();
-					
+
 					IContest contest = userInformation.getContest();
 					if (contest == null) {
 						System.err.println ("SEVERE: ContestController.contestClock(): ServerConnection.getContest() returned null!");
@@ -515,7 +518,7 @@ public class ContestController extends MainController {
 						logger.severe("ContestController.contestClock(): ServerConnection.getContest().getContestClock() returned null!");
 						throw new NullPointerException("ServerConnection.getContest().getContestClock() returned null in ContestController.contestClock()");
 					}
-										
+
 					//retrieve the relevant fields from the PC2 contest clock
 					boolean isRunning = contestClock.isContestClockRunning();
 					long contestLengthSecs = contestClock.getContestLengthSecs();
@@ -528,10 +531,10 @@ public class ContestController extends MainController {
 					} else {
 						wallClockStartTime = startTimeCalendar.getTimeInMillis();
 					}
-					
+
 					//construct a ContestClock containing the PC2 Server clock values
 					returnableContestClock = new ContestClockModel(isRunning,contestLengthSecs, elapsedSecs, wallClockStartTime);
-										
+
 				}
 				catch(NotLoggedInException e) {
 					return Response.status(Response.Status.UNAUTHORIZED)
@@ -543,24 +546,24 @@ public class ContestController extends MainController {
 					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.contestClock()"))
 							.type(MediaType.APPLICATION_JSON).build();
-				}		
-				
+				}
+
 				//return the PC2 ContestClock, mapped into JSON
 				return Response.ok()
 						.entity(returnableContestClock)
 						.type(MediaType.APPLICATION_JSON).build();
 			}
-	
+
 	/***
-	 *  This method returns a list of all the clarifications in the PC^2 contest which the requesting client is allowed to see.  
+	 *  This method returns a list of all the clarifications in the PC^2 contest which the requesting client is allowed to see.
 	 *  It first checks to see that the user (team) specified by the received "key" is currently logged in. If so, the method
 	 *  returns the current team's clarifications, obtained from the PC2 {@link ServerConnection} for the team.
-	 * 
+	 *
 	 *  Note that only clarifications which are allowed to be viewed by the requesting client are returned.
-	 *  
-	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 *
+	 * @param key a String containing a key which uniquely identifies the team making the request.
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
-	 * 
+	 *
 	 * @return Response of:
 	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
 	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
@@ -571,15 +574,15 @@ public class ContestController extends MainController {
 	@ApiOperation(value = "clarifications",
 	notes = "Gets all clarifications submitted in PC^2 contest.")
 	@ApiResponses({
-		@ApiResponse(code = 200, message = "Returns list of clarifications.", response = ClarificationModel.class), 
+		@ApiResponse(code = 200, message = "Returns list of clarifications.", response = ClarificationModel.class),
 		@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class)
 	})
 
-	public Response clarifications(@ApiParam(value="token used by logged in users to access teams information", 
+	public Response clarifications(@ApiParam(value="token used by logged in users to access teams information",
 	required = true) @HeaderParam("team_id")String key) {
 
 		ServerConnection userInformation = connections.get(key);
-	    
+
 		//verify that the user is logged in
 		try {
 			// make sure we have connection information for this user (i.e. that the user is logged in)
@@ -594,22 +597,22 @@ public class ContestController extends MainController {
 
 		//a list of the contest clarifications to be returned
 		List<ClarificationModel> clarifications = new ArrayList<ClarificationModel>();
-		
+
 		try {
-			
+
 		    //get the clarifications associated with the invoking client's Id.
 			//Note that getClarificationsWithClientId() returns exactly, and only, clarifications that the current Client should receive.
 			//This includes clars that were submitted by the team as well as announcement clars directed to the team -- either
 			//specifically or as a result of being directed to "All Teams" or to a Group of which the team is a member.
 			IClarification[] clars = userInformation.getContest().getClarificationsWithClientId();
-			
+
 			//encode each PC2 clar into a WTI ClarificationModel
 			for(IClarification clar : clars) {
-				
+
 				//holders for the lists of recipient teams and groups (if any)
 				ArrayList<String> teamRecipientList = new ArrayList<String>();
 				ArrayList<String> groupRecipientList = new ArrayList<String>();
-				
+
 				//find the teams (if any) and groups (if any) to whom the answer to this clar (if any) was sent
 				if (clar.isAnswered()) {
 
@@ -625,10 +628,10 @@ public class ContestController extends MainController {
 						groupRecipientList.add(groupName);
 					}
 				}
-				
+
 				// set the "recipient type" indicating whether this clar goes to the team because it was "sent to all",
 				// because it was sent to several teams including this team or a group containing this team,
-				// or it was sent only to this team. (The "recipient type" is used by the WTI-UI 
+				// or it was sent only to this team. (The "recipient type" is used by the WTI-UI
 				// to determine under what conditions to display the clar on the Clarifications page.)
 				String recipientType = "";
 				if (clar.isAnswered()) {
@@ -644,14 +647,14 @@ public class ContestController extends MainController {
 					recipientType = "No Answer Yet";
 				}
 				clarifications.add(new ClarificationModel(
-					recipientType, 
+					recipientType,
 					teamRecipientList,
 					groupRecipientList,
-					clar.getProblem().getName(), 
-					clar.getQuestion(), 
+					clar.getProblem().getName(),
+					clar.getQuestion(),
 					clar.getAnswer(),
 					String.format("%s-%s", clar.getSiteNumber(), clar.getNumber()),  //notional "id" for the clar
-					clar.getSubmissionTime(), 
+					clar.getSubmissionTime(),
 					clar.isAnswered()));
 			}
 		}
@@ -672,47 +675,53 @@ public class ContestController extends MainController {
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Exception in ContestController.clarifications(): " + e.getMessage()))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
-		
-		
+
+
 		return Response.ok()
 				.entity(clarifications)
 				.type(MediaType.APPLICATION_JSON).build();
 	}
-	
+
 	/***
 	 *  This method returns the current contest scoreboard standings as a JSON string.
-	 *  
-	 *  The returned JSON string is constructed by first making a call to 
+	 *
+	 *  The returned JSON string is constructed by first making a call to
 	 *  {@link DefaultScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.model.IInternalContest, Properties, edu.csus.ecs.pc2.core.log.Log)},
-	 *  which returns an XML document whose format is documented at 
+	 *  which returns an XML document whose format is documented at
 	 *  <a href="https://github.com/pc2ccs/pc2v9/wiki/Scoreboard-HTML-Configuration#xml-standings-format">this URL</a>.
 	 *  This XML string is then converted to JSON before being returned to the caller.
-	 *  
-	 *  The ContestController <I>caches</i> the scoreboard standings JSON each time they are updated; if standings have not changed
-	 *  since the last call to this endpoint then the cached copy is returned rather than making a new call to {@link DefaultScoringAlgorithm}.
-	 * 
-	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 *
+	 *  The ContestController <I>caches</i> scoreboard standings JSON per scope (full contest and each requested
+	 *  {@code groupExternalId}). If standings have not changed since the last DSA run, a cached entry is returned.
+	 *  Optional {@code groupExternalId} matches {@code standingsHeader.groupList.group.externalId}
+	 *  ({@link Group#getGroupId()}) and causes DSA to generate standings for that PC2 {@link Group} only
+	 *  (correct teams and problem columns). It is <em>not</em> the scoreboard group-list ordinal
+	 *  ({@code group/@id}), which remains for classic XSL/HTML scoreboards.
+	 *
+	 * @param key a String containing a key which uniquely identifies the team making the request.
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
+	 * @param groupExternalId optional CMS / groups.tsv External Id of a scoreboard-visible group; omit for full contest
 	 *
 	 * @return Response of:
 	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
 	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs either within this ContestController or in fetching the requested data from the PC2 server;
 	 * 				otherwise 200 (OK) and a JSON string containing {@link edu.csus.ecs.pc2.core.scoring.Standings}s is returned.
-	 */	
+	 */
 	@Path("/scoreboard")
 	@GET
 	@ApiOperation(value = "scoreboard",
 	notes = "Gets current scoreboard standings in the contest.")
 	@ApiResponses({
-		@ApiResponse(code = 200, message = "Returns XML standings.", response = String.class), 
+		@ApiResponse(code = 200, message = "Returns XML standings.", response = String.class),
 		@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class),
 		@ApiResponse(code = 500, message = "Return if server is having trouble handling request", response = ServerErrorResponseModel.class)
 	})
 	public Response getStandings(
-			@ApiParam(value="token used by logged in users to access team information", required = true) @HeaderParam("team_id")String key) {
+			@ApiParam(value="token used by logged in users to access team information", required = true) @HeaderParam("team_id")String key,
+			@ApiParam(value="optional group External Id (standingsHeader.groupList.group.externalId) for group-scoped standings") @QueryParam("groupExternalId") String groupExternalId) {
 
 		logger.fine("Looking up team login connection");
-		
+
 		ServerConnection userInformation = connections.get(key);
 
 		// make sure we have connection information for this user (i.e. that the user is logged in)
@@ -730,43 +739,27 @@ public class ContestController extends MainController {
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "DefaultScoringAlgorithm in null in ContestController"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
-		
+
 		try {
-			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName());
-			
-			xlog(logger, "debug 22 Start" );
-			
+			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName()
+					+ (groupExternalId != null && !groupExternalId.trim().isEmpty()
+							? " groupExternalId=" + groupExternalId.trim() : " (full contest)"));
+
+			final String cacheKey = getStandingsCacheKey(groupExternalId);
+			String responseJson = null;
+
 			//insure that only one browser client at a time can attempt to use the DSA to update standings
 			synchronized (updateStandingsMutex) {
-				
-				// check if some event has occurred which could have changed the standings
-				
-				/**
-				 * Should scoreboaed only show the teams in a team's division?
-				 */
-				boolean useDivisionFilter = false;
-
-				if (IniFile.isFilePresent()) {
-					new IniFile();
-					useDivisionFilter = StringUtilities.getBooleanValue(IniFile.getValue(SERVER_WTI_BOARD_USE_DIVISIONS_KEY), false);
-				}
-
-				if (useDivisionFilter) {
-					/**
-					 * If divisions are to be shown to each user, must force a new recacl of
-					 * standings for each call. This removes the efficiency of using a cached copy
-					 * of the standings.
-					 */
-					wtiServerStandingsAreCurrent = false; // force scoreboard recalc
-				}
 
 				if (!wtiServerStandingsAreCurrent) {
+					logger.info("Standings are not current; clearing scoreboard JSON cache");
+					standingsJsonCache.clear();
+				}
 
-					logger.info("Standings are not current; invoking DSA to update");
-					
+				responseJson = standingsJsonCache.get(cacheKey);
+				if (responseJson == null) {
+					logger.info("Generating scoreboard JSON for cache key '" + cacheKey + "'");
 
-					// Standings could have changed; try to get the actual InternalContest so
-					// we can use it to get updated standings
 					IInternalContest internalContest = scoreboardServerConn.getContest().getInternalContest();
 
 					if (internalContest == null) {
@@ -777,63 +770,13 @@ public class ContestController extends MainController {
 								.type(MediaType.APPLICATION_JSON).build();
 					}
 
-					// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
 					try {
-						Properties props = internalContest.getContestInformation().getScoringProperties();
-
-
-						if (props != null) {
-						       Set<Object> set = props.keySet();
-						        String[] keys = (String[]) set.toArray(new String[set.size()]);
-						        Arrays.sort(keys);
-						        for (String string : keys) {
-									xlog(logger, "input SA properties " + string + "='" + props.get(string) + "'");
-						        }
-						} 
-
-						// Assigning DefaultScoringAlgorithm.getDefaultProperties(); is a tempoary fix, i686 and i680 describe the bug.
-						// TODO i686 - Find/fix root cause for NPE in WTI DSA, details in i680 #686
-						// this is a temporary fix until root cause is found, and the bug fixed.
-						props = DefaultScoringAlgorithm.getDefaultProperties();
-
-						String xmlStandings = null;
-						Run[] runs = null;
-						if (useDivisionFilter) {
-							String userLogin= userInformation.getMyClient().getLoginName();
-							Integer clientNumber = StringUtilities.getTeamNumber(userLogin);
-							ClientId clientId = new ClientId(internalContest.getSiteNumber(), Type.TEAM, clientNumber);
-							runs = ScoreboardUtilities.getRunsForUserDivision(clientId, internalContest);
-							
-							String teamDivisionStr = ScoreboardUtilities.getDivision(internalContest, clientId);
-							xlog(logger, "Runs for "+key+" useDivisionFilter true, total runs  = "+runs.length+" for div "+teamDivisionStr);
-							
-							Integer teamDivision;
-							try {
-								teamDivision = Integer.parseInt(teamDivisionStr);
-							} catch (NumberFormatException ex) {
-								logger.throwing(dsa.getClass().getName(), "getStandings()", ex);
-								return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-										.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
-												"Illegal or undefined team division in DefaultScoringAlgorithm "
-													+ "('wtiboardUseDivisions=true' in WTI pc2v9.ini but no divisions assigned to teams?)"))
-										.type(MediaType.APPLICATION_JSON).build();
-							}
-
-							xmlStandings = dsa.getStandings(internalContest, runs, teamDivision, props, logger);
-						} else {
-							runs = internalContest.getRuns();
-							xlog(logger, "Runs for "+key+" Not using division useDivisionFilter false, total runs  = "+runs.length);
-							xmlStandings = dsa.getStandings(internalContest, runs, null, props, logger);
-						}
-
-						//					logger.fine("Got the following XML from DSA:");
-						//					logger.fine(xmlStandings);
-						logger.info("Converting DSA XML to JSON");
-						currentJSONStandings = this.omitZeroSubmissionTeamsIfConfigured(
-								this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings),
-								internalContest));
-						//					logger.fine("Got the following JSON standings:");
-						//					logger.fine(currentJSONStandings);
+						responseJson = buildScoreboardJson(internalContest, groupExternalId, userInformation.getContest().getMyClient());
+					} catch (IllegalArgumentException e) {
+						logger.warning("Invalid groupExternalId for scoreboard request: " + e.getMessage());
+						return Response.status(Response.Status.BAD_REQUEST)
+								.entity(new ServerErrorResponseModel(Response.Status.BAD_REQUEST, e.getMessage()))
+								.type(MediaType.APPLICATION_JSON).build();
 					} catch (IllegalContestState e) {
 						logger.throwing(dsa.getClass().getName(), "getStandings()", e);
 						return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -853,18 +796,29 @@ public class ContestController extends MainController {
 										"IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
 								.type(MediaType.APPLICATION_JSON).build();
 					}
+					if (responseJson != null) {
+						standingsJsonCache.put(cacheKey, responseJson);
+					}
 					wtiServerStandingsAreCurrent = true;
 				}
 			}//end synchronized block
-			
-			// standings are (now) current; return them to requestor.
-			// showOnlyMe is applied per request so the shared cache still holds every team.
-			String standingsJson = currentJSONStandings;
-			if (ini != null && ini.isShowOnlyMeOnWTIScoreboard()) {
-				standingsJson = keepOnlyRequestingTeam(standingsJson, userInformation);
+
+			if (responseJson == null) {
+				logger.severe("Scoreboard JSON unavailable for cache key '" + cacheKey + "'");
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+								"Scoreboard JSON unavailable"))
+						.type(MediaType.APPLICATION_JSON).build();
+			} else {
+				// standings are (now) current; return them to requestor.
+				// showOnlyMe is applied per request so the shared cache still holds every team.
+				String standingsJson = responseJson;
+				if (ini != null && ini.isShowOnlyMeOnWTIScoreboard()) {
+					standingsJson = keepOnlyRequestingTeam(standingsJson, userInformation);
+				}
 			}
-			return Response.ok().entity(standingsJson).type(MediaType.APPLICATION_JSON).build();
-			
+			return Response.ok().entity(responseJson).type(MediaType.APPLICATION_JSON).build();
+
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED).entity(
 					new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request - not logged in"))
@@ -872,12 +826,11 @@ public class ContestController extends MainController {
 		}
 	}
 
-
 	/***
 	 *  This method returns the Scoreboard Type for the current contest.
-	 *  The Scoreboard Type is obtained from the current cached copy of the {@link ContestInformation}; 
-	 *  the ContestInformation is obtained from the PC2 Server when the {@link ContestController} is constructed. 
-	 * 
+	 *  The Scoreboard Type is obtained from the current cached copy of the {@link ContestInformation};
+	 *  the ContestInformation is obtained from the PC2 Server when the {@link ContestController} is constructed.
+	 *
 	 * @return Response object containing one of the following:
 	 * 				200 (OK) and a JSON string containing the current scoreboard type.
 	 * 				500 (INTERNAL_SERVER_ERROR) if the current ContestInformation is null or an error occurs
@@ -888,10 +841,10 @@ public class ContestController extends MainController {
 	@ApiOperation(value = "Scoreboard Type",
 				notes = "Get the current Scoreboard Type for this contest.")
 	@ApiResponses({
-		@ApiResponse(code = 200, message = "Returns a string containing the contest scoreboard type", response = String.class), 
+		@ApiResponse(code = 200, message = "Returns a string containing the contest scoreboard type", response = String.class),
 	})
 	public Response scoreboardType() {
-		
+
 		if(contestInformation == null)
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Contest Information unavailable"))
@@ -906,16 +859,85 @@ public class ContestController extends MainController {
 		}
 		catch(Exception e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, 
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
 								"Exception attempting to fetch scoreboard type" + e.getMessage()))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
-		
 	}
-	
+
+	/**
+	 * Builds enriched JSON standings for the full contest or one scoreboard-visible group.
+	 *
+	 * @param groupExternalId blank/null for full contest; otherwise {@link Group#getGroupId()} External Id
+	 */
+	private String buildScoreboardJson(IInternalContest internalContest, String groupExternalId, IClient requestingClient)
+			throws IllegalContestState, IOException, JSONException {
+
+		Properties props = internalContest.getContestInformation().getScoringProperties();
+
+		if (props != null) {
+			Set<Object> set = props.keySet();
+			String[] keys = set.toArray(new String[set.size()]);
+			Arrays.sort(keys);
+			for (String string : keys) {
+				xlog(logger, "input SA properties " + string + "='" + props.get(string) + "'");
+			}
+		}
+
+		// Assigning DefaultScoringAlgorithm.getDefaultProperties(); is a tempoary fix, i686 and i680 describe the bug.
+		// TODO i686 - Find/fix root cause for NPE in WTI DSA, details in i680 #686
+		props = DefaultScoringAlgorithm.getDefaultProperties();
+
+		ArrayList<Group> wantedGroups = resolveWantedGroups(internalContest, groupExternalId);
+		String xmlStandings = dsa.getStandings(internalContest, null, wantedGroups, props, logger);
+
+		logger.info("Converting DSA XML to JSON");
+		ClientId requestingClientId = null;
+		if (requestingClient != null) {
+			requestingClientId = new ClientId(requestingClient.getSiteNumber(), Type.TEAM, requestingClient.getAccountNumber());
+		}
+		return this.enrichScoreboardTeamGroups(this.getJSONStandings(xmlStandings), internalContest, requestingClientId);
+	}
+
+	private static String getStandingsCacheKey(String groupExternalId) {
+		if (groupExternalId == null) {
+			return STANDINGS_CACHE_KEY_ALL;
+		}
+		String trimmed = groupExternalId.trim();
+		return trimmed.isEmpty() ? STANDINGS_CACHE_KEY_ALL : trimmed;
+	}
+
+	/**
+	 * Resolves optional {@code groupExternalId} to a one-element {@code wantedGroups} list for DSA.
+	 * {@code groupExternalId} is {@link Group#getGroupId()} for a scoreboard-visible group
+	 * (standings {@code group/@externalId}), not the dumpGroupList ordinal ({@code group/@id}).
+	 *
+	 * @return {@code null} for full-contest standings
+	 */
+	private ArrayList<Group> resolveWantedGroups(IInternalContest contest, String groupExternalId) {
+		String cacheKey = getStandingsCacheKey(groupExternalId);
+		if (STANDINGS_CACHE_KEY_ALL.equals(cacheKey)) {
+			return null;
+		}
+		Group group = resolveGroupForExternalId(contest, cacheKey);
+		if (group == null) {
+			throw new IllegalArgumentException("Unknown scoreboard groupExternalId: " + cacheKey);
+		}
+		ArrayList<Group> wantedGroups = new ArrayList<Group>();
+		wantedGroups.add(group);
+		return wantedGroups;
+	}
+
+	/**
+	 * Maps a group External Id string to the corresponding scoreboard-visible {@link Group}.
+	 */
+	private Group resolveGroupForExternalId(IInternalContest contest, String groupExternalId) {
+		return ScoreboardGroupUtilities.getGroupForExternalId(contest, groupExternalId);
+	}
+
 	/**
 	 * Logs to logger and stdout.
-	 * 
+	 *
 	 * @param logger
 	 * @param string
 	 */
@@ -927,26 +949,37 @@ public class ContestController extends MainController {
 
 	/**
 	 * Returns a JSON String containing the standings represented by the given XML Document String.
-	 * 
-	 * The JSON representation is created by first converting the given XML Document to a 
+	 *
+	 * The JSON representation is created by first converting the given XML Document to a
 	 * {@link Standings} object, then invoking {@link Standings#toJSON()} on that object.
-	 * 
-	 * @param xmlStandings a String containing an XML Document with contest standings in the XML format produced 
+	 *
+	 * @param xmlStandings a String containing an XML Document with contest standings in the XML format produced
 	 * 					by {@link DefaultScoringAlgorithm#getStandings()}
-	 * 
+	 *
 	 * @throws IOException if an error occurs in converting the Standings object to JSON form
-	 * @throws JSONException 
-	 * 
+	 * @throws JSONException
+	 *
 	 */
 	private String getJSONStandings(String xmlStandings) throws IOException, JSONException {
-		
-		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);
-	
-		changeScoresToStrings(jsonStandingsObject);
-		
-		logger.fine("Standings JSON: " + jsonStandingsObject.toString(2));
 
+		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);
+		changeScoresToStrings(jsonStandingsObject);
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+		String timestamp = LocalDateTime.now().format(formatter);
+		String jsonFileName = "standings/" + timestamp + ".json";
+		java.nio.file.Path folderPath = Paths.get("standings");
+		java.nio.file.Path filePath = folderPath.resolve(jsonFileName);
+		try {
+			Files.createDirectories(folderPath);
+			byte [] jsonBytes = jsonStandingsObject.toString(4).getBytes(StandardCharsets.UTF_8);
+		    Files.write(Paths.get(jsonFileName), jsonBytes);
+		    logger.fine("Standings JSON saved to " + jsonFileName);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 		return jsonStandingsObject.toString();
+
 	}
 
     /**
@@ -956,7 +989,7 @@ public class ContestController extends MainController {
      * score="12.340000"
      * would be converted to this JSON:
      * "score": 12.34
-     *  
+     *
      * The structure of the original XML we are interested in is:
      * <contestStandings ...>
      *  <standingsHeader ...>
@@ -973,7 +1006,7 @@ public class ContestController extends MainController {
      *
      * We will check the "probemSummaryInfo" json objects for "score" properties, fetch them, reformat them, and
      * put them back in the json as Strings.
-     * 
+     *
      * It should be noted that XML.toJSONObject() does have a mechansism to convert ALL values to Strings, but we
      * do not want that.  We wish to keep other numeric properties as numbers and booleans and whatnot.
      *
@@ -992,7 +1025,7 @@ public class ContestController extends MainController {
             return;
         }
         Object teamStandings = currentObj.opt(TEAM_STANDING);
-        
+
         // if there's more than one teamStanding, it's in a JSONArray
         if(teamStandings instanceof JSONArray) {
         	JSONArray jArray = (JSONArray)teamStandings;
@@ -1017,7 +1050,7 @@ public class ContestController extends MainController {
 
         // The teamStanding record has the total score in it, so it has to be fixed as well
         fixScore(teamStanding);
-        
+
         // Find childElement that contains the itemElement
         Object psis = teamStanding.opt(PROBLEM_SUMMARY_INFO);
 
@@ -1035,12 +1068,12 @@ public class ContestController extends MainController {
     /**
      * Check if the supplied ProblemSummaryInfo contains a score key that is a double, if so,
      * convert it to string.
-     * 
+     *
      * @param psi - the ProblemSummaryInfo of interest
      */
     void fixScore(JSONObject psi) {
         String SCORE_PROPERTY = "score";
-        
+
         try {
             double score = psi.getDouble(SCORE_PROPERTY);
             String formattedScore = Utilities.formatScore(score);
@@ -1049,21 +1082,22 @@ public class ContestController extends MainController {
         } catch(Exception e) {
             // If any exception occurs, that is, the property isn't there, or it's not a double,
             // just leave it as is - this would be the normal case for non-scoring contests.
-        } 
+        }
     }
-    
+
 	/**
-	 * Adds multi-group membership to each scoreboard row.
+	 * Adds multi-group membership to each scoreboard row, keyed by External Id.
 	 * <p>
 	 * PC2 standings XML only carries the team's primary group on each {@code teamStanding} node
-	 * ({@code teamGroupId}, {@code teamGroupName}, {@code groupRank}). A team may belong to several groups;
-	 * the UI needs every {@code standingsHeader.groupList.group} {@code id} that should include that team.
+	 * ({@code teamGroupId} ordinal-style, {@code teamGroupExternalId}, {@code teamGroupName}, {@code groupRank}).
+	 * A team may belong to several groups; the WTI UI needs every scoreboard-visible group's
+	 * {@code externalId} that should include that team.
 	 * </p>
 	 * <p>
-	 * For each team row, looks up the {@link Account} and appends a {@code teamGroupIds} array: for each
+	 * For each team row, looks up the {@link Account} and appends a {@code teamGroupExternalIds} array: for each
 	 * {@code group} in the header {@code groupList}, if {@code externalId} matches the group's CMS id and
-	 * the account {@link Account#isGroupMember} for that group, the group's {@code id} string is added.
-	 * Those ids match the scoreboard group filter in the browser.
+	 * the account {@link Account#isGroupMember} for that group, that {@code externalId} string is added.
+	 * Those values match the WTI scoreboard filter ({@code ?groupExternalId=} / dropdown).
 	 * </p>
 	 * <p>
 	 * On any failure, returns the input JSON unchanged.
@@ -1071,10 +1105,10 @@ public class ContestController extends MainController {
 	 *
 	 * @param jsonStandings JSON string from {@link #getJSONStandings(String)}
 	 * @param contest       contest providing team accounts and {@link Group} definitions
-	 * @return JSON with {@code teamGroupIds} set on each processed {@code teamStanding}, or the original string if
+	 * @return JSON with {@code teamGroupExternalIds} set on each processed {@code teamStanding}, or the original string if
 	 *         enrichment is skipped or throws
 	 */
-	private String enrichScoreboardTeamGroups(String jsonStandings, IInternalContest contest) {
+	private String enrichScoreboardTeamGroups(String jsonStandings, IInternalContest contest, ClientId requestingClientId) {
 		if (jsonStandings == null || contest == null) {
 			return jsonStandings;
 		}
@@ -1093,6 +1127,7 @@ public class ContestController extends MainController {
 				return jsonStandings;
 			}
 			JSONObject standingsHeader = contestStandings.getJSONObject("standingsHeader");
+			addDefaultGroupExternalIdToHeader(standingsHeader, contest, requestingClientId);
 			JSONObject groupListObj = null;
 			// org.json may preserve "groupList" casing from XML; we also want to accept "grouplist" for defensive parsing.
 			if (standingsHeader.has("groupList")) {
@@ -1105,16 +1140,16 @@ public class ContestController extends MainController {
 				return jsonStandings;
 			}
 
-			// Header "group" entries use externalId (CMS group id) and id (sequential scoreboard id used in the UI filter).
-			// Construct a Map CMS id -> PC2 Group so we can call account.isGroupMember(ElementId) for each header row.
+			// Header "group" entries include externalId (CMS group id; WTI filter key) and id (scoreboard
+			// ordinal for XSL/HTML). Map CMS id -> PC2 Group for account.isGroupMember(ElementId).
 			JSONArray groupArray = asJsonArray(groupListObj.get("group"));
 			HashMap<Integer, Group> groupByCmsId = new HashMap<Integer, Group>();
 			for (Group g : contest.getGroups()) {
 				groupByCmsId.put(Integer.valueOf(g.getGroupId()), g);
 			}
 
-			// Walk the list of teamStandings (one teamStanding element per team); for each team, insert into 
-			// the teamStanding an array containing teamGroupIds for the group(s) to which that team belongs.
+			// Walk the list of teamStandings (one teamStanding element per team); for each team, insert into
+			// the teamStanding an array containing External Ids for the scoreboard group(s) to which that team belongs.
 			Object rawTeams = contestStandings.get("teamStanding");
 			JSONArray teamArray = asJsonArray(rawTeams);
 			int defaultSite = contest.getSiteNumber();
@@ -1137,35 +1172,58 @@ public class ContestController extends MainController {
 					//can't do anything with this team if there's no account for them
 					continue;
 				}
-				// Collect every scoreboard group "id" from the header for which this account belongs to that group.
-				JSONArray memberStandingsIds = new JSONArray();
+				// Collect every scoreboard group externalId from the header for which this account belongs to that group.
+				JSONArray memberExternalIds = new JSONArray();
 				for (int gi = 0; gi < groupArray.length(); gi++) {
 					JSONObject groupJson = groupArray.getJSONObject(gi);
-					if (!groupJson.has("externalId") || !groupJson.has("id")) {
+					if (!groupJson.has("externalId")) {
 						continue;
 					}
 					int extId = groupJson.getInt("externalId");
 					Group scoredGroup = groupByCmsId.get(Integer.valueOf(extId));
 					if (scoredGroup != null && account.isGroupMember(scoredGroup.getElementId())) {
-						Object idObj = groupJson.get("id");
-						String standingsId = idObj == null ? "" : String.valueOf(idObj).trim();
-						if (!standingsId.isEmpty()) {
-							memberStandingsIds.put(standingsId);
-						}
+						memberExternalIds.put(Integer.toString(extId));
 					}
 				}
-				//insert the groupIds for this team in the team's teamStanding row
-				team.put("teamGroupIds", memberStandingsIds);
+				//insert the externalGroupIds for this team into the team's teamStanding row
+				team.put("teamGroupExternalIds", memberExternalIds);
 			}
-			
-			//return an updated JSON string which now also contains the groupIds in each teamStanding row
+
+			//return an updated JSON string which now also contains the externalGroupIds in each teamStanding row
 			return root.toString();
-			
+
 		} catch (Exception e) {
-			// Malformed JSON, missing fields, or type mismatches: do not fail the request; the UI can still filter by primary teamGroupId.
-			logger.warning("ContestController.enrichScoreboardTeamGroups failed while adding teamGroupIds; returning unenriched JSON: " + e.getMessage());
+			// Malformed JSON, missing fields, or type mismatches: do not fail the request; the UI can still filter by primary teamGroupExternalId.
+			logger.warning("ContestController.enrichScoreboardTeamGroups failed while adding teamGroupExternalIds; returning unenriched JSON: " + e.getMessage());
 			return jsonStandings;
 		}
+	}
+
+	/**
+	 * If "All teams" is hidden for this contest/requester, add {@code defaultGroupExternalId} to the standingsHeader
+	 * so the WTI UI can select the requester's division-wide scoreboard without a separate endpoint.
+	 * The value is {@link Group#getGroupId()}, not the scoreboard group-list ordinal.
+	 */
+	private void addDefaultGroupExternalIdToHeader(JSONObject standingsHeader, IInternalContest contest, ClientId requestingClientId)
+			throws JSONException {
+		if (standingsHeader == null || contest == null || requestingClientId == null) {
+			return;
+		}
+		if (ScoreboardGroupUtilities.shouldShowAllTeams(contest)) {
+			return;
+		}
+
+		Account requestingAccount = contest.getAccount(requestingClientId);
+		if (requestingAccount == null) {
+			return;
+		}
+
+		Group defaultGroup = ScoreboardGroupUtilities.getDefaultDivisionWideGroup(contest, requestingAccount);
+		if (defaultGroup == null) {
+			return;
+		}
+
+		standingsHeader.put("defaultGroupExternalId", Integer.toString(defaultGroup.getGroupId()));
 	}
 
 	/**
@@ -1307,7 +1365,7 @@ public class ContestController extends MainController {
 	/**
 	 * Returns the flag indicating whether the cached copy of the contest standings are current (true),
 	 * or instead that some event has occured which potentially makes the standings out of date (false).
-	 * 
+	 *
 	 * @return true if the cached contest standings are current; false if some event has occurred which means they MAY not be current.
 	 */
 	public boolean getWtiServerStandingsAreCurrent() {
@@ -1318,21 +1376,21 @@ public class ContestController extends MainController {
 	 * Sets the flag indicating that the cached copy of the contest standings should no longer be considered current.
 	 * This method is intended to be called by listeners which listen for contest state changes which could cause standings
 	 * to be invalid.
-	 * 
+	 *
 	 * @param wtiServerStandingsAreCurrent the value to which the standings flag should be set.
 	 */
 	public void setWtiServerStandingsAreCurrent(boolean wtiServerStandingsAreCurrent) {
 		this.wtiServerStandingsAreCurrent = wtiServerStandingsAreCurrent;
 	}
-	
+
 	/**
 	 * Returns a HashMap which maps current team keys to PC2 ServerConnections.
-	 * 
+	 *
 	 * @return a HashMap of teams to PC2 ServerConnection objects.
 	 */
 	public HashMap<String, ServerConnection> getTeamConnections(){
-		
+
 		return connections;
 	}
-	
+
 }
