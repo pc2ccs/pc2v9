@@ -177,6 +177,18 @@ public class EventFeedService implements Feature {
     }
 
     /**
+     * Pass commentary along to the streamer, if it exists (that is, if someone is listening.
+     * TODO: This will be removed when EventFeedStreamer has a commentary listener.
+     *
+     * @param json
+     */
+    public void commentaryAdded(String json) {
+        if(eventFeedStreamer != null) {
+            eventFeedStreamer.commentaryAdded(json);
+        }
+    }
+
+    /**
      * Create a snapshot of the JSON event feed.
      *
      * @param contest
